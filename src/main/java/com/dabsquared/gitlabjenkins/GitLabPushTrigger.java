@@ -5,141 +5,191 @@ import hudson.Util;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Hudson;
 import hudson.model.Item;
+import hudson.plugins.git.RevisionParameterAction;
+import hudson.triggers.SCMTrigger;
+import hudson.triggers.SCMTrigger.SCMTriggerCause;
+
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
-import net.sf.json.JSONObject;
-import org.apache.commons.jelly.XMLOutput;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-import sun.misc.Cleaner;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import jenkins.model.Jenkins.MasterComputer;
+
+import org.apache.commons.jelly.XMLOutput;
+
+import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
+
 /**
- * Triggers a build when we receive a GitHub post-commit webhook.
+ * Triggers a build when we receive a GitLab WebHook.
  *
  * @author Daniel Brooks
  */
-public class GitLabPushTrigger extends Trigger<AbstractProject<?,?>> implements GitLabTrigger {
+public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
+
     @DataBoundConstructor
     public GitLabPushTrigger() {
     }
 
-    /**
-     * Called when a POST is made.
-     */
-    @Deprecated
-    public void onPost() {
-        onPost("");
-    }
-
-    /**
-     * Called when a POST is made.
-     */
-    public void onPost(String triggeredByUser) {
-        final String pushBy = triggeredByUser;
+    public void onPost(final GitLabPushRequest req) {
         getDescriptor().queue.execute(new Runnable() {
-            private boolean runPolling() {
+            private boolean polling() {
                 try {
                     StreamTaskListener listener = new StreamTaskListener(getLogFile());
 
                     try {
                         PrintStream logger = listener.getLogger();
+
                         long start = System.currentTimeMillis();
-                        logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
+                        logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
                         boolean result = job.poll(listener).hasChanges();
-                        logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis() - start));
-                        if(result)
+                        logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
+
+                        if (result) {
                             logger.println("Changes found");
-                        else
+                        } else {
                             logger.println("No changes");
+                        }
+
                         return result;
                     } catch (Error e) {
                         e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
+                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
                         throw e;
                     } catch (RuntimeException e) {
                         e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
+                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
                         throw e;
                     } finally {
-                        listener.close();
+                        listener.closeQuietly();
                     }
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
+                    LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
                 }
+
                 return false;
             }
 
             public void run() {
-                if (runPolling()) {
-                    String name = " #"+job.getNextBuildNumber();
-                    GitLabPushCause cause;
-                    try {
-                        cause = new GitLabPushCause(getLogFile(), pushBy);
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Failed to parse the polling log",e);
-                        cause = new GitLabPushCause(pushBy);
-                    }
-                    if (job.scheduleBuild(cause)) {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+name);
+                LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
+                if (polling()) {
+                    String name = " #" + job.getNextBuildNumber();
+                    GitLabPushCause cause = createGitLabPushCause(req);
+                    if (job.scheduleBuild(job.getQuietPeriod(), cause)) {
+                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
+                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Job is already in the queue.", job.getName());
                     }
                 }
             }
+
+            private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
+                GitLabPushCause cause;
+                String triggeredByUser = req.getPusher().getName();
+                try {
+                    cause = new GitLabPushCause(triggeredByUser, getLogFile());
+                } catch (IOException ex) {
+                    cause = new GitLabPushCause(triggeredByUser);
+                }
+                return cause;
+            }
+
         });
     }
 
-    /**
-     * Returns the file that records the last/current polling activity.
-     */
-    public File getLogFile() {
-        return new File(job.getRootDir(),"gitlab-polling.log");
-    }
-
     @Override
-    public void start(AbstractProject<?,?> project, boolean newInstance) {
-        super.start(project, newInstance);
-        if (newInstance) {
-
-        }
+    public Collection<? extends Action> getProjectActions() {
+        return Collections.singletonList(new GitLabWebHookPollingAction());
     }
-
-
-    @Override
-    public void stop() {
-
-    }
-
 
     @Override
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl)super.getDescriptor();
+        return DescriptorImpl.get();
+    }
+
+    public File getLogFile() {
+        return new File(job.getRootDir(), "gitlab-polling.log");
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
+
+
+    public class GitLabWebHookPollingAction implements Action {
+
+        public AbstractProject<?, ?> getOwner() {
+            return job;
+        }
+
+        public String getIconFileName() {
+            return "/plugin/gitlab/images/24x24/gitlab-log.png";
+        }
+
+        public String getDisplayName() {
+            return "GitLab Hook Log";
+        }
+
+        public String getUrlName() {
+            return "GitLabPollLog";
+        }
+
+        public String getLog() throws IOException {
+            return Util.loadFile(getLogFile());
+        }
+
+        public void writeLogTo(XMLOutput out) throws IOException {
+            new AnnotatedLargeText<GitLabWebHookPollingAction>(
+                    getLogFile(), Charset.defaultCharset(), true, this).writeHtmlTo(0, out.asWriter());
+        }
+    }
+
+    public static class GitLabPushCause extends SCMTriggerCause {
+
+        private final String pushedBy;
+
+        public GitLabPushCause(String pushedBy) {
+            this.pushedBy = pushedBy;
+        }
+
+        public GitLabPushCause(String pushedBy, File logFile) throws IOException {
+            super(logFile);
+            this.pushedBy = pushedBy;
+        }
+
+        public GitLabPushCause(String pushedBy, String pollingLog) {
+            super(pollingLog);
+            this.pushedBy = pushedBy;
+        }
+
+        @Override
+        public String getShortDescription() {
+            if (pushedBy == null) {
+                return "Started by GitLab push";
+            } else {
+                return String.format("Started by GitLab push by %s", pushedBy);
+            }
+        }
     }
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
-        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Hudson.MasterComputer.threadPoolForRemoting);
 
-        private String hookUrl;
-
-        public DescriptorImpl() {
-            load();
-        }
+        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
         @Override
         public boolean isApplicable(Item item) {
@@ -151,44 +201,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?,?>> implements 
             return "Build when a change is pushed to GitLab";
         }
 
-        /**
-         * Returns the URL that GitLab should post.
-         */
-        public URL getHookUrl() throws MalformedURLException {
-            return hookUrl!=null ? new URL(hookUrl) : new URL(Hudson.getInstance().getRootUrl()+GitLabWebHook.get().getUrlName()+'/');
-        }
-
-        public boolean hasOverrideURL() {
-            return hookUrl!=null;
-        }
-
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            JSONObject hookMode = json.getJSONObject("hookMode");
-            JSONObject o = hookMode.getJSONObject("c");
-            if (o!=null && !o.isNullObject()) {
-                hookUrl = o.getString("url");
-            } else {
-                hookUrl = null;
-            }
-            save();
-            return true;
-        }
-
         public static DescriptorImpl get() {
             return Trigger.all().get(DescriptorImpl.class);
         }
 
-        public static boolean allowsHookUrlOverride() {
-            return ALLOW_HOOKURL_OVERRIDE;
-        }
     }
-
-    /**
-     * Set to false to prevent the user from overriding the hook URL.
-     */
-    public static boolean ALLOW_HOOKURL_OVERRIDE = !Boolean.getBoolean(GitLabPushTrigger.class.getName()+".disableOverride");
-
-    private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 }

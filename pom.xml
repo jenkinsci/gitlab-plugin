@@ -1,22 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-    <dependencies>
-        <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>jenkins-core</artifactId>
-            <version>1.532.3</version>
-        </dependency>
-    </dependencies>
     <parent>
-    <groupId>org.jenkins-ci.plugins</groupId>
-    <artifactId>plugin</artifactId>
-    <version>1.532.3</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
-  </parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.532.3</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
+    </parent>
 
   <groupId>com.dabsquared</groupId>
   <artifactId>gitlab-jenkins</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
+  <name>GitLab Plugin</name>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Gitlab+Plugin</url>
 
   <licenses>
     <license>
@@ -25,12 +20,30 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+        <id>bass_rock</id>
+        <name>Daniel Brooks</name>
+    </developer>
+  </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/DABSquared/gitlab-jenkins-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:DABSquared/gitlab-jenkins-plugin.git</developerConnection>
+        <url>https://github.com/DABSquared/gitlab-jenkins-plugin</url>
+    </scm>
+
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
-    </repository>
+      <repository>
+        <id>repo.jenkins-ci.org</id>
+        <url>http://repo.jenkins-ci.org/public/</url>
+      </repository>
+      <repository>
+          <id>jgit-repository</id>
+          <name>Eclipse JGit Repository</name>
+          <url>http://download.eclipse.org/jgit/maven</url>
+      </repository>
   </repositories>
 
   <pluginRepositories>
@@ -39,5 +52,33 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
+
+  <dependencies>
+      <dependency>
+          <groupId>org.jenkins-ci.plugins</groupId>
+          <artifactId>git</artifactId>
+          <version>2.2.1</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jenkins-ci.plugins</groupId>
+          <artifactId>multiple-scms</artifactId>
+          <version>0.2</version>
+          <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.11</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-all</artifactId>
+          <version>1.9.5</version>
+          <scope>test</scope>
+      </dependency>
+  </dependencies>
+
+
 
 </project>
