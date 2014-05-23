@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.532.3</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
+        <version>1.564</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
     </parent>
 
   <groupId>com.dabsquared</groupId>
@@ -60,10 +60,9 @@
           <version>2.2.1</version>
       </dependency>
       <dependency>
-          <groupId>org.jenkins-ci.plugins</groupId>
-          <artifactId>multiple-scms</artifactId>
-          <version>0.2</version>
-          <optional>true</optional>
+          <groupId>org.eclipse.jgit</groupId>
+          <artifactId>org.eclipse.jgit</artifactId>
+          <version>0.12.1</version>
       </dependency>
       <dependency>
           <groupId>junit</groupId>

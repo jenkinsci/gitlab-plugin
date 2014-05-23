@@ -2,10 +2,7 @@ package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
 import hudson.ExtensionPoint;
-import hudson.model.AbstractProject;
-import hudson.model.Hudson;
-import hudson.model.RootAction;
-import hudson.model.UnprotectedRootAction;
+import hudson.model.*;
 import hudson.security.ACL;
 import hudson.security.csrf.CrumbExclusion;
 import jenkins.model.Jenkins;
@@ -20,6 +17,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +26,8 @@ import java.util.logging.Logger;
  *
  * @author Daniel Brooks
  */
+
+@Extension
 public class GitLabWebHook implements UnprotectedRootAction {
 
     public static final String WEBHOOK_URL = "gitlab-webhook";
