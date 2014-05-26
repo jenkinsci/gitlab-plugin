@@ -27,11 +27,9 @@ import java.util.logging.Logger;
  * @author Daniel Brooks
  */
 
-@Extension
 public class GitLabWebHook implements UnprotectedRootAction {
 
-    public static final String WEBHOOK_URL = "gitlab-webhook";
-
+    public static final String WEBHOOK_URL = "projects";
 
     public String getIconFileName() {
         return null;
@@ -45,7 +43,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    @RequirePOST
+    //@RequirePOST For some reason the RequirePost is not working right.
     public void doIndex(StaplerRequest req) {
         LOGGER.log(Level.FINE, "WebHook called.");
 
@@ -63,13 +61,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
         JSONObject json = JSONObject.fromObject(payload);
         LOGGER.log(Level.FINE, "payload: {0}", json.toString(4));
 
-        GitLabPushRequest req = GitLabPushRequest.create(json);
-
-        String repositoryUrl = req.getRepository().getUrl();
-        if (repositoryUrl == null) {
-            LOGGER.log(Level.WARNING, "No repository url found.");
-            return;
-        }
+        //Eventually parse the request here.
+//        GitLabPushRequest req = GitLabPushRequest.create(json);
+//
+//        String repositoryUrl = req.getRepository().getUrl();
+//        if (repositoryUrl == null) {
+//            LOGGER.log(Level.WARNING, "No repository url found.");
+//            return;
+//        }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
@@ -77,35 +76,16 @@ public class GitLabWebHook implements UnprotectedRootAction {
             for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
                 GitLabPushTrigger trigger = job.getTrigger(GitLabPushTrigger.class);
                 if (trigger == null) {
+                    //This job does not have the Gitlab Trigger Enabled so skip it.
                     continue;
                 }
-                //if (RepositoryUrlCollector.collect(job).contains(repositoryUrl.toLowerCase())) {
-                    trigger.onPost(req);
-                //}
+
+                //Here we trigger the ush
+                //trigger.onPost(req);
+
             }
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
-        }
-    }
-
-
-    @Extension
-    public static class GitLabWebHookCrumbExclusion extends CrumbExclusion {
-
-        @Override
-        public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
-            String pathInfo = req.getPathInfo();
-            LOGGER.log(Level.FINE, "path: {0}", pathInfo);
-
-            if (pathInfo != null && pathInfo.equals(getExclusionPath())) {
-                chain.doFilter(req, resp);
-                return true;
-            }
-            return false;
-        }
-
-        private String getExclusionPath() {
-            return '/' + WEBHOOK_URL + '/';
         }
     }
 

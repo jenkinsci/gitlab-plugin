@@ -5,6 +5,7 @@ import hudson.Util;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.SCMTrigger;
@@ -17,6 +18,9 @@ import hudson.util.StreamTaskListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -28,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import jenkins.model.Jenkins.MasterComputer;
@@ -45,6 +50,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     @DataBoundConstructor
     public GitLabPushTrigger() {
+
     }
 
     public void onPost(final GitLabPushRequest req) {
@@ -137,7 +143,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         public String getIconFileName() {
-            return "/plugin/gitlab/images/24x24/gitlab-log.png";
+            return "/plugin/gitlab-jenkins/images/24x24/gitlab.png";
         }
 
         public String getDisplayName() {
@@ -189,16 +195,41 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
+        AbstractProject project;
+
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
         @Override
         public boolean isApplicable(Item item) {
-            return item instanceof AbstractProject;
+            if(item instanceof AbstractProject) {
+                project = (AbstractProject) item;
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
         public String getDisplayName() {
-            return "Build when a change is pushed to GitLab";
+            if(project == null) {
+                return "Build when a change is pushed to GitLab, unknown URL";
+            }
+
+            String projectURL = null;
+
+            try {
+                projectURL = URLEncoder.encode(project.getName(), "UTF-8");
+                projectURL = projectURL.replace("+", "%20");
+            } catch (UnsupportedEncodingException e) {
+                projectURL = project.getName();
+            }
+
+            return "Build when a change is pushed to GitLab with this url: JENKINS_HOST/projects/" + projectURL;
+        }
+
+        @Override
+        public String getHelpFile() {
+            return "/plugin/gitlab-jenkins/help/help-trigger.jelly";
         }
 
         public static DescriptorImpl get() {
