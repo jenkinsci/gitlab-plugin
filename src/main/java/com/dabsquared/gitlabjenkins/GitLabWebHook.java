@@ -24,10 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,16 +52,21 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    public void getDynamic(String url,StaplerRequest req,StaplerResponse res) {
+    public void getDynamic(String projectID,StaplerRequest req,StaplerResponse res) {
         LOGGER.log(Level.FINE, "WebHook called.");
+        String token = req.getParameter("token");
 
-        String payload = req.getParameter("payload");
-        if (payload == null) {
-            throw new IllegalArgumentException(
-                    "Not intended to be browsed interactively (must specify payload parameter)");
+        String path = req.getRestOfPath();
+
+        String[] splitURL = path.split("/");
+
+        List<String> paths = Arrays.asList(splitURL);
+        if(paths.size() > 0 && paths.get(0).equals("")) {
+            paths.remove(0); //The first split is usually blank so we remove it.
         }
 
-        processPayload(payload);
+        System.out.println(paths.toString());
+
     }
 
     private void processPayload(String payload) {
@@ -91,26 +93,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
             }
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
-        }
-    }
-
-    @Extension
-    public static class GitLabWebHookCrumbExclusion extends CrumbExclusion {
-
-        @Override
-        public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
-            String pathInfo = req.getPathInfo();
-            LOGGER.log(Level.FINE, "path: {0}", pathInfo);
-
-            if (pathInfo != null && pathInfo.equals(getExclusionPath())) {
-                chain.doFilter(req, resp);
-                return true;
-            }
-            return false;
-        }
-
-        private String getExclusionPath() {
-            return '/' + WEBHOOK_URL + '/';
         }
     }
 
