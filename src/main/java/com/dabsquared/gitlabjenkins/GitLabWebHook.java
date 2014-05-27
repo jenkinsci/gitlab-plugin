@@ -55,7 +55,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    public void doIndex(StaplerRequest req) {
+    public void getDynamic(String url,StaplerRequest req,StaplerResponse res) {
         LOGGER.log(Level.FINE, "WebHook called.");
 
         String payload = req.getParameter("payload");
