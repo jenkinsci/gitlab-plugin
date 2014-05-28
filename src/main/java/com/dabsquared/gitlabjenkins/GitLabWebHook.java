@@ -52,20 +52,38 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    public void getDynamic(String projectID,StaplerRequest req,StaplerResponse res) {
+    public void getDynamic(String projectID, StaplerRequest req,StaplerResponse res) {
         LOGGER.log(Level.FINE, "WebHook called.");
-        String token = req.getParameter("token");
 
         String path = req.getRestOfPath();
 
         String[] splitURL = path.split("/");
 
-        List<String> paths = Arrays.asList(splitURL);
+        List<String> paths = new LinkedList<String>(Arrays.asList(splitURL));
         if(paths.size() > 0 && paths.get(0).equals("")) {
             paths.remove(0); //The first split is usually blank so we remove it.
         }
 
-        System.out.println(paths.toString());
+
+        String lastPath = paths.get(paths.size()-1);
+
+        String token = req.getParameter("token");
+
+
+        //TODO: Check token authentication with project id.
+
+        if(lastPath.equals("status.json")) {
+            String commitSHA1 = paths.get(1);
+
+            //TODO: Show the status of the build. See: https://github.com/fcelda/gitlab2jenkins/blob/master/web.rb#L71
+        }else if(lastPath.equals("build")) {
+            String force = req.getParameter("force");
+
+            //TODO: Parse the body and build. See: https://github.com/fcelda/gitlab2jenkins/blob/master/web.rb#L99
+        } else if(lastPath.equals("refresh")) {
+
+            //TODO: Refresh builds? See: https://github.com/fcelda/gitlab2jenkins/blob/master/web.rb#L148
+        }
 
     }
 
