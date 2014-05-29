@@ -108,6 +108,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
             }
         }
 
+        throw HttpResponses.ok();
+
     }
 
     private void generateStatusJSON(String commitSHA1, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
@@ -116,9 +118,61 @@ public class GitLabWebHook implements UnprotectedRootAction {
             throw new IllegalArgumentException("This repo does not use git.");
         }
 
-        GitSCM git = (GitSCM) scm;
-        AbstractBuild build = git.getBySHA1(commitSHA1);
+        AbstractBuild mainBuild = null;
 
+        List<AbstractBuild> builds = project.getBuilds();
+        for(AbstractBuild build : builds) {
+            BuildData data = build.getAction(BuildData.class);
+
+            if(data.getLastBuiltRevision().getSha1String().equals(commitSHA1)) {
+                mainBuild = build;
+                break;
+            }
+        }
+
+
+        if(mainBuild == null) {
+            try {
+                this.writeJSON(rsp, null);
+                return;
+            } catch (IOException e) {
+                throw HttpResponses.error(500,"Could not generate response.");
+            }
+        }
+
+
+        JSONObject object = new JSONObject();
+        object.put("id", 1 );
+        object.put("sha", commitSHA1);
+
+        BallColor currentBallColor = mainBuild.getIconColor().noAnime();
+
+        //TODO: add staus of pending when we figure it out.
+        if(mainBuild.isBuilding()) {
+            object.put("status", "running");
+        }else if(currentBallColor == BallColor.BLUE) {
+            object.put("status", "success");
+        }else if(currentBallColor == BallColor.ABORTED) {
+            object.put("status", "failed");
+        }else if(currentBallColor == BallColor.DISABLED) {
+            object.put("status", "failed");
+        }else if(currentBallColor == BallColor.GREY) {
+            object.put("status", "failed");
+        }else if(currentBallColor == BallColor.NOTBUILT) {
+            object.put("status", "failed");
+        }else if(currentBallColor == BallColor.RED) {
+            object.put("status", "failed");
+        }else if(currentBallColor == BallColor.YELLOW) {
+            object.put("status", "failed");
+        } else {
+            object.put("status", "failed");
+        }
+
+        try {
+            this.writeJSON(rsp, object);
+        } catch (IOException e) {
+            throw HttpResponses.error(500,"Could not generate response.");
+        }
     }
 
 
@@ -133,7 +187,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-            hudson.plugins.git.util.Build branchBuild = data.getBuildsByBranchName().get(branch);
+            hudson.plugins.git.util.Build branchBuild = data.getBuildsByBranchName().get("origin/" + branch);
             if(branchBuild != null) {
                 int buildNumber = branchBuild.getBuildNumber();
                 mainBuild = project.getBuildByNumber(buildNumber);
@@ -203,11 +257,19 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param rsp The stapler response to write the output to.
      * @throws IOException
      */
-    private  void writeJSON(StaplerResponse rsp) throws IOException {
-        rsp.setContentType("text/html");
+    private  void writeJSON(StaplerResponse rsp, JSONObject jsonObject) throws IOException {
+        rsp.setContentType("application/json");
         PrintWriter w = rsp.getWriter();
-        w.write("Scheduled.\n");
+
+        if(jsonObject == null) {
+            w.write("null");
+        } else {
+            w.write(jsonObject.toString());
+        }
+
+        w.flush();
         w.close();
+
     }
 
 
