@@ -142,7 +142,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
 
         JSONObject object = new JSONObject();
-        object.put("id", 1 );
+        object.put("id", mainBuild.getNumber());
         object.put("sha", commitSHA1);
 
         BallColor currentBallColor = mainBuild.getIconColor().noAnime();
