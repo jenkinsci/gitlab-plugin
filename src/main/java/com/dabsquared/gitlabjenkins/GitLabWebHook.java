@@ -97,8 +97,9 @@ public class GitLabWebHook implements UnprotectedRootAction {
             //TODO: Parse the body and build. See: https://github.com/fcelda/gitlab2jenkins/blob/master/web.rb#L99
         } else if(lastPath.equals("status.png")) {
             String branch = req.getParameter("ref");
+            String commitSHA1 = req.getParameter("sha1");
             try {
-                this.generateStatusPNG(branch, project, req, res);
+                this.generateStatusPNG(branch, commitSHA1, project, req, res);
             } catch (ServletException e) {
                 e.printStackTrace();
                 throw HttpResponses.error(500,"Could not generate an image.");
@@ -118,18 +119,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
             throw new IllegalArgumentException("This repo does not use git.");
         }
 
-        AbstractBuild mainBuild = null;
-
-        List<AbstractBuild> builds = project.getBuilds();
-        for(AbstractBuild build : builds) {
-            BuildData data = build.getAction(BuildData.class);
-
-            if(data.getLastBuiltRevision().getSha1String().equals(commitSHA1)) {
-                mainBuild = build;
-                break;
-            }
-        }
-
+        AbstractBuild mainBuild = this.getBuildBySHA1(project, commitSHA1);
 
         if(mainBuild == null) {
             try {
@@ -176,7 +166,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
 
-    private void generateStatusPNG(String branch, AbstractProject project, StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
+    private void generateStatusPNG(String branch, String commitSHA1, AbstractProject project, StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
         SCM scm = project.getScm();
         if(!(scm instanceof GitSCM)) {
             throw new IllegalArgumentException("This repo does not use git.");
@@ -184,16 +174,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         AbstractBuild mainBuild = null;
 
-        List<AbstractBuild> builds = project.getBuilds();
-        for(AbstractBuild build : builds) {
-            BuildData data = build.getAction(BuildData.class);
-            hudson.plugins.git.util.Build branchBuild = data.getBuildsByBranchName().get("origin/" + branch);
-            if(branchBuild != null) {
-                int buildNumber = branchBuild.getBuildNumber();
-                mainBuild = project.getBuildByNumber(buildNumber);
-                break;
-            }
+        if(branch != null) {
+            mainBuild = this.getBuildByBranch(project, branch);
+        } else if(commitSHA1 != null) {
+            mainBuild = this.getBuildBySHA1(project, commitSHA1);
         }
+
 
         if(mainBuild == null) {
             rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
@@ -249,6 +235,40 @@ public class GitLabWebHook implements UnprotectedRootAction {
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
         }
+    }
+
+
+    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1) {
+        AbstractBuild mainBuild = null;
+
+        List<AbstractBuild> builds = project.getBuilds();
+        for(AbstractBuild build : builds) {
+            BuildData data = build.getAction(BuildData.class);
+
+            if(data.getLastBuiltRevision().getSha1String().equals(commitSHA1)) {
+                mainBuild = build;
+                break;
+            }
+        }
+
+        return mainBuild;
+    }
+
+    private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
+        AbstractBuild mainBuild = null;
+
+        List<AbstractBuild> builds = project.getBuilds();
+        for(AbstractBuild build : builds) {
+            BuildData data = build.getAction(BuildData.class);
+            hudson.plugins.git.util.Build branchBuild = data.getBuildsByBranchName().get("origin/" + branch);
+            if(branchBuild != null) {
+                int buildNumber = branchBuild.getBuildNumber();
+                mainBuild = project.getBuildByNumber(buildNumber);
+                break;
+            }
+        }
+
+        return mainBuild;
     }
 
 
