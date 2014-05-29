@@ -10,6 +10,7 @@ Current Supported GitLabCI Functions
 =====================
 * `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json`
 * `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME`
+* `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1`
 
 
 Planned GitLabCI Functions
