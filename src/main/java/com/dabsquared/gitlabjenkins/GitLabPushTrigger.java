@@ -48,8 +48,12 @@ import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
  */
 public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
+
     @DataBoundConstructor
     public GitLabPushTrigger() {
+
+
+
 
     }
 
@@ -137,6 +141,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
 
     public class GitLabWebHookPollingAction implements Action {
+
+        public GitLabWebHookPollingAction() {
+
+        }
+
 
         public AbstractProject<?, ?> getOwner() {
             return job;
