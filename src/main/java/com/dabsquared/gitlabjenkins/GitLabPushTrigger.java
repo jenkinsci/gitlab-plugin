@@ -111,7 +111,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
             private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
                 GitLabPushCause cause;
-                String triggeredByUser = req.getPusher().getName();
+                String triggeredByUser = req.getCommits().get(0).getAuthor().getName();
                 try {
                     cause = new GitLabPushCause(triggeredByUser, getLogFile());
                 } catch (IOException ex) {
