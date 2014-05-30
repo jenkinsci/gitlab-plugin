@@ -287,7 +287,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
 
-            if(data.getLastBuiltRevision().getSha1String().equals(commitSHA1)) {
+            if(data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
                 mainBuild = build;
                 break;
             }
