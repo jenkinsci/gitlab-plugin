@@ -17,14 +17,6 @@ import java.util.Map;
  */
 public class GitLabPushRequest {
 
-    private User pusher;
-
-    private String ref;
-
-    private List<Commit> commits;
-
-    private Repository repository;
-
     public static GitLabPushRequest create(String payload) {
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
@@ -47,9 +39,6 @@ public class GitLabPushRequest {
 
         Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
         classMap.put("commits", Commit.class);
-        classMap.put("added", String.class);
-        classMap.put("removed", String.class);
-        classMap.put("modified", String.class);
         config.setClassMap(classMap);
 
         config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
@@ -73,21 +62,24 @@ public class GitLabPushRequest {
     public GitLabPushRequest() {
     }
 
-    public User getPusher() {
-        return pusher;
-    }
 
-    public void setPusher(User pusher) {
-        this.pusher = pusher;
-    }
+    private String before;
 
-    public String getRef() {
-        return ref;
-    }
+    private String after;
 
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
+    private String ref;
+
+    private Integer userId;
+
+    private String userName;
+
+    private Integer projectId;
+
+    private Integer totalCommitsCount;
+
+    private Repository repository;
+
+    private List<Commit> commits;
 
     public List<Commit> getCommits() {
         return commits;
@@ -125,11 +117,7 @@ public class GitLabPushRequest {
 
         private String description;
 
-        private Integer forks;
-
-        private boolean private_;
-
-        private User owner;
+        private String homepage;
 
         public Repository() {
         }
@@ -158,29 +146,14 @@ public class GitLabPushRequest {
             this.description = description;
         }
 
-        public Integer getForks() {
-            return forks;
+        public String getHomepage() {
+            return homepage;
         }
 
-        public void setForks(Integer forks) {
-            this.forks = forks;
+        public void setHomepage(String homepage) {
+            this.homepage = homepage;
         }
 
-        public boolean isPrivate_() {
-            return private_;
-        }
-
-        public void setPrivate_(boolean private_) {
-            this.private_ = private_;
-        }
-
-        public User getOwner() {
-            return owner;
-        }
-
-        public void setOwner(User owner) {
-            this.owner = owner;
-        }
 
         @Override
         public String toString() {
@@ -199,11 +172,7 @@ public class GitLabPushRequest {
 
         private String url;
 
-        private List<String> added;
-
-        private List<String> removed;
-
-        private List<String> modified;
+        private User author;
 
         public Commit() {
         }
@@ -240,28 +209,12 @@ public class GitLabPushRequest {
             this.url = url;
         }
 
-        public List<String> getAdded() {
-            return added;
+        public User getAuthor() {
+            return author;
         }
 
-        public void setAdded(List<String> added) {
-            this.added = added;
-        }
-
-        public List<String> getRemoved() {
-            return removed;
-        }
-
-        public void setRemoved(List<String> removed) {
-            this.removed = removed;
-        }
-
-        public List<String> getModified() {
-            return modified;
-        }
-
-        public void setModified(List<String> modified) {
-            this.modified = modified;
+        public void setAuthor(User author) {
+            this.author = author;
         }
 
         @Override

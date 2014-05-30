@@ -89,10 +89,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
             throw HttpResponses.notFound();
         }
 
-        if(lastPath.equals("status.json")) {
+        if(lastPath.equals("status.json") && !firstPath.equals("!builds")) {
             String commitSHA1 = paths.get(1);
             this.generateStatusJSON(commitSHA1, project, req, res);
-        } else if(lastPath.equals("build")) {
+        } else if(lastPath.equals("build") || (lastPath.equals("status.json") && firstPath.equals("!builds"))) {
             String force = req.getParameter("force");
             String data = req.getParameter("data");
             this.generateBuild(data, project, req, res);
@@ -199,9 +199,9 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         if(mainBuild == null) {
             rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            return;
         }
 
-        assert mainBuild != null;
         BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
         if(mainBuild.isBuilding()) {
@@ -267,13 +267,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
         try {
-            for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                GitLabPushTrigger trigger = job.getTrigger(GitLabPushTrigger.class);
+                GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
                 if (trigger == null) {
-                    continue;
+                    return;
                 }
                 trigger.onPost(request);
-            }
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
         }

@@ -233,7 +233,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 projectURL = project.getName();
             }
 
-            return "Build when a change is pushed to GitLab with this url: JENKINS_HOST/projects/" + projectURL;
+            return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + Jenkins.getInstance().getRootUrl() + "project/" + projectURL;
         }
 
         @Override
