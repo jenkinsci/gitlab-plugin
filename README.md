@@ -11,6 +11,7 @@ Current Supported GitLabCI Functions
 * `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json`
 * `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME`
 * `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1`
+* `/project/PROJECT_NAME/builds/COMMIT_SHA1` redirects to build page.
 
 
 Planned GitLabCI Functions
@@ -26,6 +27,10 @@ Help Needed
 * `?token=XYZ` - Can not find a way to include a token parameter on an AbstractProject to security check without an extra plugin configuration
 * `/PROJECT_NAME/`  should really be /PROJECT_ID_NUMBER/ - Can not find a project id number on an AbstractProject to use here instead.
 
+
+Known Issues
+=====================
+* GitLab CI Merge Status pages says pending when there is no build scheduled, or the status is unknown. This is because I coded a workaround until this bug gets resolved: https://github.com/gitlabhq/gitlabhq/issues/7047
 
 
 Contributing

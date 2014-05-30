@@ -75,6 +75,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
 
         String lastPath = paths.get(paths.size()-1);
+        String firstPath = paths.get(0);
 
         String token = req.getParameter("token");
 
@@ -93,8 +94,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
             this.generateStatusJSON(commitSHA1, project, req, res);
         } else if(lastPath.equals("build")) {
             String force = req.getParameter("force");
-
-            //TODO: Parse the body and build. See: https://github.com/fcelda/gitlab2jenkins/blob/master/web.rb#L99
+            String data = req.getParameter("data");
+            this.generateBuild(data, project, req, res);
         } else if(lastPath.equals("status.png")) {
             String branch = req.getParameter("ref");
             String commitSHA1 = req.getParameter("sha1");
@@ -106,6 +107,19 @@ public class GitLabWebHook implements UnprotectedRootAction {
             } catch (IOException e) {
                 e.printStackTrace();
                 throw HttpResponses.error(500,"Could not generate an image.");
+            }
+        } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
+            AbstractBuild build = this.getBuildBySHA1(project, lastPath);
+            if(build != null) {
+                try {
+                    res.sendRedirect2(build.getUrl());
+                } catch (IOException e) {
+                    try {
+                        res.sendRedirect2(build.getBuildStatusUrl());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
             }
         }
 
@@ -121,9 +135,13 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         AbstractBuild mainBuild = this.getBuildBySHA1(project, commitSHA1);
 
+        JSONObject object = new JSONObject();
+        object.put("sha", commitSHA1);
+
         if(mainBuild == null) {
             try {
-                this.writeJSON(rsp, null);
+                object.put("status", "pending");
+                this.writeJSON(rsp, object);
                 return;
             } catch (IOException e) {
                 throw HttpResponses.error(500,"Could not generate response.");
@@ -131,9 +149,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
 
 
-        JSONObject object = new JSONObject();
         object.put("id", mainBuild.getNumber());
-        object.put("sha", commitSHA1);
 
         BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
@@ -210,13 +226,39 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
     }
 
-    private void processPayload(String payload) {
-        JSONObject json = JSONObject.fromObject(payload);
-        LOGGER.log(Level.FINE, "payload: {0}", json.toString(4));
 
-        GitLabPushRequest req = GitLabPushRequest.create(json);
+    /**
+     * Take the GitLab Data and parse through it.
+     * {
+     #     "before": "95790bf891e76fee5e1747ab589903a6a1f80f22",
+     #     "after": "da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
+     #     "ref": "refs/heads/master",
+     #     "commits": [
+     #       {
+     #         "id": "b6568db1bc1dcd7f8b4d5a946b0b91f9dacd7327",
+     #         "message": "Update Catalan translation to e38cb41.",
+     #         "timestamp": "2011-12-12T14:27:31+02:00",
+     #         "url": "http://localhost/diaspora/commits/b6568db1bc1dcd7f8b4d5a946b0b91f9dacd7327",
+     #         "author": {
+     #           "name": "Jordi Mallach",
+     #           "email": "jordi@softcatala.org",
+     #         }
+     #       }, .... more commits
+     #     ]
+     #   }
+     * @param data
+     */
+    private void generateBuild(String data, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
+        JSONObject json = JSONObject.fromObject(data);
+        LOGGER.log(Level.FINE, "data: {0}", json.toString(4));
 
-        String repositoryUrl = req.getRepository().getUrl();
+        if(data == null) {
+            return;
+        }
+
+        GitLabPushRequest request = GitLabPushRequest.create(json);
+
+        String repositoryUrl = request.getRepository().getUrl();
         if (repositoryUrl == null) {
             LOGGER.log(Level.WARNING, "No repository url found.");
             return;
@@ -230,7 +272,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 if (trigger == null) {
                     continue;
                 }
-                trigger.onPost(req);
+                trigger.onPost(request);
             }
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
