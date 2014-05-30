@@ -112,10 +112,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
             AbstractBuild build = this.getBuildBySHA1(project, lastPath);
             if(build != null) {
                 try {
-                    res.sendRedirect2(build.getUrl());
+                    res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
                 } catch (IOException e) {
                     try {
-                        res.sendRedirect2(build.getBuildStatusUrl());
+                        res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
