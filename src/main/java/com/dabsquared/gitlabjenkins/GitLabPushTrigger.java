@@ -123,6 +123,83 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         });
     }
 
+    public void onPost(final GitLabMergeRequest req) {
+        getDescriptor().queue.execute(new Runnable() {
+            private boolean polling() {
+                try {
+                    StreamTaskListener listener = new StreamTaskListener(getLogFile());
+
+                    try {
+                        PrintStream logger = listener.getLogger();
+
+                        long start = System.currentTimeMillis();
+                        logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
+                        boolean result = job.poll(listener).hasChanges();
+                        logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
+
+                        if (result) {
+                            logger.println("Changes found");
+                        } else {
+                            logger.println("No changes");
+                        }
+
+                        return result;
+                    } catch (Error e) {
+                        e.printStackTrace(listener.error("Failed to record SCM polling"));
+                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
+                        throw e;
+                    } catch (RuntimeException e) {
+                        e.printStackTrace(listener.error("Failed to record SCM polling"));
+                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
+                        throw e;
+                    } finally {
+                        listener.closeQuietly();
+                    }
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
+                }
+
+                return false;
+            }
+
+            public void run() {
+                LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
+                if (polling()) {
+                    String name = " #" + job.getNextBuildNumber();
+                    GitLabPushCause cause = createGitLabPushCause(req);
+                    if (job.scheduleBuild(job.getQuietPeriod(), cause)) {
+                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+                    } else {
+                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Job is already in the queue.", job.getName());
+                    }
+                }
+            }
+
+            private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
+                GitLabPushCause cause;
+                String triggeredByUser = req.getCommits().get(0).getAuthor().getName();
+                try {
+                    cause = new GitLabPushCause(triggeredByUser, getLogFile());
+                } catch (IOException ex) {
+                    cause = new GitLabPushCause(triggeredByUser);
+                }
+                return cause;
+            }
+
+            private GitLabPushCause createGitLabPushCause(GitLabMergeRequest req) {
+                GitLabPushCause cause;
+                String triggeredByUser = req.getObjectAttribute().getAuthorId() + "";
+                try {
+                    cause = new GitLabPushCause(triggeredByUser, getLogFile());
+                } catch (IOException ex) {
+                    cause = new GitLabPushCause(triggeredByUser);
+                }
+                return cause;
+            }
+
+        });
+    }
+
     @Override
     public Collection<? extends Action> getProjectActions() {
         return Collections.singletonList(new GitLabWebHookPollingAction());

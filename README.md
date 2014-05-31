@@ -14,9 +14,7 @@ Current Supported GitLabCI Functions
 * `/project/PROJECT_NAME/builds/COMMIT_SHA1` redirects to build page.
 
 
-Planned GitLabCI Functions
-=====================
-* `/project/PROJECT_NAME/build`
+* `/project/PROJECT_NAME/build`    In order for it to build properly on push you need to add this as a seperate web hook. For some reason GitLab is not sending the webhook.
 
 
 

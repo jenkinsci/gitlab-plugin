@@ -16,6 +16,7 @@ import org.acegisecurity.AccessDeniedException;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.StaplerRequest;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -66,6 +68,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         String path = req.getRestOfPath();
 
+
         String[] splitURL = path.split("/");
 
         List<String> paths = new LinkedList<String>(Arrays.asList(splitURL));
@@ -81,6 +84,15 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         //TODO: Check token authentication with project id. For now we are not using this.
 
+        StringWriter writer = new StringWriter();
+        try {
+            IOUtils.copy(req.getInputStream(), writer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String theString = writer.toString();
+
         AbstractProject project = null;
         try {
             project = project(projectName, req, res);
@@ -93,9 +105,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
             String commitSHA1 = paths.get(1);
             this.generateStatusJSON(commitSHA1, project, req, res);
         } else if(lastPath.equals("build") || (lastPath.equals("status.json") && firstPath.equals("!builds"))) {
-            String force = req.getParameter("force");
-            String data = req.getParameter("data");
-            this.generateBuild(data, project, req, res);
+            this.generateBuild(theString, project, req, res);
         } else if(lastPath.equals("status.png")) {
             String branch = req.getParameter("ref");
             String commitSHA1 = req.getParameter("sha1");
@@ -256,6 +266,18 @@ public class GitLabWebHook implements UnprotectedRootAction {
             return;
         }
 
+        String objectType = json.optString("object_kind");
+
+        if(objectType != null && objectType.equals("merge_request")) {
+            this.generateMergeRequestBuild(json, project, req, rsp);
+        } else {
+            this.generatePushBuild(json, project, req, rsp);
+        }
+    }
+
+
+
+    public void generatePushBuild(JSONObject json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         GitLabPushRequest request = GitLabPushRequest.create(json);
 
         String repositoryUrl = request.getRepository().getUrl();
@@ -267,17 +289,47 @@ public class GitLabWebHook implements UnprotectedRootAction {
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
         try {
-                GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
-                if (trigger == null) {
-                    return;
-                }
-                trigger.onPost(request);
+            GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
+            if (trigger == null) {
+                return;
+            }
+            trigger.onPost(request);
+        } finally {
+            SecurityContextHolder.getContext().setAuthentication(old);
+        }
+    }
+
+    public void generateMergeRequestBuild(JSONObject json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
+        GitLabMergeRequest request = GitLabMergeRequest.create(json);
+
+        Authentication old = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+        try {
+            GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
+            if (trigger == null) {
+                return;
+            }
+            trigger.onPost(request);
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
         }
     }
 
 
+
+    /**************************************************
+     *
+     * Helper methods
+     *
+     **************************************************/
+
+
+    /**
+     *
+     * @param project
+     * @param commitSHA1
+     * @return
+     */
     private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1) {
         AbstractBuild mainBuild = null;
 
@@ -294,6 +346,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return mainBuild;
     }
 
+    /**
+     *
+     * @param project
+     * @param branch
+     * @return
+     */
     private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
         AbstractBuild mainBuild = null;
 
