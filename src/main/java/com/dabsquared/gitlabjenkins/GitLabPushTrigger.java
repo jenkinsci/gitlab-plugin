@@ -120,11 +120,6 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @Override
-    public Collection<? extends Action> getProjectActions() {
-        return Collections.singletonList(new GitLabWebHookPollingAction());
-    }
-
-    @Override
     public DescriptorImpl getDescriptor() {
         return DescriptorImpl.get();
     }
@@ -135,39 +130,6 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 
-
-    public class GitLabWebHookPollingAction implements Action {
-
-        public GitLabWebHookPollingAction() {
-
-        }
-
-
-        public AbstractProject<?, ?> getOwner() {
-            return job;
-        }
-
-        public String getIconFileName() {
-            return "/plugin/gitlab-jenkins/images/24x24/gitlab.png";
-        }
-
-        public String getDisplayName() {
-            return "GitLab Hook Log";
-        }
-
-        public String getUrlName() {
-            return "GitLabPollLog";
-        }
-
-        public String getLog() throws IOException {
-            return Util.loadFile(getLogFile());
-        }
-
-        public void writeLogTo(XMLOutput out) throws IOException {
-            new AnnotatedLargeText<GitLabWebHookPollingAction>(
-                    getLogFile(), Charset.defaultCharset(), true, this).writeHtmlTo(0, out.asWriter());
-        }
-    }
 
     public static class GitLabPushCause extends SCMTriggerCause {
 
