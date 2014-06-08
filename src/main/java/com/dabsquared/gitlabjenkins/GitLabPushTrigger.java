@@ -131,61 +131,6 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 
 
-    public static class GitLabPushCause extends SCMTriggerCause {
-
-        private final String pushedBy;
-
-        public GitLabPushCause(String pushedBy) {
-            this.pushedBy = pushedBy;
-        }
-
-        public GitLabPushCause(String pushedBy, File logFile) throws IOException {
-            super(logFile);
-            this.pushedBy = pushedBy;
-        }
-
-        public GitLabPushCause(String pushedBy, String pollingLog) {
-            super(pollingLog);
-            this.pushedBy = pushedBy;
-        }
-
-        @Override
-        public String getShortDescription() {
-            if (pushedBy == null) {
-                return "Started by GitLab push";
-            } else {
-                return String.format("Started by GitLab push by %s", pushedBy);
-            }
-        }
-    }
-
-    public static class GitLabMergeCause extends SCMTriggerCause {
-
-        private final String pushedBy;
-
-        public GitLabMergeCause(String pushedBy) {
-            this.pushedBy = pushedBy;
-        }
-
-        public GitLabMergeCause(String pushedBy, File logFile) throws IOException {
-            super(logFile);
-            this.pushedBy = pushedBy;
-        }
-
-        public GitLabMergeCause(String pushedBy, String pollingLog) {
-            super(pollingLog);
-            this.pushedBy = pushedBy;
-        }
-
-        @Override
-        public String getShortDescription() {
-            if (pushedBy == null) {
-                return "Started by GitLab Merge Request";
-            } else {
-                return String.format("Started by GitLab Merge Request by %s", pushedBy);
-            }
-        }
-    }
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
