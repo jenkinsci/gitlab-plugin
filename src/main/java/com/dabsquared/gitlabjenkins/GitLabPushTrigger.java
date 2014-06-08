@@ -52,60 +52,20 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     @DataBoundConstructor
     public GitLabPushTrigger() {
 
-
-
-
     }
 
     public void onPost(final GitLabPushRequest req) {
         getDescriptor().queue.execute(new Runnable() {
-            private boolean polling() {
-                try {
-                    StreamTaskListener listener = new StreamTaskListener(getLogFile());
-
-                    try {
-                        PrintStream logger = listener.getLogger();
-
-                        long start = System.currentTimeMillis();
-                        logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
-                        boolean result = job.poll(listener).hasChanges();
-                        logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
-
-                        if (result) {
-                            logger.println("Changes found");
-                        } else {
-                            logger.println("No changes");
-                        }
-
-                        return result;
-                    } catch (Error e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
-                        throw e;
-                    } catch (RuntimeException e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
-                        throw e;
-                    } finally {
-                        listener.closeQuietly();
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
-                }
-
-                return false;
-            }
 
             public void run() {
                 LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
-                if (polling()) {
-                    String name = " #" + job.getNextBuildNumber();
-                    GitLabPushCause cause = createGitLabPushCause(req);
-                    if (job.scheduleBuild(job.getQuietPeriod(), cause)) {
-                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Triggering {1}", new String[]{job.getName(), name});
-                    } else {
-                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Job is already in the queue.", job.getName());
-                    }
+                String name = " #" + job.getNextBuildNumber();
+                GitLabPushCause cause = createGitLabPushCause(req);
+                Action[] actions = createActions(req);
+                if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
+                    LOGGER.log(Level.INFO, "GitLab Push detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+                } else {
+                    LOGGER.log(Level.INFO, "GitLab Push detected in {0}. Job is already in the queue.", job.getName());
                 }
             }
 
@@ -118,6 +78,15 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     cause = new GitLabPushCause(triggeredByUser);
                 }
                 return cause;
+            }
+
+            private Action[] createActions(GitLabPushRequest req) {
+                List<Action> actions = new ArrayList<Action>();
+
+                Commit lastCommit = req.getLastCommit();
+                actions.add(new RevisionParameterAction(lastCommit.getId(), false));
+
+                return actions.toArray(new Action[0]);
             }
 
         });
@@ -125,74 +94,24 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     public void onPost(final GitLabMergeRequest req) {
         getDescriptor().queue.execute(new Runnable() {
-            private boolean polling() {
-                try {
-                    StreamTaskListener listener = new StreamTaskListener(getLogFile());
-
-                    try {
-                        PrintStream logger = listener.getLogger();
-
-                        long start = System.currentTimeMillis();
-                        logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
-                        boolean result = job.poll(listener).hasChanges();
-                        logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
-
-                        if (result) {
-                            logger.println("Changes found");
-                        } else {
-                            logger.println("No changes");
-                        }
-
-                        return result;
-                    } catch (Error e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
-                        throw e;
-                    } catch (RuntimeException e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
-                        throw e;
-                    } finally {
-                        listener.closeQuietly();
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Failed to record SCM polling", e);
-                }
-
-                return false;
-            }
-
             public void run() {
                 LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
-                if (polling()) {
-                    String name = " #" + job.getNextBuildNumber();
-                    GitLabPushCause cause = createGitLabPushCause(req);
-                    if (job.scheduleBuild(job.getQuietPeriod(), cause)) {
-                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Triggering {1}", new String[]{job.getName(), name});
-                    } else {
-                        LOGGER.log(Level.INFO, "SCM changes detected in {0}. Job is already in the queue.", job.getName());
-                    }
+                String name = " #" + job.getNextBuildNumber();
+                GitLabMergeCause cause = createGitLabMergeCause(req);
+                if (job.scheduleBuild(job.getQuietPeriod(), cause)) {
+                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+                } else {
+                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getName());
                 }
             }
 
-            private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
-                GitLabPushCause cause;
-                String triggeredByUser = req.getCommits().get(0).getAuthor().getName();
-                try {
-                    cause = new GitLabPushCause(triggeredByUser, getLogFile());
-                } catch (IOException ex) {
-                    cause = new GitLabPushCause(triggeredByUser);
-                }
-                return cause;
-            }
-
-            private GitLabPushCause createGitLabPushCause(GitLabMergeRequest req) {
-                GitLabPushCause cause;
+            private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
+                GitLabMergeCause cause;
                 String triggeredByUser = req.getObjectAttribute().getAuthorId() + "";
                 try {
-                    cause = new GitLabPushCause(triggeredByUser, getLogFile());
+                    cause = new GitLabMergeCause(triggeredByUser, getLogFile());
                 } catch (IOException ex) {
-                    cause = new GitLabPushCause(triggeredByUser);
+                    cause = new GitLabMergeCause(triggeredByUser);
                 }
                 return cause;
             }
@@ -274,6 +193,34 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 return "Started by GitLab push";
             } else {
                 return String.format("Started by GitLab push by %s", pushedBy);
+            }
+        }
+    }
+
+    public static class GitLabMergeCause extends SCMTriggerCause {
+
+        private final String pushedBy;
+
+        public GitLabMergeCause(String pushedBy) {
+            this.pushedBy = pushedBy;
+        }
+
+        public GitLabMergeCause(String pushedBy, File logFile) throws IOException {
+            super(logFile);
+            this.pushedBy = pushedBy;
+        }
+
+        public GitLabMergeCause(String pushedBy, String pollingLog) {
+            super(pollingLog);
+            this.pushedBy = pushedBy;
+        }
+
+        @Override
+        public String getShortDescription() {
+            if (pushedBy == null) {
+                return "Started by GitLab Merge Request";
+            } else {
+                return String.format("Started by GitLab Merge Request by %s", pushedBy);
             }
         }
     }
