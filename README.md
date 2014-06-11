@@ -16,7 +16,9 @@ Current Supported GitLabCI Functions
 
 * `/project/PROJECT_NAME/build`    In order for it to build properly on push you need to add this as a seperate web hook. For some reason GitLab is not sending the webhook.
 
-
+Major Help Needed
+=====================
+I would like this project to be able to handle building merge requests and regular pushes. In order to do this I need a way to configure the git plugin via code to merge two branches together before a build. Much like the RevisionParameterAction.java in the git plugin, we need a class that takes to branches, a source and a target, and can be passed as a build action. I have started an issue for the Git plugin here: https://issues.jenkins-ci.org/browse/JENKINS-23362 If you know of a way to do this please PM on twitter at @bass_rock. All the other necessary code exists in this repo and works. We just need the merge requests to work and we can put a V1.0 on this thing!
 
 Help Needed
 =====================
