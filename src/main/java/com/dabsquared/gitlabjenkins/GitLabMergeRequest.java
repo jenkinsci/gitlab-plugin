@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.JavaIdentifierTransformer;
@@ -22,39 +25,12 @@ public class GitLabMergeRequest {
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
         }
-        return create(JSONObject.fromObject(payload));
+
+        Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
+        return gson.fromJson(payload, GitLabMergeRequest.class);
     }
 
-    public static GitLabMergeRequest create(JSONObject payload) {
-        if (payload == null || payload.isNullObject()) {
-            throw new IllegalArgumentException("payload should not be null");
-        }
 
-        JsonConfig config = createJsonConfig();
-        return (GitLabMergeRequest) JSONObject.toBean(payload, config);
-    }
-
-    private static JsonConfig createJsonConfig() {
-        JsonConfig config = new JsonConfig();
-        config.setRootClass(GitLabMergeRequest.class);
-
-        config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
-
-            @Override
-            public String transformToJavaIdentifier(String param) {
-                if (param == null) {
-                    return null;
-                }
-                if ("private".equals(param)) {
-                    return "private_";
-                }
-                return param;
-            }
-
-        });
-
-        return config;
-    }
 
     public GitLabMergeRequest() {
     }
@@ -62,7 +38,7 @@ public class GitLabMergeRequest {
 
     private String objectKind;
 
-    private ObjectAttributes objectAttribute;
+    private ObjectAttributes objectAttributes;
 
     public String getObjectKind() {
         return objectKind;
@@ -73,11 +49,11 @@ public class GitLabMergeRequest {
     }
 
     public ObjectAttributes getObjectAttribute() {
-        return objectAttribute;
+        return objectAttributes;
     }
 
-    public void setObjectAttribute(ObjectAttributes objectAttribute) {
-        this.objectAttribute = objectAttribute;
+    public void setObjectAttribute(ObjectAttributes objectAttributes) {
+        this.objectAttributes = objectAttributes;
     }
 
 

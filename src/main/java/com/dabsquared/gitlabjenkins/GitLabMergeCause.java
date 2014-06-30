@@ -10,28 +10,26 @@ import java.io.IOException;
  */
 public class GitLabMergeCause extends SCMTrigger.SCMTriggerCause {
 
-    private final String pushedBy;
+    private GitLabMergeRequest mergeRequest;
 
-    public GitLabMergeCause(String pushedBy) {
-        this.pushedBy = pushedBy;
+    public GitLabMergeCause(GitLabMergeRequest mergeRequest) {
+        this.mergeRequest = mergeRequest;
     }
 
-    public GitLabMergeCause(String pushedBy, File logFile) throws IOException {
+    public GitLabMergeCause(GitLabMergeRequest mergeRequest, File logFile) throws IOException {
         super(logFile);
-        this.pushedBy = pushedBy;
+        this.mergeRequest = mergeRequest;
     }
 
-    public GitLabMergeCause(String pushedBy, String pollingLog) {
+    public GitLabMergeCause(GitLabMergeRequest mergeRequest, String pollingLog) {
         super(pollingLog);
-        this.pushedBy = pushedBy;
+        this.mergeRequest = mergeRequest;
     }
 
     @Override
     public String getShortDescription() {
-        if (pushedBy == null) {
-            return "Started by GitLab Merge Request";
-        } else {
-            return String.format("Started by GitLab Merge Request by %s", pushedBy);
-        }
+        return "Gitlab Merge Request #" + this.mergeRequest.getObjectAttribute().getId() + " : " + this.mergeRequest.getObjectAttribute().getSourceBranch() +
+                " => " + this.mergeRequest.getObjectAttribute().getTargetBranch();
     }
+
 }

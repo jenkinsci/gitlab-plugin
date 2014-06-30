@@ -17,6 +17,7 @@ import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.StaplerRequest;
@@ -77,8 +78,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
 
 
-        String lastPath = paths.get(paths.size()-1);
-        String firstPath = paths.get(0);
 
         String token = req.getParameter("token");
 
@@ -101,6 +100,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
             throw HttpResponses.notFound();
         }
 
+        if(paths.size() == 0) {
+            this.generateBuild(theString, project, req, res);
+            throw HttpResponses.ok();
+        }
+
+        String lastPath = paths.get(paths.size()-1);
+        String firstPath = paths.get(0);
+
         if(lastPath.equals("status.json") && !firstPath.equals("!builds")) {
             String commitSHA1 = paths.get(1);
             this.generateStatusJSON(commitSHA1, project, req, res);
@@ -119,7 +126,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 throw HttpResponses.error(500,"Could not generate an image.");
             }
         } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
-            AbstractBuild build = this.getBuildBySHA1(project, lastPath);
+            AbstractBuild build = this.getBuildBySHA1(project, lastPath, true);
             if(build != null) {
                 try {
                     res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
@@ -143,14 +150,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
             throw new IllegalArgumentException("This repo does not use git.");
         }
 
-        AbstractBuild mainBuild = this.getBuildBySHA1(project, commitSHA1);
+        AbstractBuild mainBuild = this.getBuildBySHA1(project, commitSHA1, true);
 
         JSONObject object = new JSONObject();
         object.put("sha", commitSHA1);
 
         if(mainBuild == null) {
             try {
-                object.put("status", "pending");
+                object.put("status", "unknown");
                 this.writeJSON(rsp, object);
                 return;
             } catch (IOException e) {
@@ -203,7 +210,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         if(branch != null) {
             mainBuild = this.getBuildByBranch(project, branch);
         } else if(commitSHA1 != null) {
-            mainBuild = this.getBuildBySHA1(project, commitSHA1);
+            mainBuild = this.getBuildBySHA1(project, commitSHA1, false);
         }
 
 
@@ -262,22 +269,18 @@ public class GitLabWebHook implements UnprotectedRootAction {
         JSONObject json = JSONObject.fromObject(data);
         LOGGER.log(Level.FINE, "data: {0}", json.toString(4));
 
-        if(data == null) {
-            return;
-        }
-
         String objectType = json.optString("object_kind");
 
         if(objectType != null && objectType.equals("merge_request")) {
-            this.generateMergeRequestBuild(json, project, req, rsp);
+            this.generateMergeRequestBuild(data, project, req, rsp);
         } else {
-            this.generatePushBuild(json, project, req, rsp);
+            this.generatePushBuild(data, project, req, rsp);
         }
     }
 
 
 
-    public void generatePushBuild(JSONObject json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
+    public void generatePushBuild(String json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         GitLabPushRequest request = GitLabPushRequest.create(json);
 
         String repositoryUrl = request.getRepository().getUrl();
@@ -299,8 +302,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
     }
 
-    public void generateMergeRequestBuild(JSONObject json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
+    public void generateMergeRequestBuild(String json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         GitLabMergeRequest request = GitLabMergeRequest.create(json);
+        if(request.getObjectAttribute().getState().equals("closed")) {
+            return;
+        }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
@@ -330,16 +336,23 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param commitSHA1
      * @return
      */
-    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1) {
+    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean isMergeRequest) {
         AbstractBuild mainBuild = null;
 
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
 
-            if(data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
-                mainBuild = build;
-                break;
+            if (!isMergeRequest) {
+                if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
+                    mainBuild = build;
+                    break;
+                }
+            } else {
+                if(data.hasBeenBuilt(ObjectId.fromString(commitSHA1))) {
+                    mainBuild = build;
+                    break;
+                }
             }
         }
 

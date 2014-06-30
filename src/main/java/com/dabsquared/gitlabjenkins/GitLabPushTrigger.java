@@ -3,11 +3,8 @@ package com.dabsquared.gitlabjenkins;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.Hudson;
-import hudson.model.Item;
-import hudson.plugins.git.RevisionParameterAction;
+import hudson.model.*;
+import hudson.plugins.git.*;
 import hudson.triggers.SCMTrigger;
 import hudson.triggers.SCMTrigger.SCMTriggerCause;
 
@@ -23,16 +20,14 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
+import org.eclipse.jgit.lib.MutableObjectId;
+import org.eclipse.jgit.lib.ObjectId;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import jenkins.model.Jenkins.MasterComputer;
@@ -62,10 +57,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 String name = " #" + job.getNextBuildNumber();
                 GitLabPushCause cause = createGitLabPushCause(req);
                 Action[] actions = createActions(req);
+
                 if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
-                    LOGGER.log(Level.INFO, "GitLab Push detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+                    LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                 } else {
-                    LOGGER.log(Level.INFO, "GitLab Push detected in {0}. Job is already in the queue.", job.getName());
+                    LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.", job.getName());
                 }
             }
 
@@ -81,12 +77,26 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             }
 
             private Action[] createActions(GitLabPushRequest req) {
-                List<Action> actions = new ArrayList<Action>();
+                ArrayList<Action> actions = new ArrayList<Action>();
 
-                Commit lastCommit = req.getLastCommit();
-                actions.add(new RevisionParameterAction(lastCommit.getId(), false));
+                GitSCM scm = (GitSCM) job.getScm();
+                BranchSpec spec = scm.getBranches().get(0);
+                String randomBranchName = spec.getName();
 
-                return actions.toArray(new Action[0]);
+                Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+                values.put("sourceBranch", new StringParameterValue("sourceBranch", randomBranchName));
+                values.put("targetBranch", new StringParameterValue("targetBranch", randomBranchName));
+                List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
+
+                ParametersAction parametersAction = new ParametersAction(listValues);
+                actions.add(parametersAction);
+
+                RevisionParameterAction revision = new RevisionParameterAction(req.getLastCommit().getId());
+                actions.add(revision);
+
+                Action[] actionsArray = actions.toArray(new Action[0]);
+
+                return actionsArray;
             }
 
         });
@@ -98,7 +108,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
                 String name = " #" + job.getNextBuildNumber();
                 GitLabMergeCause cause = createGitLabMergeCause(req);
-                if (job.scheduleBuild(job.getQuietPeriod(), cause)) {
+                Action[] actions = createActions(req);
+
+                if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
                     LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                 } else {
                     LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getName());
@@ -107,13 +119,29 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
             private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
                 GitLabMergeCause cause;
-                String triggeredByUser = req.getObjectAttribute().getAuthorId() + "";
                 try {
-                    cause = new GitLabMergeCause(triggeredByUser, getLogFile());
+                    cause = new GitLabMergeCause(req, getLogFile());
                 } catch (IOException ex) {
-                    cause = new GitLabMergeCause(triggeredByUser);
+                    cause = new GitLabMergeCause(req);
                 }
                 return cause;
+            }
+
+            private Action[] createActions(GitLabMergeRequest req) {
+                List<Action> actions = new ArrayList<Action>();
+
+                Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+                values.put("sourceBranch", new StringParameterValue("sourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
+                values.put("targetBranch", new StringParameterValue("targetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
+
+                List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
+
+                ParametersAction parametersAction = new ParametersAction(listValues);
+                actions.add(parametersAction);
+
+                Action[] actionsArray = actions.toArray(new Action[0]);
+
+                return actionsArray;
             }
 
         });
