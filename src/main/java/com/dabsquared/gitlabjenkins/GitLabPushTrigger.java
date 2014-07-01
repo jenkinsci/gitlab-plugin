@@ -92,9 +92,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 String randomBranchName = spec.getName();
 
                 Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
-                values.put("sourceBranch", new StringParameterValue("sourceBranch", randomBranchName));
-                values.put("targetBranch", new StringParameterValue("targetBranch", randomBranchName));
-                values.put("branch", new StringParameterValue("branch", branch));
+                values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", randomBranchName));
+                values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", randomBranchName));
+                values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
 
                 List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
@@ -141,8 +141,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 List<Action> actions = new ArrayList<Action>();
 
                 Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
-                values.put("sourceBranch", new StringParameterValue("sourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
-                values.put("targetBranch", new StringParameterValue("targetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
+                values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
+                values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
 
                 List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 

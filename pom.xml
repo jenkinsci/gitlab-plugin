@@ -8,7 +8,7 @@
 
   <groupId>com.dabsquared</groupId>
   <artifactId>gitlab-jenkins</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Gitlab+Plugin</url>

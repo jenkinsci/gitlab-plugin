@@ -28,10 +28,10 @@ Using it With A Job
 * Feel free to specify the ``GitHub Project`` url as the url for the Gitlab project (if you have the GitHub plugin installed)
 * In the ``Source Code Management`` section:
     * Click ``Git`` and enter your Repositroy URL and in Advanced set its Name to ``origin``
-    * In ``Branch Specifier`` enter ``origin/${sourceBranch}``
+    * In ``Branch Specifier`` enter ``origin/${gitlabSourceBranch}``
     * In the ``Additional Behaviours`` section:
         * Click the ``Add`` drop down button and the ``Merge before build`` item
-        * Specify the name of the repository as ``origin`` (if origin corresponds to Gitlab) and enter the ``Branch to merge to`` as ``${targetBranch}``
+        * Specify the name of the repository as ``origin`` (if origin corresponds to Gitlab) and enter the ``Branch to merge to`` as ``${gitlabTargetBranch}``
 * In the ``Build Triggers`` section:
     * Check the ``Build when a change is pushed to GitLab.``
 * In GitLab go to the project ``Settings``
@@ -47,9 +47,9 @@ Using it With A Job
 You can trigger a job a manually by clicking ``This build is parameterized`` and adding the relevant build parameters.
 These include:
 
-* sourceBranch
-* targetBranch
-* branch (This is optional and can be used in shell scripts for the branch being built by the push request)
+* gitlabSourceBranch
+* gitlabTargetBranch
+* gitlabBranch (This is optional and can be used in shell scripts for the branch being built by the push request)
 
 
 Help Needed
