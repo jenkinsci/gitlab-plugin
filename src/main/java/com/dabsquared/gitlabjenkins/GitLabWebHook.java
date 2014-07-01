@@ -157,7 +157,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         if(mainBuild == null) {
             try {
-                object.put("status", "unknown");
+                object.put("status", "pending");
                 this.writeJSON(rsp, object);
                 return;
             } catch (IOException e) {
