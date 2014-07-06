@@ -7,8 +7,8 @@
     </parent>
 
   <groupId>com.dabsquared</groupId>
-  <artifactId>gitlab-jenkins</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <artifactId>gitlab-plugin</artifactId>
+  <version>1.0.5-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
