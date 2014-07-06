@@ -79,9 +79,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             private Action[] createActions(GitLabPushRequest req) {
                 ArrayList<Action> actions = new ArrayList<Action>();
 
-                String[] branches = req.getRef().split("/");
-
-                String branch = branches[branches.length-1];
+                String branch = req.getRef().replaceAll("refs/heads/", "");
 
                 LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
 
