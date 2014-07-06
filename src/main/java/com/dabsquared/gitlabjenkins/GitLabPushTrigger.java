@@ -79,21 +79,13 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             private Action[] createActions(GitLabPushRequest req) {
                 ArrayList<Action> actions = new ArrayList<Action>();
 
-                String[] branches = req.getRef().split("/");
-
-                String branch = branches[branches.length-1];
+                String branch = req.getRef().replaceAll("refs/heads/", "");
 
                 LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
 
-
-                GitSCM scm = (GitSCM) job.getScm();
-
-                BranchSpec spec = scm.getBranches().get(0);
-                String randomBranchName = spec.getName();
-
                 Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
-                values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", randomBranchName));
-                values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", randomBranchName));
+                values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
+                values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
                 values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
 
                 List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());

@@ -29,6 +29,45 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main:jenkins-war:war:1.532.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jenkins-ci.main:jenkins-core:1.532.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jenkins-ci.main:remoting:2.33" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jenkins-ci.main:cli:1.532.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: commons-io:commons-io:1.4" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.kohsuke.stapler:stapler-groovy:1.223" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.kohsuke.stapler:stapler-jelly:1.223" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.kohsuke.stapler:stapler:1.223" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.jcraft:jzlib:1.1.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.kohsuke.stapler:stapler-jrebel:1.223" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.kohsuke.stapler:stapler-adjunct-codemirror:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.infradna.tool:bridge-method-annotation:1.8" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jenkins-ci:bytecode-compatibility-transformer:1.4" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jvnet.hudson:task-reactor:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jvnet.hudson:xstream:1.4.4-jenkins-5" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: xmlpull:xmlpull:1.1.3.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: xpp3:xpp3_min:1.1.4c" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jvnet.winp:winp:1.16" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jenkins-ci:jinterop-wmi:1.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.kohsuke.jinterop:jinterop-proxy:1.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.samba.jcifs:jcifs:1.3.14-kohsuke-1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jenkins-ci:windows-remote-command:1.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main:jenkins-test-harness:1.532.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main:jenkins-war:war-for-test:1.532.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.modules:instance-identity:1.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.modules:slave-installer:1.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.modules:windows-slave-installer:1.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-jdk14:1.7.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-api:1.7.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main:maven-plugin:2.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.plugins:mailer:1.5" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven-agent:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven-interceptor:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven3-agent:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven31-agent:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven3-interceptor:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven3-interceptor-commons:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main.maven:maven31-interceptor:1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jenkins-ci.main:ui-samples-plugin:1.532.3" level="project" />
     <orderEntry type="library" name="Maven: org.jenkins-ci.plugins:git:2.2.1" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jgit:org.eclipse.jgit:0.12.1" level="project" />
     <orderEntry type="library" name="Maven: com.jcraft:jsch:0.1.44-1" level="project" />
