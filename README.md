@@ -3,8 +3,8 @@ gitlab-jenkins-plugin
 
 This plugin emulates Jenkins as a GitlabCI Web Service to be used with GitlabHQ.
 
-[![Build Status](https://travis-ci.org/DABSquared/gitlab-jenkins-plugin.svg?branch=master)](https://travis-ci.org/DABSquared/gitlab-jenkins-plugin) 
-[![Gitter chat](https://badges.gitter.im/DABSquared/gitlab-jenkins-plugin.png)](https://gitter.im/DABSquared/gitlab-jenkins-plugin)
+[![Build Status](https://travis-ci.org/DABSquared/gitlab-plugin.svg?branch=master)](https://travis-ci.org/DABSquared/gitlab-plugin) 
+[![Gitter chat](https://badges.gitter.im/DABSquared/gitlab-plugin.png)](https://gitter.im/DABSquared/gitlab-plugin)
 
 
 Current Supported GitLabCI Functions
