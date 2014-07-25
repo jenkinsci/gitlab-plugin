@@ -185,16 +185,22 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 return "Build when a change is pushed to GitLab, unknown URL";
             }
 
-            String projectURL = null;
-
-            try {
-                projectURL = URLEncoder.encode(project.getName(), "UTF-8");
-                projectURL = projectURL.replace("+", "%20");
-            } catch (UnsupportedEncodingException e) {
-                projectURL = project.getName();
+            final List<String> projectParentsUrl = new ArrayList<String>();
+            for (Object parent = project.getParent(); parent instanceof Item; parent = ((Item) parent).getParent()) {
+                projectParentsUrl.add(0, ((Item) parent).getName());
             }
 
-            return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + Jenkins.getInstance().getRootUrl() + "project/" + projectURL;
+            final StringBuilder projectUrl = new StringBuilder();
+            projectUrl.append(Jenkins.getInstance().getRootUrl());
+            projectUrl.append(GitLabWebHook.WEBHOOK_URL);
+            projectUrl.append('/');
+            for (final String parentUrl : projectParentsUrl) {
+                projectUrl.append(Util.rawEncode(parentUrl));
+                projectUrl.append('/');
+            }
+            projectUrl.append(Util.rawEncode(project.getName()));
+
+            return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + projectUrl;
         }
 
         @Override
