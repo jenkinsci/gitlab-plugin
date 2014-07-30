@@ -3,12 +3,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.564</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
+        <version>1.564</version>
     </parent>
 
-  <groupId>com.dabsquared</groupId>
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
@@ -28,11 +27,11 @@
     </developer>
   </developers>
 
-    <scm>
-        <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/gitlab-plugin</url>
-    </scm>
+  <scm>
+      <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
+      <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
+      <url>https://github.com/jenkinsci/gitlab-plugin</url>
+  </scm>
 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
