@@ -29,7 +29,7 @@
 
   <scm>
       <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
-      <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
+      <developerConnection>scm:git:ssh://git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
       <url>https://github.com/jenkinsci/gitlab-plugin</url>
   </scm>
 
