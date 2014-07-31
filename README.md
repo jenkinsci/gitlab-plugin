@@ -1,4 +1,4 @@
-gitlab-jenkins-plugin
+gitlab-plugin
 =====================
 
 This plugin emulates Jenkins as a GitlabCI Web Service to be used with GitlabHQ.
@@ -68,7 +68,7 @@ Known Issues
 Contributing
 =====================
 
-1. Fork it ( https://github.com/[my-github-username]/gitlab-jenkins-plugin/fork )
+1. Fork it ( https://github.com/[my-github-username]/gitlab-plugin/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
