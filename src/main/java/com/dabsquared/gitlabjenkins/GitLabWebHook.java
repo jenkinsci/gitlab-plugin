@@ -213,32 +213,37 @@ public class GitLabWebHook implements UnprotectedRootAction {
             mainBuild = this.getBuildBySHA1(project, commitSHA1, false);
         }
 
+        String baseUrl = Jenkins.getInstance().getRootUrl();
+        // Remove trailing slash
+        if (baseUrl.endsWith("/")) {
+           baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
 
         if(mainBuild == null) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
             return;
         }
 
         BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
         if(mainBuild.isBuilding()) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/running.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/running.png");
         }else if(currentBallColor == BallColor.BLUE) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/success.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/success.png");
         }else if(currentBallColor == BallColor.ABORTED) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
         }else if(currentBallColor == BallColor.DISABLED) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
         }else if(currentBallColor == BallColor.GREY) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
         }else if(currentBallColor == BallColor.NOTBUILT) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
         }else if(currentBallColor == BallColor.RED) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/failed.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/failed.png");
         }else if(currentBallColor == BallColor.YELLOW) {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
         } else {
-            rsp.sendRedirect2(Jenkins.getInstance().getRootUrl() + "/plugin/gitlab-jenkins/images/unknown.png");
+            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
         }
 
     }
