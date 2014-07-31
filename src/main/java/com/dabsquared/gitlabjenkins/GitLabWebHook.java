@@ -1,44 +1,34 @@
 package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
-import hudson.ExtensionPoint;
 import hudson.model.*;
-import hudson.plugins.git.BranchSpec;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.*;
 import hudson.scm.SCM;
 import hudson.security.ACL;
-import hudson.security.csrf.CrumbExclusion;
 import hudson.util.HttpResponses;
+
 import jenkins.model.Jenkins;
+
 import net.sf.json.JSONObject;
-import org.acegisecurity.AccessDeniedException;
+
 import org.acegisecurity.Authentication;
-import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kohsuke.stapler.HttpResponse;
+import com.google.common.base.Splitter;
 
 /**
  *
@@ -64,20 +54,37 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    public void getDynamic(String projectName, StaplerRequest req, StaplerResponse res) {
+    public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
         LOGGER.log(Level.FINE, "WebHook called.");
 
-        String path = req.getRestOfPath();
+        final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
+        final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
+        ACL.impersonate(ACL.SYSTEM, new Runnable() {
 
+            public void run() {
+                final Jenkins jenkins = Jenkins.getInstance();
+                if (jenkins != null) {
+                    Item item = jenkins.getItemByFullName(projectName);
+                    while (item instanceof ItemGroup<?> && restOfPathParts.hasNext()) {
+                        item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
+                    }
+                    if (item instanceof AbstractProject<?, ?>) {
+                        projectHolder[0] = (AbstractProject<?, ?>) item;
+                    }
+                }
+            }
 
-        String[] splitURL = path.split("/");
+        });
 
-        List<String> paths = new LinkedList<String>(Arrays.asList(splitURL));
-        if(paths.size() > 0 && paths.get(0).equals("")) {
-            paths.remove(0); //The first split is usually blank so we remove it.
+        final AbstractProject<?, ?> project = projectHolder[0];
+        if (project == null) {
+            throw HttpResponses.notFound();
         }
 
-
+        final List<String> paths = new ArrayList<String>();
+        while (restOfPathParts.hasNext()) {
+            paths.add(restOfPathParts.next());
+        }
 
         String token = req.getParameter("token");
 
@@ -91,14 +98,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
 
         String theString = writer.toString();
-
-        AbstractProject project = null;
-        try {
-            project = project(projectName, req, res);
-        } catch (IOException e) {
-            LOGGER.log(Level.FINE, "no such job {0}", projectName);
-            throw HttpResponses.notFound();
-        }
 
         if(paths.size() == 0) {
             this.generateBuild(theString, project, req, res);
@@ -407,35 +406,5 @@ public class GitLabWebHook implements UnprotectedRootAction {
         w.close();
 
     }
-
-
-    /**
-     *
-     * @param job The job name
-     * @param req The stapler request asking for the project
-     * @param rsp The stapler response asking for the project
-     * @return A project that matches the information.
-     * @throws IOException
-     * @throws HttpResponses.HttpResponseException
-     */
-    @SuppressWarnings("deprecation")
-    private AbstractProject<?,?> project(String job, StaplerRequest req, StaplerResponse rsp) throws IOException, HttpResponses.HttpResponseException {
-        AbstractProject<?,?> p;
-        SecurityContext orig = ACL.impersonate(ACL.SYSTEM);
-        try {
-            p = Jenkins.getInstance().getItemByFullName(job, AbstractProject.class);
-        } finally {
-            SecurityContextHolder.setContext(orig);
-        }
-        if (p == null) {
-            LOGGER.log(Level.FINE, "no such job {0}", job);
-            throw HttpResponses.notFound();
-        }
-        return p;
-    }
-
-
-
-
 
 }
