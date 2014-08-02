@@ -69,13 +69,13 @@ public class GitLabPushRequest {
 
     private String ref;
 
-    private Integer userId;
+    private Integer user_id;
 
-    private String userName;
+    private String user_name;
 
-    private Integer projectId;
+    private Integer project_id;
 
-    private Integer totalCommitsCount;
+    private Integer total_commits_count;
 
     private Repository repository;
 
@@ -104,12 +104,12 @@ public class GitLabPushRequest {
         this.repository = repository;
     }
 
-    public Integer getTotalCommitsCount() {
-        return totalCommitsCount;
+    public Integer getTotal_commits_count() {
+        return total_commits_count;
     }
 
-    public void setTotalCommitsCount(Integer totalCommitsCount) {
-        this.totalCommitsCount = totalCommitsCount;
+    public void setTotal_commits_count(Integer totalCommitsCount) {
+        this.total_commits_count = totalCommitsCount;
     }
 
     public String getBefore() {
@@ -136,28 +136,28 @@ public class GitLabPushRequest {
         this.ref = ref;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public Integer getUser_id() {
+        return user_id;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUser_id(Integer userId) {
+        this.user_id = userId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUser_name() {
+        return user_name;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUser_name(String userName) {
+        this.user_name = userName;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Integer getProject_id() {
+        return project_id;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject_id(Integer projectId) {
+        this.project_id = projectId;
     }
 
     @Override

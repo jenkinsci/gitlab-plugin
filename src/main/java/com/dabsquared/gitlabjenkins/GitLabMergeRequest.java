@@ -36,16 +36,16 @@ public class GitLabMergeRequest {
     }
 
 
-    private String objectKind;
+    private String object_kind;
 
     private ObjectAttributes objectAttributes;
 
-    public String getObjectKind() {
-        return objectKind;
+    public String getObject_kind() {
+        return object_kind;
     }
 
-    public void setObjectKind(String objectKind) {
-        this.objectKind = objectKind;
+    public void setObject_kind(String objectKind) {
+        this.object_kind = objectKind;
     }
 
     public ObjectAttributes getObjectAttribute() {

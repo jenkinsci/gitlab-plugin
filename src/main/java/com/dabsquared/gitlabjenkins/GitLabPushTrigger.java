@@ -2,39 +2,34 @@ package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
 import hudson.Util;
-import hudson.console.AnnotatedLargeText;
-import hudson.model.*;
-import hudson.plugins.git.*;
-import hudson.triggers.SCMTrigger;
-import hudson.triggers.SCMTrigger.SCMTriggerCause;
-
+import hudson.model.Action;
+import hudson.model.Item;
+import hudson.model.ParameterValue;
+import hudson.model.AbstractProject;
+import hudson.model.ParametersAction;
+import hudson.model.StringParameterValue;
+import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
+import hudson.util.FormValidation;
 import hudson.util.SequentialExecutionQueue;
-import hudson.util.StreamTaskListener;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
-import jenkins.model.JenkinsLocationConfiguration;
-import org.eclipse.jgit.lib.MutableObjectId;
-import org.eclipse.jgit.lib.ObjectId;
+import net.sf.json.JSONObject;
+
+import org.gitlab.api.models.GitlabProject;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import jenkins.model.Jenkins.MasterComputer;
-
-import org.apache.commons.jelly.XMLOutput;
-
-import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * Triggers a build when we receive a GitLab WebHook.
@@ -154,21 +149,31 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         return DescriptorImpl.get();
     }
 
+    public static DescriptorImpl getDesc() {
+        return DescriptorImpl.get();
+    }
+
     public File getLogFile() {
         return new File(job.getRootDir(), "gitlab-polling.log");
     }
 
     private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 
-
-
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
         AbstractProject project;
+        private String gitlabApiToken;
+        private String gitlabHostUrl = "";
+        private boolean ignoreCertificateErrors = false;
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
+        private transient GitLab gitlab;
 
+        public DescriptorImpl() {
+        	load();
+        }
+        
         @Override
         public boolean isApplicable(Item item) {
             if(item instanceof AbstractProject) {
@@ -201,6 +206,65 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             projectUrl.append(Util.rawEncode(project.getName()));
 
             return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + projectUrl;
+        }
+
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            gitlabApiToken = formData.getString("gitlabApiToken");
+            gitlabHostUrl = formData.getString("gitlabHostUrl");
+            ignoreCertificateErrors = formData.getBoolean("ignoreCertificateErrors");
+            save();
+            gitlab = new GitLab();
+            
+            try {
+            	gitlab.get().ignoreCertificateErrors(ignoreCertificateErrors);
+            } catch (IOException ex) {
+            	LOGGER.log(Level.WARNING, "Connection to Gitlab failed, reason {0}", ex.getMessage());
+            }
+            
+            return super.configure(req, formData);
+        }
+
+        public FormValidation doCheckGitlabHostUrl(@QueryParameter String value) {
+            if (value == null || value.isEmpty()) {
+                return FormValidation.error("Gitlab host URL required");
+            }        
+
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckGitlabApiToken(@QueryParameter String gitlabHostUrl, 
+        		@QueryParameter boolean ignoreCertificateErrors,
+        		@QueryParameter String value) {
+            if (value == null || value.isEmpty()) {
+                return FormValidation.error("API Token for Gitlab access required");
+            }   
+            
+            if (gitlabHostUrl != null && !gitlabHostUrl.isEmpty() 
+            		&& !GitLab.checkConnection(value, gitlabHostUrl, ignoreCertificateErrors)){
+            	return FormValidation.error("Could not connect to Gitlab with provided configuration");
+            }
+            
+            return FormValidation.ok();
+        }
+
+        public GitLab getGitlab() {
+            if (gitlab == null) {
+                gitlab = new GitLab();
+            }
+            return gitlab;
+        }
+
+        public String getGitlabApiToken() {
+            return gitlabApiToken;
+        }
+
+        public String getGitlabHostUrl() {
+            return gitlabHostUrl;
+        }
+        
+        public boolean getIgnoreCertificateErrors() {
+        	return ignoreCertificateErrors;
         }
 
         @Override
