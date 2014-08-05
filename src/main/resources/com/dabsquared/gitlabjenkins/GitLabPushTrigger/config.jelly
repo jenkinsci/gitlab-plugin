@@ -1,8 +1,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:entry title="Build on Push Events" field="triggerOnPush">
-      <f:checkbox />
+      <f:checkbox default="true" />
     </f:entry>
     <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
-      <f:checkbox />
+      <f:checkbox default="true" />
     </f:entry>
 </j:jelly>

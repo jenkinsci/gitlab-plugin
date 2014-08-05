@@ -42,19 +42,19 @@ import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
-    private boolean triggerOnPush;
-    private boolean triggerOnMergeRequest;
+    private boolean triggerOnPush = true;
+    private boolean triggerOnMergeRequest = true;
 
     @DataBoundConstructor
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
     }
-    
+
     public boolean getTriggerOnPush() {
     	return triggerOnPush;
     }
-    
+
     public boolean getTriggerOnMergeRequest() {
     	return triggerOnMergeRequest;
     }
