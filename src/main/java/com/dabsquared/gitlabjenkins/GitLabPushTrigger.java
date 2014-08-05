@@ -42,111 +42,125 @@ import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
-
+    private boolean triggerOnPush = true;
+    private boolean triggerOnMergeRequest = true;
 
     @DataBoundConstructor
-    public GitLabPushTrigger() {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest) {
+        this.triggerOnPush = triggerOnPush;
+        this.triggerOnMergeRequest = triggerOnMergeRequest;
+    }
 
+    public boolean getTriggerOnPush() {
+    	return triggerOnPush;
+    }
+
+    public boolean getTriggerOnMergeRequest() {
+    	return triggerOnMergeRequest;
     }
 
     public void onPost(final GitLabPushRequest req) {
-        getDescriptor().queue.execute(new Runnable() {
+        if (triggerOnPush) {
+            getDescriptor().queue.execute(new Runnable() {
 
-            public void run() {
-                LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
-                String name = " #" + job.getNextBuildNumber();
-                GitLabPushCause cause = createGitLabPushCause(req);
-                Action[] actions = createActions(req);
+                public void run() {
+                    LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
+                    String name = " #" + job.getNextBuildNumber();
+                    GitLabPushCause cause = createGitLabPushCause(req);
+                    Action[] actions = createActions(req);
 
-                if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
-                    LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
-                } else {
-                    LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.", job.getName());
+                    if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
+                        LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+                    } else {
+                        LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.", job.getName());
+                    }
                 }
-            }
 
-            private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
-                GitLabPushCause cause;
-                String triggeredByUser = req.getCommits().get(0).getAuthor().getName();
-                try {
-                    cause = new GitLabPushCause(triggeredByUser, getLogFile());
-                } catch (IOException ex) {
-                    cause = new GitLabPushCause(triggeredByUser);
+                private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
+                    GitLabPushCause cause;
+                    String triggeredByUser = req.getCommits().get(0).getAuthor().getName();
+                    try {
+                        cause = new GitLabPushCause(triggeredByUser, getLogFile());
+                    } catch (IOException ex) {
+                        cause = new GitLabPushCause(triggeredByUser);
+                    }
+                    return cause;
                 }
-                return cause;
-            }
 
-            private Action[] createActions(GitLabPushRequest req) {
-                ArrayList<Action> actions = new ArrayList<Action>();
+                private Action[] createActions(GitLabPushRequest req) {
+                    ArrayList<Action> actions = new ArrayList<Action>();
 
-                String branch = req.getRef().replaceAll("refs/heads/", "");
+                    String branch = req.getRef().replaceAll("refs/heads/", "");
 
-                LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
+                    LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
 
-                Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
-                values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
-                values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
-                values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
+                    Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+                    values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
+                    values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
+                    values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
 
-                List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
+                    List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
-                ParametersAction parametersAction = new ParametersAction(listValues);
-                actions.add(parametersAction);
+                    ParametersAction parametersAction = new ParametersAction(listValues);
+                    actions.add(parametersAction);
 
-                RevisionParameterAction revision = new RevisionParameterAction(req.getLastCommit().getId());
-                actions.add(revision);
+                    RevisionParameterAction revision = new RevisionParameterAction(req.getLastCommit().getId());
+                    actions.add(revision);
 
-                Action[] actionsArray = actions.toArray(new Action[0]);
+                    Action[] actionsArray = actions.toArray(new Action[0]);
 
-                return actionsArray;
-            }
+                    return actionsArray;
+                }
 
-        });
+            });
+        }
     }
 
     public void onPost(final GitLabMergeRequest req) {
-        getDescriptor().queue.execute(new Runnable() {
-            public void run() {
-                LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
-                String name = " #" + job.getNextBuildNumber();
-                GitLabMergeCause cause = createGitLabMergeCause(req);
-                Action[] actions = createActions(req);
+        if (triggerOnMergeRequest) {
+            getDescriptor().queue.execute(new Runnable() {
+                public void run() {
+                    LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
+                    String name = " #" + job.getNextBuildNumber();
+                    GitLabMergeCause cause = createGitLabMergeCause(req);
+                    Action[] actions = createActions(req);
 
-                if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
-                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
-                } else {
-                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getName());
+                    if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
+                        LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+                    } else {
+                        LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getName());
+                    }
                 }
-            }
 
-            private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
-                GitLabMergeCause cause;
-                try {
-                    cause = new GitLabMergeCause(req, getLogFile());
-                } catch (IOException ex) {
-                    cause = new GitLabMergeCause(req);
+                private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
+                    GitLabMergeCause cause;
+                    try {
+                        cause = new GitLabMergeCause(req, getLogFile());
+                    } catch (IOException ex) {
+                        cause = new GitLabMergeCause(req);
+                    }
+                    return cause;
                 }
-                return cause;
-            }
 
-            private Action[] createActions(GitLabMergeRequest req) {
-                List<Action> actions = new ArrayList<Action>();
+                private Action[] createActions(GitLabMergeRequest req) {
+                    List<Action> actions = new ArrayList<Action>();
 
-                Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
-                values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
-                values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
+                    Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+                    values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
+                    values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
 
-                List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
+                    List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
-                ParametersAction parametersAction = new ParametersAction(listValues);
-                actions.add(parametersAction);
+                    ParametersAction parametersAction = new ParametersAction(listValues);
+                    actions.add(parametersAction);
 
-                Action[] actionsArray = actions.toArray(new Action[0]);
+                    Action[] actionsArray = actions.toArray(new Action[0]);
 
-                return actionsArray;
-            }
+                    return actionsArray;
+                }
 
-        });
+            });
+        }
     }
 
     @Override
