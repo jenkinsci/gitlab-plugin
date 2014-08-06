@@ -1,18 +1,15 @@
 package com.dabsquared.gitlabjenkins;
 
+import java.io.IOException;
+import java.util.Date;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+import org.gitlab.api.models.GitlabProject;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.sf.json.JSONObject;
-import net.sf.json.JsonConfig;
-import net.sf.json.util.JavaIdentifierTransformer;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents for WebHook payload
@@ -27,7 +24,9 @@ public class GitLabMergeRequest {
         }
 
         Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setDateFormat("yyyy-MM-dd HH:mm:ss Z").create();
-        return gson.fromJson(payload, GitLabMergeRequest.class);
+        GitLabMergeRequest mergeRequest =  gson.fromJson(payload, GitLabMergeRequest.class);
+        
+        return mergeRequest;
     }
 
 
@@ -35,10 +34,17 @@ public class GitLabMergeRequest {
     public GitLabMergeRequest() {
     }
 
-
     private String object_kind;
 
     private ObjectAttributes objectAttributes;
+    private GitlabProject sourceProject = null;
+    
+    public GitlabProject getSourceProject (GitLab api) throws IOException {
+    	if (sourceProject == null) {
+    		sourceProject = api.instance().getProject(objectAttributes.sourceProjectId);
+    	}
+    	return sourceProject;
+    }
 
     public String getObject_kind() {
         return object_kind;

@@ -9,6 +9,8 @@ import hudson.model.AbstractProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
 import hudson.plugins.git.RevisionParameterAction;
+import hudson.plugins.git.GitSCM;
+import hudson.scm.SCM;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
@@ -26,7 +28,8 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
-import org.gitlab.api.models.GitlabProject;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -131,6 +134,21 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
                 values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
 
+                // Get source repository if communication to Gitlab is possible
+                String sourceRepoName = "origin";
+                String sourceRepoURL = null;
+                
+                try {
+                	sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();    
+                	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();    
+                } catch (IOException ex) {
+                	LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
+                	sourceRepoURL = getSourceRepoURLDefault();
+                } finally {
+                	values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
+                	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
+                }
+                
                 List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
                 ParametersAction parametersAction = new ParametersAction(listValues);
@@ -139,6 +157,29 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 Action[] actionsArray = actions.toArray(new Action[0]);
 
                 return actionsArray;
+            }
+            
+            /**
+             * Get the URL of the first declared repository in the project configuration.
+             * Use this as default source repository url.
+             * 
+             * @return String the default value of the source repository url
+             */
+            private String getSourceRepoURLDefault() {
+            	String url = null;
+            	SCM scm = job.getScm();
+                if (scm instanceof GitSCM) {
+                	List<RemoteConfig> repositories = ((GitSCM) scm).getRepositories();
+                	if (!repositories.isEmpty()){
+                		RemoteConfig defaultRepository = repositories.get(repositories.size()-1);
+                    	List<URIish> uris = defaultRepository.getURIs();
+                    	if (!uris.isEmpty()) {
+                    		URIish defaultUri = uris.get(uris.size());
+                    		url = defaultUri.toString();
+                    	}                    	
+                	}           
+                } 
+            	return url;
             }
 
         });
@@ -215,35 +256,21 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             ignoreCertificateErrors = formData.getBoolean("ignoreCertificateErrors");
             save();
             gitlab = new GitLab();
-            
-            try {
-            	gitlab.get().ignoreCertificateErrors(ignoreCertificateErrors);
-            } catch (IOException ex) {
-            	LOGGER.log(Level.WARNING, "Connection to Gitlab failed, reason {0}", ex.getMessage());
-            }
-            
             return super.configure(req, formData);
         }
 
         public FormValidation doCheckGitlabHostUrl(@QueryParameter String value) {
             if (value == null || value.isEmpty()) {
-                return FormValidation.error("Gitlab host URL required");
+                return FormValidation.error("Gitlab host URL required.");
             }        
 
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckGitlabApiToken(@QueryParameter String gitlabHostUrl, 
-        		@QueryParameter boolean ignoreCertificateErrors,
-        		@QueryParameter String value) {
+        public FormValidation doCheckGitlabApiToken(@QueryParameter String value) {
             if (value == null || value.isEmpty()) {
                 return FormValidation.error("API Token for Gitlab access required");
             }   
-            
-            if (gitlabHostUrl != null && !gitlabHostUrl.isEmpty() 
-            		&& !GitLab.checkConnection(value, gitlabHostUrl, ignoreCertificateErrors)){
-            	return FormValidation.error("Could not connect to Gitlab with provided configuration");
-            }
             
             return FormValidation.ok();
         }
