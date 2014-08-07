@@ -21,19 +21,28 @@ Major Help Needed
 =====================
 I would like this project to be able to handle building merge requests and regular pushes. In order to do this I need a way to configure the git plugin via code to merge two branches together before a build. Much like the RevisionParameterAction.java in the git plugin, we need a class that takes to branches, a source and a target, and can be passed as a build action. I have started an issue for the Git plugin here: https://issues.jenkins-ci.org/browse/JENKINS-23362 If you know of a way to do this please PM on twitter at @bass_rock. All the other necessary code exists in this repo and works.
 
+Configuring access to the Gitlab server
+=======================================
+
+Optionally, the plugin communicates with the Gitlab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories. 
+
+To enable this functionality, a user should be set up on Gitlab, which adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
+
 Using it With A Job
 =====================
 * Create a new job by going to ``New Job``
 * Set the ``Project Name``
 * Feel free to specify the ``GitHub Project`` url as the url for the Gitlab project (if you have the GitHub plugin installed)
 * In the ``Source Code Management`` section:
-    * Click ``Git`` and enter your Repositroy URL and in Advanced set its Name to ``origin``
-    * In ``Branch Specifier`` enter ``origin/${gitlabSourceBranch}``
+    * Click ``Git`` and enter your Repository URL and in Advanced set its Name to ``origin``
+    * Add a second Repository with URL ``${gitlabSourceRepoURL}`` and name (in Advanced) ``${gitlabSourceRepoName}`` if you want to be able to merge from forked repositories (this **requires** configuring communication to the Gitlab server)
+    * In ``Branch Specifier`` enter ``origin/${gitlabSourceBranch}`` or ``${gitlabSourceRepoURL}/${gitlabSourceBranch}``
     * In the ``Additional Behaviours`` section:
         * Click the ``Add`` drop down button and the ``Merge before build`` item
         * Specify the name of the repository as ``origin`` (if origin corresponds to Gitlab) and enter the ``Branch to merge to`` as ``${gitlabTargetBranch}``
 * In the ``Build Triggers`` section:
     * Check the ``Build when a change is pushed to GitLab.``
+    * Use the check boxes to trigger builds on Push and/or Merge Request events
 * In GitLab go to the project ``Settings``
     * Click on ``Services``
     * Click on ``GitLab CI``
@@ -49,6 +58,8 @@ These include:
 
 * gitlabSourceBranch
 * gitlabTargetBranch
+* gitlabSourceRepoURL
+* gitlabSourceRepoName
 * gitlabBranch (This is optional and can be used in shell scripts for the branch being built by the push request)
 
 
@@ -79,4 +90,6 @@ Contributors
 
 * @bass_rock, base ground work, primary developer.
 * @DABSquared, company sponsoring development.
-* @xaniasd, suggested a temporary work around for merge requests on Gitter.
+* @xaniasd
+
+Parts of this code inspired by https://github.com/timols/jenkins-gitlab-merge-request-builder-plugin

@@ -2,39 +2,37 @@ package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
 import hudson.Util;
-import hudson.console.AnnotatedLargeText;
-import hudson.model.*;
-import hudson.plugins.git.*;
-import hudson.triggers.SCMTrigger;
-import hudson.triggers.SCMTrigger.SCMTriggerCause;
-
+import hudson.model.Action;
+import hudson.model.Item;
+import hudson.model.ParameterValue;
+import hudson.model.AbstractProject;
+import hudson.model.ParametersAction;
+import hudson.model.StringParameterValue;
+import hudson.plugins.git.RevisionParameterAction;
+import hudson.plugins.git.GitSCM;
+import hudson.scm.SCM;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
+import hudson.util.FormValidation;
 import hudson.util.SequentialExecutionQueue;
-import hudson.util.StreamTaskListener;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
-import jenkins.model.JenkinsLocationConfiguration;
-import org.eclipse.jgit.lib.MutableObjectId;
-import org.eclipse.jgit.lib.ObjectId;
+import net.sf.json.JSONObject;
+
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import jenkins.model.Jenkins.MasterComputer;
-
-import org.apache.commons.jelly.XMLOutput;
-
-import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * Triggers a build when we receive a GitLab WebHook.
@@ -42,10 +40,10 @@ import com.dabsquared.gitlabjenkins.GitLabPushRequest.Commit;
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
-    private boolean triggerOnPush = true;
+	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
 
-    @DataBoundConstructor
+	@DataBoundConstructor
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -60,7 +58,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabPushRequest req) {
-        if (triggerOnPush) {
+    	if (triggerOnPush) {
             getDescriptor().queue.execute(new Runnable() {
 
                 public void run() {
@@ -117,8 +115,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabMergeRequest req) {
-        if (triggerOnMergeRequest) {
-            getDescriptor().queue.execute(new Runnable() {
+    	if (triggerOnMergeRequest) {
+    		getDescriptor().queue.execute(new Runnable() {
                 public void run() {
                     LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
                     String name = " #" + job.getNextBuildNumber();
@@ -149,6 +147,21 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
 
+                    // Get source repository if communication to Gitlab is possible
+                    String sourceRepoName = "origin";
+                    String sourceRepoURL = null;
+                    
+                    try {
+                    	sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();    
+                    	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();    
+                    } catch (IOException ex) {
+                    	LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
+                    	sourceRepoURL = getSourceRepoURLDefault();
+                    } finally {
+                    	values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
+                    	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
+                    }
+                    
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
                     ParametersAction parametersAction = new ParametersAction(listValues);
@@ -158,13 +171,40 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
                     return actionsArray;
                 }
-
+                
+                /**
+                 * Get the URL of the first declared repository in the project configuration.
+                 * Use this as default source repository url.
+                 * 
+                 * @return String the default value of the source repository url
+                 */
+                private String getSourceRepoURLDefault() {
+                	String url = null;
+                	SCM scm = job.getScm();
+                    if (scm instanceof GitSCM) {
+                    	List<RemoteConfig> repositories = ((GitSCM) scm).getRepositories();
+                    	if (!repositories.isEmpty()){
+                    		RemoteConfig defaultRepository = repositories.get(repositories.size()-1);
+                        	List<URIish> uris = defaultRepository.getURIs();
+                        	if (!uris.isEmpty()) {
+                        		URIish defaultUri = uris.get(uris.size());
+                        		url = defaultUri.toString();
+                        	}                    	
+                    	}           
+                    } 
+                	return url;
+                }
             });
-        }
-    }
+	
+    	}
+            }
 
     @Override
     public DescriptorImpl getDescriptor() {
+        return DescriptorImpl.get();
+    }
+
+    public static DescriptorImpl getDesc() {
         return DescriptorImpl.get();
     }
 
@@ -174,15 +214,21 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 
-
-
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
         AbstractProject project;
+        private String gitlabApiToken;
+        private String gitlabHostUrl = "";
+        private boolean ignoreCertificateErrors = false;
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
+        private transient GitLab gitlab;
 
+        public DescriptorImpl() {
+        	load();
+        }
+        
         @Override
         public boolean isApplicable(Item item) {
             if(item instanceof AbstractProject) {
@@ -215,6 +261,51 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             projectUrl.append(Util.rawEncode(project.getName()));
 
             return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + projectUrl;
+        }
+
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            gitlabApiToken = formData.getString("gitlabApiToken");
+            gitlabHostUrl = formData.getString("gitlabHostUrl");
+            ignoreCertificateErrors = formData.getBoolean("ignoreCertificateErrors");
+            save();
+            gitlab = new GitLab();
+            return super.configure(req, formData);
+        }
+
+        public FormValidation doCheckGitlabHostUrl(@QueryParameter String value) {
+            if (value == null || value.isEmpty()) {
+                return FormValidation.error("Gitlab host URL required.");
+            }        
+
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckGitlabApiToken(@QueryParameter String value) {
+            if (value == null || value.isEmpty()) {
+                return FormValidation.error("API Token for Gitlab access required");
+            }   
+            
+            return FormValidation.ok();
+        }
+
+        public GitLab getGitlab() {
+            if (gitlab == null) {
+                gitlab = new GitLab();
+            }
+            return gitlab;
+        }
+
+        public String getGitlabApiToken() {
+            return gitlabApiToken;
+        }
+
+        public String getGitlabHostUrl() {
+            return gitlabHostUrl;
+        }
+        
+        public boolean getIgnoreCertificateErrors() {
+        	return ignoreCertificateErrors;
         }
 
         @Override

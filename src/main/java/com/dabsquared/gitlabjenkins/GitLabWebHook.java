@@ -1,15 +1,30 @@
 package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.BallColor;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
+import hudson.model.UnprotectedRootAction;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.util.*;
+import hudson.plugins.git.util.BuildData;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
 
-import jenkins.model.Jenkins;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.servlet.ServletException;
+
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 import org.acegisecurity.Authentication;
@@ -18,15 +33,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.base.Splitter;
 
@@ -56,7 +62,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
     public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
         LOGGER.log(Level.FINE, "WebHook called.");
-
         final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
         final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -283,7 +288,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
 
-
     public void generatePushBuild(String json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         GitLabPushRequest request = GitLabPushRequest.create(json);
 
@@ -309,6 +313,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     public void generateMergeRequestBuild(String json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         GitLabMergeRequest request = GitLabMergeRequest.create(json);
         if(request.getObjectAttribute().getState().equals("closed")) {
+        	LOGGER.log(Level.INFO, "Closed Merge Request, no build started");
             return;
         }
 
