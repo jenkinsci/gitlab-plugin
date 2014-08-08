@@ -43,7 +43,7 @@ public class GitLabMergeRequest {
     
     private static final String[] DATE_FORMATS = new String[] {
     	"yyyy-MM-dd HH:mm:ss Z",
-    	"yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+    	"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     };
 
 
