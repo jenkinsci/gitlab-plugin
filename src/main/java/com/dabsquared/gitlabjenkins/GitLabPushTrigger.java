@@ -288,6 +288,16 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             
             return FormValidation.ok();
         }
+        
+        public FormValidation doTestConnection(@QueryParameter("gitlabHostUrl") final String hostUrl,
+                @QueryParameter("gitlabApiToken") final String token, @QueryParameter("ignoreCertificateErrors") final boolean ignoreCertificateErrors) throws IOException {
+            try {
+                GitLab.checkConnection(token, hostUrl, ignoreCertificateErrors);
+                return FormValidation.ok("Success");
+            } catch (IOException e) {
+                return FormValidation.error("Client error : "+e.getMessage());
+            }
+        }
 
         public GitLab getGitlab() {
             if (gitlab == null) {
