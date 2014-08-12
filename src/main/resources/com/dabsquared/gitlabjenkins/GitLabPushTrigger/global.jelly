@@ -11,5 +11,7 @@
     <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
       <f:checkbox />
     </f:entry>
+    <f:validateButton title="${%Test Connection}" progress="${%Testing...}"
+   		method="testConnection" with="gitlabApiToken,gitlabHostUrl,ignoreCertificateErrors" />
   </f:section>
 </j:jelly>

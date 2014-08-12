@@ -23,16 +23,10 @@ public class GitLab {
     return api;
   }
   
-  public static boolean checkConnection (String token, String url, boolean ignoreCertificateErrors) {
-	  try {
-		  GitlabAPI testApi = GitlabAPI.connect(url, token);
-		  testApi.ignoreCertificateErrors(ignoreCertificateErrors);
-		  testApi.getProjects();
-		  return true;
-	  } catch (IOException ex) {
-		  // TODO improve error handling
-		  LOGGER.log(Level.WARNING, ex.getMessage());
-		  return false;
-	  }
+  public static boolean checkConnection (String token, String url, boolean ignoreCertificateErrors) throws IOException {
+	  GitlabAPI testApi = GitlabAPI.connect(url, token);
+	  testApi.ignoreCertificateErrors(ignoreCertificateErrors);
+	  testApi.getProjects();
+	  return true;
   }
 }
