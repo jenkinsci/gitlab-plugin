@@ -36,7 +36,7 @@ Using it With A Job
 * In the ``Source Code Management`` section:
     * Click ``Git`` and enter your Repository URL and in Advanced set its Name to ``origin``
     * Add a second Repository with URL ``${gitlabSourceRepoURL}`` and name (in Advanced) ``${gitlabSourceRepoName}`` if you want to be able to merge from forked repositories (this **requires** configuring communication to the Gitlab server)
-    * In ``Branch Specifier`` enter ``origin/${gitlabSourceBranch}`` or ``${gitlabSourceRepoURL}/${gitlabSourceBranch}``
+    * In ``Branch Specifier`` enter ``origin/${gitlabSourceBranch}`` or ``${gitlabSourceRepoName}/${gitlabSourceBranch}``
     * In the ``Additional Behaviours`` section:
         * Click the ``Add`` drop down button and the ``Merge before build`` item
         * Specify the name of the repository as ``origin`` (if origin corresponds to Gitlab) and enter the ``Branch to merge to`` as ``${gitlabTargetBranch}``
