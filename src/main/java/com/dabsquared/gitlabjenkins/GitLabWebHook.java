@@ -70,7 +70,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
                     Item item = jenkins.getItemByFullName(projectName);
-                    while (item instanceof ItemGroup<?> && restOfPathParts.hasNext()) {
+                    while (item instanceof ItemGroup<?> && !(item instanceof AbstractProject<?, ?>) && restOfPathParts.hasNext()) {
                         item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
                     }
                     if (item instanceof AbstractProject<?, ?>) {
