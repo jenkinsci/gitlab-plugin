@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.gitlab.api.models.GitlabProject;
 
+import com.dabsquared.gitlabjenkins.GitLabRequest.Builder;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,44 +26,17 @@ import com.google.gson.JsonParseException;
  *
  * @author Daniel Brooks
  */
-public class GitLabMergeRequest {
+public class GitLabMergeRequest extends GitLabRequest {
 
-    public static GitLabMergeRequest create(String payload) {
+	public static GitLabMergeRequest create(String payload) {
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
         }
-
-        Gson gson = new GsonBuilder()
-        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        .registerTypeAdapter(Date.class, new GitLabMergeRequest.DateSerializer())
-        .create();
-        GitLabMergeRequest mergeRequest =  gson.fromJson(payload, GitLabMergeRequest.class);
-        
-        return mergeRequest;
+     
+        GitLabMergeRequest pushRequest =  Builder.INSTANCE.get().fromJson(payload, GitLabMergeRequest.class);
+        return pushRequest;
     }
     
-    private static final String[] DATE_FORMATS = new String[] {
-    	"yyyy-MM-dd HH:mm:ss Z",
-    	"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-    };
-
-
-    private static class DateSerializer implements JsonDeserializer<Date> {
-        public Date deserialize(JsonElement jsonElement, Type typeOF,
-                JsonDeserializationContext context) throws JsonParseException {
-            for (String format : DATE_FORMATS) {
-                try {
-                    return new SimpleDateFormat(format, Locale.US).parse(jsonElement.getAsString());
-                } catch (ParseException e) {
-                }
-            }
-            throw new JsonParseException("Unparseable date: \"" + jsonElement.getAsString()
-                    + "\". Supported formats: " + Arrays.toString(DATE_FORMATS));
-        }
-    }
-    
-    
-
     public GitLabMergeRequest() {
     }
 

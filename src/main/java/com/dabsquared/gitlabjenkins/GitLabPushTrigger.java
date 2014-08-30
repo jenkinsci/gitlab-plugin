@@ -121,8 +121,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
                     String name = " #" + job.getNextBuildNumber();
                     GitLabMergeCause cause = createGitLabMergeCause(req);
-                    Action[] actions = createActions(req);
-
+                    Action[] actions = createActions(req);                 
                     if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
                         LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
@@ -146,22 +145,23 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", String.valueOf(req.getObjectAttribute().getSourceBranch())));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", String.valueOf(req.getObjectAttribute().getTargetBranch())));
-
-                    // Get source repository if communication to Gitlab is possible
+                
                     String sourceRepoName = "origin";
-                    String sourceRepoURL = null;
+                    String sourceRepoURL = getSourceRepoURLDefault();
                     
-                    try {
-                    	sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();    
-                    	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();    
-                    } catch (IOException ex) {
-                    	LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
-                    	sourceRepoURL = getSourceRepoURLDefault();
-                    } finally {
-                    	values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
-                    	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
+                    if (!getDescriptor().getGitlabHostUrl().isEmpty()) {                                        
+                    	// Get source repository if communication to Gitlab is possible
+                    	try {
+                        	sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();    
+                        	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();    
+                        } catch (IOException ex) {
+                        	LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});                        	
+                        }
                     }
                     
+                    values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
+                	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
+                	                    
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
                     ParametersAction parametersAction = new ParametersAction(listValues);
@@ -187,7 +187,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     		RemoteConfig defaultRepository = repositories.get(repositories.size()-1);
                         	List<URIish> uris = defaultRepository.getURIs();
                         	if (!uris.isEmpty()) {
-                        		URIish defaultUri = uris.get(uris.size());
+                        		URIish defaultUri = uris.get(uris.size()-1);
                         		url = defaultUri.toString();
                         	}                    	
                     	}           
@@ -246,11 +246,16 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             }
 
             final List<String> projectParentsUrl = new ArrayList<String>();
-            for (Object parent = project.getParent(); parent instanceof Item; parent = ((Item) parent).getParent()) {
-                projectParentsUrl.add(0, ((Item) parent).getName());
-            }
-
-            final StringBuilder projectUrl = new StringBuilder();
+            
+            try {
+				for (Object parent = project.getParent(); parent instanceof Item; parent = ((Item) parent)
+						.getParent()) {
+					projectParentsUrl.add(0, ((Item) parent).getName());
+				}
+			} catch (IllegalStateException e) {
+				return "Build when a change is pushed to GitLab, unknown URL";
+			}
+			final StringBuilder projectUrl = new StringBuilder();
             projectUrl.append(Jenkins.getInstance().getRootUrl());
             projectUrl.append(GitLabWebHook.WEBHOOK_URL);
             projectUrl.append('/');
