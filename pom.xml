@@ -7,7 +7,7 @@
     </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.1.2-SNAPSHOT</version>
+  <version>1.1.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
