@@ -15,6 +15,4 @@
 			</j:forEach>
    		</select>
 	</f:entry> 
-	<f:validateButton title="${%Update branches}" progress="${%Updating...}"
-   		method="updateBranches" with="userRemoteConfigs" />
 </j:jelly>

@@ -356,12 +356,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             } catch (IOException e) {
                 return FormValidation.error("Client error : "+e.getMessage());
             }
-        }
-        
-        public FormValidation doUpdateBranches(@QueryParameter("userRemoteConfigs") final List<UserRemoteConfig> scm){
-        	LOGGER.log(Level.FINE,"{0}", scm.getClass());
-        	return FormValidation.ok("Success");
-        }
+        }        
 
         public GitLab getGitlab() {
             if (gitlab == null) {
