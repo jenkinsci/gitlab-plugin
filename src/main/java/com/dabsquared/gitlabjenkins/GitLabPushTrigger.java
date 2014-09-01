@@ -10,15 +10,16 @@ import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.UserRemoteConfig;
 import hudson.scm.SCM;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.SequentialExecutionQueue;
-import hudson.util.ListBoxModel;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,10 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
-        this.allowedBranches = allowedBranches;
+        if (allowedBranches.isEmpty())
+        	this.allowedBranches = getDescriptor().getProjectBranches();
+        else 
+        	this.allowedBranches = allowedBranches;
     }
 
     public boolean getTriggerOnPush() {
@@ -68,7 +72,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabPushRequest req) {
-    	if (triggerOnPush && allowedBranches.contains(getSourceBranch(req))) {
+    	if (triggerOnPush && (allowedBranches.contains("*") || allowedBranches.contains(getSourceBranch(req)))) {
             getDescriptor().queue.execute(new Runnable() {
 
                 public void run() {
@@ -124,7 +128,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabMergeRequest req) {
-    	if (triggerOnMergeRequest && allowedBranches.contains(getSourceBranch(req))) {
+    	if (triggerOnMergeRequest && (allowedBranches.contains("*") || allowedBranches.contains(getSourceBranch(req)))) {
     		getDescriptor().queue.execute(new Runnable() {
                 public void run() {
                     LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
@@ -217,7 +221,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         private String gitlabApiToken;
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
-
+        private List<String> projectBranches = null;
+        
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private transient GitLab gitlab;
 
@@ -274,30 +279,35 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             return super.configure(req, formData);
         }       
         
-        public List<String> getProjectBranches() {
-        	List<String> result = new ArrayList<String>();
+        public List<String> getProjectBranches() {        	
+        	projectBranches = new ArrayList<String>();
         	try {
             	/* TODO until java-gitlab-api v1.1.5 is released,
             		cannot search projects by namespace/name
             		For now getting project id before getting project branches
             	 */
-				List<GitlabProject> projects = getGitlab().instance().getProjects();
-				URIish sourceRepository = getSourceRepoURLDefault();
-				for (GitlabProject project : projects) {
-					if(project.getSshUrl().equalsIgnoreCase(sourceRepository.toString())){
-						//Get all branches of project
-						List<GitlabBranch> branches = getGitlab().instance().getBranches(project);
-						for (GitlabBranch branch : branches){
-							result.add(branch.getName());
-						}
-						break;
-					}					
-				}
-			} catch (IOException ex) {
+        		URIish sourceRepository = getSourceRepoURLDefault();
+        		if (gitlabHostUrl.isEmpty() || null == sourceRepository) {
+        			projectBranches.add("*");
+        		} else {
+        			List<GitlabProject> projects = getGitlab().instance().getProjects();
+        			for (GitlabProject project : projects) {
+						if(project.getSshUrl().equalsIgnoreCase(sourceRepository.toString())){
+							//Get all branches of project
+							List<GitlabBranch> branches = getGitlab().instance().getBranches(project);
+							for (GitlabBranch branch : branches){
+								projectBranches.add(branch.getName());
+							}
+							break;
+						}					
+					}    			
+        		}				
+			} catch (Exception ex) {
 				LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
-				result.add("*");
+				projectBranches.add("*");
 			}
-        	return result;
+        	LOGGER.log(Level.FINE, "Fetched {0} Repository branches", projectBranches.size());
+        	return projectBranches;
         }
         
         /**
@@ -336,7 +346,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             }   
             
             return FormValidation.ok();
-        }
+        }        
         
         public FormValidation doTestConnection(@QueryParameter("gitlabHostUrl") final String hostUrl,
                 @QueryParameter("gitlabApiToken") final String token, @QueryParameter("ignoreCertificateErrors") final boolean ignoreCertificateErrors) throws IOException {
@@ -346,6 +356,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             } catch (IOException e) {
                 return FormValidation.error("Client error : "+e.getMessage());
             }
+        }
+        
+        public FormValidation doUpdateBranches(@QueryParameter("userRemoteConfigs") final List<UserRemoteConfig> scm){
+        	LOGGER.log(Level.FINE,"{0}", scm.getClass());
+        	return FormValidation.ok("Success");
         }
 
         public GitLab getGitlab() {
