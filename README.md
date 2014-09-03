@@ -21,7 +21,7 @@ Major Help Needed
 =====================
 I would like this project to be able to handle building merge requests and regular pushes. In order to do this I need a way to configure the git plugin via code to merge two branches together before a build. Much like the RevisionParameterAction.java in the git plugin, we need a class that takes to branches, a source and a target, and can be passed as a build action. I have started an issue for the Git plugin here: https://issues.jenkins-ci.org/browse/JENKINS-23362 If you know of a way to do this please PM on twitter at @bass_rock. All the other necessary code exists in this repo and works.
 
-Configuring access to the Gitlab server
+Configuring access to Gitlab
 =======================================
 
 Optionally, the plugin communicates with the Gitlab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories. 
@@ -52,6 +52,16 @@ Using it With A Job
         * Add a ``Web Hook`` for ``Merge Request Events`` to ``http://JENKINS_URL/project/PROJECT_NAME``  (GitLab for some reason does not send a merge request event with the GitLab Service)
 * Configure any other pre build, build or post build actions as necessary
 * ``Save`` to preserve your changes
+
+Branch filtering
+================
+
+Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``, or an asterisk (*) indicating that no filtering will be applied. It is possible to select multiple branches by holding Ctrl and clicking. 
+
+This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For existing projects, all branches are allowed to push by default.
+
+Parameterized builds
+====================
 
 You can trigger a job a manually by clicking ``This build is parameterized`` and adding the relevant build parameters.
 These include:
