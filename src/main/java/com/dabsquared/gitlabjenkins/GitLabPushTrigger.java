@@ -128,7 +128,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabMergeRequest req) {
-    	if (triggerOnMergeRequest && (allowedBranches.contains("*") || allowedBranches.contains(getSourceBranch(req)))) {
+    	if (triggerOnMergeRequest) {
     		getDescriptor().queue.execute(new Runnable() {
                 public void run() {
                     LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
@@ -319,6 +319,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         protected URIish getSourceRepoURLDefault() {
         	URIish url = null;
         	SCM scm = project.getScm();
+        	if(!(scm instanceof GitSCM)) {
+                throw new IllegalArgumentException("This repo does not use git.");
+            }
             if (scm instanceof GitSCM) {
             	List<RemoteConfig> repositories = ((GitSCM) scm).getRepositories();
             	if (!repositories.isEmpty()){
