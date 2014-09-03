@@ -1,25 +1,11 @@
 package com.dabsquared.gitlabjenkins;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Locale;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.gitlab.api.models.GitlabProject;
-
-import com.dabsquared.gitlabjenkins.GitLabRequest.Builder;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 
 /**
  * Represents for WebHook payload

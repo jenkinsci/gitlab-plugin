@@ -10,7 +10,6 @@ import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.UserRemoteConfig;
 import hudson.scm.SCM;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -19,7 +18,6 @@ import hudson.util.SequentialExecutionQueue;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
