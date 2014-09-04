@@ -11,7 +11,7 @@
     	<j:set var="optionsSize" value="${projectBranches.size()}"/>
    		<select name="allowedBranches" multiple="multiple" size="${optionsSize}" style="min-width:50%;">   		
 			<j:forEach var="aBranch" items="${projectBranches}" varStatus="loop">
-				<f:option value="${aBranch}" selected="${instance.allowedBranches.contains(aBranch)}">${aBranch}</f:option>				
+				<f:option value="${aBranch}" selected="${instance.allowedBranches.isEmpty() || instance.allowedBranches.contains(aBranch)}">${aBranch}</f:option>				
 			</j:forEach>
    		</select>
 	</f:entry> 

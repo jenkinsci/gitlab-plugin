@@ -56,7 +56,7 @@ Using it With A Job
 Branch filtering
 ================
 
-Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``, or an asterisk (*) indicating that no filtering will be applied. It is possible to select multiple branches by holding Ctrl and clicking. 
+Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
 
 This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For existing projects, all branches are allowed to push by default.
 

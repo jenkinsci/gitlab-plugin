@@ -70,7 +70,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabPushRequest req) {
-    	if (triggerOnPush && (allowedBranches.contains("*") || allowedBranches.contains(getSourceBranch(req)))) {
+    	boolean allowBuild = allowedBranches.isEmpty() || allowedBranches.contains(getSourceBranch(req));
+    	if (triggerOnPush && (allowBuild)) {
             getDescriptor().queue.execute(new Runnable() {
 
                 public void run() {
@@ -285,9 +286,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             		For now getting project id before getting project branches
             	 */
         		URIish sourceRepository = getSourceRepoURLDefault();
-        		if (gitlabHostUrl.isEmpty() || null == sourceRepository) {
-        			projectBranches.add("*");
-        		} else {
+        		if (!gitlabHostUrl.isEmpty() && (null != sourceRepository)) {
         			List<GitlabProject> projects = getGitlab().instance().getProjects();
         			for (GitlabProject project : projects) {
 						if(project.getSshUrl().equalsIgnoreCase(sourceRepository.toString())){
@@ -302,9 +301,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         		}				
 			} catch (Exception ex) {
 				LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
-				projectBranches.add("*");
 			}
-        	LOGGER.log(Level.FINE, "Fetched {0} Repository branches", projectBranches.size());
+
         	return projectBranches;
         }
         
