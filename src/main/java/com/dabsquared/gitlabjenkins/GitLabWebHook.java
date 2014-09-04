@@ -16,6 +16,7 @@ import hudson.util.HttpResponses;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -90,7 +91,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         while (restOfPathParts.hasNext()) {
             paths.add(restOfPathParts.next());
         }
-
+        
         String token = req.getParameter("token");
 
         //TODO: Check token authentication with project id. For now we are not using this.
@@ -203,7 +204,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
 
-    private void generateStatusPNG(String branch, String commitSHA1, AbstractProject project, StaplerRequest req, StaplerResponse rsp) throws ServletException, IOException {
+    private void generateStatusPNG(String branch, String commitSHA1, AbstractProject project, final StaplerRequest req, final StaplerResponse rsp) throws ServletException, IOException {
         SCM scm = project.getScm();
         if(!(scm instanceof GitSCM)) {
             throw new IllegalArgumentException("This repo does not use git.");
@@ -222,33 +223,33 @@ public class GitLabWebHook implements UnprotectedRootAction {
         if (baseUrl.endsWith("/")) {
            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
+        String imageUrl = "/plugin/gitlab-plugin/images/unknown.png";
+        if(null != mainBuild) {
+        	BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
-        if(mainBuild == null) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-            return;
+            if(mainBuild.isBuilding()) {        	
+            	imageUrl = "/plugin/gitlab-plugin/images/running.png";
+            }else if(currentBallColor == BallColor.BLUE) {
+            	imageUrl = "/plugin/gitlab-plugin/images/success.png";
+            }else if(currentBallColor == BallColor.RED) {
+            	imageUrl = "/plugin/gitlab-plugin/images/failed.png";
+            }else {
+            	imageUrl = "/plugin/gitlab-plugin/images/unknown.png"; 
+            }
         }
+       
+        final URL url = new URL(baseUrl + imageUrl);
+        ACL.impersonate(ACL.SYSTEM, new Runnable() {
 
-        BallColor currentBallColor = mainBuild.getIconColor().noAnime();
+            public void run() {
+                try {
+					rsp.sendRedirect2(url.toString());
+				} catch (IOException e) {
+					throw HttpResponses.error(500,"Could not generate response.");
+				}
+            }
 
-        if(mainBuild.isBuilding()) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/running.png");
-        }else if(currentBallColor == BallColor.BLUE) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/success.png");
-        }else if(currentBallColor == BallColor.ABORTED) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-        }else if(currentBallColor == BallColor.DISABLED) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-        }else if(currentBallColor == BallColor.GREY) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-        }else if(currentBallColor == BallColor.NOTBUILT) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-        }else if(currentBallColor == BallColor.RED) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/failed.png");
-        }else if(currentBallColor == BallColor.YELLOW) {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-        } else {
-            rsp.sendRedirect2(baseUrl + "/plugin/gitlab-plugin/images/unknown.png");
-        }
+        });
 
     }
 

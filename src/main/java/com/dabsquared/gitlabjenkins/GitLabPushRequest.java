@@ -1,62 +1,23 @@
 package com.dabsquared.gitlabjenkins;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JsonConfig;
-import net.sf.json.util.JavaIdentifierTransformer;
+import java.util.List;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents for WebHook payload
  *
  * @author Daniel Brooks
  */
-public class GitLabPushRequest {
-
+public class GitLabPushRequest extends GitLabRequest {
     public static GitLabPushRequest create(String payload) {
         if (payload == null) {
             throw new IllegalArgumentException("payload should not be null");
         }
-        return create(JSONObject.fromObject(payload));
-    }
-
-    public static GitLabPushRequest create(JSONObject payload) {
-        if (payload == null || payload.isNullObject()) {
-            throw new IllegalArgumentException("payload should not be null");
-        }
-
-        JsonConfig config = createJsonConfig();
-        return (GitLabPushRequest) JSONObject.toBean(payload, config);
-    }
-
-    private static JsonConfig createJsonConfig() {
-        JsonConfig config = new JsonConfig();
-        config.setRootClass(GitLabPushRequest.class);
-
-        Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
-        classMap.put("commits", Commit.class);
-        config.setClassMap(classMap);
-
-        config.setJavaIdentifierTransformer(new JavaIdentifierTransformer() {
-
-            @Override
-            public String transformToJavaIdentifier(String param) {
-                if (param == null) {
-                    return null;
-                }
-                if ("private".equals(param)) {
-                    return "private_";
-                }
-                return param;
-            }
-
-        });
-
-        return config;
+     
+        GitLabPushRequest pushRequest =  Builder.INSTANCE.get().fromJson(payload, GitLabPushRequest.class);
+        return pushRequest;
     }
 
     public GitLabPushRequest() {
@@ -64,34 +25,25 @@ public class GitLabPushRequest {
 
 
     private String before;
-
     private String after;
-
     private String ref;
-
     private Integer user_id;
-
     private String user_name;
-
     private Integer project_id;
-
     private Integer total_commits_count;
-
     private Repository repository;
-
     private List<Commit> commits;
-
+    
     public List<Commit> getCommits() {
         return commits;
     }
-
     public Commit getLastCommit() {
         if (commits.isEmpty()) {
             return null;
         }
         return commits.get(commits.size() - 1);
     }
-
+    
     public void setCommits(List<Commit> commits) {
         this.commits = commits;
     }

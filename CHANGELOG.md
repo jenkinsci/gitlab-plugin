@@ -1,6 +1,16 @@
 ChangeLog
 =====================
 
+1.1.2
+=====================
+* Filter source branches (for push requests only)
+* Show build status images when Jenkins authentication is on
+
+1.1.1
+=====================
+* Support for Merge Requests from forked repositories
+* Selective triggering (Push events and/or Merge Request events)
+
 1.0.8
 =====================
 * Fix images not showing up. (Jotschi)
