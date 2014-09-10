@@ -46,15 +46,20 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private List<String> allowedBranches;
+    
+    // compatibility with earlier plugins
+    public Object readResolve() {
+        if (null == allowedBranches) {
+        	allowedBranches = new ArrayList<String>();
+        }               
+        return this;
+    }
 
 	@DataBoundConstructor
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
-        if (allowedBranches.isEmpty())
-        	this.allowedBranches = getDescriptor().getProjectBranches();
-        else 
-        	this.allowedBranches = allowedBranches;
+        this.allowedBranches = allowedBranches;        	
     }
 
     public boolean getTriggerOnPush() {

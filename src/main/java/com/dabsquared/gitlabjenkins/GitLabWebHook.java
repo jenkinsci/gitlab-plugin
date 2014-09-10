@@ -7,6 +7,8 @@ import hudson.model.ItemGroup;
 import hudson.model.UnprotectedRootAction;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.ParametersAction;
+import hudson.model.StringParameterValue;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.BuildData;
 import hudson.scm.SCM;
@@ -20,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -112,7 +115,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         String lastPath = paths.get(paths.size()-1);
         String firstPath = paths.get(0);
-
         if(lastPath.equals("status.json") && !firstPath.equals("!builds")) {
             String commitSHA1 = paths.get(1);
             this.generateStatusJSON(commitSHA1, project, req, res);
@@ -195,7 +197,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         } else {
             object.put("status", "failed");
         }
-
+        
         try {
             this.writeJSON(rsp, object);
         } catch (IOException e) {
@@ -223,33 +225,32 @@ public class GitLabWebHook implements UnprotectedRootAction {
         if (baseUrl.endsWith("/")) {
            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
-        String imageUrl = "/plugin/gitlab-plugin/images/unknown.png";
+        String imageUrl = "images/unknown.png";
         if(null != mainBuild) {
         	BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
             if(mainBuild.isBuilding()) {        	
-            	imageUrl = "/plugin/gitlab-plugin/images/running.png";
+            	imageUrl = "images/running.png";
             }else if(currentBallColor == BallColor.BLUE) {
-            	imageUrl = "/plugin/gitlab-plugin/images/success.png";
+            	imageUrl = "images/success.png";
             }else if(currentBallColor == BallColor.RED) {
-            	imageUrl = "/plugin/gitlab-plugin/images/failed.png";
+            	imageUrl = "images/failed.png";
+            }else if(currentBallColor == BallColor.YELLOW) {
+            	imageUrl = "images/unstable.png";
             }else {
-            	imageUrl = "/plugin/gitlab-plugin/images/unknown.png"; 
+            	imageUrl = "images/unknown.png"; 
             }
+        }       
+        Authentication old = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+        try {
+        	URL resourceUrl = new URL(Jenkins.getInstance().getPlugin("gitlab-plugin").getWrapper().baseResourceURL + imageUrl);
+        	rsp.serveFile(req, resourceUrl);
+        } catch (IOException e) {
+			throw HttpResponses.error(500,"Could not generate response.");
+		} finally {
+            SecurityContextHolder.getContext().setAuthentication(old);
         }
-       
-        final URL url = new URL(baseUrl + imageUrl);
-        ACL.impersonate(ACL.SYSTEM, new Runnable() {
-
-            public void run() {
-                try {
-					rsp.sendRedirect2(url.toString());
-				} catch (IOException e) {
-					throw HttpResponses.error(500,"Could not generate response.");
-				}
-            }
-
-        });
 
     }
 
@@ -375,20 +376,21 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param branch
      * @return
      */
-    private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
+    @SuppressWarnings("rawtypes")
+	private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
         AbstractBuild mainBuild = null;
 
         List<AbstractBuild> builds = project.getBuilds();
-        for(AbstractBuild build : builds) {
-            BuildData data = build.getAction(BuildData.class);
-            hudson.plugins.git.util.Build branchBuild = data.getBuildsByBranchName().get("origin/" + branch);
-            if(branchBuild != null) {
-                int buildNumber = branchBuild.getBuildNumber();
-                mainBuild = project.getBuildByNumber(buildNumber);
-                break;
-            }
+        ListIterator<AbstractBuild> li = builds.listIterator();
+        while (li.hasNext()) {
+        	AbstractBuild build = li.next();
+        	ParametersAction data = build.getAction(ParametersAction.class);
+        	StringParameterValue sourceBranch = (StringParameterValue) data.getParameter("gitlabSourceBranch");
+        	if (sourceBranch.value.equals(branch)) {
+        		mainBuild = build;
+        		break;
+        	}
         }
-
         return mainBuild;
     }
 
