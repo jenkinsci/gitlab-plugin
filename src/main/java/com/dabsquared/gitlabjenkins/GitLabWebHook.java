@@ -318,6 +318,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
         	LOGGER.log(Level.INFO, "Closed Merge Request, no build started");
             return;
         }
+        if(request.getObjectAttribute().getState().equals("merged")) {
+        	LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
+            return;
+        }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
