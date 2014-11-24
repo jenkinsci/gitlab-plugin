@@ -294,7 +294,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         		if (!gitlabHostUrl.isEmpty() && (null != sourceRepository)) {
         			List<GitlabProject> projects = getGitlab().instance().getProjects();
         			for (GitlabProject project : projects) {
-						if(project.getSshUrl().equalsIgnoreCase(sourceRepository.toString())){
+						if(project.getSshUrl().equalsIgnoreCase(sourceRepository.toString()) ||
+							project.getHttpUrl().equalsIgnoreCase(sourceRepository.toString())){
 							//Get all branches of project
 							List<GitlabBranch> branches = getGitlab().instance().getBranches(project);
 							for (GitlabBranch branch : branches){
