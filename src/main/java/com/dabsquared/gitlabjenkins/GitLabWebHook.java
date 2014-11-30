@@ -65,7 +65,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
     public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
-        LOGGER.log(Level.FINE, "WebHook called.");
+        LOGGER.log(Level.WARNING, "WebHook called.");
         final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
         final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -109,8 +109,15 @@ public class GitLabWebHook implements UnprotectedRootAction {
         String theString = writer.toString();
 
         if(paths.size() == 0) {
-            this.generateBuild(theString, project, req, res);
-            throw HttpResponses.ok();
+        	if (req.getParameter("ref") != null){
+        		// support /project/PROJECT_NAME?ref=BRANCH_NAME
+        		// link on project activity page - build status
+        		AbstractBuild build = this.getBuildByBranch(project, req.getParameter("ref"));
+        		redirectToBuildPage(res, build);
+        	} else {
+        		this.generateBuild(theString, project, req, res);           
+        	}
+        	throw HttpResponses.ok();
         }
 
         String lastPath = paths.get(paths.size()-1);
@@ -134,22 +141,26 @@ public class GitLabWebHook implements UnprotectedRootAction {
             }
         } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
             AbstractBuild build = this.getBuildBySHA1(project, lastPath, true);
-            if(build != null) {
-                try {
-                    res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
-                } catch (IOException e) {
-                    try {
-                        res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            }
+            redirectToBuildPage(res, build);
         }
 
         throw HttpResponses.ok();
 
     }
+
+	private void redirectToBuildPage(StaplerResponse res, AbstractBuild build) {
+		if(build != null) {
+		    try {
+		        res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
+		    } catch (IOException e) {
+		        try {
+		            res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
+		        } catch (IOException e1) {
+		            e1.printStackTrace();
+		        }
+		    }
+		}
+	}
 
     private void generateStatusJSON(String commitSHA1, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         SCM scm = project.getScm();
@@ -177,7 +188,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
-        //TODO: add staus of pending when we figure it out.
+        //TODO: add status of pending when we figure it out.
         if(mainBuild.isBuilding()) {
             object.put("status", "running");
         }else if(currentBallColor == BallColor.BLUE) {
@@ -351,22 +362,36 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param commitSHA1
      * @return
      */
-    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean isMergeRequest) {
+    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean triggeredByMergeRequest) {
         AbstractBuild mainBuild = null;
 
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-
-            if (!isMergeRequest) {
+            
+            //Determine if build was triggered by a Merge Request event
+            ParametersAction params = build.getAction(ParametersAction.class);
+            StringParameterValue sourceBranch = (StringParameterValue) params.getParameter("gitlabSourceBranch");
+            StringParameterValue targetBranch = (StringParameterValue) params.getParameter("gitlabTargetBranch");
+            boolean isMergeRequestBuild = !sourceBranch.value.equals(targetBranch.value);
+            		
+            if (!triggeredByMergeRequest) {
+            		if (isMergeRequestBuild)
+            			// skip Merge Request builds
+            			continue;
+            		
                 if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
                     mainBuild = build;
                     break;
                 }
             } else {
-                if(data.hasBeenBuilt(ObjectId.fromString(commitSHA1))) {
-                    mainBuild = build;
-                    break;
+            		if (!isMergeRequestBuild)
+            			// skip Push builds
+            			continue;
+            		
+            		if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
+                        mainBuild = build;
+                        break;
                 }
             }
         }

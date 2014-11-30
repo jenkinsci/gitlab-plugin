@@ -114,7 +114,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
                     values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
-
+                    values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", getDesc().getSourceRepoNameDefault()));
+                	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", getDesc().getSourceRepoURLDefault().toString()));
+                	
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
                     ParametersAction parametersAction = new ParametersAction(listValues);
@@ -163,7 +165,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
                 
-                    String sourceRepoName = "origin";
+                    String sourceRepoName = getDesc().getSourceRepoNameDefault();
                     String sourceRepoURL = getDesc().getSourceRepoURLDefault().toString();
                     
                     if (!getDescriptor().getGitlabHostUrl().isEmpty()) {                                        
@@ -334,6 +336,27 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             	}           
             } 
         	return url;
+        }
+        
+        /**
+         * Get the Name of the first declared repository in the project configuration.
+         * Use this as default source repository Name.
+         * 
+         * @return String with the default name of the source repository
+         */
+        protected String getSourceRepoNameDefault() {
+        	String result = null;
+        	SCM scm = project.getScm();
+        	if(!(scm instanceof GitSCM)) {
+                throw new IllegalArgumentException("This repo does not use git.");
+            }
+            if (scm instanceof GitSCM) {
+            	List<RemoteConfig> repositories = ((GitSCM) scm).getRepositories();
+            	if (!repositories.isEmpty()){
+            		result = repositories.get(repositories.size()-1).getName();            		                	                   
+            	}           
+            } 
+        	return result;
         }
 
         public FormValidation doCheckGitlabHostUrl(@QueryParameter String value) {
