@@ -9,6 +9,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
+import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.BuildData;
 import hudson.scm.SCM;
@@ -379,13 +380,19 @@ public class GitLabWebHook implements UnprotectedRootAction {
     @SuppressWarnings("rawtypes")
 	private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
         AbstractBuild mainBuild = null;
-
         List<AbstractBuild> builds = project.getBuilds();
         ListIterator<AbstractBuild> li = builds.listIterator();
         while (li.hasNext()) {
         	AbstractBuild build = li.next();
-        	ParametersAction data = build.getAction(ParametersAction.class);
-        	StringParameterValue sourceBranch = (StringParameterValue) data.getParameter("gitlabSourceBranch");
+            BuildData data = build.getAction(BuildData.class);
+            if(data!=null && data.getLastBuiltRevision() != null && data.getLastBuiltRevision().getBranches() != null){
+                            for(Branch br: data.getLastBuiltRevision().getBranches()){
+                                if(br.getName().equals(branch) || br.getName().equals("origin/"+branch))
+                                    return build;
+                            }
+                        }
+        	ParametersAction fallback = build.getAction(ParametersAction.class);
+        	StringParameterValue sourceBranch = (StringParameterValue) fallback.getParameter("gitlabSourceBranch");
         	if (sourceBranch.value.equals(branch)) {
         		mainBuild = build;
         		break;
