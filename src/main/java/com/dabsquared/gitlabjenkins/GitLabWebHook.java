@@ -10,6 +10,7 @@ import hudson.model.AbstractProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
 import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
 import hudson.scm.SCM;
 import hudson.security.ACL;
@@ -20,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -34,7 +36,6 @@ import net.sf.json.JSONObject;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.lib.ObjectId;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -374,7 +375,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
             StringParameterValue sourceBranch = (StringParameterValue) params.getParameter("gitlabSourceBranch");
             StringParameterValue targetBranch = (StringParameterValue) params.getParameter("gitlabTargetBranch");
             boolean isMergeRequestBuild = !sourceBranch.value.equals(targetBranch.value);
-            		
+            
             if (!triggeredByMergeRequest) {
             		if (isMergeRequestBuild)
             			// skip Merge Request builds
@@ -389,10 +390,15 @@ public class GitLabWebHook implements UnprotectedRootAction {
             			// skip Push builds
             			continue;
             		
-            		if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
-                        mainBuild = build;
-                        break;
-                }
+            		// Merge request builds result in a local revision that is created due to the Prebuild merge.
+            		// This prevents from identifying the correct build by using getLastBuiltRevision()
+            		Collection<Build> gitBuilds = data.getBuildsByBranchName().values();
+                    for ( Iterator<Build> buildIterator = gitBuilds.iterator(); buildIterator.hasNext();) {
+                    	Build gitBuild = buildIterator.next();
+                    	if (gitBuild.getMarked().getSha1String().equals(commitSHA1)) {
+                    		return builds.get(builds.size() - gitBuild.hudsonBuildNumber);
+                    	}
+                    }
             }
         }
 
