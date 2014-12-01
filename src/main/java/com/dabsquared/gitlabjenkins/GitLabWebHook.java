@@ -14,6 +14,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.BuildData;
 import hudson.scm.SCM;
 import hudson.security.ACL;
+import hudson.security.csrf.CrumbExclusion;
 import hudson.util.HttpResponses;
 
 import java.io.IOException;
@@ -27,7 +28,10 @@ import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -319,6 +323,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
         	LOGGER.log(Level.INFO, "Closed Merge Request, no build started");
             return;
         }
+        if(request.getObjectAttribute().getState().equals("merged")) {
+        	LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
+            return;
+        }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
@@ -407,7 +415,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param rsp The stapler response to write the output to.
      * @throws IOException
      */
-    private  void writeJSON(StaplerResponse rsp, JSONObject jsonObject) throws IOException {
+    private void writeJSON(StaplerResponse rsp, JSONObject jsonObject) throws IOException {
         rsp.setContentType("application/json");
         PrintWriter w = rsp.getWriter();
 
@@ -422,4 +430,21 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
     }
 
+    @Extension
+    public static class GitlabWebHookCrumbExclusion extends CrumbExclusion {
+
+        @Override
+        public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
+            String pathInfo = req.getPathInfo();
+            if (pathInfo != null && pathInfo.startsWith(getExclusionPath())) {
+                chain.doFilter(req, resp);
+                return true;
+            }
+            return false;
+        }
+
+        private String getExclusionPath() {
+            return '/' + WEBHOOK_URL + '/';
+        }
+    }
 }
