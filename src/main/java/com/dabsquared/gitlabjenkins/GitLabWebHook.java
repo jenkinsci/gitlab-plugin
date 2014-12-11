@@ -369,45 +369,19 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @return
      */
     private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean triggeredByMergeRequest) {
-        AbstractBuild mainBuild = null;
-
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-            
-            //Determine if build was triggered by a Merge Request event
-            ParametersAction params = build.getAction(ParametersAction.class);
-            StringParameterValue sourceBranch = (StringParameterValue) params.getParameter("gitlabSourceBranch");
-            StringParameterValue targetBranch = (StringParameterValue) params.getParameter("gitlabTargetBranch");
-            boolean isMergeRequestBuild = !sourceBranch.value.equals(targetBranch.value);
-            
-            if (!triggeredByMergeRequest) {
-            		if (isMergeRequestBuild)
-            			// skip Merge Request builds
-            			continue;
-            		
-                if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
-                    mainBuild = build;
-                    break;
+            Build b =  data.lastBuild;
+            if(b.getMarked().getSha1String().equals(commitSHA1)){
+                boolean isMergeBuild = !b.getSHA1().getName().equals(b.getMarked().getSha1String());
+                if(triggeredByMergeRequest == isMergeBuild){
+                    LOGGER.log(Level.FINE, "Build found matching "+commitSHA1+" "+(isMergeBuild? "merge":"normal")+" build");
+                       return build;
                 }
-            } else {
-            		if (!isMergeRequestBuild)
-            			// skip Push builds
-            			continue;
-            		
-            		// Merge request builds result in a local revision that is created due to the Prebuild merge.
-            		// This prevents from identifying the correct build by using getLastBuiltRevision()
-            		Collection<Build> gitBuilds = data.getBuildsByBranchName().values();
-                    for ( Iterator<Build> buildIterator = gitBuilds.iterator(); buildIterator.hasNext();) {
-                    	Build gitBuild = buildIterator.next();
-                    	if (gitBuild.getMarked().getSha1String().equals(commitSHA1)) {
-                    		return builds.get(builds.size() - gitBuild.hudsonBuildNumber);
-                    	}
-                    }
             }
         }
-
-        return mainBuild;
+        return null;
     }
 
     /**
@@ -418,26 +392,23 @@ public class GitLabWebHook implements UnprotectedRootAction {
      */
     @SuppressWarnings("rawtypes")
 	private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
-        AbstractBuild mainBuild = null;
+        String targetBranch = branch.startsWith("origin/")? branch : "origin/"+branch;
         List<AbstractBuild> builds = project.getBuilds();
-        ListIterator<AbstractBuild> li = builds.listIterator();
-        while (li.hasNext()) {
-        	AbstractBuild build = li.next();
+        for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-            if(data!=null && data.getLastBuiltRevision() != null && data.getLastBuiltRevision().getBranches() != null){
-                            for(Branch br: data.getLastBuiltRevision().getBranches()){
-                                if(br.getName().equals(branch) || br.getName().equals("origin/"+branch))
-                                    return build;
-                            }
+            if(data!=null) {
+                Build lastBuild = data.getLastBuildOfBranch(targetBranch);
+                if(lastBuild!=null) {
+                    List<AbstractBuild> buildList = project.getBuilds();
+                    for (AbstractBuild b : buildList) {
+                        if (b.getNumber() == lastBuild.getBuildNumber()) {
+                            return b;
                         }
-        	ParametersAction fallback = build.getAction(ParametersAction.class);
-        	StringParameterValue sourceBranch = (StringParameterValue) fallback.getParameter("gitlabSourceBranch");
-        	if (sourceBranch.value.equals(branch)) {
-        		mainBuild = build;
-        		break;
-        	}
+                    }
+                }
+            }
         }
-        return mainBuild;
+        return null;
     }
 
 
