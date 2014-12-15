@@ -397,11 +397,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-            MergeRecord merge = build.getAction(MergeRecord.class);
-            if(data!=null && data.lastBuild!=null && data.lastBuild.getRevision()!=null && merge==null) {
-                for(Branch b: data.lastBuild.getRevision().getBranches()){
-                    if(b.getName().endsWith("/"+branch))
-                        return build;
+            if(data!=null && data.lastBuild!=null) {
+                MergeRecord merge = build.getAction(MergeRecord.class);
+                boolean isMergeBuild = merge != null && !merge.getSha1().equals(data.lastBuild.getMarked().getSha1String());
+                if (data.lastBuild.getRevision() != null && !isMergeBuild) {
+                    for (Branch b : data.lastBuild.getRevision().getBranches()) {
+                        if (b.getName().endsWith("/" + branch))
+                            return build;
+                    }
                 }
             }
         }
