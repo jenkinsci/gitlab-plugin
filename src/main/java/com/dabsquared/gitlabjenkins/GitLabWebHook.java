@@ -13,6 +13,7 @@ import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
+import hudson.plugins.git.util.MergeRecord;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.security.csrf.CrumbExclusion;
@@ -373,10 +374,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
             Build b =  data.lastBuild;
-            if(b.getMarked().getSha1String().equals(commitSHA1)){
-                boolean isMergeBuild = !b.getSHA1().getName().equals(b.getMarked().getSha1String());
+            MergeRecord merge = build.getAction(MergeRecord.class);
+            boolean isMergeBuild = merge!=null && !merge.getSha1().equals(b.getMarked().getSha1String());
+            if(b!=null && b.getMarked()!=null && b.getMarked().getSha1String().equals(commitSHA1)){
                 if(triggeredByMergeRequest == isMergeBuild){
-                    LOGGER.log(Level.FINE, "Build found matching "+commitSHA1+" "+(isMergeBuild? "merge":"normal")+" build");
+                    LOGGER.log(Level.FINE, build.getNumber()+" Build found matching "+commitSHA1+" "+(isMergeBuild? "merge":"normal")+" build");
                        return build;
                 }
             }
@@ -392,19 +394,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
      */
     @SuppressWarnings("rawtypes")
 	private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
-        String targetBranch = branch.startsWith("origin/")? branch : "origin/"+branch;
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-            if(data!=null) {
-                Build lastBuild = data.getLastBuildOfBranch(targetBranch);
-                if(lastBuild!=null) {
-                    List<AbstractBuild> buildList = project.getBuilds();
-                    for (AbstractBuild b : buildList) {
-                        if (b.getNumber() == lastBuild.getBuildNumber()) {
-                            return b;
-                        }
-                    }
+            MergeRecord merge = build.getAction(MergeRecord.class);
+            if(data!=null && data.lastBuild!=null && data.lastBuild.getRevision()!=null && merge==null) {
+                for(Branch b: data.lastBuild.getRevision().getBranches()){
+                    if(b.getName().endsWith("/"+branch))
+                        return build;
                 }
             }
         }
