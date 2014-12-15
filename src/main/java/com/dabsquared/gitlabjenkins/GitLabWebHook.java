@@ -66,7 +66,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
     public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
-        LOGGER.log(Level.WARNING, "WebHook called.");
+        LOGGER.log(Level.WARNING, "WebHook called. req: "+req.getMethod()+" "+req.getRequestURI()+" ");
         final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
         final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -289,6 +289,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param data
      */
     private void generateBuild(String data, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
+        LOGGER.log(Level.INFO, "generateBuild: \n{0}\n\n", data);
         JSONObject json = JSONObject.fromObject(data);
         LOGGER.log(Level.FINE, "data: {0}", json.toString(4));
 
@@ -310,7 +311,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
             LOGGER.log(Level.WARNING, "No repository url found.");
             return;
         }
-
+        checkForOpenMergeRequests(project, request);
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
         try {
@@ -321,6 +322,60 @@ public class GitLabWebHook implements UnprotectedRootAction {
             trigger.onPost(request);
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
+        }
+    }
+
+
+    protected void checkForOpenMergeRequests(AbstractProject project, GitLabPushRequest gitLabPushRequest){
+        GitLab api = new GitLab();
+        try {
+            List<org.gitlab.api.models.GitlabMergeRequest> reqs = api.instance().getMergeRequests(gitLabPushRequest.getProject_id());
+            for(org.gitlab.api.models.GitlabMergeRequest mr:reqs){
+                if(!mr.isClosed() && !mr.isMerged() && gitLabPushRequest.getRef().endsWith(mr.getSourceBranch())){
+                    LOGGER.log(Level.FINE, "Generating new merge trigger from "+mr.toString()+
+                            "\n source: "+mr.getSourceBranch()+
+                            "\n target: "+mr.getTargetBranch()+
+                            "\n state: "+mr.getState()+
+                            "\n assign: "+mr.getAssignee()+
+                            "\n author: "+mr.getAuthor()+
+                            "\n id: "+mr.getId()+
+                            "\n iid: "+mr.getIid()+
+                            "\n\n"
+                    );
+                    GitLabMergeRequest newReq = new GitLabMergeRequest();
+                    newReq.setObject_kind("merge_request");
+                    newReq.setObjectAttribute(new GitLabMergeRequest.ObjectAttributes());
+                    if(mr.getAssignee()!=null)
+                        newReq.getObjectAttribute().setAssigneeId(mr.getAssignee().getId());
+                    if(mr.getAuthor()!=null)
+                        newReq.getObjectAttribute().setAuthorId(mr.getAuthor().getId());
+                    newReq.getObjectAttribute().setDescription(mr.getDescription());
+                    newReq.getObjectAttribute().setId(mr.getId());
+                    newReq.getObjectAttribute().setIid(mr.getIid());
+                    newReq.getObjectAttribute().setMergeStatus(mr.getState());
+                    newReq.getObjectAttribute().setSourceBranch(mr.getSourceBranch());
+                    newReq.getObjectAttribute().setSourceProjectId(mr.getSourceProjectId());
+                    newReq.getObjectAttribute().setTargetBranch(mr.getTargetBranch());
+                    newReq.getObjectAttribute().setTargetProjectId(gitLabPushRequest.getProject_id());
+                    newReq.getObjectAttribute().setTitle(mr.getTitle());
+
+                    Authentication old = SecurityContextHolder.getContext().getAuthentication();
+                    SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+                    try {
+                        GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
+                        if (trigger == null) {
+                            return;
+                        }
+                        trigger.onPost(newReq);
+                    } finally {
+                        SecurityContextHolder.getContext().setAuthentication(old);
+                    }
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warning("failed to communicate with gitlab server to determine is this is an update for a merge request: "+e.getMessage());
+            e.printStackTrace();
         }
     }
 
