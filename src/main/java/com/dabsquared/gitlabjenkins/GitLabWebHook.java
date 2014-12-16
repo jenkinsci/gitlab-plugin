@@ -66,7 +66,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
     public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
-        LOGGER.log(Level.WARNING, "WebHook called. req: "+req.getMethod()+" "+req.getRequestURI()+" ");
+        LOGGER.log(Level.WARNING, "WebHook called.");
         final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
         final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -289,7 +289,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param data
      */
     private void generateBuild(String data, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
-        LOGGER.log(Level.INFO, "generateBuild: \n{0}\n\n", data);
         JSONObject json = JSONObject.fromObject(data);
         LOGGER.log(Level.FINE, "data: {0}", json.toString(4));
 
