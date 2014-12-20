@@ -145,9 +145,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 e.printStackTrace();
                 throw HttpResponses.error(500,"Could not generate an image.");
             }
-        } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
+        } else if((firstPath.equals("commits") || firstPath.equals("builds")) && !lastPath.equals("status.json")) {
             AbstractBuild build = this.getBuildBySHA1(project, lastPath, true);
             redirectToBuildPage(res, build);
+        } else{
+            LOGGER.warning("Dynamic request mot met: First path: '" + firstPath + "' late path: '" + lastPath + "'");
         }
 
         throw HttpResponses.ok();
