@@ -42,9 +42,13 @@ import net.sf.json.JSONObject;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
+import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.google.common.base.Splitter;
 
 /**
@@ -146,9 +150,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 e.printStackTrace();
                 throw HttpResponses.error(500,"Could not generate an image.");
             }
-        } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
+        } else if((firstPath.equals("commits") || firstPath.equals("builds")) && !lastPath.equals("status.json")) {
             AbstractBuild build = this.getBuildBySHA1(project, lastPath, true);
             redirectToBuildPage(res, build);
+        } else{
+            LOGGER.warning("Dynamic request mot met: First path: '" + firstPath + "' late path: '" + lastPath + "'");
         }
 
         throw HttpResponses.ok();
