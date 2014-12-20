@@ -326,27 +326,31 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
 
     protected void checkForOpenMergeRequests(AbstractProject project, GitLabPushRequest gitLabPushRequest){
-        GitLab api = new GitLab();
         try {
+            GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
+            if (trigger == null || !trigger.isTriggerOpenMergeRequestOnPush()) {
+                return;
+            }
+            GitLab api = new GitLab();
             List<org.gitlab.api.models.GitlabMergeRequest> reqs = api.instance().getMergeRequests(gitLabPushRequest.getProject_id());
-            for(org.gitlab.api.models.GitlabMergeRequest mr:reqs){
-                if(!mr.isClosed() && !mr.isMerged() && gitLabPushRequest.getRef().endsWith(mr.getSourceBranch())){
-                    LOGGER.log(Level.FINE, "Generating new merge trigger from "+mr.toString()+
-                            "\n source: "+mr.getSourceBranch()+
-                            "\n target: "+mr.getTargetBranch()+
-                            "\n state: "+mr.getState()+
-                            "\n assign: "+mr.getAssignee()+
-                            "\n author: "+mr.getAuthor()+
-                            "\n id: "+mr.getId()+
-                            "\n iid: "+mr.getIid()+
-                            "\n\n"
+            for (org.gitlab.api.models.GitlabMergeRequest mr : reqs) {
+                if (!mr.isClosed() && !mr.isMerged() && gitLabPushRequest.getRef().endsWith(mr.getSourceBranch())) {
+                    LOGGER.log(Level.FINE, "Generating new merge trigger from " + mr.toString() +
+                                    "\n source: " + mr.getSourceBranch() +
+                                    "\n target: " + mr.getTargetBranch() +
+                                    "\n state: " + mr.getState() +
+                                    "\n assign: " + mr.getAssignee() +
+                                    "\n author: " + mr.getAuthor() +
+                                    "\n id: " + mr.getId() +
+                                    "\n iid: " + mr.getIid() +
+                                    "\n\n"
                     );
                     GitLabMergeRequest newReq = new GitLabMergeRequest();
                     newReq.setObject_kind("merge_request");
                     newReq.setObjectAttribute(new GitLabMergeRequest.ObjectAttributes());
-                    if(mr.getAssignee()!=null)
+                    if (mr.getAssignee() != null)
                         newReq.getObjectAttribute().setAssigneeId(mr.getAssignee().getId());
-                    if(mr.getAuthor()!=null)
+                    if (mr.getAuthor() != null)
                         newReq.getObjectAttribute().setAuthorId(mr.getAuthor().getId());
                     newReq.getObjectAttribute().setDescription(mr.getDescription());
                     newReq.getObjectAttribute().setId(mr.getId());
@@ -360,11 +364,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
                     Authentication old = SecurityContextHolder.getContext().getAuthentication();
                     SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
-                    try {
-                        GitLabPushTrigger trigger = (GitLabPushTrigger) project.getTrigger(GitLabPushTrigger.class);
-                        if (trigger == null) {
-                            return;
-                        }
+                    try{
                         trigger.onPost(newReq);
                     } finally {
                         SecurityContextHolder.getContext().setAuthentication(old);

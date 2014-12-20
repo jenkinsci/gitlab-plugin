@@ -45,6 +45,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 	private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
+    private boolean triggerOpenMergeRequestOnPush = true;
     private List<String> allowedBranches;
     
     // compatibility with earlier plugins
@@ -56,10 +57,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
 	@DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, List<String> allowedBranches) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
-        this.allowedBranches = allowedBranches;        	
+        this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+        this.allowedBranches = allowedBranches;
     }
 
     public boolean getTriggerOnPush() {
@@ -69,7 +71,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     public boolean getTriggerOnMergeRequest() {
     	return triggerOnMergeRequest;
     }
-    
+
+    public boolean isTriggerOpenMergeRequestOnPush() {
+        return triggerOpenMergeRequestOnPush;
+    }
+
     public List<String> getAllowedBranches() {
     	return allowedBranches;
     }
