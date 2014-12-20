@@ -9,8 +9,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
+import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
+import hudson.plugins.git.util.MergeRecord;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.security.csrf.CrumbExclusion;
@@ -21,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -42,6 +46,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
+import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.google.common.base.Splitter;
 
 /**
@@ -69,7 +76,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
     public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
-        LOGGER.log(Level.FINE, "WebHook called.");
+        LOGGER.log(Level.WARNING, "WebHook called.");
         final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
         final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -113,8 +120,15 @@ public class GitLabWebHook implements UnprotectedRootAction {
         String theString = writer.toString();
 
         if(paths.size() == 0) {
-            this.generateBuild(theString, project, req, res);
-            throw HttpResponses.ok();
+        	if (req.getParameter("ref") != null){
+        		// support /project/PROJECT_NAME?ref=BRANCH_NAME
+        		// link on project activity page - build status
+        		AbstractBuild build = this.getBuildByBranch(project, req.getParameter("ref"));
+        		redirectToBuildPage(res, build);
+        	} else {
+        		this.generateBuild(theString, project, req, res);           
+        	}
+        	throw HttpResponses.ok();
         }
 
         String lastPath = paths.get(paths.size()-1);
@@ -136,24 +150,30 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 e.printStackTrace();
                 throw HttpResponses.error(500,"Could not generate an image.");
             }
-        } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
+        } else if((firstPath.equals("commits") || firstPath.equals("builds")) && !lastPath.equals("status.json")) {
             AbstractBuild build = this.getBuildBySHA1(project, lastPath, true);
-            if(build != null) {
-                try {
-                    res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
-                } catch (IOException e) {
-                    try {
-                        res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            }
+            redirectToBuildPage(res, build);
+        } else{
+            LOGGER.warning("Dynamic request mot met: First path: '" + firstPath + "' late path: '" + lastPath + "'");
         }
 
         throw HttpResponses.ok();
 
     }
+
+	private void redirectToBuildPage(StaplerResponse res, AbstractBuild build) {
+		if(build != null) {
+		    try {
+		        res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
+		    } catch (IOException e) {
+		        try {
+		            res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
+		        } catch (IOException e1) {
+		            e1.printStackTrace();
+		        }
+		    }
+		}
+	}
 
     private void generateStatusJSON(String commitSHA1, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         SCM scm = project.getScm();
@@ -181,7 +201,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         BallColor currentBallColor = mainBuild.getIconColor().noAnime();
 
-        //TODO: add staus of pending when we figure it out.
+        //TODO: add status of pending when we figure it out.
         if(mainBuild.isBuilding()) {
             object.put("status", "running");
         }else if(currentBallColor == BallColor.BLUE) {
@@ -355,27 +375,21 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @param commitSHA1
      * @return
      */
-    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean isMergeRequest) {
-        AbstractBuild mainBuild = null;
-
+    private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean triggeredByMergeRequest) {
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-
-            if (!isMergeRequest) {
-                if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
-                    mainBuild = build;
-                    break;
-                }
-            } else {
-                if(data.hasBeenBuilt(ObjectId.fromString(commitSHA1))) {
-                    mainBuild = build;
-                    break;
+            Build b =  data.lastBuild;
+            MergeRecord merge = build.getAction(MergeRecord.class);
+            boolean isMergeBuild = merge!=null && !merge.getSha1().equals(b.getMarked().getSha1String());
+            if(b!=null && b.getMarked()!=null && b.getMarked().getSha1String().equals(commitSHA1)){
+                if(triggeredByMergeRequest == isMergeBuild){
+                    LOGGER.log(Level.FINE, build.getNumber()+" Build found matching "+commitSHA1+" "+(isMergeBuild? "merge":"normal")+" build");
+                       return build;
                 }
             }
         }
-
-        return mainBuild;
+        return null;
     }
 
     /**
@@ -386,20 +400,21 @@ public class GitLabWebHook implements UnprotectedRootAction {
      */
     @SuppressWarnings("rawtypes")
 	private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
-        AbstractBuild mainBuild = null;
-
         List<AbstractBuild> builds = project.getBuilds();
-        ListIterator<AbstractBuild> li = builds.listIterator();
-        while (li.hasNext()) {
-        	AbstractBuild build = li.next();
-        	ParametersAction data = build.getAction(ParametersAction.class);
-        	StringParameterValue sourceBranch = (StringParameterValue) data.getParameter("gitlabSourceBranch");
-        	if (sourceBranch.value.equals(branch)) {
-        		mainBuild = build;
-        		break;
-        	}
+        for(AbstractBuild build : builds) {
+            BuildData data = build.getAction(BuildData.class);
+            if(data!=null && data.lastBuild!=null) {
+                MergeRecord merge = build.getAction(MergeRecord.class);
+                boolean isMergeBuild = merge != null && !merge.getSha1().equals(data.lastBuild.getMarked().getSha1String());
+                if (data.lastBuild.getRevision() != null && !isMergeBuild) {
+                    for (Branch b : data.lastBuild.getRevision().getBranches()) {
+                        if (b.getName().endsWith("/" + branch))
+                            return build;
+                    }
+                }
+            }
         }
-        return mainBuild;
+        return null;
     }
 
 

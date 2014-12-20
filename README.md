@@ -9,13 +9,12 @@ This plugin emulates Jenkins as a GitlabCI Web Service to be used with GitlabHQ.
 
 Current Supported GitLabCI Functions
 =====================
-* `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json`
-* `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME`
-* `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1`
-* `/project/PROJECT_NAME/builds/COMMIT_SHA1` redirects to build page.
-
-
-* `/project/PROJECT_NAME`    In order for it to build properly on push you need to add this as a seperate web hook for just merge requests.
+* `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json` (used for Merge Request pages) returns build result for Merge Request build with `COMMIT_SHA1` as last commit
+* `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME` returns build status icon for latest build for `BRANCH_NAME`
+* `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1` returns build status icon for latest build for `COMMIT_SHA1` as last commit
+* `/project/PROJECT_NAME/builds/COMMIT_SHA1` redirects to build page of the last build containing `COMMIT_SHA1` as last commit
+* `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
+* `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
 Major Help Needed
 =====================
