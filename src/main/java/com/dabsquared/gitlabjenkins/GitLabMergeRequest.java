@@ -64,6 +64,8 @@ public class GitLabMergeRequest extends GitLabRequest {
 
         private Integer id;
 
+        private Integer iid;
+
         private String targetBranch;
 
         private String sourceBranch;
@@ -103,6 +105,14 @@ public class GitLabMergeRequest extends GitLabRequest {
 
         public void setId(Integer id) {
             this.id = id;
+        }
+
+        public Integer getIid() {
+            return iid;
+        }
+
+        public void setIid(Integer iid) {
+            this.iid = iid;
         }
 
         public String getTargetBranch() {
