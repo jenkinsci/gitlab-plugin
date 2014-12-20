@@ -9,6 +9,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
+import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
@@ -36,9 +37,13 @@ import net.sf.json.JSONObject;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
+import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.google.common.base.Splitter;
 
 /**
@@ -140,9 +145,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 e.printStackTrace();
                 throw HttpResponses.error(500,"Could not generate an image.");
             }
-        } else if(firstPath.equals("builds") && !lastPath.equals("status.json")) {
+        } else if((firstPath.equals("commits") || firstPath.equals("builds")) && !lastPath.equals("status.json")) {
             AbstractBuild build = this.getBuildBySHA1(project, lastPath, true);
             redirectToBuildPage(res, build);
+        } else{
+            LOGGER.warning("Dynamic request mot met: First path: '" + firstPath + "' late path: '" + lastPath + "'");
         }
 
         throw HttpResponses.ok();
@@ -431,33 +438,42 @@ public class GitLabWebHook implements UnprotectedRootAction {
             boolean isMergeRequestBuild = !sourceBranch.value.equals(targetBranch.value);
             
             if (!triggeredByMergeRequest) {
-            		if (isMergeRequestBuild)
-            			// skip Merge Request builds
-            			continue;
+				if (isMergeRequestBuild)
+					// skip Merge Request builds
+					continue;
             		
                 if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
                     mainBuild = build;
                     break;
                 }
             } else {
-            		if (!isMergeRequestBuild)
-            			// skip Push builds
-            			continue;
+				if (!isMergeRequestBuild)
+					// skip Push builds
+					continue;
             		
-            		// Merge request builds result in a local revision that is created due to the Prebuild merge.
-            		// This prevents from identifying the correct build by using getLastBuiltRevision()
-            		Collection<Build> gitBuilds = data.getBuildsByBranchName().values();
-                    for ( Iterator<Build> buildIterator = gitBuilds.iterator(); buildIterator.hasNext();) {
-                    	Build gitBuild = buildIterator.next();
-                    	if (gitBuild.getMarked().getSha1String().equals(commitSHA1)) {
-                    		return builds.get(builds.size() - gitBuild.hudsonBuildNumber);
-                    	}
-                    }
+				if (hasBeenBuilt(data, ObjectId.fromString(commitSHA1), build)) {
+					mainBuild = build;
+					break;
+				}
             }
         }
 
         return mainBuild;
     }
+
+	private boolean hasBeenBuilt(BuildData data, ObjectId sha1,
+			AbstractBuild build) {
+		try {
+			for (Build b : data.getBuildsByBranchName().values()) {
+				if (b.getBuildNumber() == build.number
+						&& b.marked.getSha1().equals(sha1))
+					return true;
+			}
+			return false;
+		} catch (Exception ex) {
+			return false;
+		}
+	}
 
     /**
      *
