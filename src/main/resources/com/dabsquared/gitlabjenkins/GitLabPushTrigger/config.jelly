@@ -6,6 +6,9 @@
     <f:entry title="Build on Push Events" field="triggerOnPush">
       <f:checkbox default="true" />
     </f:entry>
+    <f:entry title="Rebuild open Merge Requests on Push Events" field="triggerOpenMergeRequestOnPush">
+      <f:checkbox default="true" />
+    </f:entry>
     <f:entry title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
     	<j:invoke on="${descriptor}" method="getProjectBranches" var="projectBranches" />
     	<j:set var="optionsSize" value="${projectBranches.size()}"/>

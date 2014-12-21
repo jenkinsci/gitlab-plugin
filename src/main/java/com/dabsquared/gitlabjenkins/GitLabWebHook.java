@@ -327,10 +327,64 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 return;
             }
             trigger.onPost(request);
+            
+            if (trigger.getTriggerOpenMergeRequestOnPush()) {
+            	// Fetch and build open merge requests with the same source branch
+            	buildOpenMergeRequests(trigger, request.getProject_id(), request.getRef());
+            }
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
         }
     }
+
+	protected void buildOpenMergeRequests(GitLabPushTrigger trigger, Integer projectId, String projectRef) {
+		try {
+			GitLab api = new GitLab();
+			List<org.gitlab.api.models.GitlabMergeRequest> reqs = api.instance().getMergeRequests(projectId);
+			for (org.gitlab.api.models.GitlabMergeRequest mr : reqs) {
+				if (!mr.isClosed() && !mr.isMerged()&& projectRef.endsWith(mr.getSourceBranch())) {
+					LOGGER.log(Level.FINE,
+							"Generating new merge trigger from "
+									+ mr.toString() + "\n source: "
+									+ mr.getSourceBranch() + "\n target: "
+									+ mr.getTargetBranch() + "\n state: "
+									+ mr.getState() + "\n assign: "
+									+ mr.getAssignee() + "\n author: "
+									+ mr.getAuthor() + "\n id: " + mr.getId()
+									+ "\n iid: " + mr.getIid() + "\n\n");
+					GitLabMergeRequest newReq = new GitLabMergeRequest();
+					newReq.setObject_kind("merge_request");
+					newReq.setObjectAttribute(new GitLabMergeRequest.ObjectAttributes());
+					if (mr.getAssignee() != null)
+						newReq.getObjectAttribute().setAssigneeId(mr.getAssignee().getId());
+					if (mr.getAuthor() != null)
+						newReq.getObjectAttribute().setAuthorId(mr.getAuthor().getId());
+					newReq.getObjectAttribute().setDescription(mr.getDescription());
+					newReq.getObjectAttribute().setId(mr.getId());
+					newReq.getObjectAttribute().setIid(mr.getIid());
+					newReq.getObjectAttribute().setMergeStatus(mr.getState());
+					newReq.getObjectAttribute().setSourceBranch(mr.getSourceBranch());
+					newReq.getObjectAttribute().setSourceProjectId(mr.getSourceProjectId());
+					newReq.getObjectAttribute().setTargetBranch(mr.getTargetBranch());
+					newReq.getObjectAttribute().setTargetProjectId(projectId);
+					newReq.getObjectAttribute().setTitle(mr.getTitle());
+
+					Authentication old = SecurityContextHolder.getContext().getAuthentication();
+					SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+					try {
+						trigger.onPost(newReq);
+					} finally {
+						SecurityContextHolder.getContext().setAuthentication(old);
+					}
+					return;
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.warning("failed to communicate with gitlab server to determine is this is an update for a merge request: "
+					+ e.getMessage());
+			e.printStackTrace();
+		}
+	}
 
     public void generateMergeRequestBuild(String json, AbstractProject project, StaplerRequest req, StaplerResponse rsp) {
         GitLabMergeRequest request = GitLabMergeRequest.create(json);
