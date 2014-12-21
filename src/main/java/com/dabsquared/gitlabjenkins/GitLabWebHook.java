@@ -13,6 +13,7 @@ import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
+import hudson.plugins.git.util.MergeRecord;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
@@ -371,78 +372,45 @@ public class GitLabWebHook implements UnprotectedRootAction {
      * @return
      */
     private AbstractBuild getBuildBySHA1(AbstractProject project, String commitSHA1, boolean triggeredByMergeRequest) {
-        AbstractBuild mainBuild = null;
-
         List<AbstractBuild> builds = project.getBuilds();
         for(AbstractBuild build : builds) {
             BuildData data = build.getAction(BuildData.class);
-            
-            //Determine if build was triggered by a Merge Request event
-            ParametersAction params = build.getAction(ParametersAction.class);
-            StringParameterValue sourceBranch = (StringParameterValue) params.getParameter("gitlabSourceBranch");
-            StringParameterValue targetBranch = (StringParameterValue) params.getParameter("gitlabTargetBranch");
-            boolean isMergeRequestBuild = !sourceBranch.value.equals(targetBranch.value);
-            
-            if (!triggeredByMergeRequest) {
-				if (isMergeRequestBuild)
-					// skip Merge Request builds
-					continue;
-            		
-                if (data.getLastBuiltRevision().getSha1String().contains(commitSHA1)) {
-                    mainBuild = build;
-                    break;
+            Build b =  data.lastBuild;
+            MergeRecord merge = build.getAction(MergeRecord.class);
+            boolean isMergeBuild = merge!=null && !merge.getSha1().equals(b.getMarked().getSha1String());
+            if(b!=null && b.getMarked()!=null && b.getMarked().getSha1String().equals(commitSHA1)){
+                if(triggeredByMergeRequest == isMergeBuild){
+                    LOGGER.log(Level.FINE, build.getNumber()+" Build found matching "+commitSHA1+" "+(isMergeBuild? "merge":"normal")+" build");
+                       return build;
                 }
-            } else {
-				if (!isMergeRequestBuild)
-					// skip Push builds
-					continue;
-            		
-				if (hasBeenBuilt(data, ObjectId.fromString(commitSHA1), build)) {
-					mainBuild = build;
-					break;
-				}
             }
         }
-
-        return mainBuild;
+        return null;
     }
-
-	private boolean hasBeenBuilt(BuildData data, ObjectId sha1,
-			AbstractBuild build) {
-		try {
-			for (Build b : data.getBuildsByBranchName().values()) {
-				if (b.getBuildNumber() == build.number
-						&& b.marked.getSha1().equals(sha1))
-					return true;
-			}
-			return false;
-		} catch (Exception ex) {
-			return false;
-		}
-	}
 
     /**
      *
      * @param project
      * @param branch
-     * @return
+     * @return latest build of the branch specified that is not part of a merge request
      */
     @SuppressWarnings("rawtypes")
 	private AbstractBuild getBuildByBranch(AbstractProject project, String branch) {
-        AbstractBuild mainBuild = null;
-
         List<AbstractBuild> builds = project.getBuilds();
-        ListIterator<AbstractBuild> li = builds.listIterator();
-        while (li.hasNext()) {
-        	AbstractBuild build = li.next();
-        	ParametersAction data = build.getAction(ParametersAction.class);
-        	StringParameterValue sourceBranch = (StringParameterValue) data.getParameter("gitlabSourceBranch");
-        	if (sourceBranch.value.equals(branch)) {
-        		mainBuild = build;
-        		break;
-        	}
+        for(AbstractBuild build : builds) {
+            BuildData data = build.getAction(BuildData.class);
+            if(data!=null && data.lastBuild!=null) {
+                MergeRecord merge = build.getAction(MergeRecord.class);
+                boolean isMergeBuild = merge != null && !merge.getSha1().equals(data.lastBuild.getMarked().getSha1String());
+                if (data.lastBuild.getRevision() != null && !isMergeBuild) {
+                    for (Branch b : data.lastBuild.getRevision().getBranches()) {
+                        if (b.getName().endsWith("/" + branch))
+                            return build;
+                    }
+                }
+            }
         }
-        return mainBuild;
+        return null;
     }
 
 
