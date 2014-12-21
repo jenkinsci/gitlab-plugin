@@ -13,6 +13,7 @@ Current Supported GitLabCI Functions
 * `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME` returns build status icon for latest build for `BRANCH_NAME`
 * `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1` returns build status icon for latest build for `COMMIT_SHA1` as last commit
 * `/project/PROJECT_NAME/builds/COMMIT_SHA1` redirects to build page of the last build containing `COMMIT_SHA1` as last commit
+* `/project/PROJECT_NAME/commits/COMMIT_SHA1` redirects to build page of the last build containing `COMMIT_SHA1` as last commit
 * `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
 * `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
@@ -42,6 +43,7 @@ Using it With A Job
 * In the ``Build Triggers`` section:
     * Check the ``Build when a change is pushed to GitLab.``
     * Use the check boxes to trigger builds on Push and/or Merge Request events
+    * Optionally enable building open merge requests again after a push to the source branch.
 * In GitLab go to the project ``Settings``
     * Click on ``Services``
     * Click on ``GitLab CI``

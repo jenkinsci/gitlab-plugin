@@ -1,6 +1,14 @@
 ChangeLog
 =====================
 
+1.1.4
+=====================
+* Updated git-plugin dependency to latest version; minimum supported version of Jenkins is now 1.568
+* Rebuild open merge requests after a push to the source branch (configurable parameter) (kasper-f)
+* Build page link on Merge Request page redirects to the correct build (zenovich)
+* Stop building closed merge requests
+* Bug fixes and documentation updates
+
 1.1.2
 =====================
 * Filter source branches (for push requests only)

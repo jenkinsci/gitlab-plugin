@@ -72,7 +72,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     	return triggerOnMergeRequest;
     }
 
-    public boolean isTriggerOpenMergeRequestOnPush() {
+    public boolean getTriggerOpenMergeRequestOnPush() {
         return triggerOpenMergeRequestOnPush;
     }
 
