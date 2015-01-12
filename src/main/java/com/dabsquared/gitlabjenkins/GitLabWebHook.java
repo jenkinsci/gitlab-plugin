@@ -439,7 +439,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
             ParametersAction params = build.getAction(ParametersAction.class);
             StringParameterValue sourceBranch = (StringParameterValue) params.getParameter("gitlabSourceBranch");
             StringParameterValue targetBranch = (StringParameterValue) params.getParameter("gitlabTargetBranch");
-            boolean isMergeRequestBuild = !sourceBranch.value.equals(targetBranch.value);
+            boolean isMergeRequestBuild = ! ( 
+            		sourceBranch!=null  && sourceBranch.value != null &&
+            		targetBranch != null && targetBranch.value != null &&
+            		sourceBranch.value.equals(targetBranch.value)
+            );
             
             if (!triggeredByMergeRequest) {
 				if (isMergeRequestBuild)
