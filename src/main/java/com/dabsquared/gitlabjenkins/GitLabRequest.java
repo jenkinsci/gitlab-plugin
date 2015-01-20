@@ -35,6 +35,10 @@ public class GitLabRequest {
 	private static final String[] DATE_FORMATS = new String[] {
 			"yyyy-MM-dd HH:mm:ss Z", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" };
 
+	public String getJenkinsBuildViewName(){
+		return null;
+	}
+
 	private static class DateSerializer implements JsonDeserializer<Date> {
 		public Date deserialize(JsonElement jsonElement, Type typeOF,
 				JsonDeserializationContext context) throws JsonParseException {

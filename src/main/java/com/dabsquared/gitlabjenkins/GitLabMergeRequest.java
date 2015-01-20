@@ -54,6 +54,11 @@ public class GitLabMergeRequest extends GitLabRequest {
         this.objectAttributes = objectAttributes;
     }
 
+    public String getJenkinsBuildViewName(){
+        return "GitLab Merge Request #" + this.getObjectAttribute().getIid() + " : " + this.getObjectAttribute().getSourceBranch() +
+                        " => " + this.getObjectAttribute().getTargetBranch();
+
+    }
 
     @Override
     public String toString() {

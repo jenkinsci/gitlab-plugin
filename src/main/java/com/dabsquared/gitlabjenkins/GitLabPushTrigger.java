@@ -46,6 +46,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOpenMergeRequestOnPush = true;
+    private boolean setJobDescription = true;
     private List<String> allowedBranches;
     
     // compatibility with earlier plugins
@@ -57,10 +58,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
 	@DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, List<String> allowedBranches) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setJobDescription, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+        this.setJobDescription = setJobDescription;
         this.allowedBranches = allowedBranches;
     }
 
@@ -90,7 +92,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     String name = " #" + job.getNextBuildNumber();
                     GitLabPushCause cause = createGitLabPushCause(req);
                     Action[] actions = createActions(req);
-
+                    setBuildCauseInJob(req);
                     if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
                         LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
@@ -146,7 +148,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
                     String name = " #" + job.getNextBuildNumber();
                     GitLabMergeCause cause = createGitLabMergeCause(req);
-                    Action[] actions = createActions(req);                 
+                    Action[] actions = createActions(req);
+                    setBuildCauseInJob(req);
                     if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
                         LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
@@ -201,7 +204,19 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             });	
     	}
     }
-    
+
+    private void setBuildCauseInJob(GitLabRequest req){
+        if(setJobDescription){
+            String name = req.getJenkinsBuildViewName();
+            if(name!=null && name.length()>0){
+                try {
+                    job.setDisplayName(name);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     private String getSourceBranch(GitLabRequest req) {
     	String result = null;
     	if (req instanceof GitLabPushRequest) {
