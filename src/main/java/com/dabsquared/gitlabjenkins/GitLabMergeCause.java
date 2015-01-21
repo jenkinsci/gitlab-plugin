@@ -32,26 +32,4 @@ public class GitLabMergeCause extends SCMTrigger.SCMTriggerCause {
                 " => " + this.mergeRequest.getObjectAttribute().getTargetBranch();
     }
 
-
-    public String getHtmlDescription() {
-        GitLab git = new GitLab();
-        String url= null;
-        String text = "GitLab Merge Request #" + this.mergeRequest.getObjectAttribute().getIid() + " : " + this.mergeRequest.getObjectAttribute().getSourceBranch() +
-                        " => " + this.mergeRequest.getObjectAttribute().getTargetBranch();
-        try {
-            url=mergeRequest.getSourceProject(git).getHttpUrl();
-            return asLink(url,text);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return text;
-    }
-
-    private String asLink(String url,String text){
-        return "<a href=\""+url+"\">"+text+"</a>";
-    }
-
-
-
 }

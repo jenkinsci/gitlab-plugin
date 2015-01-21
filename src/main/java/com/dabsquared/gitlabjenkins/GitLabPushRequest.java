@@ -112,10 +112,6 @@ public class GitLabPushRequest extends GitLabRequest {
         this.project_id = projectId;
     }
 
-    public String getJenkinsBuildViewName(){
-            return "GitLab push " + this.getLastCommit().getId() + " by " +this.getLastCommit().getAuthor();
-    }
-
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
