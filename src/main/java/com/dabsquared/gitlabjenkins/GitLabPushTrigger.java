@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.AbstractBuild;
+import hudson.model.Cause;
 import hudson.model.Action;
 import hudson.model.Item;
 import hudson.model.ParameterValue;
@@ -46,9 +48,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOpenMergeRequestOnPush = true;
-    private boolean setJobDescription = true;
+    private boolean setBuildDescription = true;
     private List<String> allowedBranches;
-    
+
     // compatibility with earlier plugins
     public Object readResolve() {
         if (null == allowedBranches) {
@@ -57,12 +59,12 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         return this;
     }
 
-	@DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setJobDescription, List<String> allowedBranches) {
+    @DataBoundConstructor
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setBuildDescription, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
-        this.setJobDescription = setJobDescription;
+        this.setBuildDescription = setBuildDescription;
         this.allowedBranches = allowedBranches;
     }
 
@@ -76,6 +78,10 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     public boolean getTriggerOpenMergeRequestOnPush() {
         return triggerOpenMergeRequestOnPush;
+    }
+
+    public boolean getSetBuildDescription() {
+        return setBuildDescription;
     }
 
     public List<String> getAllowedBranches() {
@@ -92,7 +98,6 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     String name = " #" + job.getNextBuildNumber();
                     GitLabPushCause cause = createGitLabPushCause(req);
                     Action[] actions = createActions(req);
-                    setBuildCauseInJob(req);
                     if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
                         LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
@@ -132,7 +137,6 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
                     RevisionParameterAction revision = new RevisionParameterAction(req.getLastCommit().getId());
                     actions.add(revision);
-
                     Action[] actionsArray = actions.toArray(new Action[0]);
 
                     return actionsArray;
@@ -149,7 +153,6 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     String name = " #" + job.getNextBuildNumber();
                     GitLabMergeCause cause = createGitLabMergeCause(req);
                     Action[] actions = createActions(req);
-                    setBuildCauseInJob(req);
                     if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
                         LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
                     } else {
@@ -205,18 +208,30 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     	}
     }
 
-    private void setBuildCauseInJob(GitLabRequest req){
-        if(setJobDescription){
-            String name = req.getJenkinsBuildViewName();
-            if(name!=null && name.length()>0){
+    private void setBuildCauseInJob(AbstractBuild abstractBuild){
+        if(setBuildDescription){
+            Cause pcause= abstractBuild.getCause(GitLabPushCause.class);
+            Cause mcause= abstractBuild.getCause(GitLabMergeCause.class);
+            String desc = null;
+            if(pcause!=null) desc = pcause.getShortDescription();
+            if(mcause!=null) desc = mcause.getShortDescription();
+            if(desc!=null && desc.length()>0){
                 try {
-                    job.setDisplayName(name);
+                    abstractBuild.setDescription(desc);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
+
+    public void onCompleted(AbstractBuild abstractBuild){
+    }
+
+    public void onStarted(AbstractBuild abstractBuild) {
+        setBuildCauseInJob(abstractBuild);
+    }
+
     private String getSourceBranch(GitLabRequest req) {
     	String result = null;
     	if (req instanceof GitLabPushRequest) {
