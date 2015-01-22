@@ -269,6 +269,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         try {
         	URL resourceUrl = new URL(Jenkins.getInstance().getPlugin("gitlab-plugin").getWrapper().baseResourceURL + imageUrl);
         	rsp.serveFile(req, resourceUrl);
+            rsp.flushBuffer();
         } catch (IOException e) {
 			throw HttpResponses.error(500,"Could not generate response.");
 		} finally {
