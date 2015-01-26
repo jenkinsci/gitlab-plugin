@@ -18,6 +18,7 @@ import hudson.security.ACL;
 import hudson.security.csrf.CrumbExclusion;
 import hudson.util.HttpResponses;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -267,9 +268,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
         try {
-        	URL resourceUrl = new URL(Jenkins.getInstance().getPlugin("gitlab-plugin").getWrapper().baseResourceURL + imageUrl);
-        	rsp.serveFile(req, resourceUrl);
-        } catch (IOException e) {
+            URL resourceUrl = new URL(Jenkins.getInstance().getPlugin("gitlab-plugin").getWrapper().baseResourceURL + imageUrl);
+            LOGGER.info("serving image "+resourceUrl.toExternalForm());
+            rsp.setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+            rsp.setHeader("Cache-Control", "no-cache, private");
+            rsp.setHeader("Content-Type", "image/png");
+            hudson.util.IOUtils.copy(new File(resourceUrl.toURI()), rsp.getOutputStream());
+            rsp.flushBuffer();
+        } catch (Exception e) {
 			throw HttpResponses.error(500,"Could not generate response.");
 		} finally {
             SecurityContextHolder.getContext().setAuthentication(old);
