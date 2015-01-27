@@ -245,7 +245,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             msg.append("\n\nResults available at: ")
                     .append("[").append("Jenkins").append("](").append(buildUrl).append(")");
             try {
-                GitlabProject proj = cause.getMergeRequest().getSourceProject(this.getDescriptor().getGitlab());
+                GitlabProject proj = new GitlabProject();
+                proj.setId(cause.getMergeRequest().getObjectAttribute().getTargetProjectId());
                 org.gitlab.api.models.GitlabMergeRequest mr = this.getDescriptor().getGitlab().instance().getMergeRequest(proj,cause.getMergeRequest().getObjectAttribute().getId());
                 this.getDescriptor().getGitlab().instance().createNote(mr,msg.toString());
             } catch (IOException e) {
