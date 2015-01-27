@@ -26,6 +26,10 @@ public class GitLabMergeCause extends SCMTrigger.SCMTriggerCause {
         this.mergeRequest = mergeRequest;
     }
 
+    public GitLabMergeRequest getMergeRequest() {
+        return mergeRequest;
+    }
+
     @Override
     public String getShortDescription() {
         return "GitLab Merge Request #" + this.mergeRequest.getObjectAttribute().getIid() + " : " + this.mergeRequest.getObjectAttribute().getSourceBranch() +

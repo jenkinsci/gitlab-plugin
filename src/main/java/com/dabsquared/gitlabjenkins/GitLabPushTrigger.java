@@ -2,14 +2,7 @@ package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.Cause;
-import hudson.model.Action;
-import hudson.model.Item;
-import hudson.model.ParameterValue;
-import hudson.model.AbstractProject;
-import hudson.model.ParametersAction;
-import hudson.model.StringParameterValue;
+import hudson.model.*;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
@@ -49,6 +42,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOpenMergeRequestOnPush = true;
     private boolean setBuildDescription = true;
+    private boolean addNoteOnMergeRequest = true;
+
     private List<String> allowedBranches;
 
     // compatibility with earlier plugins
@@ -82,6 +77,10 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     public boolean getSetBuildDescription() {
         return setBuildDescription;
+    }
+
+    public boolean getAddNoteOnMergeRequest() {
+        return addNoteOnMergeRequest;
     }
 
     public List<String> getAllowedBranches() {
@@ -225,7 +224,35 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         }
     }
 
-    public void onCompleted(AbstractBuild abstractBuild){
+    public void onCompleted(AbstractBuild build){
+        Cause mCause= build.getCause(GitLabMergeCause.class);
+        if (mCause != null && mCause instanceof GitLabMergeCause) {
+            onCompleteMergeRequest(build,(GitLabMergeCause) mCause);
+        }
+
+    }
+
+    private void onCompleteMergeRequest(AbstractBuild abstractBuild,GitLabMergeCause cause){
+        if(addNoteOnMergeRequest) {
+            StringBuilder msg = new StringBuilder();
+            if (abstractBuild.getResult() == Result.SUCCESS) {
+                msg.append(":white_check_mark:");
+            } else {
+                msg.append(":anguished:");
+            }
+            msg.append(" Jenkins Build ").append(abstractBuild.getResult().color.getDescription());
+            String buildUrl = Jenkins.getInstance().getRootUrl() + abstractBuild.getUrl();
+            msg.append("\n\nResults available at: ")
+                    .append("[").append("Jenkins").append("](").append(buildUrl).append(")");
+            try {
+                GitlabProject proj = cause.getMergeRequest().getSourceProject(this.getDescriptor().getGitlab());
+                org.gitlab.api.models.GitlabMergeRequest mr = this.getDescriptor().getGitlab().instance().getMergeRequest(proj,cause.getMergeRequest().getObjectAttribute().getId());
+                this.getDescriptor().getGitlab().instance().createNote(mr,msg.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     public void onStarted(AbstractBuild abstractBuild) {
