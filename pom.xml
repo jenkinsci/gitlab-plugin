@@ -7,7 +7,7 @@
     </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.1.11-SNAPSHOT</version>
+  <version>1.1.12-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -83,6 +83,23 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.2-beta-5</version>
         </plugin>
+                <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.8</version>
+        </plugin>
+        <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-release-plugin</artifactId>
+			<version>2.5.1</version>
+			<dependencies>
+			  <dependency>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-provider-gitexe</artifactId>
+				<version>1.9.2</version>
+			  </dependency>
+			</dependencies>
+		</plugin>
+        
       </plugins>
     </pluginManagement>
   </build>
