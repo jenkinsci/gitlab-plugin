@@ -43,6 +43,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     private boolean triggerOpenMergeRequestOnPush = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
+    private boolean acceptMergeRequestOnSuccess = true;
 
     private List<String> allowedBranches;
 
@@ -55,12 +56,13 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setBuildDescription, List<String> allowedBranches) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setBuildDescription, boolean acceptMergeRequestOnSuccess, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.setBuildDescription = setBuildDescription;
         this.allowedBranches = allowedBranches;
+        this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
 
     public boolean getTriggerOnPush() {
@@ -233,6 +235,18 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     private void onCompleteMergeRequest(AbstractBuild abstractBuild,GitLabMergeCause cause){
+        if(acceptMergeRequestOnSuccess && abstractBuild.getResult() == Result.SUCCESS) {
+            try {
+                GitlabProject proj = new GitlabProject();
+                proj.setId(cause.getMergeRequest().getObjectAttribute().getTargetProjectId());
+                this.getDescriptor().getGitlab().instance().acceptMergeRequest(
+                        proj,
+                        cause.getMergeRequest().getObjectAttribute().getId(),
+                        "Merge Request accepted by jenkins build success");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         if(addNoteOnMergeRequest) {
             StringBuilder msg = new StringBuilder();
             if (abstractBuild.getResult() == Result.SUCCESS) {

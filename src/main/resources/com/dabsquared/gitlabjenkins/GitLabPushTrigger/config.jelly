@@ -15,6 +15,9 @@
     <f:entry title="Add note with build status on merge requests" field="addNoteOnMergeRequest">
       <f:checkbox default="true" />
     </f:entry>
+    <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
+      <f:checkbox default="true" />
+    </f:entry>
     <f:entry title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
     	<j:invoke on="${descriptor}" method="getProjectBranches" var="projectBranches" />
     	<j:set var="optionsSize" value="${projectBranches.size()}"/>
