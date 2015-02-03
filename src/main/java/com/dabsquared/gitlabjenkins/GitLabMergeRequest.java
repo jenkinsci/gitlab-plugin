@@ -90,6 +90,12 @@ public class GitLabMergeRequest extends GitLabRequest {
 
         private String description;
 
+        private Branch source;
+
+        private Branch target;
+
+        private LastCommit lastCommit;
+
 
         public ObjectAttributes() {
         }
@@ -209,6 +215,104 @@ public class GitLabMergeRequest extends GitLabRequest {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+        public Branch getSource() {
+            return source;
+        }
+
+        public void setSource(Branch source) {
+            this.source = source;
+        }
+
+        public Branch getTarget() {
+            return target;
+        }
+
+        public void setTarget(Branch target) {
+            this.target = target;
+        }
+
+        public LastCommit getLastCommit() {
+            return lastCommit;
+        }
+
+        public void setLastCommit(LastCommit lastCommit) {
+            this.lastCommit = lastCommit;
+        }
+    }
+
+    public static class Branch{
+        private String name;
+        private String ssh_url;
+        private String http_url;
+        private String namespace;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getSsh_url() {
+            return ssh_url;
+        }
+
+        public void setSsh_url(String ssh_url) {
+            this.ssh_url = ssh_url;
+        }
+
+        public String getHttp_url() {
+            return http_url;
+        }
+
+        public void setHttp_url(String http_url) {
+            this.http_url = http_url;
+        }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
+        }
+    }
+    public static class LastCommit{
+        private String id;
+        private String message;
+        private String url;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
         }
     }
 

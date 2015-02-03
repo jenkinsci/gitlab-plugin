@@ -337,7 +337,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 return;
             }
             trigger.onPost(request);
-            
+
             if (trigger.getTriggerOpenMergeRequestOnPush()) {
             	// Fetch and build open merge requests with the same source branch
             	buildOpenMergeRequests(trigger, request.getProject_id(), request.getRef());
@@ -404,6 +404,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
         if(request.getObjectAttribute().getState().equals("merged")) {
         	LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
+            return;
+        }
+        AbstractBuild mergeBuild = getBuildBySHA1(project, request.getObjectAttribute().getLastCommit().getId(), true);
+        if(mergeBuild!=null){
+            LOGGER.log(Level.INFO, "Last commit in Merge Request has already been build in build #"+mergeBuild.getId());
             return;
         }
 
