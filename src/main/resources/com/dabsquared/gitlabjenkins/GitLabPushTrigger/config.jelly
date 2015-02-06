@@ -24,13 +24,13 @@
         <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
       <f:checkbox default="false" />
     </f:entry>
-    <f:entry title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
-    	<j:invoke on="${descriptor}" method="getProjectBranches" var="projectBranches" />
-    	<j:set var="optionsSize" value="${projectBranches.size()}"/>
-   		<select name="allowedBranches" multiple="multiple" size="${optionsSize}" style="min-width:50%;">   		
-			<j:forEach var="aBranch" items="${projectBranches}" varStatus="loop">
-				<f:option value="${aBranch}" selected="${instance.allowedBranches.isEmpty() || instance.allowedBranches.contains(aBranch)}">${aBranch}</f:option>				
-			</j:forEach>
-   		</select>
-	</f:entry> 
+    <f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"
+                     inline="true" checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
+        <f:entry title="Include">
+            <f:textbox field="includeBranchesSpec" autocompleteDelimChar="," />
+        </f:entry>
+        <f:entry title="Exclude">
+            <f:textbox field="excludeBranchesSpec" autocompleteDelimChar="," />
+        </f:entry>
+    </f:optionalBlock>
 </j:jelly>
