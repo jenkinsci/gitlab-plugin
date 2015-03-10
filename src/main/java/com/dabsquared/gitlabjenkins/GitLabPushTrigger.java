@@ -95,15 +95,15 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             getDescriptor().queue.execute(new Runnable() {
 
                 public void run() {
-                    LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
-                    String name = " #" + job.getNextBuildNumber();
-                    GitLabPushCause cause = createGitLabPushCause(req);
-                    Action[] actions = createActions(req);
-                    if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
-                        LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
-                    } else {
-                        LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.", job.getName());
-                    }
+            		LOGGER.log(Level.INFO, "{0} triggered for push.", job.getName());
+            		String name = " #" + job.getNextBuildNumber();
+            		GitLabPushCause cause = createGitLabPushCause(req);
+            		Action[] actions = createActions(req);
+            		if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
+            			LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+            		} else {
+            			LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.", job.getName());
+            		}
                 }
 
                 private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
@@ -128,8 +128,10 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
                     values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
-                    values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", getDesc().getSourceRepoNameDefault()));
-                	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", getDesc().getSourceRepoURLDefault().toString()));
+                    
+                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1} (push)", new String[]{job.getName(), getDesc().project.getName()});
+                    values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", getDesc().getSourceRepoNameDefault(job)));
+                	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", getDesc().getSourceRepoURLDefault(job).toString()));
                 	
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
@@ -150,15 +152,15 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     	if (triggerOnMergeRequest) {
     		getDescriptor().queue.execute(new Runnable() {
                 public void run() {
-                    LOGGER.log(Level.INFO, "{0} triggered.", job.getName());
-                    String name = " #" + job.getNextBuildNumber();
-                    GitLabMergeCause cause = createGitLabMergeCause(req);
-                    Action[] actions = createActions(req);
-                    if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
-                        LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
-                    } else {
-                        LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getName());
-                    }
+	                LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getName());
+	                String name = " #" + job.getNextBuildNumber();
+	                GitLabMergeCause cause = createGitLabMergeCause(req);
+	                Action[] actions = createActions(req);
+	                if (job.scheduleBuild(job.getQuietPeriod(), cause, actions)) {
+	                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getName(), name});
+	                } else {
+	                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getName());
+	                }
                 }
 
                 private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
@@ -177,15 +179,16 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
-                
-                    String sourceRepoName = getDesc().getSourceRepoNameDefault();
-                    String sourceRepoURL = getDesc().getSourceRepoURLDefault().toString();
+                    
+                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1}", new String[]{job.getName(), getDesc().project.getName()});
+                    String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
+                    String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
                     
                     if (!getDescriptor().getGitlabHostUrl().isEmpty()) {                                        
                     	// Get source repository if communication to Gitlab is possible
                     	try {
                         	sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();    
-                        	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();    
+                        	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
                         } catch (IOException ex) {
                         	LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});                        	
                         }
@@ -193,7 +196,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     
                     values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
                 	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
-                	                    
+
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
                     ParametersAction parametersAction = new ParametersAction(listValues);
@@ -358,7 +361,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             		cannot search projects by namespace/name
             		For now getting project id before getting project branches
             	 */
-        		URIish sourceRepository = getSourceRepoURLDefault();
+        		URIish sourceRepository = getSourceRepoURLDefault(project);
         		if (!gitlabHostUrl.isEmpty() && (null != sourceRepository)) {
         			List<GitlabProject> projects = getGitlab().instance().getProjects();
         			for (GitlabProject project : projects) {
@@ -386,11 +389,17 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
          * 
          * @return URIish the default value of the source repository url
          */
-        protected URIish getSourceRepoURLDefault() {
+        protected URIish getSourceRepoURLDefault(AbstractProject job) {
         	URIish url = null;
-        	SCM scm = project.getScm();
+        	SCM scm = job.getScm();
         	if(!(scm instanceof GitSCM)) {
-                throw new IllegalArgumentException("This repo does not use git.");
+        		LOGGER.log(
+						Level.WARNING,
+						"Could not find GitSCM for project, found {0} instead (getSourceRepoURLDefault). Project = {1}, next build = {2}",
+						new String[] { scm.getClass().getCanonicalName(),
+								project.getName(),
+								String.valueOf(project.getNextBuildNumber()) });
+                throw new IllegalArgumentException("This repo does not use git:" + scm.getClass().getCanonicalName());
             }
             if (scm instanceof GitSCM) {
             	List<RemoteConfig> repositories = ((GitSCM) scm).getRepositories();
@@ -411,11 +420,17 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
          * 
          * @return String with the default name of the source repository
          */
-        protected String getSourceRepoNameDefault() {
+        protected String getSourceRepoNameDefault(AbstractProject job) {
         	String result = null;
-        	SCM scm = project.getScm();
+        	SCM scm = job.getScm();
         	if(!(scm instanceof GitSCM)) {
-                throw new IllegalArgumentException("This repo does not use git.");
+				LOGGER.log(
+						Level.WARNING,
+						"Could not find GitSCM for project, found {0} instead (getSourceRepoNameDefault). Project = {1}, next build = {2}",
+						new String[] { scm.getClass().getCanonicalName(),
+								project.getName(),
+								String.valueOf(project.getNextBuildNumber()) });
+                throw new IllegalArgumentException("This repo does not use git.:" + scm.getClass().getCanonicalName());
             }
             if (scm instanceof GitSCM) {
             	List<RemoteConfig> repositories = ((GitSCM) scm).getRepositories();
