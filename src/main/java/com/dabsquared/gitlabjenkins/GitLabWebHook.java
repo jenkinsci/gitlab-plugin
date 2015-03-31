@@ -336,6 +336,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
             if (trigger == null) {
                 return;
             }
+
+            if(trigger.getCiSkip() && request.getLastCommit() != null) {
+                if(request.getLastCommit().getMessage().contains("[ci-skip]")) {
+                    LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
+                    return;
+                }
+            }
+
             trigger.onPost(request);
 
             if (trigger.getTriggerOpenMergeRequestOnPush()) {

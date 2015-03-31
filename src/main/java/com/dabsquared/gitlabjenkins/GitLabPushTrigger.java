@@ -41,6 +41,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOpenMergeRequestOnPush = true;
+    private boolean ciSkip = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
     private boolean allowAllBranches = false;
@@ -56,10 +57,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setBuildDescription, boolean allowAllBranches, List<String> allowedBranches) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean allowAllBranches, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+        this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
         this.allowAllBranches = allowAllBranches;
         this.allowedBranches = allowedBranches;
@@ -85,6 +87,14 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         return addNoteOnMergeRequest;
     }
 
+    public boolean getAllowAllBranches() {
+        return allowAllBranches;
+    }
+
+    public boolean getCiSkip() {
+        return ciSkip;
+    }
+
     public List<String> getAllowedBranches() {
     	return allowedBranches;
     }
@@ -96,6 +106,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
                 public void run() {
             		LOGGER.log(Level.INFO, "{0} triggered for push.", job.getName());
+
             		String name = " #" + job.getNextBuildNumber();
             		GitLabPushCause cause = createGitLabPushCause(req);
             		Action[] actions = createActions(req);
