@@ -44,6 +44,8 @@ import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab.api.models.GitlabMergeRequest;
+import org.gitlab.api.models.GitlabProject;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -106,7 +108,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         while (restOfPathParts.hasNext()) {
             paths.add(restOfPathParts.next());
         }
-        
+
         String token = req.getParameter("token");
 
         //TODO: Check token authentication with project id. For now we are not using this.
@@ -358,9 +360,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
 	protected void buildOpenMergeRequests(GitLabPushTrigger trigger, Integer projectId, String projectRef) {
 		try {
 			GitLab api = new GitLab();
-			List<org.gitlab.api.models.GitlabMergeRequest> reqs = api.instance().getMergeRequests(projectId);
-			for (org.gitlab.api.models.GitlabMergeRequest mr : reqs) {
-				if (!mr.isClosed() && !mr.isMerged()&& projectRef.endsWith(mr.getSourceBranch())) {
+			// TODO Replace this with a call to GitlabAPI.getOpenMergeRequests, once timols has deployed version 1.1.7
+			String tailUrl = GitlabProject.URL + "/" + projectId + GitlabMergeRequest.URL + "?state=opened&per_page=100";
+			List<GitlabMergeRequest> mergeRequests = api.instance().retrieve().getAll(tailUrl, GitlabMergeRequest[].class);
+
+			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
+				if (projectRef.endsWith(mr.getSourceBranch())) {
 					LOGGER.log(Level.FINE,
 							"Generating new merge trigger from "
 									+ mr.toString() + "\n source: "
