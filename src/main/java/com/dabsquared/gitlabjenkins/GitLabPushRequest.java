@@ -26,6 +26,7 @@ public class GitLabPushRequest extends GitLabRequest {
 
     private String before;
     private String after;
+    private String checkout_sha;
     private String ref;
     private Integer user_id;
     private String user_name;
@@ -115,6 +116,14 @@ public class GitLabPushRequest extends GitLabRequest {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public String getCheckout_sha() {
+        return checkout_sha;
+    }
+
+    public void setCheckout_sha(String checkout_sha) {
+        this.checkout_sha = checkout_sha;
     }
 
     public static class Repository {
