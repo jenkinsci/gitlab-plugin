@@ -158,6 +158,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     if (req.getLastCommit() !=null) {
                         revision = new RevisionParameterAction(req.getLastCommit().getId());
                     }else{
+                        if (req.getCheckout_sha().contains("0000000000000000000000000000000000000000") ){
+                            // no commit and no checkout sha, a Tag was deleted, so no build need to be triggered
+                            LOGGER.log(Level.INFO, "GitLab Push {0} has been deleted, skip build .", req.getRef());
+                            return null;
+                        }
                         revision = new RevisionParameterAction(req.getCheckout_sha());
                     }
 
