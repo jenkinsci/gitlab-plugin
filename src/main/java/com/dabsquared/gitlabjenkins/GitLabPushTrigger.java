@@ -119,7 +119,12 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
                 private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
                     GitLabPushCause cause;
-                    String triggeredByUser = req.getCommits().get(0).getAuthor().getName();
+                    String triggeredByUser;
+                    if (req.getCommits().size() > 0){
+                        triggeredByUser = req.getCommits().get(0).getAuthor().getName();
+                    } else {
+                        triggeredByUser = req.getUser_name();
+                    }
                     try {
                         cause = new GitLabPushCause(triggeredByUser, getLogFile());
                     } catch (IOException ex) {
@@ -139,8 +144,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
                     values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
-                    
-                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1} (push)", new String[]{job.getName(), getDesc().project.getName()});
+
+                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1} (push)", new String[]{job.getName(), job.getRootProject().getName()});
                     values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", getDesc().getSourceRepoNameDefault(job)));
                 	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", getDesc().getSourceRepoURLDefault(job).toString()));
                 	
@@ -148,8 +153,19 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
                     ParametersAction parametersAction = new ParametersAction(listValues);
                     actions.add(parametersAction);
+                    RevisionParameterAction revision;
 
-                    RevisionParameterAction revision = new RevisionParameterAction(req.getLastCommit().getId());
+                    if (req.getLastCommit() !=null) {
+                        revision = new RevisionParameterAction(req.getLastCommit().getId());
+                    }else{
+                        if (req.getCheckout_sha().contains("0000000000000000000000000000000000000000") ){
+                            // no commit and no checkout sha, a Tag was deleted, so no build need to be triggered
+                            LOGGER.log(Level.INFO, "GitLab Push {0} has been deleted, skip build .", req.getRef());
+                            return null;
+                        }
+                        revision = new RevisionParameterAction(req.getCheckout_sha());
+                    }
+
                     actions.add(revision);
                     Action[] actionsArray = actions.toArray(new Action[0]);
 
