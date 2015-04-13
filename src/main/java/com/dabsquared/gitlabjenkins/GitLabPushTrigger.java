@@ -44,6 +44,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
+    private boolean addVoteOnMergeRequest = true;
     private boolean allowAllBranches = false;
 
     private List<String> allowedBranches;
@@ -57,13 +58,14 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean allowAllBranches, List<String> allowedBranches) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addVoteOnMergeRequest, boolean allowAllBranches, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
 	this.addNoteOnMergeRequest = addNoteOnMergeRequest;
+        this.addVoteOnMergeRequest = addVoteOnMergeRequest;
         this.allowAllBranches = allowAllBranches;
         this.allowedBranches = allowedBranches;
     }
@@ -86,6 +88,10 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
     public boolean getAddNoteOnMergeRequest() {
         return addNoteOnMergeRequest;
+    }
+    
+    public boolean getAddVoteOnMergeRequest() {
+        return addVoteOnMergeRequest;
     }
 
     public boolean getAllowAllBranches() {
@@ -269,9 +275,11 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         if(addNoteOnMergeRequest) {
             StringBuilder msg = new StringBuilder();
             if (abstractBuild.getResult() == Result.SUCCESS) {
-                msg.append(":white_check_mark:");
+                String icon = addVoteOnMergeRequest ? ":+1:" : ":white_check_mark:";
+                msg.append(icon);
             } else {
-                msg.append(":anguished:");
+                String icon = addVoteOnMergeRequest ? ":-1:" : ":anguished:";
+                msg.append(icon);
             }
             msg.append(" Jenkins Build ").append(abstractBuild.getResult().color.getDescription());
             String buildUrl = Jenkins.getInstance().getRootUrl() + abstractBuild.getUrl();
