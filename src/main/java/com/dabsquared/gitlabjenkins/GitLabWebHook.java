@@ -108,6 +108,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
         while (restOfPathParts.hasNext()) {
             paths.add(restOfPathParts.next());
         }
+        
+        // remove everything till we found 'commits'
+        for (Iterator<String> it = paths.iterator(); it.hasNext();) {
+            String path = it.next();
+            if (path.equals("commits"))
+            	break;
+            it.remove();
+        }
 
         String token = req.getParameter("token");
 
