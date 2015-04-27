@@ -2,7 +2,17 @@ package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
 import hudson.Util;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.Item;
+import hudson.model.ParameterValue;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Cause;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersAction;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.StringParameterValue;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
@@ -147,7 +157,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 
                     LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
 
-                    Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+                    Map<String, ParameterValue> values = getDefaultParameters();
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
                     values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
@@ -210,7 +220,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 private Action[] createActions(GitLabMergeRequest req) {
                     List<Action> actions = new ArrayList<Action>();
 
-                    Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+                    Map<String, ParameterValue> values = getDefaultParameters();
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
                     
@@ -244,6 +254,19 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                 
             });	
     	}
+    }
+    
+    private Map<String, ParameterValue> getDefaultParameters() {
+        Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+        ParametersDefinitionProperty definitionProperty = job.getProperty(ParametersDefinitionProperty.class);
+
+        if (definitionProperty != null) {
+            for (ParameterDefinition definition : definitionProperty.getParameterDefinitions()) {
+                values.put(definition.getName(), definition.getDefaultParameterValue());
+            }
+        }
+
+        return values;
     }
 
     private void setBuildCauseInJob(AbstractBuild abstractBuild){
