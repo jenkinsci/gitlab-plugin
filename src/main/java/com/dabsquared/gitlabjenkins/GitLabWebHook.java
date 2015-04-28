@@ -52,6 +52,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
 import com.dabsquared.gitlabjenkins.GitLabPushRequest;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 /**
@@ -109,12 +110,23 @@ public class GitLabWebHook implements UnprotectedRootAction {
             paths.add(restOfPathParts.next());
         }
         
-        // remove everything till we found 'commits'
-        for (Iterator<String> it = paths.iterator(); it.hasNext();) {
-            String path = it.next();
-            if (path.equals("commits"))
-            	break;
-            it.remove();
+        /*
+         * Since GitLab 7.10 the URL contains the pushed branch name.
+         * Extract and store the branch name for further processing.
+         * http://jenkins.host.com/project/<ProjectName>/refs/<branchName>/commit/<SHA1>
+         */
+        String sourceBranch = null;
+        if (!paths.isEmpty() && paths.get(0).equals("refs")) {
+            int index = paths.lastIndexOf("commits");
+            if (index == -1)
+                index = paths.lastIndexOf("builds");
+            if (index == -1)
+                index = paths.lastIndexOf("!builds");
+            
+            if (index > 1) {
+                sourceBranch = Joiner.on('/').join(paths.subList(1, index)); // extract branch
+                paths.subList(0, index).clear(); // remove 'refs/<branchName>'
+            }
         }
 
         String token = req.getParameter("token");
