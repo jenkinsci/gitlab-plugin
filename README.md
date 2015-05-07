@@ -37,7 +37,7 @@ Using it With A Job
     * Click *Git*
     * Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
       * In the Advanced settings, set its *Name* to ``origin``
-    * To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the Gitlab server](#configuring-access-to-gitlab))
+    * To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the Gitlab server](#configuring-access-to-gitlab)
       * Add a second repository with:
         * *URL*: ``${gitlabSourceRepoURL}`` 
         * *Name* (in Advanced): ``${gitlabSourceRepoName}``
