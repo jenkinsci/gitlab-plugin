@@ -412,7 +412,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             msg.append(" Jenkins Build ").append(run.getResult().color.getDescription());
             String buildUrl = Jenkins.getInstance().getRootUrl() + run.getUrl();
             msg.append("\n\nResults available at: ")
-                    .append("[").append("Jenkins").append("](").append(buildUrl).append(")");
+                    .append("[").append("Jenkins " + buildUrl).append("](").append(buildUrl).append(")");
             try {
                 GitlabProject proj = new GitlabProject();
                 proj.setId(cause.getMergeRequest().getObjectAttribute().getTargetProjectId());
