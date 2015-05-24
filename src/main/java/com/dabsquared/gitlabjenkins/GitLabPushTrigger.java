@@ -165,6 +165,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1} (push)", new String[]{job.getName(), job.getRootProject().getName()});
                     values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", getDesc().getSourceRepoNameDefault(job)));
                 	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", getDesc().getSourceRepoURLDefault(job).toString()));
+                    values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
                 	
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
@@ -223,7 +224,9 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     Map<String, ParameterValue> values = getDefaultParameters();
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
-                    
+                    values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
+
+
                     LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1}", new String[]{job.getName(), getDesc().project.getName()});
                     String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
                     String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
