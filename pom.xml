@@ -7,7 +7,7 @@
     </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.1.24-SNAPSHOT</version>
+  <version>1.1.24</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -31,7 +31,7 @@
       <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
       <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
       <url>https://github.com/jenkinsci/gitlab-plugin</url>
-    <tag>HEAD</tag>
+    <tag>gitlab-plugin-1.1.24</tag>
   </scm> 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
