@@ -385,7 +385,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 			List<GitlabMergeRequest> mergeRequests = api.instance().retrieve().getAll(tailUrl, GitlabMergeRequest[].class);
 
 			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
-				if (projectRef.endsWith(mr.getSourceBranch())) {
+				if (projectRef.endsWith(mr.getSourceBranch()) || projectRef.endsWith(mr.getTargetBranch())) {
 					LOGGER.log(Level.FINE,
 							"Generating new merge trigger from "
 									+ mr.toString() + "\n source: "
