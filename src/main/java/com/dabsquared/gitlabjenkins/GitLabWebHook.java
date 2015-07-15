@@ -439,10 +439,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
         	LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
             return;
         }
-        AbstractBuild mergeBuild = getBuildBySHA1(project, request.getObjectAttribute().getLastCommit().getId(), true);
-        if(mergeBuild!=null){
-            LOGGER.log(Level.INFO, "Last commit in Merge Request has already been build in build #"+mergeBuild.getId());
-            return;
+        if(request.getObjectAttribute().getLastCommit()!=null) {
+            AbstractBuild mergeBuild = getBuildBySHA1(project, request.getObjectAttribute().getLastCommit().getId(), true);
+            if(mergeBuild!=null){
+                LOGGER.log(Level.INFO, "Last commit in Merge Request has already been build in build #"+mergeBuild.getId());
+                return;
+            }
         }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
