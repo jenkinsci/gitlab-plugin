@@ -23,6 +23,8 @@ import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.XStream2;
+import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +75,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
 	private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 	private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
-    private boolean triggerOpenMergeRequestOnPush = true;
+    private final String triggerOpenMergeRequestOnPush;
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
@@ -83,7 +85,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     private final String excludeBranchesSpec;
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addVoteOnMergeRequest, boolean allowAllBranches,
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addVoteOnMergeRequest, boolean allowAllBranches,
             String includeBranchesSpec, String excludeBranchesSpec) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -105,7 +107,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     	return triggerOnMergeRequest;
     }
 
-    public boolean getTriggerOpenMergeRequestOnPush() {
+    public String getTriggerOpenMergeRequestOnPush() {
         return triggerOpenMergeRequestOnPush;
     }
 
@@ -509,6 +511,12 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             save();
             gitlab = new GitLab();
             return super.configure(req, formData);
+        }
+        
+        public ListBoxModel doFillTriggerOpenMergeRequestOnPushItems(@QueryParameter String triggerOpenMergeRequestOnPush) {
+            return new ListBoxModel(new Option("Never", "never", triggerOpenMergeRequestOnPush.matches("never") ),
+                    new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source") ),
+                    new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both") ));
         }
 
         private List<String> getProjectBranches(final Job<?, ?> job) throws IOException, IllegalStateException {
