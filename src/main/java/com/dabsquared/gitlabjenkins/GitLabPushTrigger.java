@@ -458,6 +458,8 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private transient GitLab gitlab;
 
+        private final Map<String, List<String>> projectBranches = new HashMap<String, List<String>>();
+
         public DescriptorImpl() {
         	load();
         }
@@ -512,6 +514,10 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
         }
 
         private List<String> getProjectBranches(final Job<?, ?> job) throws IOException, IllegalStateException {
+            if (projectBranches.containsKey(job.getName())){
+                return projectBranches.get(job.getName());
+            }
+
             if (!(job instanceof AbstractProject<?, ?>)) {
                 return Lists.newArrayList();
             }
@@ -541,6 +547,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     }
                 }
 
+                projectBranches.put(job.getName(), branchNames);
                 return branchNames;
             } catch (final Error error) {
                 /* WTF WTF WTF */
