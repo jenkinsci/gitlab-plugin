@@ -420,7 +420,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
 					} finally {
 						SecurityContextHolder.getContext().setAuthentication(old);
 					}
-					return;
 				}
 			}
 		} catch (Exception e) {
