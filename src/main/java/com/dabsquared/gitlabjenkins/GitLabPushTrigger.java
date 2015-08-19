@@ -270,7 +270,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
                     values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
 
 
-                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0} using project {1}", new String[]{job.getName(), getDesc().project.getName()});
+                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getName());
                     String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
                     String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
                     
