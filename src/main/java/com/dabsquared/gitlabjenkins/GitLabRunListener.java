@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.triggers.Trigger;
+import jenkins.model.ParameterizedJobMixIn;
 
 import javax.annotation.Nonnull;
 
@@ -38,10 +39,13 @@ public class GitLabRunListener extends RunListener<Run> {
 
     private GitLabPushTrigger getTrigger(Run run) {
         if (run instanceof AbstractBuild) {
-            Trigger trig = ((AbstractBuild) run).getProject().getTrigger(GitLabPushTrigger.class);
-            if (trig != null && trig instanceof GitLabPushTrigger)
-                return (GitLabPushTrigger) trig;
+            ParameterizedJobMixIn.ParameterizedJob p = ((AbstractBuild) run).getProject();
+            for (Trigger t : p.getTriggers().values()) {
+                if (t instanceof GitLabPushTrigger)
+                    return (GitLabPushTrigger) t;
+            }
         }
+
         return null;
     }
 }

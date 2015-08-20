@@ -163,7 +163,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     // executes when the Trigger receives a push request
     public void onPost(final GitLabPushRequest req) {
-    	final ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
+        // TODO 1.621+ use standard method
+        final ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
             @Override
             protected Job asJob() {
                 return job;
@@ -176,7 +177,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 public void run() {
             		LOGGER.log(Level.INFO, "{0} triggered for push.", job.getName());
 
-            		String name = " #" + job.getNextBuildNumber();
+            		String name = " #" + job.getNextBuildNumber();                    
             		GitLabPushCause cause = createGitLabPushCause(req);
             		Action[] actions = createActions(req);
 
@@ -266,7 +267,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     		getDescriptor().queue.execute(new Runnable() {
                 public void run() {
 	                LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getName());
-	                String name = " #" + job.getNextBuildNumber();
+                  String name = " #" + job.getNextBuildNumber();
+                  
 	                GitLabMergeCause cause = createGitLabMergeCause(req);
 	                Action[] actions = createActions(req);
                     ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
