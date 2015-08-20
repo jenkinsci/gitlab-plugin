@@ -564,10 +564,25 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             return Lists.newArrayList(Splitter.on(',').omitEmptyStrings().trimResults().split(spec));
         }
 
-        private AutoCompletionCandidates doAutoCompleteBranchesSpec(final Job<?, ?> job) {
+        private AutoCompletionCandidates doAutoCompleteBranchesSpec(final Job<?, ?> job, @QueryParameter final String value) {
+            String query = value.toLowerCase();
+
             final AutoCompletionCandidates ac = new AutoCompletionCandidates();
-            try {
-                ac.getValues().addAll(this.getProjectBranches(job));
+            List<String> values = ac.getValues();
+
+            try {  
+                List<String> branches = this.getProjectBranches(job);
+                // show all suggestions for short strings
+                if (query.length() < 2){
+                    values.addAll(branches);              
+                }
+                else {
+                    for (String branch : branches){
+                      if (branch.toLowerCase().indexOf(query) > -1){
+                        values.add(branch);
+                      }
+                    }
+                }
             } catch (final IllegalStateException ex) {
                 /* no-op */
             } catch (final IOException ex) {
@@ -577,12 +592,12 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
             return ac;
         }
 
-        public AutoCompletionCandidates doAutoCompleteIncludeBranchesSpec(@AncestorInPath final Job<?, ?> job) {
-            return this.doAutoCompleteBranchesSpec(job);
+        public AutoCompletionCandidates doAutoCompleteIncludeBranchesSpec(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
+            return this.doAutoCompleteBranchesSpec(job, value);
         }
 
-        public AutoCompletionCandidates doAutoCompleteExcludeBranchesSpec(@AncestorInPath final Job<?, ?> job) {
-            return this.doAutoCompleteBranchesSpec(job);
+        public AutoCompletionCandidates doAutoCompleteExcludeBranchesSpec(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
+            return this.doAutoCompleteBranchesSpec(job, value);
         }
 
         private FormValidation doCheckBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
