@@ -399,7 +399,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
             trigger.onPost(request);
 
-            if (trigger.getTriggerOpenMergeRequestOnPush()) {
+            if (!trigger.getTriggerOpenMergeRequestOnPush().equals("never")) {
             	// Fetch and build open merge requests with the same source branch
             	buildOpenMergeRequests(trigger, request.getProject_id(), request.getRef());
             }
@@ -416,7 +416,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
 			List<GitlabMergeRequest> mergeRequests = api.instance().retrieve().getAll(tailUrl, GitlabMergeRequest[].class);
 
 			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
-				if (projectRef.endsWith(mr.getSourceBranch()) || projectRef.endsWith(mr.getTargetBranch())) {
+				if (projectRef.endsWith(mr.getSourceBranch()) || 
+                                        (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(mr.getTargetBranch()))) {
 					LOGGER.log(Level.FINE,
 							"Generating new merge trigger from "
 									+ mr.toString() + "\n source: "
@@ -450,7 +451,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
 					} finally {
 						SecurityContextHolder.getContext().setAuthentication(old);
 					}
-					return;
 				}
 			}
 		} catch (Exception e) {
@@ -468,6 +468,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
         if(request.getObjectAttribute().getState().equals("merged")) {
         	LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
+            return;
+        }
+        if(request.getObjectAttribute().getAction().equals("update")) {
+        	LOGGER.log(Level.INFO, "Existing Merge Request, build will be trigged by buildOpenMergeRequests instead");
             return;
         }
         if(request.getObjectAttribute().getLastCommit()!=null) {
