@@ -418,6 +418,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
 			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
 				if (projectRef.endsWith(mr.getSourceBranch()) || 
                                         (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(mr.getTargetBranch()))) {
+                                    
+                                        if (trigger.getCiSkip() && mr.getDescription().contains("[ci-skip]")) {
+                                            LOGGER.log(Level.INFO, "Skipping MR " + mr.getTitle() + " due to ci-skip.");
+                                            continue;
+                                        }
+                                    
 					LOGGER.log(Level.FINE,
 							"Generating new merge trigger from "
 									+ mr.toString() + "\n source: "
@@ -480,6 +486,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #"+mergeBuild.getId());
                 return;
             }
+        }
+        if(request.getObjectAttribute().getDescription().contains("[ci-skip]")) {
+                LOGGER.log(Level.INFO, "Skipping MR " + request.getObjectAttribute().getTitle() + " due to ci-skip.");
+            return;
         }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
