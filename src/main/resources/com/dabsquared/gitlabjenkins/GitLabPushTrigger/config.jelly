@@ -6,8 +6,8 @@
     <f:entry title="Build on Push Events" field="triggerOnPush">
       <f:checkbox default="true" />
     </f:entry>
-    <f:entry title="Rebuild open Merge Requests on Push Events" field="triggerOpenMergeRequestOnPush">
-      <f:checkbox default="true" />
+    <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
+      <f:select/>
     </f:entry>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
       <f:checkbox default="true" />
