@@ -318,6 +318,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getName());
                     String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
                     String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
+                    String mergeRequestID = req.getObjectAttribute().getId().toString();
+                    String targetProjectID = req.getObjectAttribute().getTargetProjectId().toString();
                     
                     if (!getDescriptor().getGitlabHostUrl().isEmpty()) {                                        
                     	// Get source repository if communication to Gitlab is possible
@@ -332,6 +334,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
                 	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
 
+                    values.put("gitlabMergeRequestID", new StringParameterValue("gitlabMergeRequestID", mergeRequestID));
+                    values.put("gitlabTargetProjectID", new StringParameterValue("gitlabTargetProjectID", targetProjectID));
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
                     ParametersAction parametersAction = new ParametersAction(listValues);
