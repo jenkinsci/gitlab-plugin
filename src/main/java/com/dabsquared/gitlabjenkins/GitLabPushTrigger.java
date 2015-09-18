@@ -44,6 +44,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
     private boolean acceptMergeRequestOnSuccess = true;
+    private boolean allowAllBranches = false;
 
     private List<String> allowedBranches;
 
@@ -56,11 +57,12 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setBuildDescription, boolean acceptMergeRequestOnSuccess, List<String> allowedBranches) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOpenMergeRequestOnPush, boolean setBuildDescription, boolean acceptMergeRequestOnSuccess, boolean allowAllBranches, List<String> allowedBranches) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.setBuildDescription = setBuildDescription;
+        this.allowAllBranches = allowAllBranches;
         this.allowedBranches = allowedBranches;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
@@ -90,7 +92,7 @@ public class GitLabPushTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public void onPost(final GitLabPushRequest req) {
-    	boolean allowBuild = allowedBranches.isEmpty() || allowedBranches.contains(getSourceBranch(req));
+    	boolean allowBuild = allowAllBranches || (allowedBranches.isEmpty() || allowedBranches.contains(getSourceBranch(req)));
     	if (triggerOnPush && (allowBuild)) {
             getDescriptor().queue.execute(new Runnable() {
 
