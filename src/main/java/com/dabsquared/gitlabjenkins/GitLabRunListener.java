@@ -1,10 +1,12 @@
 package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
+import hudson.model.Run;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.triggers.Trigger;
+import jenkins.model.ParameterizedJobMixIn;
 
 import javax.annotation.Nonnull;
 
@@ -14,31 +16,36 @@ import javax.annotation.Nonnull;
  * in order to have access to the build and set properties.
  */
 @Extension
-public class GitLabRunListener extends RunListener<AbstractBuild> {
+public class GitLabRunListener extends RunListener<Run> {
 
     @Override
-    public void onCompleted(AbstractBuild abstractBuild, @Nonnull TaskListener listener) {
-        GitLabPushTrigger trig = getTrigger(abstractBuild);
+    public void onCompleted(Run run, @Nonnull TaskListener listener) {
+        GitLabPushTrigger trig = getTrigger(run);
         if (trig != null) {
-            trig.onCompleted(abstractBuild);
+            trig.onCompleted(run);
         }
-        super.onCompleted(abstractBuild, listener);
+        super.onCompleted(run, listener);
     }
 
     @Override
-    public void onStarted(AbstractBuild abstractBuild, TaskListener listener) {
-        GitLabPushTrigger trig = getTrigger(abstractBuild);
+    public void onStarted(Run run, TaskListener listener) {
+        GitLabPushTrigger trig = getTrigger(run);
         if (trig != null) {
-            trig.onStarted(abstractBuild);
+            trig.onStarted(run);
         }
-        super.onStarted(abstractBuild, listener);
+        super.onStarted(run, listener);
     }
 
 
-    private GitLabPushTrigger getTrigger(AbstractBuild abstractBuild) {
-        Trigger trig = abstractBuild.getProject().getTrigger(GitLabPushTrigger.class);
-        if (trig != null && trig instanceof GitLabPushTrigger)
-            return (GitLabPushTrigger) trig;
+    private GitLabPushTrigger getTrigger(Run run) {
+        if (run instanceof AbstractBuild) {
+            ParameterizedJobMixIn.ParameterizedJob p = ((AbstractBuild) run).getProject();
+            for (Trigger t : p.getTriggers().values()) {
+                if (t instanceof GitLabPushTrigger)
+                    return (GitLabPushTrigger) t;
+            }
+        }
+
         return null;
     }
 }

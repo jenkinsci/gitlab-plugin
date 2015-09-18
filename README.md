@@ -30,29 +30,53 @@ To enable this functionality, a user should be set up on Gitlab, which adequate 
 
 Using it With A Job
 =====================
-* Create a new job by going to ``New Job``
-* Set the ``Project Name``
-* Feel free to specify the ``GitHub Project`` url as the url for the Gitlab project (if you have the GitHub plugin installed)
-* In the ``Source Code Management`` section:
-    * Click ``Git`` and enter your Repository URL and in Advanced set its Name to ``origin``
-    * Add a second Repository with URL ``${gitlabSourceRepoURL}`` and name (in Advanced) ``${gitlabSourceRepoName}`` if you want to be able to merge from forked repositories (this **requires** configuring communication to the Gitlab server)
-    * In ``Branch Specifier`` enter ``origin/${gitlabSourceBranch}`` or ``${gitlabSourceRepoName}/${gitlabSourceBranch}``
-    * In the ``Additional Behaviours`` section:
-        * Click the ``Add`` drop down button and the ``Merge before build`` item
-        * Specify the name of the repository as ``origin`` (if origin corresponds to Gitlab) and enter the ``Branch to merge to`` as ``${gitlabTargetBranch}``
-* In the ``Build Triggers`` section:
+* Create a new job by going to *New Job*
+* Set the _Project Name_ to whatever you like
+* If you have the GitHub plugin installed, feel free to specify the ``GitHub Project`` url as the url for the Gitlab project.
+* In the *Source Code Management* section:
+    * Click *Git*
+    * Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
+      * In the Advanced settings, set its *Name* to ``origin``
+    * To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the Gitlab server](#configuring-access-to-gitlab)
+      * Add a second repository with:
+        * *URL*: ``${gitlabSourceRepoURL}`` 
+        * *Name* (in Advanced): ``${gitlabSourceRepoName}``
+    * In *Branch Specifier* enter:
+      * For single-repository setups: ``origin/${gitlabSourceBranch}``
+      * For forked repository setups: ``${gitlabSourceRepoName}/${gitlabSourceBranch}``
+    * In *Additional Behaviours*:
+        * Click the *Add* drop-down button.
+        * Select *Merge before build* from the drop-down.
+        * Set *Name of the repository" to ``origin`` 
+        * Set *Branch to merge* as ``${gitlabTargetBranch}``
+* In the *Build Triggers* section:
     * Check the ``Build when a change is pushed to GitLab.``
     * Use the check boxes to trigger builds on Push and/or Merge Request events
     * Optionally enable building open merge requests again after a push to the source branch.
-* In GitLab go to the project ``Settings``
-    * Click on ``Services``
-    * Click on ``GitLab CI``
-        * For ``token`` put any random string (This is not yet functioning)
-        * For ``Project URL`` put ``http://JENKINS_URL/project/PROJECT_NAME``
-    * Click on ``Web Hooks``
-        * Add a ``Web Hook`` for ``Merge Request Events`` to ``http://JENKINS_URL/project/PROJECT_NAME``  (GitLab for some reason does not send a merge request event with the GitLab Service)
 * Configure any other pre build, build or post build actions as necessary
-* ``Save`` to preserve your changes
+* Click *Save* to preserve your changes in Jenkins.
+
+### GitLab Configuration
+* In GitLab go to you primary repository's project *Settings*
+    * Click on *Services*
+    * Click on *GitLab CI*
+        * Check the *Active* checkbox 
+        * For *Token* put any random string (This is not yet functioning)
+        * For *Project URL* put ``http://JENKINS_URL/project/PROJECT_NAME``
+        * Click *Save*
+    * Click on *Web Hooks*
+        * Add a Web Hook for *Merge Request Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+        **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
+
+If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
+* Go to the Settings page in each developer's fork
+* Click on *Services*
+   * Click on *GitLab CI*
+      * Check the *Active* checkbox 
+      * For *Token* put any random string (This is not yet functioning)
+      * For *Project URL* put ``http://JENKINS_URL/project/PROJECT_NAME``
+      * Click *Save* <br />
+      **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
 Branch filtering
 ================
@@ -60,6 +84,15 @@ Branch filtering
 Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
 
 This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For existing projects, all branches are allowed to push by default.
+
+Build Tags
+================
+
+In order to build when a new tag is pushed:
+* In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
+* In the ``Jenkins`` under the ``Source Code Management`` section:
+    * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
+    * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
 
 Parameterized builds
 ====================
@@ -72,6 +105,7 @@ These include:
 * gitlabSourceRepoURL
 * gitlabSourceRepoName
 * gitlabBranch (This is optional and can be used in shell scripts for the branch being built by the push request)
+* gitlabActionType (This is optional and can be used in shell scripts or other plugins to change the build behaviour. Possible values are PUSH or MERGE)
 
 
 Help Needed

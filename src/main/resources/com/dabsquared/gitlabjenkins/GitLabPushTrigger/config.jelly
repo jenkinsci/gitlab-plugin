@@ -6,7 +6,10 @@
     <f:entry title="Build on Push Events" field="triggerOnPush">
       <f:checkbox default="true" />
     </f:entry>
-    <f:entry title="Rebuild open Merge Requests on Push Events" field="triggerOpenMergeRequestOnPush">
+    <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
+      <f:select/>
+    </f:entry>
+    <f:entry title="Enable [ci-skip]" field="ciSkip">
       <f:checkbox default="true" />
     </f:entry>
     <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
@@ -15,20 +18,16 @@
     <f:entry title="Add note with build status on merge requests" field="addNoteOnMergeRequest">
       <f:checkbox default="true" />
     </f:entry>
-    boolean acceptMergeRequestOnSuccess,
-    <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
-      <f:checkbox default="true" />
-    </f:entry>
         <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
       <f:checkbox default="false" />
     </f:entry>
-    <f:entry title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
-    	<j:invoke on="${descriptor}" method="getProjectBranches" var="projectBranches" />
-    	<j:set var="optionsSize" value="${projectBranches.size()}"/>
-   		<select name="allowedBranches" multiple="multiple" size="${optionsSize}" style="min-width:50%;">   		
-			<j:forEach var="aBranch" items="${projectBranches}" varStatus="loop">
-				<f:option value="${aBranch}" selected="${instance.allowedBranches.isEmpty() || instance.allowedBranches.contains(aBranch)}">${aBranch}</f:option>				
-			</j:forEach>
-   		</select>
-	</f:entry> 
+    <f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"
+                     inline="true" checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
+        <f:entry title="Include">
+            <f:textbox field="includeBranchesSpec" autocompleteDelimChar="," />
+        </f:entry>
+        <f:entry title="Exclude">
+            <f:textbox field="excludeBranchesSpec" autocompleteDelimChar="," />
+        </f:entry>
+    </f:optionalBlock>
 </j:jelly>

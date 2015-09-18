@@ -95,7 +95,8 @@ public class GitLabMergeRequest extends GitLabRequest {
         private Branch target;
 
         private LastCommit lastCommit;
-
+        
+        private String action;
 
         public ObjectAttributes() {
         }
@@ -239,6 +240,14 @@ public class GitLabMergeRequest extends GitLabRequest {
 
         public void setLastCommit(LastCommit lastCommit) {
             this.lastCommit = lastCommit;
+        }
+        
+        public String getAction() {
+            return action;
+        }
+
+        public void setAction(String action) {
+            this.action = action;
         }
     }
 
