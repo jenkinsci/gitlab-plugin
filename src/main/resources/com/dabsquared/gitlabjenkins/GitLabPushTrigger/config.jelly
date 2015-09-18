@@ -18,6 +18,12 @@
     <f:entry title="Add note with build status on merge requests" field="addNoteOnMergeRequest">
       <f:checkbox default="true" />
     </f:entry>
+     <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
+      <f:checkbox default="true" />
+    </f:entry>
+     <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
+       <f:checkbox default="true" />
+     </f:entry>
         <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
       <f:checkbox default="false" />
     </f:entry>
