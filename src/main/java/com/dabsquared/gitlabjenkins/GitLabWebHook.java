@@ -468,16 +468,16 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
     public void generateMergeRequestBuild(String json, Job project, StaplerRequest req, StaplerResponse rsp) {
         GitLabMergeRequest request = GitLabMergeRequest.create(json);
-        if(request.getObjectAttribute().getState().equals("closed")) {
-        	LOGGER.log(Level.INFO, "Closed Merge Request, no build started");
+        if("closed".equals(request.getObjectAttribute().getState())) {
+            LOGGER.log(Level.INFO, "Closed Merge Request, no build started");
             return;
         }
-        if(request.getObjectAttribute().getState().equals("merged")) {
-        	LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
+        if("merged".equals(request.getObjectAttribute().getState())) {
+            LOGGER.log(Level.INFO, "Accepted Merge Request, no build started");
             return;
         }
-        if(request.getObjectAttribute().getAction().equals("update")) {
-        	LOGGER.log(Level.INFO, "Existing Merge Request, build will be trigged by buildOpenMergeRequests instead");
+        if("update".equals(request.getObjectAttribute().getAction())) {
+            LOGGER.log(Level.INFO, "Existing Merge Request, build will be trigged by buildOpenMergeRequests instead");
             return;
         }
         if(request.getObjectAttribute().getLastCommit()!=null) {
