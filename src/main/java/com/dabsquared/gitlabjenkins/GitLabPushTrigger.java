@@ -86,9 +86,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean allowAllBranches = false;
     private final String includeBranchesSpec;
     private final String excludeBranchesSpec;
+    private boolean acceptMergeRequestOnSuccess = false;
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addVoteOnMergeRequest, boolean allowAllBranches,
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, boolean allowAllBranches,
             String includeBranchesSpec, String excludeBranchesSpec) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -100,6 +101,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.allowAllBranches = allowAllBranches;
         this.includeBranchesSpec = includeBranchesSpec;
         this.excludeBranchesSpec = excludeBranchesSpec;
+        this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
 
     public boolean getTriggerOnPush() {
@@ -386,6 +388,18 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     private void onCompleteMergeRequest(Run run,GitLabMergeCause cause){
+        if (acceptMergeRequestOnSuccess && run.getResult() == Result.SUCCESS) {
+            try {
+                GitlabProject proj = new GitlabProject();
+                proj.setId(cause.getMergeRequest().getObjectAttribute().getTargetProjectId());
+                this.getDescriptor().getGitlab().instance().acceptMergeRequest(
+                        proj,
+                        cause.getMergeRequest().getObjectAttribute().getId(),
+                        "Merge Request accepted by jenkins build success");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         if(addNoteOnMergeRequest) {
             StringBuilder msg = new StringBuilder();
             if (run.getResult() == Result.SUCCESS) {
