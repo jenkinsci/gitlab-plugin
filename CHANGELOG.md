@@ -1,6 +1,19 @@
 ChangeLog
 =====================
 
+1.1.27
+=====================
+* (#118 - @christ66) IntelliJ Excludes
+* (#117 - @christ66) Ball Color Changed to Result
+* (#110 - @kasper-f) Accept Merge Request On Build Succes
+* (#106 - @xathien) Null Pointer Error Fix
+* (#105 - @jr4) Merge Request Not Built On First Raise
+
+1.1.26
+=====================
+* (#101 - @TomAndrews) Generalise ci-skip
+* (#102 - @TomAndrews) Configurable Rebuild Options
+
 1.1.4
 =====================
 * Updated git-plugin dependency to latest version; minimum supported version of Jenkins is now 1.568

@@ -17,9 +17,9 @@ Current Supported GitLabCI Functions
 * `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
 * `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
-Major Help Needed
+Help Needed
 =====================
-I would like this project to be able to handle building merge requests and regular pushes. In order to do this I need a way to configure the git plugin via code to merge two branches together before a build. Much like the RevisionParameterAction.java in the git plugin, we need a class that takes to branches, a source and a target, and can be passed as a build action. I have started an issue for the Git plugin here: https://issues.jenkins-ci.org/browse/JENKINS-23362 If you know of a way to do this please PM on twitter at @bass_rock. All the other necessary code exists in this repo and works.
+* I am currently looking for someone to help maintain this project. This includes keeping up a Changelog, releasing builds, accepting merge requests, etc. If you are interested let @bass_rock know and I can add you as a maintainer.
 
 Configuring access to Gitlab
 =======================================
@@ -56,7 +56,21 @@ Using it With A Job
 * Configure any other pre build, build or post build actions as necessary
 * Click *Save* to preserve your changes in Jenkins.
 
-### GitLab Configuration
+### GitLab Configuration (≥ 8.0)
+* In GitLab go to you primary repository's project *Settings*
+    * Click on *Web Hooks*
+        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+        **Note:** Currently GitLab 8.0 does not have a commit status api. Once this is added we should be able to add the commit status to Gitlab.
+
+If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
+* Go to the Settings page in each developer's fork
+* Click on *Services*
+    * Click on *Web Hooks*
+        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+        **Note:** Currently GitLab 8.0 does not have a commit status api. Once this is added we should be able to add the commit status to Gitlab.
+        **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
+
+### GitLab Configuration (< 8.0)
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Services*
     * Click on *GitLab CI*
