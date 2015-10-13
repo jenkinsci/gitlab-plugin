@@ -1,14 +1,7 @@
 package com.dabsquared.gitlabjenkins;
 
 import hudson.Extension;
-import hudson.model.BallColor;
-import hudson.model.Item;
-import hudson.model.ItemGroup;
-import hudson.model.Job;
-import hudson.model.UnprotectedRootAction;
-import hudson.model.ParametersAction;
-import hudson.model.Run;
-import hudson.model.StringParameterValue;
+import hudson.model.*;
 import hudson.plugins.git.Branch;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.Build;
@@ -240,26 +233,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
         object.put("id", mainBuild.getNumber());
 
-        BallColor currentBallColor = mainBuild.getIconColor().noAnime();
+        Result res = mainBuild.getResult();
 
         //TODO: add status of pending when we figure it out.
         if(mainBuild.isBuilding()) {
             object.put("status", "running");
-        }else if(currentBallColor == BallColor.BLUE) {
+        }else if(res == Result.SUCCESS) {
             object.put("status", "success");
-        }else if(currentBallColor == BallColor.ABORTED) {
-            object.put("status", "failed");
-        }else if(currentBallColor == BallColor.DISABLED) {
-            object.put("status", "failed");
-        }else if(currentBallColor == BallColor.GREY) {
-            object.put("status", "failed");
-        }else if(currentBallColor == BallColor.NOTBUILT) {
-            object.put("status", "failed");
-        }else if(currentBallColor == BallColor.RED) {
-            object.put("status", "failed");
-        }else if(currentBallColor == BallColor.YELLOW) {
-            object.put("status", "failed");
-        } else {
+        }else {
             object.put("status", "failed");
         }
         
@@ -294,15 +275,14 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
         String imageUrl = "images/unknown.png";
         if(null != mainBuild) {
-        	BallColor currentBallColor = mainBuild.getIconColor().noAnime();
-
-            if(mainBuild.isBuilding()) {        	
+            Result res = mainBuild.getResult();
+            if(mainBuild.isBuilding()) {
             	imageUrl = "images/running.png";
-            }else if(currentBallColor == BallColor.BLUE) {
+            }else if(res == Result.SUCCESS) {
             	imageUrl = "images/success.png";
-            }else if(currentBallColor == BallColor.RED) {
+            }else if(res == Result.FAILURE) {
             	imageUrl = "images/failed.png";
-            }else if(currentBallColor == BallColor.YELLOW) {
+            }else if(res == Result.UNSTABLE) {
             	imageUrl = "images/unstable.png";
             }else {
             	imageUrl = "images/unknown.png"; 
