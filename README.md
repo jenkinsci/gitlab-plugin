@@ -19,7 +19,7 @@ Current Supported GitLabCI Functions
 
 Help Needed
 =====================
-* I am currently looking for someone to help maintain this project. This includes keeping up a Changelog, releasing builds, accepting merge requests, etc. If you are interested let @bass_rock know and I can add you as a maintainer.
+* I am currently looking for someone to help maintain this project. This includes keeping up a Changelog, releasing builds, accepting merge requests, etc. If you are interested let @bassrock know and I can add you as a maintainer.
 
 Configuring access to Gitlab
 =======================================
