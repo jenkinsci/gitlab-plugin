@@ -40,7 +40,6 @@ import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.sf.json.JSONObject;
-import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
@@ -130,6 +129,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     public boolean getAllowAllBranches() {
         return allowAllBranches;
+    }
+
+    public boolean getAcceptMergeRequestOnSuccess() {
+        return acceptMergeRequestOnSuccess;
     }
 
     public boolean getCiSkip() {
