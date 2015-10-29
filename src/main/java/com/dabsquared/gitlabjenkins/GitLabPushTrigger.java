@@ -133,6 +133,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return allowAllBranches;
     }
 
+    public boolean getAddCiMessage() {
+        return addCiMessage;
+    }
+
     public boolean getCiSkip() {
         return ciSkip;
     }
