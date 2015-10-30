@@ -417,8 +417,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
 									+ mr.getSourceBranch() + "\n target: "
 									+ mr.getTargetBranch() + "\n state: "
 									+ mr.getState() + "\n assign: "
-									+ mr.getAssignee() + "\n author: "
-									+ mr.getAuthor() + "\n id: "
+									+ mr.getAssignee().getName() + "\n author: "
+									+ mr.getAuthor().getName() + "\n id: "
 									+ mr.getId() + "\n iid: "
                                     + mr.getIid() + "\n last commit: "
                                     + lastCommit.getId() + "\n\n");
