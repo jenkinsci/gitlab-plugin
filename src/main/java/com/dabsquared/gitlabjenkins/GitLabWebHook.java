@@ -394,9 +394,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 	protected void buildOpenMergeRequests(GitLabPushTrigger trigger, Integer projectId, String projectRef) {
 		try {
 			GitLab api = new GitLab();
-			// TODO Replace this with a call to GitlabAPI.getOpenMergeRequests, once timols has deployed version 1.1.7
-			String tailUrl = GitlabProject.URL + "/" + projectId + GitlabMergeRequest.URL + "?state=opened&per_page=100";
-			List<GitlabMergeRequest> mergeRequests = api.instance().retrieve().getAll(tailUrl, GitlabMergeRequest[].class);
+			List<GitlabMergeRequest> mergeRequests = api.instance().getOpenMergeRequests(projectId);
 
 			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
 				if (projectRef.endsWith(mr.getSourceBranch()) || 
