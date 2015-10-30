@@ -207,7 +207,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             		}
 
                     if(addCiMessage) {
-                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", getDescriptor().gitlabHostUrl);
+                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
                     }
                 }
 
@@ -311,7 +311,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 	                }
 
                     if(addCiMessage) {
-                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", getDescriptor().gitlabHostUrl);
+                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
                     }
                 }
 
@@ -411,7 +411,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     private void onCompletedPushRequest(Run run, GitLabPushCause cause) {
         if(addCiMessage) {
-            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), run.getResult()==Result.SUCCESS?"success":"failure", this.getDescriptor().gitlabHostUrl);
+            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), run.getResult()==Result.SUCCESS?"success":"failure", Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 
@@ -452,7 +452,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
 
         if(addCiMessage) {
-            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), run.getResult()==Result.SUCCESS?"success":"failure", this.getDescriptor().gitlabHostUrl);
+            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), run.getResult()==Result.SUCCESS?"success":"failure", Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 
@@ -472,13 +472,13 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     private void onStartedPushRequest(Run run, GitLabPushCause cause) {
         if(addCiMessage) {
-            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), "running", this.getDescriptor().gitlabHostUrl);
+            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), "running", Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 
     private void onStartedMergeRequest(Run run, GitLabMergeCause cause) {
         if(addCiMessage) {
-            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), "running", this.getDescriptor().gitlabHostUrl);
+            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), "running", Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 

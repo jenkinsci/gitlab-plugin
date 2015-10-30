@@ -39,7 +39,7 @@ public class GitLabPushRequest extends GitLabRequest {
     public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
         try {
             if(getLastCommit()!=null) {
-                return api.createCommitStatus(sourceProject, getLastCommit().getId(), status, checkout_sha, "Jenkins", targetUrl, null);
+                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
             }
         } catch (IOException e) {
             e.printStackTrace();
