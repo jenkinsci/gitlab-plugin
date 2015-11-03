@@ -128,6 +128,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return addVoteOnMergeRequest;
     }
 
+    public boolean getAcceptMergeRequestOnSuccess() {
+        return acceptMergeRequestOnSuccess;
+    }
+
     public boolean getAllowAllBranches() {
         return allowAllBranches;
     }
