@@ -238,6 +238,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", getDesc().getSourceRepoNameDefault(job)));
                 	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", getDesc().getSourceRepoURLDefault(job).toString()));
                     values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
+                    values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getCommits().get(0).getAuthor().getName()));
+                    values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getCommits().get(0).getAuthor().getEmail()));
 
                     List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
