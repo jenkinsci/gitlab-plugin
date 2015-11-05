@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.gitlab.api.models.GitlabProject;
+import org.gitlab.api.models.GitlabUser;
 
 /**
  * Represents for WebHook payload
@@ -72,9 +73,9 @@ public class GitLabMergeRequest extends GitLabRequest {
 
         private Integer sourceProjectId;
 
-        private Integer authorId;
+        private User author;
 
-        private Integer assigneeId;
+        private User assignee;
 
         private String title;
 
@@ -146,20 +147,34 @@ public class GitLabMergeRequest extends GitLabRequest {
             this.sourceProjectId = sourceProjectId;
         }
 
-        public Integer getAuthorId() {
-            return authorId;
+        public User getAuthor() {
+            return author;
         }
 
-        public void setAuthorId(Integer authorId) {
-            this.authorId = authorId;
+        public void setAuthor(User author) {
+            this.author = author;
         }
 
-        public Integer getAssigneeId() {
-            return assigneeId;
+        public void setAuthor(GitlabUser author) {
+            this.author = new User();
+            this.author.setId(author.getId());
+            this.author.setEmail(author.getEmail());
+            this.author.setName(author.getName());
         }
 
-        public void setAssigneeId(Integer assigneeId) {
-            this.assigneeId = assigneeId;
+        public User getAssignee() {
+            return assignee;
+        }
+
+        public void setAssignee(User assignee) {
+            this.assignee = assignee;
+        }
+
+        public void setAssignee(GitlabUser assignee) {
+            this.assignee = new User();
+            this.assignee.setId(assignee.getId());
+            this.assignee.setEmail(assignee.getEmail());
+            this.assignee.setName(assignee.getName());
         }
 
         public String getTitle() {
@@ -324,5 +339,40 @@ public class GitLabMergeRequest extends GitLabRequest {
             return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
         }
     }
+    public static class User {
 
+        private Integer id;
+
+        private String name;
+
+        private String email;
+
+        public User() {
+        }
+
+        public Integer getId() { return id;}
+
+        public void setId(Integer id) { this.id = id; }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+        }
+    }
 }
