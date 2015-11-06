@@ -479,10 +479,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 return;
             }
         }
-        if(request.getObjectAttribute().getDescription().contains("[ci-skip]")) {
-                LOGGER.log(Level.INFO, "Skipping MR " + request.getObjectAttribute().getTitle() + " due to ci-skip.");
-            return;
-        }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
@@ -499,6 +495,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
             if (trigger == null) {
                 return;
             }
+            
+            if(trigger.getCiSkip() && request.getObjectAttribute().getDescription().contains("[ci-skip]")) {
+                LOGGER.log(Level.INFO, "Skipping MR " + request.getObjectAttribute().getTitle() + " due to ci-skip.");
+                return;
+            }
+            
             trigger.onPost(request);
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
