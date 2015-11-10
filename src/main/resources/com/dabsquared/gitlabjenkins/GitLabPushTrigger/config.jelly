@@ -18,7 +18,7 @@
     <f:entry title="Add note with build status on merge requests" field="addNoteOnMergeRequest">
       <f:checkbox default="true" />
     </f:entry>
-    <f:entry title="Use GitLab CI features (GitLab 8.1 required!)" field="addCiMessage">
+    <f:entry title="Use GitLab CI features (GitLab 8.1 required!)" field="addCiMessage" help="/plugin/gitlab-plugin/help/help-gitlab8.1CI.html">
       <f:checkbox default="false"/>
     </f:entry>
      <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
