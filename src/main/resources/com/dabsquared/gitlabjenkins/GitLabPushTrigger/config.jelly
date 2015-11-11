@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-	<f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
+    <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
       <f:checkbox default="true" />
     </f:entry>
     <f:entry title="Build on Push Events" field="triggerOnPush">
@@ -27,13 +27,18 @@
         <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
       <f:checkbox default="false" />
     </f:entry>
-    <f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"
-                     inline="true" checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
-        <f:entry title="Include">
+
+    <f:block>
+      <table style="margin-left:10px">
+	<f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"  inline="true" checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
+          <f:entry title="Include">
             <f:textbox field="includeBranchesSpec" autocompleteDelimChar="," />
-        </f:entry>
-        <f:entry title="Exclude">
+          </f:entry>
+          <f:entry title="Exclude">
             <f:textbox field="excludeBranchesSpec" autocompleteDelimChar="," />
-        </f:entry>
-    </f:optionalBlock>
+          </f:entry>
+	</f:optionalBlock>
+      </table>
+    </f:block>
+
 </j:jelly>
