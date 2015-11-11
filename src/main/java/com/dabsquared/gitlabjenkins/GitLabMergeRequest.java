@@ -5,6 +5,9 @@ import java.util.Date;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.models.GitlabCommitStatus;
+import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
 
 /**
@@ -58,6 +61,18 @@ public class GitLabMergeRequest extends GitLabRequest {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
+        try {
+            if(objectAttributes.lastCommit!=null) {
+                return api.createCommitStatus(sourceProject, objectAttributes.getLastCommit().getId(), status, objectAttributes.getLastCommit().getId(), "Jenkins", targetUrl, null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public static class ObjectAttributes {

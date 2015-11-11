@@ -64,15 +64,16 @@ Using it With A Job
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-        **Note:** Currently GitLab 8.0 does not have a commit status api. Once this is added we should be able to add the commit status to Gitlab.
 
 If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
 * Go to the Settings page in each developer's fork
 * Click on *Services*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-        **Note:** Currently GitLab 8.0 does not have a commit status api. Once this is added we should be able to add the commit status to Gitlab.
         **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
+## Gitlab Configuration (≥ 8.1)
+GitLab 8.1 uses the same configuration as GitLab 8.0
+* GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
 
 ### GitLab Configuration (< 8.0)
 * In GitLab go to you primary repository's project *Settings*
