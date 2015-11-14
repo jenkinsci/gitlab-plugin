@@ -1,47 +1,77 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
     <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Build on Push Events" field="triggerOnPush">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
-      <f:select/>
+        <f:select/>
     </f:entry>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Add note with build status on merge requests" field="addNoteOnMergeRequest">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
-    <f:entry title="Use GitLab CI features (GitLab 8.1 required!)" field="addCiMessage" help="/plugin/gitlab-plugin/help/help-gitlab8.1CI.html">
-      <f:checkbox default="false"/>
+    <f:entry title="Use GitLab CI features (GitLab 8.1 required!)" field="addCiMessage"
+             help="/plugin/gitlab-plugin/help/help-gitlab8.1CI.html">
+        <f:checkbox default="false"/>
     </f:entry>
-     <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
-      <f:checkbox default="true" />
+    <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
+        <f:checkbox default="true"/>
     </f:entry>
-     <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
-       <f:checkbox default="false" />
-     </f:entry>
-        <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
-      <f:checkbox default="false" />
+    <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
+        <f:checkbox default="false"/>
+    </f:entry>
+    <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
+        <f:checkbox default="false"/>
     </f:entry>
 
     <f:block>
-      <table style="margin-left:10px">
-	<f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"  inline="true" checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
-          <f:entry title="Include">
-            <f:textbox field="includeBranchesSpec" autocompleteDelimChar="," />
-          </f:entry>
-          <f:entry title="Exclude">
-            <f:textbox field="excludeBranchesSpec" autocompleteDelimChar="," />
-          </f:entry>
-	</f:optionalBlock>
-      </table>
+        <table style="margin-left:10px">
+            <f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"
+                             inline="true"
+                             checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
+                <f:entry title="Include">
+                    <f:textbox field="includeBranchesSpec" autocompleteDelimChar=","/>
+                </f:entry>
+                <f:entry title="Exclude">
+                    <f:textbox field="excludeBranchesSpec" autocompleteDelimChar=","/>
+                </f:entry>
+            </f:optionalBlock>
+        </table>
     </f:block>
 
+    <f:optionalBlock title="Custom GitLab messages" checked="${instance.customMessages}" help="/plugin/gitlab-plugin/help/help-customMessages.html">
+        <f:entry title="${%Merge request accept message}" field="mergeRequestAcceptMsg"
+                 description="Message to post on Gitlab upon automatic merge request acceptance">
+            <f:textarea default="${descriptor.mergeRequestAcceptMsg}"/>
+        </f:entry>
+
+        <f:entry title="${%Build success message}" field="buildSuccessMsg"
+                 description="Comment that Jenkins will post on Gitlab upon successful build">
+            <f:textarea default="${descriptor.buildSuccessMsg}"/>
+        </f:entry>
+
+        <f:entry title="${%Build failure message}" field="buildFailureMsg"
+                 description="Comment that Jenkins will post on Gitlab upon failed build">
+            <f:textarea default="${descriptor.buildFailureMsg}"/>
+        </f:entry>
+
+        <f:entry title="${%Build unstable message}" field="buildUnstableMsg"
+                 description="Comment that Jenkins will post on Gitlab upon unstable build">
+            <f:textarea default="${descriptor.buildUnstableMsg}"/>
+        </f:entry>
+
+        <f:entry title="${%Build aborted message}" field="buildAbortedMsg"
+                 description="Comment that Jenkins will post on Gitlab upon aborted build">
+            <f:textarea default="${descriptor.buildAbortedMsg}"/>
+        </f:entry>
+    </f:optionalBlock>
 </j:jelly>

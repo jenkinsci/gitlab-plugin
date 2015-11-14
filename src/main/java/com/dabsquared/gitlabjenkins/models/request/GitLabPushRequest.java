@@ -1,0 +1,154 @@
+package com.dabsquared.gitlabjenkins.models.request;
+
+import com.dabsquared.gitlabjenkins.GitLab;
+import com.dabsquared.gitlabjenkins.models.Commit;
+import com.dabsquared.gitlabjenkins.models.Repository;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.models.GitlabCommitStatus;
+import org.gitlab.api.models.GitlabProject;
+
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * Represents for WebHook payload
+ *
+ * @author Daniel Brooks
+ */
+public class GitLabPushRequest extends GitLabRequest {
+    private GitlabProject sourceProject = null;
+    private String before;
+    private String after;
+    private String checkout_sha;
+    private String ref;
+    private Integer user_id;
+    private String user_name;
+    private Integer project_id;
+    private Integer total_commits_count;
+    private Repository repository;
+    private List<Commit> commits;
+    public GitLabPushRequest() {
+    }
+
+    public static GitLabPushRequest create(String payload) {
+        if (payload == null) {
+            throw new IllegalArgumentException("payload should not be null");
+        }
+
+        GitLabPushRequest pushRequest = Builder.INSTANCE.get().fromJson(payload, GitLabPushRequest.class);
+        return pushRequest;
+    }
+
+    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
+        try {
+            if (getLastCommit() != null) {
+                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public GitlabProject getSourceProject(GitLab api) throws IOException {
+        if (sourceProject == null) {
+            sourceProject = api.instance().getProject(project_id);
+        }
+        return sourceProject;
+    }
+
+    public List<Commit> getCommits() {
+        return commits;
+    }
+
+    public void setCommits(List<Commit> commits) {
+        this.commits = commits;
+    }
+
+    public Commit getLastCommit() {
+        if (commits.isEmpty()) {
+            return null;
+        }
+        return commits.get(commits.size() - 1);
+    }
+
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(Repository repository) {
+        this.repository = repository;
+    }
+
+    public Integer getTotal_commits_count() {
+        return total_commits_count;
+    }
+
+    public void setTotal_commits_count(Integer totalCommitsCount) {
+        this.total_commits_count = totalCommitsCount;
+    }
+
+    public String getBefore() {
+        return before;
+    }
+
+    public void setBefore(String before) {
+        this.before = before;
+    }
+
+    public String getAfter() {
+        return after;
+    }
+
+    public void setAfter(String after) {
+        this.after = after;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    public Integer getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(Integer userId) {
+        this.user_id = userId;
+    }
+
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public void setUser_name(String userName) {
+        this.user_name = userName;
+    }
+
+    public Integer getProject_id() {
+        return project_id;
+    }
+
+    public void setProject_id(Integer projectId) {
+        this.project_id = projectId;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public String getCheckout_sha() {
+        return checkout_sha;
+    }
+
+    public void setCheckout_sha(String checkout_sha) {
+        this.checkout_sha = checkout_sha;
+    }
+
+}

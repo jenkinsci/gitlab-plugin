@@ -1,17 +1,48 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:section title="Gitlab">
-    <f:entry title="Gitlab host URL" field="gitlabHostUrl"
-      description="The complete URL to the Gitlab server (i.e. http://gitlab">
-      <f:textbox/>
-    </f:entry>
-    <f:entry title="API Token" field="gitlabApiToken"
-           description="API Token for accessing Gitlab">
-      <f:textbox/>
-    </f:entry>
-    <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
-      <f:checkbox />
-    </f:entry>
-    <f:validateButton title="${%Test Connection}" progress="${%Testing...}"
-   		method="testConnection" with="gitlabApiToken,gitlabHostUrl,ignoreCertificateErrors" />
-  </f:section>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:section title="Gitlab">
+        <f:entry title="Gitlab host URL" field="gitlabHostUrl"
+                 description="The complete URL to the Gitlab server (i.e. http://gitlab">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="API Token" field="gitlabApiToken"
+                 description="API Token for accessing Gitlab">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
+            <f:checkbox/>
+        </f:entry>
+        <f:validateButton title="${%Test Connection}" progress="${%Testing...}"
+                          method="testConnection" with="gitlabApiToken,gitlabHostUrl,ignoreCertificateErrors"/>
+
+        <f:advanced>
+            <f:block>
+                <f:entry title="${%Merge request accept message}" field="mergeRequestAcceptMsg"
+                         description="Message to post on Gitlab upon automatic merge request acceptance"
+                >
+                    <f:textbox default="${descriptor.mergeRequestAcceptMsg}"/>
+                </f:entry>
+
+                <f:entry title="${%Build success message}" field="buildSuccessMsg"
+                         description="Comment that Jenkins will post on Gitlab upon successful build">
+                    <f:textbox default="${descriptor.buildSuccessMsg}"/>
+                </f:entry>
+
+                <f:entry title="${%Build failure message}" field="buildFailureMsg"
+                         description="Comment that Jenkins will post on Gitlab upon failed build">
+                    <f:textbox default="${descriptor.buildFailureMsg}"/>
+                </f:entry>
+
+                <f:entry title="${%Build unstable message}" field="buildUnstableMsg"
+                         description="Comment that Jenkins will post on Gitlab upon unstable build">
+                    <f:textbox default="${descriptor.buildUnstableMsg}"/>
+                </f:entry>
+
+                <f:entry title="${%Build aborted message}" field="buildAbortedMsg"
+                         description="Comment that Jenkins will post on Gitlab upon aborted build">
+                    <f:textbox default="${descriptor.buildAbortedMsg}"/>
+                </f:entry>
+            </f:block>
+        </f:advanced>
+    </f:section>
 </j:jelly>

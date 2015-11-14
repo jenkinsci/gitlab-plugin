@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+
+import com.dabsquared.gitlabjenkins.models.request.GitLabPushRequest;
 
 public interface GitLabPushRequestSamples {
 	GitLabPushRequest pushBrandNewMasterBranchRequest();

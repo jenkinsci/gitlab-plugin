@@ -1,16 +1,16 @@
 package com.dabsquared.gitlabjenkins;
 
+import com.dabsquared.gitlabjenkins.handlers.PushRequestHandler;
+import com.dabsquared.gitlabjenkins.models.request.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
+import hudson.model.Job;
+import hudson.plugins.git.RevisionParameterAction;
+import org.junit.Test;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-
-import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
-
-import hudson.model.Job;
-import hudson.plugins.git.RevisionParameterAction;
 
 public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 
@@ -24,7 +24,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushBrandNewMasterBranchRequest();
 
 		// when
-		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
+		RevisionParameterAction revisionParameterAction = PushRequestHandler.createPushRequestRevisionParameter(job,
 				pushRequest);
 
 		// then
@@ -38,7 +38,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		GitLabPushRequest pushRequest = gitLabPushRequestSamples.mergePushRequest();
 
 		// when
-		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
+		RevisionParameterAction revisionParameterAction = PushRequestHandler.createPushRequestRevisionParameter(job,
 				pushRequest);
 
 		// then
@@ -52,7 +52,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushCommitRequest();
 
 		// when
-		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
+		RevisionParameterAction revisionParameterAction = PushRequestHandler.createPushRequestRevisionParameter(job,
 				pushRequest);
 
 		// then
@@ -66,7 +66,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushNewBranchRequest();
 
 		// when
-		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
+		RevisionParameterAction revisionParameterAction = PushRequestHandler.createPushRequestRevisionParameter(job,
 				pushRequest);
 
 		// then
@@ -80,7 +80,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushNewTagRequest();
 
 		// when
-		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
+		RevisionParameterAction revisionParameterAction = PushRequestHandler.createPushRequestRevisionParameter(job,
 				pushRequest);
 
 		// then
@@ -94,7 +94,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		GitLabPushRequest pushRequest = gitLabPushRequestSamples.deleteBranchRequest();
 
 		// when
-		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
+		RevisionParameterAction revisionParameterAction = PushRequestHandler.createPushRequestRevisionParameter(job,
 				pushRequest);
 
 		// then
@@ -114,12 +114,17 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		boolean allowAllBranches = true;
 		String includeBranchesSpec = null;
 		String excludeBranchesSpec = null;
-		GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger(triggerOnPush, triggerOnMergeRequest,
+		String buildAbortedMsg = null;
+		String buildSuccessMsg = null;
+		String buildFailureMsg = null;
+		String buildUnstableMsg = null;
+		String mergeRequestAcceptMsg = null;
+		boolean customMessages = false;
+
+		return new GitLabPushTrigger(triggerOnPush, triggerOnMergeRequest,
 				triggerOpenMergeRequestOnPush, ciSkip, setBuildDescription, addNoteOnMergeRequest, addCiMessage,
 				addVoteOnMergeRequest, acceptMergeRequestOnSuccess, allowAllBranches, includeBranchesSpec,
-				excludeBranchesSpec);
-
-		return gitLabPushTrigger;
+				excludeBranchesSpec, buildAbortedMsg, buildSuccessMsg, buildFailureMsg, mergeRequestAcceptMsg, buildUnstableMsg, customMessages);
 	}
 
 }
