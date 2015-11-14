@@ -3,9 +3,18 @@ gitlab-plugin
 
 This plugin emulates Jenkins as a GitlabCI Web Service to be used with GitlabHQ.
 
-[![Build Status](https://travis-ci.org/DABSquared/gitlab-plugin.svg?branch=master)](https://travis-ci.org/DABSquared/gitlab-plugin) 
-[![Gitter chat](https://badges.gitter.im/DABSquared/gitlab-plugin.png)](https://gitter.im/DABSquared/gitlab-plugin)
+Help Needed
+=====================
+* We are seeking help to maintain and improve this plugin. This includes keeping up a Changelog, releasing builds, reviewing merge requests, etc. If you are interested, please post to the Jenkins Developers list (https://groups.google.com/forum/#!forum/jenkinsci-dev) or ping autojack (@omehegan on Github) in #jenkins on irc.freenode.org IRC and ask for commit access.
 
+Supported GitLab versions
+======
+* 7.14.x
+
+Unsupported GitLab versions
+======
+* 8.0.x - in this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. **Jenkins build status will never work with GitLab 8.0.x!**
+* 8.1.x - in this version, GitLab created a new public API to interface with external CI services like Jenkins. This plugin will be updated to support the new API; that work is incomplete at this time. See https://github.com/jenkinsci/gitlab-plugin/pull/127 for status.
 
 Current Supported GitLabCI Functions
 =====================
@@ -17,22 +26,17 @@ Current Supported GitLabCI Functions
 * `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
 * `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
-Help Needed
-=====================
-* I am currently looking for someone to help maintain this project. This includes keeping up a Changelog, releasing builds, accepting merge requests, etc. If you are interested let @bass_rock know and I can add you as a maintainer.
-
 Configuring access to Gitlab
 =======================================
 
 Optionally, the plugin communicates with the Gitlab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories. 
 
-To enable this functionality, a user should be set up on Gitlab, which adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
+To enable this functionality, a user should be set up on Gitlab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
 
 Using it With A Job
 =====================
 * Create a new job by going to *New Job*
 * Set the _Project Name_ to whatever you like
-* If you have the GitHub plugin installed, feel free to specify the ``GitHub Project`` url as the url for the Gitlab project.
 * In the *Source Code Management* section:
     * Click *Git*
     * Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
@@ -60,15 +64,16 @@ Using it With A Job
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-        **Note:** Currently GitLab 8.0 does not have a commit status api. Once this is added we should be able to add the commit status to Gitlab.
 
 If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
 * Go to the Settings page in each developer's fork
 * Click on *Services*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-        **Note:** Currently GitLab 8.0 does not have a commit status api. Once this is added we should be able to add the commit status to Gitlab.
         **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
+## Gitlab Configuration (≥ 8.1)
+GitLab 8.1 uses the same configuration as GitLab 8.0
+* GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
 
 ### GitLab Configuration (< 8.0)
 * In GitLab go to you primary repository's project *Settings*
@@ -97,7 +102,7 @@ Branch filtering
 
 Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
 
-This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For existing projects, all branches are allowed to push by default.
+This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
 
 Build Tags
 ================

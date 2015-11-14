@@ -1,9 +1,13 @@
 package com.dabsquared.gitlabjenkins;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.models.GitlabCommitStatus;
+import org.gitlab.api.models.GitlabProject;
 
 /**
  * Represents for WebHook payload
@@ -23,6 +27,25 @@ public class GitLabPushRequest extends GitLabRequest {
     public GitLabPushRequest() {
     }
 
+    private GitlabProject sourceProject = null;
+
+    public GitlabProject getSourceProject (GitLab api) throws IOException {
+        if (sourceProject == null) {
+            sourceProject = api.instance().getProject(project_id);
+        }
+        return sourceProject;
+    }
+
+    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
+        try {
+            if(getLastCommit()!=null) {
+                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private String before;
     private String after;
