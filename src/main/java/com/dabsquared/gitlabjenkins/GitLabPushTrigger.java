@@ -262,15 +262,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     actions.add(parametersAction);
                     RevisionParameterAction revision;
 
-                    if (req.getLastCommit() !=null) {
-                        revision = new RevisionParameterAction(req.getLastCommit().getId());
-                    } else {
-                        if (req.getCheckout_sha().contains("0000000000000000000000000000000000000000") ){
-                            // no commit and no checkout sha, a Tag was deleted, so no build need to be triggered
-                            LOGGER.log(Level.INFO, "GitLab Push {0} has been deleted, skip build .", req.getRef());
-                            return null;
-                        }
-                        revision = new RevisionParameterAction(req.getCheckout_sha());
+                    revision = createPushRequestRevisionParameter(job, req);
+                    if (revision==null) {
+                        return null;
                     }
 
                     actions.add(revision);
@@ -278,8 +272,36 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
                     return actionsArray;
                 }
+
             });
         }
+    }
+
+    public RevisionParameterAction createPushRequestRevisionParameter(Job<?, ?> job, GitLabPushRequest req) {
+        RevisionParameterAction revision = null;
+
+        if (req.getLastCommit() !=null) {
+            revision = new RevisionParameterAction(req.getLastCommit().getId());
+        } else {
+            if (req.getCheckout_sha() != null) {
+                if (req.getCheckout_sha().contains("0000000000000000000000000000000000000000")) {
+                    // no commit and no checkout sha, a Tag was deleted, so no build need to be triggered
+                    LOGGER.log(Level.INFO, "GitLab Push {0} has been deleted, skip build .", req.getRef());
+                    return null;
+                }
+                revision = new RevisionParameterAction(req.getCheckout_sha());
+            } else if (req.getBefore() != null
+                    && req.getBefore().contains("0000000000000000000000000000000000000000")) {
+                // new branches
+                revision = new RevisionParameterAction(req.getAfter());
+            } else {
+                LOGGER.log(Level.WARNING,
+                        "unknown handled situation, dont know what revision to build for req {0} for job {1}",
+                         new Object[] {req, (job!=null?job.getFullName():null)});
+                return null;
+            }
+        }
+        return revision;
     }
 
     // executes when the Trigger receives a merge request
