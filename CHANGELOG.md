@@ -1,6 +1,13 @@
 ChangeLog
 =====================
 
+1.1.28
+=====================
+* (#119 - @mfriedenhagen) Add buildUrl in the description of the merge (shown in GitLab)
+* (#124 - @jsyrjala) Fix acceptMergeRequestOnSuccess configuration so it stays set, and is disabled by default
+* (#127 and #134 - @thommy101) Added support for the GitLab 8.1 commit API
+* (#133 - @EmteZogaf) Send commit status on push-triggered merge request build
+
 1.1.27
 =====================
 * (#118 - @christ66) IntelliJ Excludes
