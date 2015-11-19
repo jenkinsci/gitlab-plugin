@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins;
 
+import com.dabsquared.gitlabjenkins.GitLabMergeRequest.LastCommit;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.plugins.git.Branch;
@@ -42,6 +43,8 @@ import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab.api.models.GitlabBranch;
+import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -403,7 +406,13 @@ public class GitLabWebHook implements UnprotectedRootAction {
                                             LOGGER.log(Level.INFO, "Skipping MR " + mr.getTitle() + " due to ci-skip.");
                                             continue;
                                         }
-                                    
+					GitlabBranch branch = api.instance().getBranch(api.instance().getProject(projectId), mr.getSourceBranch());
+                    LastCommit lastCommit = new LastCommit();
+                    lastCommit.setId(branch.getCommit().getId());
+                    lastCommit.setMessage(branch.getCommit().getMessage());
+                    lastCommit.setUrl(GitlabProject.URL + "/" + projectId + "/repository" + GitlabCommit.URL + "/"
+                            + branch.getCommit().getId());
+
 					LOGGER.log(Level.FINE,
 							"Generating new merge trigger from "
 									+ mr.toString() + "\n source: "
@@ -411,8 +420,10 @@ public class GitLabWebHook implements UnprotectedRootAction {
 									+ mr.getTargetBranch() + "\n state: "
 									+ mr.getState() + "\n assign: "
 									+ mr.getAssignee() + "\n author: "
-									+ mr.getAuthor() + "\n id: " + mr.getId()
-									+ "\n iid: " + mr.getIid() + "\n\n");
+									+ mr.getAuthor() + "\n id: "
+									+ mr.getId() + "\n iid: "
+                                    + mr.getIid() + "\n last commit: "
+                                    + lastCommit.getId() + "\n\n");
 					GitLabMergeRequest newReq = new GitLabMergeRequest();
 					newReq.setObject_kind("merge_request");
 					newReq.setObjectAttribute(new GitLabMergeRequest.ObjectAttributes());
@@ -429,6 +440,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 					newReq.getObjectAttribute().setTargetBranch(mr.getTargetBranch());
 					newReq.getObjectAttribute().setTargetProjectId(projectId);
 					newReq.getObjectAttribute().setTitle(mr.getTitle());
+                    newReq.getObjectAttribute().setLastCommit(lastCommit);
 
 					Authentication old = SecurityContextHolder.getContext().getAuthentication();
 					SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
