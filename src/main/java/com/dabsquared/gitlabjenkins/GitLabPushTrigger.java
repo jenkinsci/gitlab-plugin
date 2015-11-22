@@ -597,8 +597,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         private boolean ignoreCertificateErrors = false;
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private transient GitLab gitlab;
-        private transient GitLabProjectBranchesService gitLabProjectBranchesService;
-
 
         public DescriptorImpl() {
         	load();
@@ -651,7 +649,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             ignoreCertificateErrors = formData.getBoolean("ignoreCertificateErrors");
             save();
             gitlab = new GitLab();
-            gitLabProjectBranchesService = new GitLabProjectBranchesService(gitlab.instance(), new GitLabProjectBranchesService.TimeUtility());
             return super.configure(req, formData);
         }
 
@@ -673,7 +670,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             }
 
             if (!getGitlabHostUrl().isEmpty()) {
-                return gitLabProjectBranchesService.getBranches(sourceRepository.toString());
+                return GitLabProjectBranchesService.instance().getBranches(getGitlab(), sourceRepository.toString());
             } else {
                 LOGGER.log(Level.WARNING, "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.",
                         job.getFullName());

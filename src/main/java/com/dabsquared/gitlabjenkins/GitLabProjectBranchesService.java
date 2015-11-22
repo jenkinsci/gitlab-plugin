@@ -46,16 +46,22 @@ public class GitLabProjectBranchesService {
      */
     private long projectCacheExpiry;
 
-    private final GitlabAPI gitlabAPI;
-
     private final TimeUtility timeUtility;
 
-    protected GitLabProjectBranchesService(GitlabAPI gitlabAPI, TimeUtility timeUtility) {
-        this.gitlabAPI = gitlabAPI;
+    private static transient GitLabProjectBranchesService gitLabProjectBranchesService;
+
+    public static GitLabProjectBranchesService instance() {
+        if (gitLabProjectBranchesService == null) {
+            gitLabProjectBranchesService = new GitLabProjectBranchesService(new TimeUtility());
+        }
+        return gitLabProjectBranchesService;
+    }
+
+    protected GitLabProjectBranchesService(TimeUtility timeUtility) {
         this.timeUtility = timeUtility;
     }
 
-    public List<String> getBranches(String sourceRepositoryString) throws IOException {
+    public List<String> getBranches(GitLab gitLab, String sourceRepositoryString) throws IOException {
 
         synchronized (projectBranchCache) {
             BranchListEntry branchListEntry = projectBranchCache.get(sourceRepositoryString);
@@ -69,9 +75,9 @@ public class GitLabProjectBranchesService {
             final List<String> branchNames = new ArrayList<String>();
 
             try {
-                GitlabProject gitlabProject = findGitlabProjectForRepositoryUrl(sourceRepositoryString);
+                GitlabProject gitlabProject = findGitlabProjectForRepositoryUrl(gitLab, sourceRepositoryString);
                 if (gitlabProject != null) {
-                    final List<GitlabBranch> branches = gitlabAPI.getBranches(gitlabProject);
+                    final List<GitlabBranch> branches = gitLab.instance().getBranches(gitlabProject);
                     for (final GitlabBranch branch : branches) {
                         branchNames.add(branch.getName());
                     }
@@ -95,7 +101,8 @@ public class GitLabProjectBranchesService {
         }
     }
 
-    public GitlabProject findGitlabProjectForRepositoryUrl(String sourceRepositoryString) throws IOException {
+    public GitlabProject findGitlabProjectForRepositoryUrl(GitLab gitLab, String sourceRepositoryString)
+            throws IOException {
         synchronized (projectMapCache) {
             String repositoryUrl = sourceRepositoryString.toLowerCase();
             if (projectCacheExpiry < timeUtility.getCurrentTimeInMillis()
@@ -109,17 +116,17 @@ public class GitLabProjectBranchesService {
                                     (Boolean) projectMapCache.containsKey(repositoryUrl), projectCacheExpiry,
                                     timeUtility.getCurrentTimeInMillis() });
                 }
-                refreshGitLabProjectMap();
+                refreshGitLabProjectMap(gitLab);
             }
             return projectMapCache.get(repositoryUrl);
         }
     }
 
-    public Map<String, GitlabProject> refreshGitLabProjectMap() throws IOException {
+    public Map<String, GitlabProject> refreshGitLabProjectMap(GitLab gitLab) throws IOException {
         synchronized (projectMapCache) {
             try {
                 projectMapCache.clear();
-                List<GitlabProject> projects = gitlabAPI.getProjects();
+                List<GitlabProject> projects = gitLab.instance().getProjects();
                 for (GitlabProject gitlabProject : projects) {
                     projectMapCache.put(gitlabProject.getSshUrl().toLowerCase(), gitlabProject);
                     projectMapCache.put(gitlabProject.getHttpUrl().toLowerCase(), gitlabProject);
