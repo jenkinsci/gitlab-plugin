@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabProject;
 
