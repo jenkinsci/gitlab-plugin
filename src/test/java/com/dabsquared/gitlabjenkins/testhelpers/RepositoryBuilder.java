@@ -1,17 +1,17 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.data.Repository;
 
 public class RepositoryBuilder {
 
-	public static GitLabPushRequest.Repository buildWithDefaults() {
+	public static Repository buildWithDefaults() {
 		return new RepositoryBuilder().withBasicValues().build();
 	}
 
-	private GitLabPushRequest.Repository repository;
+	private Repository repository;
 
 	public RepositoryBuilder() {
-		repository = new GitLabPushRequest.Repository();
+		repository = new Repository();
 	}
 
 	public RepositoryBuilder withBasicValues() {
@@ -22,7 +22,7 @@ public class RepositoryBuilder {
 		return this;
 	}
 
-	public GitLabPushRequest.Repository build() {
+	public Repository build() {
 		return repository;
 	}
 
