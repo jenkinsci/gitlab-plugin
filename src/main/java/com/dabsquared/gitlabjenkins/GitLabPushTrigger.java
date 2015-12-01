@@ -238,6 +238,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
 
                     values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
+                    values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getCommits().get(0).getAuthor().getName()));
+                    values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getCommits().get(0).getAuthor().getEmail()));
+                    values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle", ""));
+                    values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", ""));
+                    values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", ""));
 
                     LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getName());
                     String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
@@ -358,6 +363,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
                     values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
                     values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
+                    if (req.getObjectAttribute().getAuthor() != null) {
+                        values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getObjectAttribute().getAuthor().getName()));
+                        values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getObjectAttribute().getAuthor().getEmail()));
+                    }
+                    values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle",  req.getObjectAttribute().getTitle()));
+                    values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", req.getObjectAttribute().getIid().toString()));
+                    if (req.getObjectAttribute().getAssignee() != null) {
+                        values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", req.getObjectAttribute().getAssignee().getName()));
+                    }
 
 
                     LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getName());

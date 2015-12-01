@@ -426,9 +426,9 @@ public class GitLabWebHook implements UnprotectedRootAction {
 					newReq.setObject_kind("merge_request");
 					newReq.setObjectAttribute(new GitLabMergeRequest.ObjectAttributes());
 					if (mr.getAssignee() != null)
-						newReq.getObjectAttribute().setAssigneeId(mr.getAssignee().getId());
+						newReq.getObjectAttribute().setAssignee(mr.getAssignee());
 					if (mr.getAuthor() != null)
-						newReq.getObjectAttribute().setAuthorId(mr.getAuthor().getId());
+                        newReq.getObjectAttribute().setAuthor(mr.getAuthor());
 					newReq.getObjectAttribute().setDescription(mr.getDescription());
 					newReq.getObjectAttribute().setId(mr.getId());
 					newReq.getObjectAttribute().setIid(mr.getIid());
