@@ -394,9 +394,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 	protected void buildOpenMergeRequests(GitLabPushTrigger trigger, Integer projectId, String projectRef) {
 		try {
 			GitLab api = new GitLab();
-			// TODO Replace this with a call to GitlabAPI.getOpenMergeRequests, once timols has deployed version 1.1.7
-			String tailUrl = GitlabProject.URL + "/" + projectId + GitlabMergeRequest.URL + "?state=opened&per_page=100";
-			List<GitlabMergeRequest> mergeRequests = api.instance().retrieve().getAll(tailUrl, GitlabMergeRequest[].class);
+			List<GitlabMergeRequest> mergeRequests = api.instance().getOpenMergeRequests(projectId);
 
 			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
 				if (projectRef.endsWith(mr.getSourceBranch()) || 
@@ -419,8 +417,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
 									+ mr.getSourceBranch() + "\n target: "
 									+ mr.getTargetBranch() + "\n state: "
 									+ mr.getState() + "\n assign: "
-									+ mr.getAssignee() + "\n author: "
-									+ mr.getAuthor() + "\n id: "
+									+ mr.getAssignee().getName() + "\n author: "
+									+ mr.getAuthor().getName() + "\n id: "
 									+ mr.getId() + "\n iid: "
                                     + mr.getIid() + "\n last commit: "
                                     + lastCommit.getId() + "\n\n");
@@ -479,10 +477,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
                 return;
             }
         }
-        if(request.getObjectAttribute().getDescription().contains("[ci-skip]")) {
-                LOGGER.log(Level.INFO, "Skipping MR " + request.getObjectAttribute().getTitle() + " due to ci-skip.");
-            return;
-        }
 
         Authentication old = SecurityContextHolder.getContext().getAuthentication();
         SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
@@ -499,6 +493,12 @@ public class GitLabWebHook implements UnprotectedRootAction {
             if (trigger == null) {
                 return;
             }
+            
+            if(trigger.getCiSkip() && request.getObjectAttribute().getDescription().contains("[ci-skip]")) {
+                LOGGER.log(Level.INFO, "Skipping MR " + request.getObjectAttribute().getTitle() + " due to ci-skip.");
+                return;
+            }
+            
             trigger.onPost(request);
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
