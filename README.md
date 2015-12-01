@@ -127,7 +127,11 @@ These include:
 * gitlabSourceRepoName
 * gitlabBranch (This is optional and can be used in shell scripts for the branch being built by the push request)
 * gitlabActionType (This is optional and can be used in shell scripts or other plugins to change the build behaviour. Possible values are PUSH or MERGE)
-
+* gitlabMergeRequestTitle
+* gitlabMergeRequestId
+* gitlabMergeRequestAssignee
+* gitlabUserName
+* gitlabUserEmail
 
 Help Needed
 =====================
