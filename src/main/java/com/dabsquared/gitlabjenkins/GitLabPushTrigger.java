@@ -712,9 +712,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     }
                 }
             } catch (final IllegalStateException ex) {
-                LOGGER.log(Level.FINEST, "Ka-Boom!", ex);
+                LOGGER.log(Level.FINEST, "Unexpected IllegalStateException. Please check the logs and your configuration.", ex);
             } catch (final IOException ex) {
-                LOGGER.log(Level.FINEST, "Ka-Boom!", ex);
+                LOGGER.log(Level.FINEST, "Unexpected IllegalStateException. Please check the logs and your configuration.", ex);
             }
 
             return ac;
