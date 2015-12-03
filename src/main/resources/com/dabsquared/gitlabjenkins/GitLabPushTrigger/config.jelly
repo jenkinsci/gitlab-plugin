@@ -1,47 +1,62 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Build on Push Events" field="triggerOnPush">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
-      <f:select/>
+        <f:select/>
     </f:entry>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Add note with build status on merge requests" field="addNoteOnMergeRequest">
-      <f:checkbox default="true" />
+        <f:checkbox default="true"/>
     </f:entry>
-    <f:entry title="Use GitLab CI features (GitLab 8.1 required!)" field="addCiMessage" help="/plugin/gitlab-plugin/help/help-gitlab8.1CI.html">
-      <f:checkbox default="false"/>
+    <f:entry title="Use GitLab CI features (GitLab 8.1 required!)" field="addCiMessage"
+             help="/plugin/gitlab-plugin/help/help-gitlab8.1CI.html">
+        <f:checkbox default="false"/>
     </f:entry>
-     <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
-      <f:checkbox default="true" />
+    <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
+        <f:checkbox default="true"/>
     </f:entry>
-     <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
-       <f:checkbox default="false" />
-     </f:entry>
-        <f:entry title="All allow all branches (Ignoring Filtered Branches)" field="allowAllBranches">
-      <f:checkbox default="false" />
+    <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
+        <f:checkbox default="false"/>
     </f:entry>
 
     <f:block>
-      <table style="margin-left:10px">
-	<f:optionalBlock title="Filter branches" help="/plugin/gitlab-plugin/help/help-allowedBranches.html"  inline="true" checked="${not (empty(instance.includeBranchesSpec) and empty(instance.excludeBranchesSpec))}">
-          <f:entry title="Include">
-            <f:textbox field="includeBranchesSpec" autocompleteDelimChar="," />
-          </f:entry>
-          <f:entry title="Exclude">
-            <f:textbox field="excludeBranchesSpec" autocompleteDelimChar="," />
-          </f:entry>
-	</f:optionalBlock>
-      </table>
+        <table style="margin-left:10px">
+            <!--<f:section title="">-->
+            <f:radioBlock name="branchFilterName" value="" title="Allow all branches to trigger this job"
+                          checked="${instance.branchFilterName == ''}"
+                          inline="true" help="/plugin/gitlab-plugin/help/help-noBranchFiltering.html"/>
+            <f:radioBlock name="branchFilterName" value="NameBasedFilter" title="Filter branches by name"
+                          checked="${instance.branchFilterName == 'NameBasedFilter'}" inline="true"
+                          help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
+                <f:entry title="Include">
+                    <f:textbox field="includeBranchesSpec" autocompleteDelimChar=","/>
+                </f:entry>
+                <f:entry title="Exclude">
+                    <f:textbox field="excludeBranchesSpec" autocompleteDelimChar=","/>
+                </f:entry>
+            </f:radioBlock>
+
+            <f:radioBlock name="branchFilterName" value="RegexBasedFilter" title="Filter branches by regex"
+                          checked="${instance.branchFilterName == 'RegexBasedFilter'}" inline="true"
+                          help="/plugin/gitlab-plugin/help/help-filterBranchesByRegex.html">
+                <f:entry title="Target Branch Regex">
+                    <f:textbox field="targetBranchRegex"/>
+                </f:entry>
+            </f:radioBlock>
+            <!--</f:section> -->
+        </table>
     </f:block>
+
 
 </j:jelly>
