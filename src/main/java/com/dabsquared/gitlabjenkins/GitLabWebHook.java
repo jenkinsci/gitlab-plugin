@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins;
 
 import com.dabsquared.gitlabjenkins.GitLabMergeRequest.LastCommit;
+
 import hudson.Extension;
 import hudson.model.*;
 import hudson.plugins.git.Branch;
@@ -42,6 +43,7 @@ import jenkins.model.ParameterizedJobMixIn;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabCommit;
@@ -472,9 +474,18 @@ public class GitLabWebHook implements UnprotectedRootAction {
         }
         if(request.getObjectAttribute().getLastCommit()!=null) {
             Run mergeBuild = getBuildBySHA1(project, request.getObjectAttribute().getLastCommit().getId(), true);
-            if(mergeBuild!=null){
-                LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #"+mergeBuild.getId());
-                return;
+            if (mergeBuild != null) {
+                StringParameterValue mergeBuildTargetBranch = (StringParameterValue) mergeBuild.getAction(ParametersAction.class).getParameter("gitlabTargetBranch");
+                boolean targetBranchesEqual = StringUtils.equals(mergeBuildTargetBranch.value, request.getObjectAttribute().getTargetBranch());
+                LOGGER.fine("Previous build's target-branch: " + mergeBuildTargetBranch.value
+                        + ", current build's target-branch: "
+                        + request.getObjectAttribute().getTargetBranch() + ", equals: "
+                        + targetBranchesEqual);
+
+                if (targetBranchesEqual) {
+                    LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getId());
+                    return;
+                }
             }
         }
 
