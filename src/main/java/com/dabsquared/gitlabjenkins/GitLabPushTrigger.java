@@ -234,7 +234,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
                     Map<String, ParameterValue> values = getDefaultParameters();
                     values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
-                    values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
+                    values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
                     values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
 
                     values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
