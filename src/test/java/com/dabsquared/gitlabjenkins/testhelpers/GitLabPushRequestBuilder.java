@@ -1,12 +1,11 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
+import com.dabsquared.gitlabjenkins.models.Commit;
+import com.dabsquared.gitlabjenkins.models.request.GitLabPushRequest;
+
 import java.util.ArrayList;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
-
 public class GitLabPushRequestBuilder {
-
-	public static final String ZERO_SHA = "0000000000000000000000000000000000000000";
 
 	public static GitLabPushRequest buildWithDefaults() {
 		return new GitLabPushRequestBuilder().withBasicValues().build();
@@ -20,7 +19,7 @@ public class GitLabPushRequestBuilder {
 		pushRequest.setUser_name("admin@example");
 		pushRequest.setProject_id(345);
 		pushRequest.setRepository(RepositoryBuilder.buildWithDefaults());
-		pushRequest.setCommits(new ArrayList<GitLabPushRequest.Commit>());
+		pushRequest.setCommits(new ArrayList<Commit>());
 	}
 
 	public GitLabPushRequestBuilder withBasicValues() {

@@ -1,8 +1,8 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import static com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestBuilder.ZERO_SHA;
+import com.dabsquared.gitlabjenkins.models.request.GitLabPushRequest;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import static com.dabsquared.gitlabjenkins.handlers.GitlabRequestHandler.NO_COMMIT_HASH;
 
 public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequestSamples {
 
@@ -13,7 +13,7 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
 	private static final String COMMIT_E5 = "e5a46665b80965724b45fe921788105258b3ec5c";
 
 	public GitLabPushRequest pushBrandNewMasterBranchRequest() {
-		GitLabPushRequest pushRequest = new GitLabPushRequestBuilder().withRef("refs/heads/master").withBefore(ZERO_SHA)
+		GitLabPushRequest pushRequest = new GitLabPushRequestBuilder().withRef("refs/heads/master").withBefore(NO_COMMIT_HASH)
 				.withAfter(COMMIT_63).withCheckoutSha(COMMIT_63)
 				// no commit on new branches
 				.build();
@@ -22,7 +22,7 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
 
 	public GitLabPushRequest pushNewBranchRequest() {
 		GitLabPushRequest pushRequest = new GitLabPushRequestBuilder().withRef("refs/heads/test-new-branch1")
-				.withBefore(ZERO_SHA).withAfter(COMMIT_25).withCheckoutSha(COMMIT_25)
+				.withBefore(NO_COMMIT_HASH).withAfter(COMMIT_25).withCheckoutSha(COMMIT_25)
 				// no commit on new branches
 				.build();
 		return pushRequest;
@@ -47,13 +47,13 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
 
 	public GitLabPushRequest pushNewTagRequest() {
 		GitLabPushRequest pushRequest = new GitLabPushRequestBuilder().withRef("refs/tags/test-tag-2")
-				.withBefore(ZERO_SHA).withAfter(COMMIT_64).withCheckoutSha(COMMIT_64).addCommit(COMMIT_64).build();
+				.withBefore(NO_COMMIT_HASH).withAfter(COMMIT_64).withCheckoutSha(COMMIT_64).addCommit(COMMIT_64).build();
 		return pushRequest;
 	}
 
 	public GitLabPushRequest deleteBranchRequest() {
 		GitLabPushRequest pushRequest = new GitLabPushRequestBuilder().withRef("refs/heads/test-branch-delete-1")
-				.withBefore("784c5ca7814aa7ea1913ae8e64187c31322946f0").withAfter(ZERO_SHA).withCheckoutSha(null)
+				.withBefore("784c5ca7814aa7ea1913ae8e64187c31322946f0").withAfter(NO_COMMIT_HASH).withCheckoutSha(null)
 				.build();
 		return pushRequest;
 	}
