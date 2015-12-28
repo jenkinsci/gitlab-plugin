@@ -352,16 +352,16 @@ public class GitLabWebHook implements UnprotectedRootAction {
         try {
             List<GitlabMergeRequest> mergeRequests = getApi().getOpenMergeRequests(projectId);
 
-            for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
-                if (projectRef.endsWith(mr.getSourceBranch()) ||
-                    (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(mr.getTargetBranch()))) {
+            for (org.gitlab.api.models.GitlabMergeRequest mergeRequest : mergeRequests) {
+                if (projectRef.endsWith(mergeRequest.getSourceBranch()) ||
+                    (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(mergeRequest.getTargetBranch()))) {
 
-                    if (trigger.getCiSkip() && mr.getDescription().contains(CI_SKIP_TAG)) {
-                        LOGGER.log(Level.INFO, "Skipping MR " + mr.getTitle() + " due to ci-skip.");
+                    if (trigger.getCiSkip() && mergeRequest.getDescription().contains(CI_SKIP_TAG)) {
+                        LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
                         continue;
                     }
 
-                    GitlabBranch branch = getApi().getBranch(getApi().getProject(projectId), mr.getSourceBranch());
+                    GitlabBranch branch = getApi().getBranch(getApi().getProject(projectId), mergeRequest.getSourceBranch());
                     LastCommit lastCommit = new LastCommit();
                     lastCommit.setId(branch.getCommit().getId());
                     lastCommit.setMessage(branch.getCommit().getMessage());
@@ -370,40 +370,40 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
                     LOGGER.log(Level.FINE,
                             "Generating new merge trigger from "
-                                    + mr.toString() + "\n source: "
-                                    + mr.getSourceBranch() + "\n target: "
-                                    + mr.getTargetBranch() + "\n state: "
-                                    + mr.getState() + "\n assign: "
-                                    + mr.getAssignee().getName() + "\n author: "
-                                    + mr.getAuthor().getName() + "\n id: "
-                                    + mr.getId() + "\n iid: "
-                                    + mr.getIid() + "\n last commit: "
+                                    + mergeRequest.toString() + "\n source: "
+                                    + mergeRequest.getSourceBranch() + "\n target: "
+                                    + mergeRequest.getTargetBranch() + "\n state: "
+                                    + mergeRequest.getState() + "\n assign: "
+                                    + mergeRequest.getAssignee().getName() + "\n author: "
+                                    + mergeRequest.getAuthor().getName() + "\n id: "
+                                    + mergeRequest.getId() + "\n iid: "
+                                    + mergeRequest.getIid() + "\n last commit: "
                                     + lastCommit.getId() + "\n\n");
 
-                    GitLabMergeRequest newReq = new GitLabMergeRequest();
-                    newReq.setObject_kind("merge_request");
-                    newReq.setObjectAttribute(new ObjectAttributes());
-                    if (mr.getAssignee() != null) {
-                        newReq.getObjectAttribute().setAssignee(mr.getAssignee());
+                    GitLabMergeRequest newRequest = new GitLabMergeRequest();
+                    newRequest.setObject_kind("merge_request");
+                    newRequest.setObjectAttribute(new ObjectAttributes());
+                    if (mergeRequest.getAssignee() != null) {
+                        newRequest.getObjectAttribute().setAssignee(mergeRequest.getAssignee());
                     }
-                    if (mr.getAuthor() != null) {
-                        newReq.getObjectAttribute().setAuthor(mr.getAuthor());
+                    if (mergeRequest.getAuthor() != null) {
+                        newRequest.getObjectAttribute().setAuthor(mergeRequest.getAuthor());
                     }
-                    newReq.getObjectAttribute().setDescription(mr.getDescription());
-                    newReq.getObjectAttribute().setId(mr.getId());
-                    newReq.getObjectAttribute().setIid(mr.getIid());
-                    newReq.getObjectAttribute().setMergeStatus(mr.getState());
-                    newReq.getObjectAttribute().setSourceBranch(mr.getSourceBranch());
-                    newReq.getObjectAttribute().setSourceProjectId(mr.getSourceProjectId());
-                    newReq.getObjectAttribute().setTargetBranch(mr.getTargetBranch());
-                    newReq.getObjectAttribute().setTargetProjectId(projectId);
-                    newReq.getObjectAttribute().setTitle(mr.getTitle());
-                    newReq.getObjectAttribute().setLastCommit(lastCommit);
+                    newRequest.getObjectAttribute().setDescription(mergeRequest.getDescription());
+                    newRequest.getObjectAttribute().setId(mergeRequest.getId());
+                    newRequest.getObjectAttribute().setIid(mergeRequest.getIid());
+                    newRequest.getObjectAttribute().setMergeStatus(mergeRequest.getState());
+                    newRequest.getObjectAttribute().setSourceBranch(mergeRequest.getSourceBranch());
+                    newRequest.getObjectAttribute().setSourceProjectId(mergeRequest.getSourceProjectId());
+                    newRequest.getObjectAttribute().setTargetBranch(mergeRequest.getTargetBranch());
+                    newRequest.getObjectAttribute().setTargetProjectId(projectId);
+                    newRequest.getObjectAttribute().setTitle(mergeRequest.getTitle());
+                    newRequest.getObjectAttribute().setLastCommit(lastCommit);
 
                     Authentication old = SecurityContextHolder.getContext().getAuthentication();
                     SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
                     try {
-                        trigger.onPost(newReq);
+                        trigger.onPost(newRequest);
                     } finally {
                         SecurityContextHolder.getContext().setAuthentication(old);
                     }

@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.handlers;
 
+import com.dabsquared.gitlabjenkins.models.User;
 import com.dabsquared.gitlabjenkins.models.cause.GitLabPushCause;
 import com.dabsquared.gitlabjenkins.models.request.GitLabPushRequest;
 import com.dabsquared.gitlabjenkins.types.GitlabActionType;
@@ -45,8 +46,14 @@ public class PushRequestHandler extends GitlabRequestHandler<GitLabPushRequest> 
         values.put(Parameters.GITLAB_TARGET_BRANCH, new StringParameterValue(Parameters.GITLAB_TARGET_BRANCH, branch));
         values.put(GITLAB_BRANCH, new StringParameterValue(GITLAB_BRANCH, branch));
         values.put(GITLAB_ACTION_TYPE, new StringParameterValue(GITLAB_ACTION_TYPE, GitlabActionType.PUSH.name().toLowerCase()));
-        values.put(GITLAB_USER_NAME, new StringParameterValue(GITLAB_USER_NAME, request.getCommits().get(0).getAuthor().getName()));
-        values.put(GITLAB_USER_EMAIL, new StringParameterValue(GITLAB_USER_EMAIL, request.getCommits().get(0).getAuthor().getEmail()));
+
+        User author = request.getCommits().get(0).getAuthor();
+        if (author.getName() != null) {
+            values.put(GITLAB_USER_NAME, new StringParameterValue(GITLAB_USER_NAME, author.getName()));
+        }
+        if (author.getEmail() != null) {
+            values.put(GITLAB_USER_EMAIL, new StringParameterValue(GITLAB_USER_EMAIL, author.getEmail()));
+        }
         values.put(GITLAB_MERGE_REQUEST_TITLE, new StringParameterValue(GITLAB_MERGE_REQUEST_TITLE, ""));
         values.put(GITLAB_MERGE_REQUEST_ID, new StringParameterValue(GITLAB_MERGE_REQUEST_ID, ""));
         values.put(GITLAB_MERGE_REQUEST_ASSIGNEE, new StringParameterValue(GITLAB_MERGE_REQUEST_ASSIGNEE, ""));

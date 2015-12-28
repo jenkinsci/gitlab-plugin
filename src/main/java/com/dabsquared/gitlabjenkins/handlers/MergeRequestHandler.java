@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.handlers;
 
+import com.dabsquared.gitlabjenkins.models.User;
 import com.dabsquared.gitlabjenkins.models.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.models.request.GitLabMergeRequest;
 import com.dabsquared.gitlabjenkins.types.GitlabActionType;
@@ -34,9 +35,14 @@ public class MergeRequestHandler extends GitlabRequestHandler<GitLabMergeRequest
         Map<String, ParameterValue> values = getDefaultParameters(request);
         values.put(Parameters.GITLAB_TARGET_BRANCH, new StringParameterValue(Parameters.GITLAB_TARGET_BRANCH, request.getObjectAttribute().getTargetBranch()));
         values.put(GITLAB_ACTION_TYPE, new StringParameterValue(GITLAB_ACTION_TYPE, GitlabActionType.MERGE.name().toLowerCase()));
-        if (request.getObjectAttribute().getAuthor() != null) {
-            values.put(GITLAB_USER_NAME, new StringParameterValue(GITLAB_USER_NAME, request.getObjectAttribute().getAuthor().getName()));
-            values.put(GITLAB_USER_EMAIL, new StringParameterValue(GITLAB_USER_EMAIL, request.getObjectAttribute().getAuthor().getEmail()));
+        User author = request.getObjectAttribute().getAuthor();
+        if (author != null) {
+            if (author.getName() != null) {
+                values.put(GITLAB_USER_NAME, new StringParameterValue(GITLAB_USER_NAME, author.getName()));
+            }
+            if (author.getEmail() != null) {
+                values.put(GITLAB_USER_EMAIL, new StringParameterValue(GITLAB_USER_EMAIL, author.getEmail()));
+            }
         }
         values.put(GITLAB_MERGE_REQUEST_TITLE, new StringParameterValue(GITLAB_MERGE_REQUEST_TITLE, request.getObjectAttribute().getTitle()));
         values.put(GITLAB_MERGE_REQUEST_ID, new StringParameterValue(GITLAB_MERGE_REQUEST_ID, request.getObjectAttribute().getIid().toString()));
