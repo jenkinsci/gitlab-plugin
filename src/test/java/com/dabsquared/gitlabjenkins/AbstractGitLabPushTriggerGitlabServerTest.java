@@ -115,10 +115,13 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		String includeBranchesSpec = null;
 		String excludeBranchesSpec = null;
 		String targetBranchRegex = null;
+		String gitlabApiToken = null;
+		String gitlabHostUrl = "";
+		boolean ignoreCertificateErrors = false;
 		GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger(triggerOnPush, triggerOnMergeRequest,
 				triggerOpenMergeRequestOnPush, ciSkip, setBuildDescription, addNoteOnMergeRequest, addCiMessage,
 				addVoteOnMergeRequest, acceptMergeRequestOnSuccess, branchFilter, includeBranchesSpec,
-				excludeBranchesSpec, targetBranchRegex);
+				excludeBranchesSpec, targetBranchRegex, gitlabApiToken, gitlabHostUrl, ignoreCertificateErrors);
 
 		return gitLabPushTrigger;
 	}

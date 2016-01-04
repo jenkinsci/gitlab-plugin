@@ -31,7 +31,7 @@ Configuring access to Gitlab
 
 Optionally, the plugin communicates with the Gitlab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories. 
 
-To enable this functionality, a user should be set up on Gitlab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
+To enable this functionality, a user should be set up on Gitlab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice. This can be overridden in the job configuration.
 
 Using it With A Job
 =====================
