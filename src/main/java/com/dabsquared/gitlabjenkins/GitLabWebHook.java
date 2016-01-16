@@ -243,6 +243,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
         //TODO: add status of pending when we figure it out.
         if(mainBuild.isBuilding()) {
             object.put("status", "running");
+        }else if(res == Result.ABORTED) {
+            object.put("status", "canceled");
         }else if(res == Result.SUCCESS) {
             object.put("status", "success");
         }else {
