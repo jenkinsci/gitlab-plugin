@@ -3,6 +3,8 @@ package com.dabsquared.gitlabjenkins.publisher;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -112,8 +114,27 @@ public class GitLabCommitStatusPublisher extends Notifier {
         return projectId;
     }
 
+    @Initializer(after = InitMilestone.JOB_LOADED)
+    public static void migrateJobs() throws IOException {
+        DescriptorImpl descriptor = (DescriptorImpl) Jenkins.getInstance().getDescriptor(GitLabCommitStatusPublisher.class);
+        if (!descriptor.migrationFinished) {
+            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                if (trigger != null && trigger.getAddCiMessage()) {
+                    project.getPublishersList().add(new GitLabCommitStatusPublisher());
+                    trigger.setAddCiMessage(false);
+                    project.save();
+                }
+            }
+            descriptor.migrationFinished = true;
+            descriptor.save();
+        }
+    }
+
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+
+        private boolean migrationFinished = false;
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {

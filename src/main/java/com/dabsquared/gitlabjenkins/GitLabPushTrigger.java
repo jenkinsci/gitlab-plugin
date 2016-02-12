@@ -85,6 +85,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
+    private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
     private transient boolean allowAllBranches = false;
     private final String branchFilterName;
@@ -96,7 +97,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     @DataBoundConstructor
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush,
-                             boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest,
+                             boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, String branchFilterName,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.triggerOnPush = triggerOnPush;
@@ -105,6 +106,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
+        this.addCiMessage = addCiMessage;
         this.addVoteOnMergeRequest = addVoteOnMergeRequest;
         this.branchFilterName = branchFilterName;
         this.includeBranchesSpec = includeBranchesSpec;
@@ -139,6 +141,22 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     public boolean getAcceptMergeRequestOnSuccess() {
         return acceptMergeRequestOnSuccess;
+    }
+
+    /**
+     * @deprecated see {@link com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher}
+     */
+    @Deprecated
+    public boolean getAddCiMessage() {
+        return addCiMessage;
+    }
+
+    /**
+     * @deprecated see {@link com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher}
+     */
+    @Deprecated
+    public void setAddCiMessage(boolean addCiMessage) {
+        this.addCiMessage = addCiMessage;
     }
 
     public boolean getCiSkip() {
