@@ -1,12 +1,13 @@
 package com.dabsquared.gitlabjenkins;
 
+import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
+import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Action;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.ParameterValue;
-import hudson.model.Result;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Job;
@@ -82,7 +83,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
-    private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
     private final String branchFilterName;
     private final String includeBranchesSpec;
@@ -90,9 +90,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private final String targetBranchRegex;
     private boolean acceptMergeRequestOnSuccess = false;
 
+
     @DataBoundConstructor
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush,
-                             boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
+                             boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, String branchFilterName,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.triggerOnPush = triggerOnPush;
@@ -101,7 +102,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
-        this.addCiMessage = addCiMessage;
         this.addVoteOnMergeRequest = addVoteOnMergeRequest;
         this.branchFilterName = branchFilterName;
         this.includeBranchesSpec = includeBranchesSpec;
@@ -136,10 +136,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     public boolean getAcceptMergeRequestOnSuccess() {
         return acceptMergeRequestOnSuccess;
-    }
-
-    public boolean getAddCiMessage() {
-        return addCiMessage;
     }
 
     public boolean getCiSkip() {
@@ -247,10 +243,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     } else {
                         LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.",
                                 job.getFullName());
-                    }
-
-                    if(addCiMessage) {
-                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
                     }
                 }
 
@@ -379,10 +371,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 	                } else {
 	                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getFullName());
 	                }
-
-                    if(addCiMessage) {
-                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
-                    }
                 }
 
                 private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
@@ -472,108 +460,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    public void onCompleted(Run run){
-        Cause mCause= run.getCause(GitLabMergeCause.class);
-        if (mCause != null && mCause instanceof GitLabMergeCause) {
-            onCompleteMergeRequest(run, (GitLabMergeCause) mCause);
-        }
-
-        Cause pCause= run.getCause(GitLabPushCause.class);
-        if (pCause != null && pCause instanceof GitLabPushCause) {
-            onCompletedPushRequest(run, (GitLabPushCause) pCause);
-        }
-
-    }
-
-    private void onCompletedPushRequest(Run run, GitLabPushCause cause) {
-        if(addCiMessage) {
-            String status;
-            if (run.getResult() == Result.ABORTED) {
-                status = "canceled";
-            }else if (run.getResult() == Result.SUCCESS) {
-                status = "success";
-            }else {
-                status = "failed";
-            }
-            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), status, Jenkins.getInstance().getRootUrl() + run.getUrl());
-        }
-    }
-
-    private void onCompleteMergeRequest(Run run,GitLabMergeCause cause){
-        if (acceptMergeRequestOnSuccess && run.getResult() == Result.SUCCESS) {
-            try {
-                GitlabProject proj = new GitlabProject();
-                proj.setId(cause.getMergeRequest().getObjectAttribute().getTargetProjectId());
-                this.getDescriptor().getGitlab().instance().acceptMergeRequest(
-                        proj,
-                        cause.getMergeRequest().getObjectAttribute().getId(),
-                        "Merge Request accepted by jenkins build success");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if(addNoteOnMergeRequest) {
-            StringBuilder msg = new StringBuilder();
-            if (run.getResult() == Result.SUCCESS) {
-                String icon = addVoteOnMergeRequest ? ":+1:" : ":white_check_mark:";
-                msg.append(icon);
-            } else {
-                String icon = addVoteOnMergeRequest ? ":-1:" : ":anguished:";
-                msg.append(icon);
-            }
-            msg.append(" Jenkins Build ").append(run.getResult().color.getDescription());
-            String buildUrl = Jenkins.getInstance().getRootUrl() + run.getUrl();
-            msg.append("\n\nResults available at: ")
-                    .append("[").append("Jenkins " + buildUrl).append("](").append(buildUrl).append(")");
-            try {
-                GitlabProject proj = new GitlabProject();
-                proj.setId(cause.getMergeRequest().getObjectAttribute().getTargetProjectId());
-                org.gitlab.api.models.GitlabMergeRequest mr = this.getDescriptor().getGitlab().instance().getMergeRequest(proj,cause.getMergeRequest().getObjectAttribute().getId());
-                this.getDescriptor().getGitlab().instance().createNote(mr,msg.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if(addCiMessage) {
-            String status;
-            if (run.getResult() == Result.ABORTED) {
-                status = "canceled";
-            }else if (run.getResult() == Result.SUCCESS) {
-                status = "success";
-            }else {
-                status = "failed";
-            }
-            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), status, Jenkins.getInstance().getRootUrl() + run.getUrl());
-        }
-    }
-
-    public void onStarted(Run run) {
-        setBuildCauseInJob(run);
-
-        Cause mCause= run.getCause(GitLabMergeCause.class);
-        if (mCause != null && mCause instanceof GitLabMergeCause) {
-            onStartedMergeRequest(run, (GitLabMergeCause) mCause);
-        }
-
-        Cause pCause= run.getCause(GitLabPushCause.class);
-        if (pCause != null && pCause instanceof GitLabPushCause) {
-            onStartedPushRequest(run, (GitLabPushCause) pCause);
-        }
-    }
-
-    private void onStartedPushRequest(Run run, GitLabPushCause cause) {
-        if(addCiMessage) {
-            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), "running", Jenkins.getInstance().getRootUrl() + run.getUrl());
-        }
-    }
-
-    private void onStartedMergeRequest(Run run, GitLabMergeCause cause) {
-        if(addCiMessage) {
-            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), "running", Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 
