@@ -36,10 +36,10 @@
                           checked="${instance.branchFilterName == 'NameBasedFilter'}" inline="true"
                           help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
                 <f:entry title="Include">
-                    <f:textbox field="includeBranchesSpec" autocompleteDelimChar=","/>
+                    <f:textbox field="includeBranchesSpec" autoCompleteDelimChar=","/>
                 </f:entry>
                 <f:entry title="Exclude">
-                    <f:textbox field="excludeBranchesSpec" autocompleteDelimChar=","/>
+                    <f:textbox field="excludeBranchesSpec" autoCompleteDelimChar=","/>
                 </f:entry>
             </f:radioBlock>
 
