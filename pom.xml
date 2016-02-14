@@ -121,6 +121,12 @@
           <version>3.5.2.201411120430-r</version>
       </dependency>
       <dependency>
+          <groupId>org.jboss.spec.javax.ws.rs</groupId>
+          <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+          <version>1.0.0.Final</version>
+      </dependency>
+
+      <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
           <version>4.11</version>
