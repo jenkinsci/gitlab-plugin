@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -12,6 +14,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public class User {
 
+    private final Integer id;
     private final String name;
     private final String username;
     private final String email;
@@ -25,9 +28,15 @@ public class User {
             }
         };
     }
-    
+
+    @JsonCreator
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public User(String name, String username, String email, String avatarUrl) {
+    public User(@JsonProperty("id") Integer id,
+                @JsonProperty("name") String name,
+                @JsonProperty("username") String username,
+                @JsonProperty("email") String email,
+                @JsonProperty("avatar_url") String avatarUrl) {
+        this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
@@ -35,7 +44,11 @@ public class User {
     }
 
     User() {
-        this(null, null, null, null);
+        this(null, null, null, null, null);
+    }
+
+    public Optional<Integer> optId() {
+        return Optional.fromNullable(id);
     }
 
     public Optional<String> optName() {
@@ -64,6 +77,7 @@ public class User {
         }
         User user = (User) o;
         return new EqualsBuilder()
+                .append(id, user.id)
                 .append(name, user.name)
                 .append(username, user.username)
                 .append(email, user.email)
@@ -74,6 +88,7 @@ public class User {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
+                .append(id)
                 .append(name)
                 .append(username)
                 .append(email)
@@ -84,6 +99,7 @@ public class User {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .append("id", id)
                 .append("name", name)
                 .append("username", username)
                 .append("email", email)

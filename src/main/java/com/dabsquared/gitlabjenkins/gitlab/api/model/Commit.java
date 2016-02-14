@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -24,8 +26,16 @@ public class Commit {
     private final List<String> modified;
     private final List<String> removed;
 
+    @JsonCreator
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public Commit(String id, String message, Date timestamp, String url, User author, List<String> added, List<String> modified, List<String> removed) {
+    public Commit(@JsonProperty("id") String id,
+                  @JsonProperty("message") String message,
+                  @JsonProperty("timestamp") Date timestamp,
+                  @JsonProperty("url") String url,
+                  @JsonProperty("author") User author,
+                  @JsonProperty("added") List<String> added,
+                  @JsonProperty("modified") List<String> modified,
+                  @JsonProperty("removed") List<String> removed) {
         this.id = id;
         this.message = message;
         this.timestamp = timestamp;
