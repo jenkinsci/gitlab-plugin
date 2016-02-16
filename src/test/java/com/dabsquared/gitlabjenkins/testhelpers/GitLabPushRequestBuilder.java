@@ -1,8 +1,9 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import java.util.ArrayList;
-
 import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.data.Commit;
+
+import java.util.ArrayList;
 
 public class GitLabPushRequestBuilder {
 
@@ -20,7 +21,7 @@ public class GitLabPushRequestBuilder {
 		pushRequest.setUser_name("admin@example");
 		pushRequest.setProject_id(345);
 		pushRequest.setRepository(RepositoryBuilder.buildWithDefaults());
-		pushRequest.setCommits(new ArrayList<GitLabPushRequest.Commit>());
+		pushRequest.setCommits(new ArrayList<Commit>());
 	}
 
 	public GitLabPushRequestBuilder withBasicValues() {

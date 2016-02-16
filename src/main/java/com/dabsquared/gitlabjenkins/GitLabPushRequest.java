@@ -1,13 +1,15 @@
 package com.dabsquared.gitlabjenkins;
 
-import java.io.IOException;
-import java.util.List;
-
+import com.dabsquared.gitlabjenkins.data.Commit;
+import com.dabsquared.gitlabjenkins.data.Repository;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabCommitStatus;
 import org.gitlab.api.models.GitlabProject;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Represents for WebHook payload
@@ -149,149 +151,4 @@ public class GitLabPushRequest extends GitLabRequest {
         this.checkout_sha = checkout_sha;
     }
 
-    public static class Repository {
-
-        private String name;
-
-        private String url;
-
-        private String description;
-
-        private String homepage;
-
-        public Repository() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public String getHomepage() {
-            return homepage;
-        }
-
-        public void setHomepage(String homepage) {
-            this.homepage = homepage;
-        }
-
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-        }
-
-    }
-
-    public static class Commit {
-
-        private String id;
-
-        private String message;
-
-        private String timestamp;
-
-        private String url;
-
-        private User author;
-
-        public Commit() {
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public String getTimestamp() {
-            return timestamp;
-        }
-
-        public void setTimestamp(String timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public User getAuthor() {
-            return author;
-        }
-
-        public void setAuthor(User author) {
-            this.author = author;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-        }
-
-    }
-
-    public static class User {
-
-        private String name;
-
-        private String email;
-
-        public User() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-        }
-    }
 }

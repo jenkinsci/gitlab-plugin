@@ -1,18 +1,19 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.data.Commit;
+import com.dabsquared.gitlabjenkins.data.User;
 
 public class CommitBuilder {
 
-	public static GitLabPushRequest.Commit buildWithDefaults() {
+	public static Commit buildWithDefaults() {
 		return new CommitBuilder().withCommitSha("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb").build();
 	}
 
-	private GitLabPushRequest.Commit commit;
+	private Commit commit;
 
 	public CommitBuilder() {
-		commit = new GitLabPushRequest.Commit();
-		commit.setAuthor(new GitLabPushRequest.User());
+		commit = new Commit();
+		commit.setAuthor(new User());
 		commit.getAuthor().setName("author name");
 		commit.getAuthor().setEmail("author@example.com");
 		commit.setTimestamp("2015-11-12T07:49:09+11:00");
@@ -24,7 +25,7 @@ public class CommitBuilder {
 		return this;
 	}
 
-	public GitLabPushRequest.Commit build() {
+	public Commit build() {
 		return commit;
 	}
 
