@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
@@ -53,6 +54,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.springframework.util.AntPathMatcher;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -83,14 +85,17 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean addNoteOnMergeRequest = true;
     private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
-    private boolean allowAllBranches = false;
+    private final String branchFilterName;
     private final String includeBranchesSpec;
     private final String excludeBranchesSpec;
+    private final String targetBranchRegex;
     private boolean acceptMergeRequestOnSuccess = false;
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush, boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, boolean allowAllBranches,
-            String includeBranchesSpec, String excludeBranchesSpec) {
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush,
+                             boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
+                             boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, String branchFilterName,
+                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
@@ -99,9 +104,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
         this.addCiMessage = addCiMessage;
         this.addVoteOnMergeRequest = addVoteOnMergeRequest;
-        this.allowAllBranches = allowAllBranches;
+        this.branchFilterName = branchFilterName;
         this.includeBranchesSpec = includeBranchesSpec;
         this.excludeBranchesSpec = excludeBranchesSpec;
+        this.targetBranchRegex = targetBranchRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
 
@@ -133,10 +139,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return acceptMergeRequestOnSuccess;
     }
 
-    public boolean getAllowAllBranches() {
-        return allowAllBranches;
-    }
-
     public boolean getAddCiMessage() {
         return addCiMessage;
     }
@@ -144,7 +146,19 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     public boolean getCiSkip() {
         return ciSkip;
     }
-    private boolean isBranchAllowed(final String branchName) {
+
+    private boolean isAllowedByTargetBranchRegex(String branchName) {
+        final String regex = this.getTargetBranchRegex();
+
+        if (StringUtils.isEmpty(regex)) {
+            return true;
+        }
+        final Pattern pattern = Pattern.compile(regex);
+        return pattern.matcher(branchName).matches();
+    }
+
+    private boolean isAllowedByList(final String branchName) {
+
         final List<String> exclude = DescriptorImpl.splitBranchSpec(this.getExcludeBranchesSpec());
         final List<String> include = DescriptorImpl.splitBranchSpec(this.getIncludeBranchesSpec());
         if (exclude.isEmpty() && include.isEmpty()) {
@@ -166,6 +180,27 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return false;
     }
 
+    private boolean isBranchAllowed(final String branchName) {
+
+        final String branchFilterName = this.getBranchFilterName();
+        if (branchFilterName.isEmpty()) {
+            // no filter is applied, allow all branches
+            return true;
+        }
+
+        if (Objects.equal(branchFilterName, "NameBasedFilter")) {
+            return this.isAllowedByList(branchName);
+        }
+
+        if (Objects.equal(branchFilterName, "RegexBasedFilter")) {
+            return this.isAllowedByTargetBranchRegex(branchName);
+        }
+
+        return false;
+    }
+
+    public String getBranchFilterName() { return this.branchFilterName; }
+
     public String getIncludeBranchesSpec() {
         return this.includeBranchesSpec == null ? "" : this.includeBranchesSpec;
     }
@@ -173,6 +208,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     public String getExcludeBranchesSpec() {
         return this.excludeBranchesSpec == null ? "" : this.excludeBranchesSpec;
     }
+
+    public String getTargetBranchRegex() { return this.targetBranchRegex == null ? "" : this.targetBranchRegex; }
 
     // executes when the Trigger receives a push request
     public void onPost(final GitLabPushRequest req) {
@@ -184,7 +221,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             }
         };
 
-        if (triggerOnPush && (allowAllBranches || this.isBranchAllowed(this.getSourceBranch(req)))) {
+        if (triggerOnPush && this.isBranchAllowed(this.getSourceBranch(req))) {
+
             getDescriptor().queue.execute(new Runnable() {
 
                 public void run() {
@@ -311,7 +349,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     // executes when the Trigger receives a merge request
     public void onPost(final GitLabMergeRequest req) {
-    	if (triggerOnMergeRequest) {
+        if (triggerOnMergeRequest && this.isBranchAllowed(req.getObjectAttribute().getTargetBranch())) {
+
     		getDescriptor().queue.execute(new Runnable() {
                 public void run() {
 	                LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getName());
@@ -403,7 +442,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
 
             });
-    	}
+        }
     }
 
     private Map<String, ParameterValue> getDefaultParameters() {

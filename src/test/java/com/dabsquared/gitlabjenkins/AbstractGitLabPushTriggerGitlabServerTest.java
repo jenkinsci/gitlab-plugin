@@ -111,13 +111,14 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		boolean addCiMessage = true;
 		boolean addVoteOnMergeRequest = true;
 		boolean acceptMergeRequestOnSuccess = false;
-		boolean allowAllBranches = true;
+		String branchFilter = null;
 		String includeBranchesSpec = null;
 		String excludeBranchesSpec = null;
+		String targetBranchRegex = null;
 		GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger(triggerOnPush, triggerOnMergeRequest,
 				triggerOpenMergeRequestOnPush, ciSkip, setBuildDescription, addNoteOnMergeRequest, addCiMessage,
-				addVoteOnMergeRequest, acceptMergeRequestOnSuccess, allowAllBranches, includeBranchesSpec,
-				excludeBranchesSpec);
+				addVoteOnMergeRequest, acceptMergeRequestOnSuccess, branchFilter, includeBranchesSpec,
+				excludeBranchesSpec, targetBranchRegex);
 
 		return gitLabPushTrigger;
 	}
