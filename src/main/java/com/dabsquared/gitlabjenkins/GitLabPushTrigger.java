@@ -490,7 +490,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     private void onCompletedPushRequest(Run run, GitLabPushCause cause) {
         if(addCiMessage) {
-            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), run.getResult()==Result.SUCCESS?"success":"failed", Jenkins.getInstance().getRootUrl() + run.getUrl());
+            String status;
+            if (run.getResult() == Result.ABORTED) {
+                status = "canceled";
+            }else if (run.getResult() == Result.SUCCESS) {
+                status = "success";
+            }else {
+                status = "failed";
+            }
+            cause.getPushRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), status, Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 
@@ -531,7 +539,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
 
         if(addCiMessage) {
-            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), run.getResult()==Result.SUCCESS?"success":"failed", Jenkins.getInstance().getRootUrl() + run.getUrl());
+            String status;
+            if (run.getResult() == Result.ABORTED) {
+                status = "canceled";
+            }else if (run.getResult() == Result.SUCCESS) {
+                status = "success";
+            }else {
+                status = "failed";
+            }
+            cause.getMergeRequest().createCommitStatus(this.getDescriptor().getGitlab().instance(), status, Jenkins.getInstance().getRootUrl() + run.getUrl());
         }
     }
 
