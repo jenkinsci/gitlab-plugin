@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -15,38 +17,10 @@ import org.gitlab.api.models.GitlabProject;
  * @author Daniel Brooks
  */
 public class GitLabPushRequest extends GitLabRequest {
-    public static GitLabPushRequest create(String payload) {
-        if (payload == null) {
-            throw new IllegalArgumentException("payload should not be null");
-        }
-     
-        GitLabPushRequest pushRequest =  Builder.INSTANCE.get().fromJson(payload, GitLabPushRequest.class);
-        return pushRequest;
-    }
 
-    public GitLabPushRequest() {
-    }
+    private static final Logger LOGGER = Logger.getLogger(GitLabWebHook.class.getName());
 
     private GitlabProject sourceProject = null;
-
-    public GitlabProject getSourceProject (GitLab api) throws IOException {
-        if (sourceProject == null) {
-            sourceProject = api.instance().getProject(project_id);
-        }
-        return sourceProject;
-    }
-
-    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
-        try {
-            if(getLastCommit()!=null) {
-                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private String before;
     private String after;
     private String checkout_sha;
@@ -57,17 +31,47 @@ public class GitLabPushRequest extends GitLabRequest {
     private Integer total_commits_count;
     private Repository repository;
     private List<Commit> commits;
-    
+
+    public GitLabPushRequest() {
+    }
+
+    public static GitLabPushRequest create(String payload) {
+        if (payload == null) {
+            throw new IllegalArgumentException("payload should not be null");
+        }
+
+        return Builder.INSTANCE.get().fromJson(payload, GitLabPushRequest.class);
+    }
+
+    public GitlabProject getSourceProject(GitLab api) throws IOException {
+        if (sourceProject == null) {
+            sourceProject = api.instance().getProject(project_id);
+        }
+        return sourceProject;
+    }
+
+    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
+        try {
+            if (getLastCommit() != null) {
+                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "", e);
+        }
+        return null;
+    }
+
     public List<Commit> getCommits() {
         return commits;
     }
+
     public Commit getLastCommit() {
         if (commits.isEmpty()) {
             return null;
         }
         return commits.get(commits.size() - 1);
     }
-    
+
     public void setCommits(List<Commit> commits) {
         this.commits = commits;
     }
