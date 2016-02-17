@@ -3,8 +3,8 @@ package com.dabsquared.gitlabjenkins;
 import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabProject;
-import org.gitlab.api.models.GitlabUser;
 
 import java.io.IOException;
 
@@ -32,9 +32,9 @@ public class GitLabMergeRequest extends GitLabRequest {
     private ObjectAttributes objectAttributes;
     private GitlabProject sourceProject = null;
     
-    public GitlabProject getSourceProject (GitLab api) throws IOException {
+    public GitlabProject getSourceProject(GitlabAPI gitlabAPI) throws IOException {
     	if (sourceProject == null) {
-    		sourceProject = api.instance().getProject(objectAttributes.getSourceProjectId());
+    		sourceProject = gitlabAPI.getProject(objectAttributes.getSourceProjectId());
     	}
     	return sourceProject;
     }
