@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Action;
@@ -48,7 +49,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
-import org.gitlab.api.models.GitlabProject;
+import org.gitlab.api.GitlabAPI;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -301,8 +302,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         if (!getDescriptor().getGitlabHostUrl().isEmpty()) {
             // Get source repository if communication to Gitlab is possible
             try {
-                sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();
-                sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
+                GitLabConnectionProperty property = (GitLabConnectionProperty) job.getProperty(GitLabConnectionProperty.class);
+                if (property != null && property.getClient() != null) {
+                    GitlabAPI client = property.getClient();
+                    sourceRepoName = req.getSourceProject(client).getPathWithNamespace();
+                    sourceRepoURL = req.getSourceProject(client).getSshUrl();
+                }
             } catch (IOException ex) {
                 LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
             }
@@ -426,8 +431,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         if (!getDescriptor().getGitlabHostUrl().isEmpty()) {
             // Get source repository if communication to Gitlab is possible
             try {
-                sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();
-                sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
+                GitLabConnectionProperty property = (GitLabConnectionProperty) job.getProperty(GitLabConnectionProperty.class);
+                if (property != null && property.getClient() != null) {
+                    GitlabAPI client = property.getClient();
+                    sourceRepoName = req.getSourceProject(client).getPathWithNamespace();
+                    sourceRepoURL = req.getSourceProject(client).getSshUrl();
+                }
             } catch (IOException ex) {
                 LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
             }
@@ -607,9 +616,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            gitlabApiToken = formData.getString("gitlabApiToken");
-            gitlabHostUrl = formData.getString("gitlabHostUrl");
-            ignoreCertificateErrors = formData.getBoolean("ignoreCertificateErrors");
             save();
             gitlab = new GitLab();
             return super.configure(req, formData);
@@ -797,32 +803,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 }
             }
             return result;
-        }
-
-        public FormValidation doCheckGitlabHostUrl(@QueryParameter String value) {
-            if (value == null || value.isEmpty()) {
-                return FormValidation.error("Gitlab host URL required.");
-            }
-
-            return FormValidation.ok();
-        }
-
-        public FormValidation doCheckGitlabApiToken(@QueryParameter String value) {
-            if (value == null || value.isEmpty()) {
-                return FormValidation.error("API Token for Gitlab access required");
-            }
-
-            return FormValidation.ok();
-        }
-
-        public FormValidation doTestConnection(@QueryParameter("gitlabHostUrl") final String hostUrl,
-                @QueryParameter("gitlabApiToken") final String token, @QueryParameter("ignoreCertificateErrors") final boolean ignoreCertificateErrors) throws IOException {
-            try {
-                GitLab.checkConnection(token, hostUrl, ignoreCertificateErrors);
-                return FormValidation.ok("Success");
-            } catch (IOException e) {
-                return FormValidation.error("Client error : "+e.getMessage());
-            }
         }
 
         public GitLab getGitlab() {
