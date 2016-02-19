@@ -10,13 +10,20 @@ public class GitLab {
   private static final Logger LOGGER = Logger.getLogger(GitLab.class.getName());
   private GitlabAPI api;
 
-  public GitlabAPI instance() {
+	private String gitlabApiToken;
+	private String gitlabHostUrl = "";
+	private boolean ignoreCertificateErrors;
+
+	public GitLab(String gitlabApiToken, String gitlabHostUrl, boolean ignoreCertificateErrors) {
+		this.gitlabApiToken = gitlabApiToken;
+		this.gitlabHostUrl = gitlabHostUrl;
+		this.ignoreCertificateErrors = ignoreCertificateErrors;
+	}
+
+	public GitlabAPI instance() {
     if (api == null) {
-    	String token = GitLabPushTrigger.getDesc().getGitlabApiToken();
-        String url = GitLabPushTrigger.getDesc().getGitlabHostUrl();
-        boolean ignoreCertificateErrors = GitLabPushTrigger.getDesc().getIgnoreCertificateErrors();
-        LOGGER.log(Level.FINE, "Connecting to Gitlab server ({0})", url);
-        api = GitlabAPI.connect(url, token);
+        LOGGER.log(Level.FINE, "Connecting to Gitlab server ({0})", gitlabHostUrl);
+        api = GitlabAPI.connect(gitlabHostUrl, gitlabApiToken);
         api.ignoreCertificateErrors(ignoreCertificateErrors);
     }
 

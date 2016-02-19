@@ -1,6 +1,18 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
+    <f:entry title="Gitlab host URL" field="jobGitlabHostUrl"
+      description="The complete URL to the Gitlab server (i.e. http://gitlab">
+      <f:textbox/>
+    </f:entry>
+    <f:entry title="API Token" field="jobGitlabApiToken"
+           description="API Token for accessing Gitlab">
+      <f:textbox/>
+    </f:entry>
+    <f:entry title="${%Ignore SSL Certificate Errors}" field="jobIgnoreCertificateErrors">
+      <f:checkbox />
+    </f:entry>
+
     <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
         <f:checkbox default="true"/>
     </f:entry>
