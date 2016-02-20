@@ -10,7 +10,6 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.gitlab.api.GitlabAPI;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -34,15 +33,6 @@ public class GitLabConnectionProperty extends JobProperty<AbstractProject<?, ?>>
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
             return connectionConfig != null ? connectionConfig.getClient(gitLabConnection) : null;
-        }
-        return null;
-    }
-
-    @Deprecated
-    public GitlabAPI getOldClient() {
-        if (StringUtils.isNotEmpty(gitLabConnection)) {
-            GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            return connectionConfig != null ? connectionConfig.getOldClient(gitLabConnection) : null;
         }
         return null;
     }

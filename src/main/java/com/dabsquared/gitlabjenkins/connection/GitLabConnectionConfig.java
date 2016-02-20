@@ -1,18 +1,11 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
-import hudson.init.InitMilestone;
-import hudson.init.Initializer;
-import hudson.model.AbstractProject;
-import hudson.triggers.Trigger;
 import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.gitlab.api.GitlabAPI;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -30,9 +23,9 @@ import java.util.Map;
 @Extension
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
-    private List<GitLabConnection> connections = new ArrayList<GitLabConnection>();
-    private transient Map<String, GitLabConnection> connectionMap = new HashMap<String, GitLabConnection>();
-    private transient Map<String, GitLabApi> clients = new HashMap<String, GitLabApi>();
+    private List<GitLabConnection> connections = new ArrayList<>();
+    private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
+    private transient Map<String, GitLabApi> clients = new HashMap<>();
 
     public GitLabConnectionConfig() {
         load();
@@ -56,14 +49,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
             clients.put(connectionName, GitLabClientBuilder.buildClient(connectionMap.get(connectionName)));
         }
         return clients.get(connectionName);
-    }
-
-    @Deprecated
-    public GitlabAPI getOldClient(String connectionName) {
-        GitLabConnection connection = connectionMap.get(connectionName);
-        GitlabAPI client = GitlabAPI.connect(connection.getUrl(), connection.getApiToken());
-        client.ignoreCertificateErrors(connection.isIgnoreCertificateErrors());
-        return client;
     }
 
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
@@ -108,12 +93,5 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         for (GitLabConnection connection : connections) {
             connectionMap.put(connection.getName(), connection);
         }
-    }
-
-    public static boolean checkConnection(String token, String url, boolean ignoreCertificateErrors) throws IOException {
-        GitlabAPI testApi = GitlabAPI.connect(url, token);
-        testApi.ignoreCertificateErrors(ignoreCertificateErrors);
-        testApi.getProjects();
-        return true;
     }
 }

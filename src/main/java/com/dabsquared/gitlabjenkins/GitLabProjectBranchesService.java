@@ -1,167 +1,83 @@
 package com.dabsquared.gitlabjenkins;
 
-import java.io.IOException;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import com.dabsquared.gitlabjenkins.util.LoggerUtil;
+import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
+import com.google.common.base.Optional;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabBranch;
-import org.gitlab.api.models.GitlabProject;
 
 public class GitLabProjectBranchesService {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabProjectBranchesService.class.getName());
 
-    /**
-     * A map of git projects' branches; this is cached for
-     * BRANCH_CACHE_TIME_IN_MILLISECONDS ms
-     */
-    private final Map<String, BranchListEntry> projectBranchCache = new HashMap<String, BranchListEntry>();
-
-    /**
-     * length of time a git project's branch list is kept in the
-     * projectBranchCache for a particular source Repository
-     */
-    protected static final long BRANCH_CACHE_TIME_IN_MILLISECONDS = 5000;
-
-    /**
-     * a map of git projects; this is cached for
-     * PROJECT_LIST_CACHE_TIME_IN_MILLISECONDS ms
-     */
-    private HashMap<String, GitlabProject> projectMapCache = new HashMap<String, GitlabProject>();
-
-    /**
-     * length of time the list of git project is kept without being refreshed
-     * the map is also refreshed when a key hasnt been found, so we can leave
-     * the cache time high e.g. 1 day:
-     */
-    protected static final long PROJECT_MAP_CACHE_TIME_IN_MILLISECONDS = 24 * 3600 * 1000;
-
-    /**
-     * time (epoch) the project cache will have expired
-     */
-    private long projectCacheExpiry;
-
-    private final TimeUtility timeUtility;
+    private final Cache<String, List<String>> projectBranchCache;
 
     private static transient GitLabProjectBranchesService gitLabProjectBranchesService;
 
+    GitLabProjectBranchesService() {
+        this.projectBranchCache = CacheBuilder.<String, String>newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(5, TimeUnit.SECONDS)
+                .build();
+    }
+
     public static GitLabProjectBranchesService instance() {
         if (gitLabProjectBranchesService == null) {
-            gitLabProjectBranchesService = new GitLabProjectBranchesService(new TimeUtility());
+            gitLabProjectBranchesService = new GitLabProjectBranchesService();
         }
         return gitLabProjectBranchesService;
     }
 
-    protected GitLabProjectBranchesService(TimeUtility timeUtility) {
-        this.timeUtility = timeUtility;
-    }
-
-    public List<String> getBranches(GitlabAPI client, String sourceRepositoryString) throws IOException {
-
+    public List<String> getBranches(GitLabApi client, String sourceRepositoryString) {
         synchronized (projectBranchCache) {
-            BranchListEntry branchListEntry = projectBranchCache.get(sourceRepositoryString);
-            if (branchListEntry != null && !branchListEntry.hasExpired()) {
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.log(Level.FINEST, "found branches in cache for {0}", sourceRepositoryString);
-                }
-                return branchListEntry.branchNames;
-            }
-
-            final List<String> branchNames = new ArrayList<String>();
-
             try {
-                GitlabProject gitlabProject = findGitlabProjectForRepositoryUrl(client, sourceRepositoryString);
-                if (gitlabProject != null) {
-                    final List<GitlabBranch> branches = client.getBranches(gitlabProject);
-                    for (final GitlabBranch branch : branches) {
-                        branchNames.add(branch.getName());
-                    }
-                    projectBranchCache.put(sourceRepositoryString, new BranchListEntry(branchNames));
+                return projectBranchCache.get(sourceRepositoryString, new BranchNamesLoader(client, sourceRepositoryString));
+            } catch (ExecutionException e) {
+                throw new BranchLoadingException(e);
+            }
+        }
+    }
 
-                    if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.log(Level.FINEST, "found these branches for repo {0} : {1}",
-                                new Object[] { sourceRepositoryString, branchNames.toString() });
-                    }
-                }
-            } catch (final Error error) {
-                /* WTF WTF WTF */
-                final Throwable cause = error.getCause();
-                if (cause instanceof IOException) {
-                    throw (IOException) cause;
-                } else {
-                    throw error;
+    public static class BranchLoadingException extends RuntimeException {
+        BranchLoadingException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    private static class BranchNamesLoader implements Callable<List<String>> {
+        private final GitLabApi client;
+        private final String sourceRepository;
+
+        private BranchNamesLoader(GitLabApi client, String sourceRepository) {
+            this.client = client;
+            this.sourceRepository = sourceRepository;
+        }
+
+        @Override
+        public List<String> call() throws Exception {
+            List<String> result = new ArrayList<>();
+            String projectId = ProjectIdUtil.retrieveProjectId(sourceRepository);
+            for (Branch branch : client.getBranches(projectId)) {
+                Optional<String> name = branch.optName();
+                if (name.isPresent()) {
+                    result.add(name.get());
                 }
             }
-            return branchNames;
+            LOGGER.log(Level.FINEST, "found these branches for repo {0} : {1}", LoggerUtil.toArray(sourceRepository, result));
+            return result;
         }
     }
-
-    public GitlabProject findGitlabProjectForRepositoryUrl(GitlabAPI client, String sourceRepositoryString)
-            throws IOException {
-        synchronized (projectMapCache) {
-            String repositoryUrl = sourceRepositoryString.toLowerCase();
-            if (projectCacheExpiry < timeUtility.getCurrentTimeInMillis()
-                    || !projectMapCache.containsKey(repositoryUrl)) {
-
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.log(Level.FINEST,
-                            "refreshing repo map for {0} because expired : {1} or missing Key {2} expiry:{3} TS:{4}",
-                            new Object[] { sourceRepositoryString,
-                                    (Boolean) (projectCacheExpiry < timeUtility.getCurrentTimeInMillis()),
-                                    (Boolean) projectMapCache.containsKey(repositoryUrl), projectCacheExpiry,
-                                    timeUtility.getCurrentTimeInMillis() });
-                }
-                refreshGitLabProjectMap(client);
-            }
-            return projectMapCache.get(repositoryUrl);
-        }
-    }
-
-    public Map<String, GitlabProject> refreshGitLabProjectMap(GitlabAPI client) throws IOException {
-        synchronized (projectMapCache) {
-            try {
-                projectMapCache.clear();
-                List<GitlabProject> projects = client.getProjects();
-                for (GitlabProject gitlabProject : projects) {
-                    projectMapCache.put(gitlabProject.getSshUrl().toLowerCase(), gitlabProject);
-                    projectMapCache.put(gitlabProject.getHttpUrl().toLowerCase(), gitlabProject);
-                }
-                projectCacheExpiry = timeUtility.getCurrentTimeInMillis() + PROJECT_MAP_CACHE_TIME_IN_MILLISECONDS;
-            } catch (final Error error) {
-                final Throwable cause = error.getCause();
-                if (cause instanceof IOException) {
-                    throw (IOException) cause;
-                } else {
-                    throw error;
-                }
-            }
-            return projectMapCache;
-        }
-    }
-
-    public class BranchListEntry {
-        long expireTimestamp;
-        List<String> branchNames;
-
-        public BranchListEntry(List<String> branchNames) {
-            this.branchNames = branchNames;
-            this.expireTimestamp = timeUtility.getCurrentTimeInMillis() + BRANCH_CACHE_TIME_IN_MILLISECONDS;
-        }
-
-        boolean hasExpired() {
-            return expireTimestamp < timeUtility.getCurrentTimeInMillis();
-        }
-    }
-
-    public static class TimeUtility {
-        public long getCurrentTimeInMillis() {
-            return System.currentTimeMillis();
-        }
-    }
-
 }

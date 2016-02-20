@@ -46,12 +46,11 @@ public final class ProjectBranchesProvider {
         return INSTANCE;
     }
 
-    public List<String> getProjectBranches(Job<?, ?> project) throws IOException {
+    private List<String> getProjectBranches(Job<?, ?> project) {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
-            // TODO Adapt the branches service to use the JAX-RS gitlab API implementation
-            return null; //GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
+            return GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
         } else {
             LOGGER.log(Level.WARNING, "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
             return Collections.emptyList();
@@ -80,16 +79,14 @@ public final class ProjectBranchesProvider {
 
         try {
             return checkMatchingBranches(value, getProjectBranches(project));
-        } catch (final IllegalStateException ex) {
-            return FormValidation.warning(Messages.GitLabPushTrigger_CannotConnectToGitLab(ex.getMessage()));
-        } catch (final IOException ex) {
-            return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? ex : null, Messages.GitLabPushTrigger_CannotCheckBranches());
+        } catch (GitLabProjectBranchesService.BranchLoadingException e) {
+            return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? e : null, Messages.GitLabPushTrigger_CannotCheckBranches());
         }
     }
 
     private FormValidation checkMatchingBranches(@QueryParameter String value, List<String> projectBranches) {
-        Set<String> matchingSpecs = new HashSet<String>();
-        Set<String> unknownSpecs = new HashSet<String>();
+        Set<String> matchingSpecs = new HashSet<>();
+        Set<String> unknownSpecs = new HashSet<>();
         AntPathMatcherSet projectBranchesMatcherSet = new AntPathMatcherSet(projectBranches);
         for (String branchSpec : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
             if (projectBranchesMatcherSet.contains(branchSpec)) {
@@ -115,10 +112,8 @@ public final class ProjectBranchesProvider {
         try {
             List<String> branches = getProjectBranches(job);
             return branches.toArray(new String[branches.size()]);
-        } catch (final IllegalStateException ex) {
-            LOGGER.log(Level.FINEST, "Unexpected IllegalStateException. Please check the logs and your configuration.", ex);
-        } catch (final IOException ex) {
-            LOGGER.log(Level.FINEST, "Unexpected IllegalStateException. Please check the logs and your configuration.", ex);
+        } catch (GitLabProjectBranchesService.BranchLoadingException e) {
+            LOGGER.log(Level.FINEST, "Failed to load branch names from GitLab. Please check the logs and your configuration.", e);
         }
         return new String[0];
     }
