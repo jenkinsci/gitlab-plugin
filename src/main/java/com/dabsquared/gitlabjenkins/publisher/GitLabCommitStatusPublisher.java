@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins.publisher;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.init.InitMilestone;
@@ -10,7 +12,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
-import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -18,18 +19,23 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.transport.URIish;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabProject;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Robin Müller
  */
 public class GitLabCommitStatusPublisher extends Recorder {
+
+    private final static Logger LOGGER = Logger.getLogger(GitLabCommitStatusPublisher.class.getName());
 
     @DataBoundConstructor
     public GitLabCommitStatusPublisher() { }
@@ -40,28 +46,22 @@ public class GitLabCommitStatusPublisher extends Recorder {
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        GitlabProject buildProject = retrieveGitlabProject(build, listener);
-        if (buildProject != null) {
-            String commitHash = getBuildRevision(build);
-            updateCommitStatus(build, listener, buildProject, commitHash, "running", getBuildUrl(build));
-        }
+        String commitHash = getBuildRevision(build);
+        updateCommitStatus(build, listener, BuildState.running, commitHash, getBuildUrl(build));
         return true;
     }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        GitlabProject buildProject = retrieveGitlabProject(build, listener);
-        if (buildProject != null) {
-            String commitHash = getBuildRevision(build);
-            String buildUrl = getBuildUrl(build);
-            Result buildResult = build.getResult();
-            if (buildResult == Result.SUCCESS) {
-                updateCommitStatus(build, listener, buildProject, commitHash, "success", buildUrl);
-            } else if (buildResult == Result.ABORTED) {
-                updateCommitStatus(build, listener, buildProject, commitHash, "canceled", buildUrl);
-            } else {
-                updateCommitStatus(build, listener, buildProject, commitHash, "failed", buildUrl);
-            }
+        String commitHash = getBuildRevision(build);
+        String buildUrl = getBuildUrl(build);
+        Result buildResult = build.getResult();
+        if (buildResult == Result.SUCCESS) {
+            updateCommitStatus(build, listener, BuildState.success, commitHash, buildUrl);
+        } else if (buildResult == Result.ABORTED) {
+            updateCommitStatus(build, listener, BuildState.canceled, commitHash, buildUrl);
+        } else {
+            updateCommitStatus(build, listener, BuildState.failed, commitHash, buildUrl);
         }
         return true;
     }
@@ -70,16 +70,29 @@ public class GitLabCommitStatusPublisher extends Recorder {
         return build.getAction(BuildData.class).getLastBuiltRevision().getSha1String();
     }
 
-    private void updateCommitStatus(AbstractBuild<?, ?> build, BuildListener listener, GitlabProject buildProject, String commitHash, String state, String buildUrl) {
-        try {
-            GitlabAPI client = getClient(build);
-            if (client == null) {
-                listener.getLogger().println("No GitLab connection configured");
-            } else {
-                client.createCommitStatus(buildProject, commitHash, state, commitHash, "jenkins", buildUrl, null);
+    private void updateCommitStatus(AbstractBuild<?, ?> build, BuildListener listener, BuildState state, String commitHash, String buildUrl) {
+        for (String gitlabProjectId : retrieveGitlabProjectIds(build)) {
+            try {
+                GitLabApi client = getClient(build);
+                if (client == null) {
+                    listener.getLogger().println("No GitLab connection configured");
+                } else if (existsCommit(client, gitlabProjectId, commitHash)) {
+                    client.changeBuildStatus(gitlabProjectId, commitHash, state, commitHash, "jenkins", buildUrl, null);
+                }
+            } catch (WebApplicationException e) {
+                listener.getLogger().printf("Failed to update Gitlab commit status for project '%s': %s%n", gitlabProjectId, e.getMessage());
+                LOGGER.log(Level.SEVERE, String.format("Failed to update Gitlab commit status for project '%s'", gitlabProjectId), e);
             }
-        } catch (IOException e) {
-            listener.getLogger().println("Failed to update Gitlab commit status");
+        }
+    }
+
+    private boolean existsCommit(GitLabApi client, String gitlabProjectId, String commitHash) {
+        try {
+            client.headCommit(gitlabProjectId, commitHash);
+            return true;
+        } catch (NotFoundException e) {
+            LOGGER.log(Level.FINE, String.format("Project (%s) and commit (%s) combination not found", gitlabProjectId, commitHash));
+            return false;
         }
     }
 
@@ -87,33 +100,24 @@ public class GitLabCommitStatusPublisher extends Recorder {
         return Jenkins.getInstance().getRootUrl() + build.getUrl();
     }
 
-    private GitlabAPI getClient(AbstractBuild<?, ?> build) {
+    private GitLabApi getClient(AbstractBuild<?, ?> build) {
         GitLabConnectionProperty connectionProperty = build.getProject().getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null) {
-            return connectionProperty.getOldClient();
+            return connectionProperty.getClient();
         }
         return null;
     }
 
-    private GitlabProject retrieveGitlabProject(AbstractBuild<?, ?> build, TaskListener listener) {
-        GitlabAPI client = getClient(build);
-        if (client == null) {
-            listener.getLogger().println("No GitLab connection configured");
-        } else {
-            Set<String> remoteUrls = build.getAction(BuildData.class).getRemoteUrls();
-            for (String remoteUrl : remoteUrls) {
-                try {
-                    try {
-                        return client.getProject(retrieveProjectId(remoteUrl));
-                    } catch (Throwable e) {
-                        listener.getLogger().printf("Failed to retrieve GitLab project for projectId: %s", retrieveProjectId(remoteUrl));
-                    }
-                } catch (URISyntaxException e) {
-                    // nothing to do
-                }
+    private List<String> retrieveGitlabProjectIds(AbstractBuild<?, ?> build) {
+        List<String> result = new ArrayList<String>();
+        for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
+            try {
+                result.add(retrieveProjectId(remoteUrl));
+            } catch (URISyntaxException e) {
+                // nothing to do
             }
         }
-        return null;
+        return result;
     }
 
     private String retrieveProjectId(String remoteUrl) throws URISyntaxException {

@@ -1,8 +1,11 @@
 package com.dabsquared.gitlabjenkins.listener;
 
+import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
@@ -14,6 +17,7 @@ import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.text.MessageFormat;
 
@@ -34,9 +38,9 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
             Integer projectId = gitLabMergeCause.getRequest().getObjectAttribute().getSourceProjectId();
             Integer mergeRequestId = gitLabMergeCause.getRequest().getObjectAttribute().getId();
             if (buildResult == Result.SUCCESS) {
-                acceptMergeRequestIfNecessary(build, trigger, listener, projectId, mergeRequestId);
+                acceptMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId);
             }
-            addNoteOnMergeRequestIfNecessary(build, trigger, listener, projectId, mergeRequestId, build.getProject().getDisplayName(), build.getNumber(),
+            addNoteOnMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId, build.getProject().getDisplayName(), build.getNumber(),
                     buildUrl, getResultIcon(trigger, Result.SUCCESS), buildResult.color.getDescription());
         }
     }
@@ -45,40 +49,35 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
         return Jenkins.getInstance().getRootUrl() + build.getUrl();
     }
 
-    private void acceptMergeRequestIfNecessary(AbstractBuild<?, ?> build, GitLabPushTrigger trigger, TaskListener listener, Integer projectId, Integer mergeRequestId) {
+    private void acceptMergeRequestIfNecessary(AbstractBuild<?, ?> build, GitLabPushTrigger trigger, TaskListener listener, String projectId, Integer mergeRequestId) {
         if (trigger.getAcceptMergeRequestOnSuccess()) {
             try {
-                GitlabProject project = new GitlabProject();
-                project.setId(projectId);
-                GitlabAPI client = getClient(build);
+                GitLabApi client = getClient(build);
                 if (client == null) {
                     listener.getLogger().println("No GitLab connection configured");
                 } else {
-                    client.acceptMergeRequest(project, mergeRequestId, "Merge Request accepted by jenkins build success");
+                    client.acceptMergeRequest(projectId, mergeRequestId, "Merge Request accepted by jenkins build success", false);
                 }
-            } catch (Throwable e) {
+            } catch (WebApplicationException e) {
                 listener.getLogger().println("Failed to accept merge request.");
             }
         }
     }
 
-    private void addNoteOnMergeRequestIfNecessary(AbstractBuild<?, ?> build, GitLabPushTrigger trigger, TaskListener listener, Integer projectId, Integer mergeRequestId,
+    private void addNoteOnMergeRequestIfNecessary(AbstractBuild<?, ?> build, GitLabPushTrigger trigger, TaskListener listener, String projectId, Integer mergeRequestId,
                                                   String projectName, int buildNumber, String buildUrl, String resultIcon, String statusDescription) {
         if (trigger.getAddNoteOnMergeRequest()) {
             String message = MessageFormat.format("{0} Jenkins Build {1}\n\nResults available at: [Jenkins [{2} #{3}]]({4})", resultIcon,
                     statusDescription, projectName, buildNumber, buildUrl);
             try {
-                GitlabMergeRequest mergeRequest = new GitlabMergeRequest();
-                mergeRequest.setProjectId(projectId);
-                mergeRequest.setId(mergeRequestId);
-                GitlabAPI client = getClient(build);
+                GitLabApi client = getClient(build);
                 if (client == null) {
                     listener.getLogger().println("No GitLab connection configured");
                 } else {
-                    client.createNote(mergeRequest, message);
+                    client.createMergeRequestNote(projectId, mergeRequestId, message);
                 }
-            } catch (IOException e) {
-                listener.getLogger().println("Failed to accept merge request.");
+            } catch (WebApplicationException e) {
+                listener.getLogger().println("Failed to add message to merge request.");
             }
         }
     }
@@ -91,10 +90,10 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
         }
     }
 
-    private GitlabAPI getClient(AbstractBuild<?, ?> run) {
+    private GitLabApi getClient(AbstractBuild<?, ?> run) {
         GitLabConnectionProperty connectionProperty = ((AbstractBuild<?, ?>) run).getProject().getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null) {
-            return connectionProperty.getOldClient();
+            return connectionProperty.getClient();
         }
         return null;
     }
