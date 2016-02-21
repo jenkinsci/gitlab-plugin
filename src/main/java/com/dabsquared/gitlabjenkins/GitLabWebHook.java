@@ -3,6 +3,8 @@ package com.dabsquared.gitlabjenkins;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.data.LastCommit;
 import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.webhook.StatusJsonAction;
+import com.dabsquared.gitlabjenkins.webhook.StatusPngAction;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import hudson.Extension;
@@ -33,6 +35,7 @@ import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
+import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -78,25 +81,25 @@ public class GitLabWebHook implements UnprotectedRootAction {
     public void getDynamic(final String projectName, final StaplerRequest req, StaplerResponse res) {
         LOGGER.log(Level.INFO, "WebHook called with url: {0}", req.getRestOfPath());
         final Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(req.getRestOfPath()).iterator();
-        final Job<?, ?>[] projectHolder = new Job<?, ?>[] { null };
+        final AbstractProject<?, ?>[] projectHolder = new AbstractProject<?, ?>[] { null };
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
 
             public void run() {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
                     Item item = jenkins.getItemByFullName(projectName);
-                    while (item instanceof ItemGroup<?> && !(item instanceof Job<?, ?>) && restOfPathParts.hasNext()) {
+                    while (item instanceof ItemGroup<?> && !(item instanceof AbstractProject<?, ?>) && restOfPathParts.hasNext()) {
                         item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
                     }
-                    if (item instanceof Job<?, ?>) {
-                        projectHolder[0] = (Job<?, ?>) item;
+                    if (item instanceof AbstractProject<?, ?>) {
+                        projectHolder[0] = (AbstractProject<?, ?>) item;
                     }
                 }
             }
 
         });
 
-        final Job<?, ?> project = projectHolder[0];
+        final AbstractProject<?, ?> project = projectHolder[0];
         if (project == null) {
             throw HttpResponses.notFound();
         }
@@ -153,22 +156,11 @@ public class GitLabWebHook implements UnprotectedRootAction {
         String lastPath = paths.get(paths.size()-1);
         String firstPath = paths.get(0);
         if(lastPath.equals("status.json") && !firstPath.equals("!builds")) {
-            String commitSHA1 = paths.get(1);
-            this.generateStatusJSON(commitSHA1, project, req, res);
+            new StatusJsonAction(project, paths.get(1)).execute(res);
         } else if(lastPath.equals("build") || (lastPath.equals("status.json") && firstPath.equals("!builds"))) {
             this.generateBuild(theString, project, req, res);
         } else if(lastPath.equals("status.png")) {
-            String branch = req.getParameter("ref");
-            String commitSHA1 = req.getParameter("sha1");
-            try {
-                this.generateStatusPNG(branch, commitSHA1, project, req, res);
-            } catch (ServletException e) {
-                e.printStackTrace();
-                throw HttpResponses.error(500,"Could not generate an image.");
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw HttpResponses.error(500,"Could not generate an image.");
-            }
+            new StatusPngAction(project, req.getParameter("sha1"), req.getParameter("ref")).execute(res);
         } else if((firstPath.equals("commits") || firstPath.equals("builds")) && !lastPath.equals("status.json")) {
             Run build = this.getBuildBySHA1(project, lastPath, true);
             redirectToBuildPage(res, build);
@@ -193,119 +185,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
 		    }
 		}
 	}
-
-    private GitSCM getGitSCM(SCMTriggerItem item) {
-        if(item != null) {
-            for(SCM scm : item.getSCMs()) {
-                if(scm instanceof GitSCM) {
-                    return (GitSCM) scm;
-                }
-            }
-        }
-        return null;
-    }
-
-    private void generateStatusJSON(String commitSHA1, Job project, StaplerRequest req, StaplerResponse rsp) {
-        SCMTriggerItem item = SCMTriggerItems.asSCMTriggerItem(project);
-        GitSCM gitSCM = getGitSCM(item);
-
-        if(gitSCM == null) {
-            throw new IllegalArgumentException("This repo does not use git.");
-        }
-
-        Run mainBuild = this.getBuildBySHA1(project, commitSHA1, true);
-
-        JSONObject object = new JSONObject();
-        object.put("sha", commitSHA1);
-
-        if(mainBuild == null) {
-            try {
-                object.put("status", "pending");
-                this.writeJSON(rsp, object);
-                return;
-            } catch (IOException e) {
-                throw HttpResponses.error(500,"Could not generate response.");
-            }
-        }
-
-
-        object.put("id", mainBuild.getNumber());
-
-        Result res = mainBuild.getResult();
-
-        //TODO: add status of pending when we figure it out.
-        if(mainBuild.isBuilding()) {
-            object.put("status", "running");
-        }else if(res == Result.ABORTED) {
-            object.put("status", "canceled");
-        }else if(res == Result.SUCCESS) {
-            object.put("status", "success");
-        }else {
-            object.put("status", "failed");
-        }
-        
-        try {
-            this.writeJSON(rsp, object);
-        } catch (IOException e) {
-            throw HttpResponses.error(500,"Could not generate response.");
-        }
-    }
-
-
-    private void generateStatusPNG(String branch, String commitSHA1, Job project, final StaplerRequest req, final StaplerResponse rsp) throws ServletException, IOException {
-        SCMTriggerItem item = SCMTriggerItems.asSCMTriggerItem(project);
-        GitSCM gitSCM = getGitSCM(item);
-
-        if(gitSCM == null) {
-            throw new IllegalArgumentException("This repo does not use git.");
-        }
-
-        Run mainBuild = null;
-
-        if(branch != null) {
-            mainBuild = this.getBuildByBranch(project, branch);
-        } else if(commitSHA1 != null) {
-            mainBuild = this.getBuildBySHA1(project, commitSHA1, false);
-        }
-
-        String baseUrl = Jenkins.getInstance().getRootUrl();
-        // Remove trailing slash
-        if (baseUrl.endsWith("/")) {
-           baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-        String imageUrl = "images/unknown.png";
-        if(null != mainBuild) {
-            Result res = mainBuild.getResult();
-            if(mainBuild.isBuilding()) {
-            	imageUrl = "images/running.png";
-            }else if(res == Result.SUCCESS) {
-            	imageUrl = "images/success.png";
-            }else if(res == Result.FAILURE) {
-            	imageUrl = "images/failed.png";
-            }else if(res == Result.UNSTABLE) {
-            	imageUrl = "images/unstable.png";
-            }else {
-            	imageUrl = "images/unknown.png"; 
-            }
-        }       
-        Authentication old = SecurityContextHolder.getContext().getAuthentication();
-        SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
-        try {
-            URL resourceUrl = new URL(Jenkins.getInstance().getPlugin("gitlab-plugin").getWrapper().baseResourceURL + imageUrl);
-            LOGGER.info("serving image "+resourceUrl.toExternalForm());
-            rsp.setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
-            rsp.setHeader("Cache-Control", "no-cache, private");
-            rsp.setHeader("Content-Type", "image/png");
-            hudson.util.IOUtils.copy(new File(resourceUrl.toURI()), rsp.getOutputStream());
-            rsp.flushBuffer();
-        } catch (Exception e) {
-			throw HttpResponses.error(500,"Could not generate response.");
-		} finally {
-            SecurityContextHolder.getContext().setAuthentication(old);
-        }
-
-    }
-
 
     /**
      * Take the GitLab Data and parse through it.
@@ -608,27 +487,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
             }
         }
         return null;
-    }
-
-
-    /**
-     *
-     * @param rsp The stapler response to write the output to.
-     * @throws IOException
-     */
-    private void writeJSON(StaplerResponse rsp, JSONObject jsonObject) throws IOException {
-        rsp.setContentType("application/json");
-        PrintWriter w = rsp.getWriter();
-
-        if(jsonObject == null) {
-            w.write("null");
-        } else {
-            w.write(jsonObject.toString());
-        }
-
-        w.flush();
-        w.close();
-
     }
 
     @Extension
