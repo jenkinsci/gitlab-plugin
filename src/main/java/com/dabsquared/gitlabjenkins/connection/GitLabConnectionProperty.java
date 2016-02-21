@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -29,10 +30,19 @@ public class GitLabConnectionProperty extends JobProperty<AbstractProject<?, ?>>
         return gitLabConnection;
     }
 
-    public GitlabAPI getClient() {
+    public GitLabApi getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
             return connectionConfig != null ? connectionConfig.getClient(gitLabConnection) : null;
+        }
+        return null;
+    }
+
+    @Deprecated
+    public GitlabAPI getOldClient() {
+        if (StringUtils.isNotEmpty(gitLabConnection)) {
+            GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+            return connectionConfig != null ? connectionConfig.getOldClient(gitLabConnection) : null;
         }
         return null;
     }

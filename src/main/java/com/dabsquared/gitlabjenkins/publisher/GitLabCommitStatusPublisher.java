@@ -90,7 +90,7 @@ public class GitLabCommitStatusPublisher extends Recorder {
     private GitlabAPI getClient(AbstractBuild<?, ?> build) {
         GitLabConnectionProperty connectionProperty = build.getProject().getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null) {
-            return connectionProperty.getClient();
+            return connectionProperty.getOldClient();
         }
         return null;
     }

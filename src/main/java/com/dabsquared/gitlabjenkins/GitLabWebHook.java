@@ -392,7 +392,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 		try {
             GitLabConnectionProperty property = project.getProperty(GitLabConnectionProperty.class);
             if (property != null && property.getClient() != null) {
-                GitlabAPI client = property.getClient();
+                GitlabAPI client = property.getOldClient();
                 List<GitlabMergeRequest> mergeRequests = client.getOpenMergeRequests(projectId);
 
                 for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {

@@ -302,8 +302,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                         // Get source repository if communication to Gitlab is possible
                         try {
                             GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
-                            if (property != null && property.getClient() != null) {
-                                GitlabAPI client = property.getClient();
+                            if (property != null && property.getOldClient() != null) {
+                                GitlabAPI client = property.getOldClient();
                                 sourceRepoName = req.getSourceProject(client).getPathWithNamespace();
                                 sourceRepoURL = req.getSourceProject(client).getSshUrl();
                             }
@@ -433,7 +433,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     	try {
                             GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
                             if (property != null && property.getClient() != null) {
-                                GitlabAPI client = property.getClient();
+                                GitlabAPI client = property.getOldClient();
                                 sourceRepoName = req.getSourceProject(client).getPathWithNamespace();
                                 sourceRepoURL = req.getSourceProject(client).getSshUrl();
                             }

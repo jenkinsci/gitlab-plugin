@@ -94,7 +94,7 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
     private GitlabAPI getClient(AbstractBuild<?, ?> run) {
         GitLabConnectionProperty connectionProperty = ((AbstractBuild<?, ?>) run).getProject().getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null) {
-            return connectionProperty.getClient();
+            return connectionProperty.getOldClient();
         }
         return null;
     }

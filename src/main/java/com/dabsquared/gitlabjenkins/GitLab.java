@@ -1,12 +1,9 @@
 package com.dabsquared.gitlabjenkins;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
-import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 import org.gitlab.api.GitlabAPI;
 
@@ -26,12 +23,5 @@ public class GitLab {
     }
 
     return api;
-  }
-  
-  public static boolean checkConnection (String token, String url, boolean ignoreCertificateErrors) throws IOException {
-	  GitlabAPI testApi = GitlabAPI.connect(url, token);
-	  testApi.ignoreCertificateErrors(ignoreCertificateErrors);
-	  testApi.getProjects();
-	  return true;
   }
 }

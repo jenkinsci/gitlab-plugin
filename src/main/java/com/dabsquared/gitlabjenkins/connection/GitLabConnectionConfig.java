@@ -1,7 +1,8 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import com.dabsquared.gitlabjenkins.GitLab;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.gitlab.GitLabClientBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -14,6 +15,8 @@ import org.gitlab.api.GitlabAPI;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +31,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     private List<GitLabConnection> connections = new ArrayList<GitLabConnection>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<String, GitLabConnection>();
-    private transient Map<String, GitlabAPI> clients = new HashMap<String, GitlabAPI>();
+    private transient Map<String, GitLabApi> clients = new HashMap<String, GitLabApi>();
     private boolean migrationFinished = false;
 
     public GitLabConnectionConfig() {
@@ -48,14 +51,19 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return connections;
     }
 
-    public GitlabAPI getClient(String connectionName) {
+    public GitLabApi getClient(String connectionName) {
         if (!clients.containsKey(connectionName) && connectionMap.containsKey(connectionName)) {
-            GitLabConnection connection = connectionMap.get(connectionName);
-            GitlabAPI client = GitlabAPI.connect(connection.getUrl(), connection.getApiToken());
-            client.ignoreCertificateErrors(connection.isIgnoreCertificateErrors());
-            clients.put(connectionName, client);
+            clients.put(connectionName, GitLabClientBuilder.buildClient(connectionMap.get(connectionName)));
         }
         return clients.get(connectionName);
+    }
+
+    @Deprecated
+    public GitlabAPI getOldClient(String connectionName) {
+        GitLabConnection connection = connectionMap.get(connectionName);
+        GitlabAPI client = GitlabAPI.connect(connection.getUrl(), connection.getApiToken());
+        client.ignoreCertificateErrors(connection.isIgnoreCertificateErrors());
+        return client;
     }
 
     public FormValidation doCheckName(@QueryParameter String value, @QueryParameter String url, @QueryParameter String apiToken, @QueryParameter boolean ignoreCertificateErrors) {
@@ -88,12 +96,14 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiToken, @QueryParameter boolean ignoreCertificateErrors) throws IOException {
+    public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiToken, @QueryParameter boolean ignoreCertificateErrors) {
         try {
-            GitLab.checkConnection(apiToken, url, ignoreCertificateErrors);
+            GitLabClientBuilder.buildClient(url, apiToken, ignoreCertificateErrors).headCurrentUser();
             return FormValidation.ok(Messages.connection_success());
-        } catch (IOException e) {
+        } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
+        } catch (ProcessingException e) {
+            return FormValidation.error(Messages.connection_error(e.getCause().getMessage()));
         }
     }
 
