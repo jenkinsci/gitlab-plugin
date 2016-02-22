@@ -28,6 +28,7 @@ import hudson.util.ListBoxModel.Option;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -323,8 +324,19 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     public RevisionParameterAction createPushRequestRevisionParameter(Job<?, ?> job, GitLabPushRequest req) {
         RevisionParameterAction revision = null;
 
+
+        // add url to remote to work with multiple scm plugin.
+        // See JENKINS-26587, https://github.com/jenkinsci/git-plugin/pull/296
+        // and https://github.com/jenkinsci/gitlab-plugin/issues/183
+        URIish urIish = null;
+        try {
+            urIish = new URIish(req.getRepository().getUrl());
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+        }
+
         if (req.getLastCommit() !=null) {
-            revision = new RevisionParameterAction(req.getLastCommit().getId());
+            revision = new RevisionParameterAction(req.getLastCommit().getId(), urIish);
         } else {
             if (req.getCheckout_sha() != null) {
                 if (req.getCheckout_sha().contains("0000000000000000000000000000000000000000")) {
@@ -332,11 +344,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     LOGGER.log(Level.INFO, "GitLab Push {0} has been deleted, skip build .", req.getRef());
                     return null;
                 }
-                revision = new RevisionParameterAction(req.getCheckout_sha());
+                revision = new RevisionParameterAction(req.getCheckout_sha(), urIish);
             } else if (req.getBefore() != null
                     && req.getBefore().contains("0000000000000000000000000000000000000000")) {
                 // new branches
-                revision = new RevisionParameterAction(req.getAfter());
+                revision = new RevisionParameterAction(req.getAfter(), urIish);
             } else {
                 LOGGER.log(Level.WARNING,
                         "unknown handled situation, dont know what revision to build for req {0} for job {1}",
