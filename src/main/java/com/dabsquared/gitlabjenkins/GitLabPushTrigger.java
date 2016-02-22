@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Action;
