@@ -1,9 +1,8 @@
-package com.dabsquared.gitlabjenkins.webhook;
+package com.dabsquared.gitlabjenkins.webhook.status;
 
+import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.plugins.git.util.Build;
-import hudson.plugins.git.util.BuildData;
 import hudson.util.HttpResponses;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerResponse;
@@ -16,18 +15,18 @@ import java.io.PrintWriter;
  */
 public class StatusJsonAction extends BuildStatusAction {
 
-    private String commitSHA1;
+    private String sha1;
 
-    public StatusJsonAction(AbstractProject<?, ?> project, String commitSHA1) {
-        super(project);
-        this.commitSHA1 = commitSHA1;
+    public StatusJsonAction(AbstractProject<?, ?> project, String sha1) {
+        super(project, BuildUtil.getBuildBySHA1(project, sha1, true));
+        this.sha1 = sha1;
     }
 
     @Override
     protected void writeStatusBody(StaplerResponse response, AbstractBuild<?, ?> build, BuildStatus status) {
         try {
             JSONObject object = new JSONObject();
-            object.put("sha", commitSHA1);
+            object.put("sha", sha1);
             if (build != null) {
                 object.put("id", build.getNumber());
             }
@@ -36,19 +35,6 @@ public class StatusJsonAction extends BuildStatusAction {
         } catch (IOException e) {
             throw HttpResponses.error(500, "Failed to generate response");
         }
-    }
-
-    @Override
-    protected AbstractBuild<?, ?> retrieveBuild(AbstractProject<?, ?> project) {
-        for (AbstractBuild build : project.getBuilds()) {
-            BuildData data = build.getAction(BuildData.class);
-            if (data != null && data.lastBuild != null) {
-                if (data.lastBuild.isFor(commitSHA1)) {
-                    return build;
-                }
-            }
-        }
-        return null;
     }
 
     private void writeBody(StaplerResponse response, JSONObject body) throws IOException {
