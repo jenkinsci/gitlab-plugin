@@ -3,18 +3,19 @@ package com.dabsquared.gitlabjenkins;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.data.LastCommit;
 import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
-import com.dabsquared.gitlabjenkins.webhook.StatusJsonAction;
-import com.dabsquared.gitlabjenkins.webhook.StatusPngAction;
+import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
+import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
+import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
+import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
+import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.plugins.git.Branch;
-import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
 import hudson.plugins.git.util.MergeRecord;
-import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.security.csrf.CrumbExclusion;
 import hudson.triggers.Trigger;
@@ -22,8 +23,6 @@ import hudson.util.HttpResponses;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
-import jenkins.triggers.SCMTriggerItem;
-import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.sf.json.JSONObject;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -35,7 +34,6 @@ import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
-import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -43,11 +41,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -142,11 +137,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
         String theString = writer.toString();
 
         if(paths.size() == 0) {
-        	if (req.getParameter("ref") != null){
-        		// support /project/PROJECT_NAME?ref=BRANCH_NAME
-        		// link on project activity page - build status
-        		Run build = this.getBuildByBranch(project, req.getParameter("ref"));
-        		redirectToBuildPage(res, build);
+        	if (req.hasParameter("ref")){
+                new BranchBuildPageRedirectAction(project, req.getParameter("ref")).execute(res);
         	} else {
         		this.generateBuild(theString, project, req, res);           
         	}
@@ -160,10 +152,13 @@ public class GitLabWebHook implements UnprotectedRootAction {
         } else if(lastPath.equals("build") || (lastPath.equals("status.json") && firstPath.equals("!builds"))) {
             this.generateBuild(theString, project, req, res);
         } else if(lastPath.equals("status.png")) {
-            new StatusPngAction(project, req.getParameter("sha1"), req.getParameter("ref")).execute(res);
+            if (req.hasParameter("ref")) {
+                new BranchStatusPngAction(project, req.getParameter("ref")).execute(res);
+            } else {
+                new CommitStatusPngAction(project, req.getParameter("sha1")).execute(res);
+            }
         } else if((firstPath.equals("commits") || firstPath.equals("builds")) && !lastPath.equals("status.json")) {
-            Run build = this.getBuildBySHA1(project, lastPath, true);
-            redirectToBuildPage(res, build);
+            new CommitBuildPageRedirectAction(project, lastPath).execute(res);
         } else{
             LOGGER.warning("Dynamic request mot met: First path: '" + firstPath + "' late path: '" + lastPath + "'");
         }
@@ -171,20 +166,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
         throw HttpResponses.ok();
 
     }
-
-	private void redirectToBuildPage(StaplerResponse res, Run build) {
-		if(build != null) {
-		    try {
-		        res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
-		    } catch (IOException e) {
-		        try {
-		            res.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
-		        } catch (IOException e1) {
-		            e1.printStackTrace();
-		        }
-		    }
-		}
-	}
 
     /**
      * Take the GitLab Data and parse through it.
@@ -464,31 +445,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
 		}
 	}
     
-    /**
-     *
-     * @param project
-     * @param branch
-     * @return latest build of the branch specified that is not part of a merge request
-     */
-    @SuppressWarnings("rawtypes")
-	private Run getBuildByBranch(Job project, String branch) {
-        RunList<?> builds = project.getBuilds();
-        for(Run build : builds) {
-            BuildData data = build.getAction(BuildData.class);
-            if(data!=null && data.lastBuild!=null) {
-                MergeRecord merge = build.getAction(MergeRecord.class);
-                boolean isMergeBuild = merge != null && !merge.getSha1().equals(data.lastBuild.getMarked().getSha1String());
-                if (data.lastBuild.getRevision() != null && !isMergeBuild) {
-                    for (Branch b : data.lastBuild.getRevision().getBranches()) {
-                        if (b.getName().endsWith("/" + branch))
-                            return build;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     @Extension
     public static class GitlabWebHookCrumbExclusion extends CrumbExclusion {
 

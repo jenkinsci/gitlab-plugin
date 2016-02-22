@@ -1,11 +1,10 @@
-package com.dabsquared.gitlabjenkins.webhook;
+package com.dabsquared.gitlabjenkins.webhook.status;
 
+import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.util.Build;
-import hudson.plugins.git.util.BuildData;
 import hudson.scm.SCM;
 import hudson.util.HttpResponses;
 import jenkins.triggers.SCMTriggerItem;
@@ -14,12 +13,14 @@ import org.kohsuke.stapler.StaplerResponse;
 /**
  * @author Robin Müller
  */
-public abstract class BuildStatusAction implements WebHookAction {
+abstract class BuildStatusAction implements WebHookAction {
 
     private final AbstractProject<?, ?> project;
+    private AbstractBuild<?, ?> build;
 
-    public BuildStatusAction(AbstractProject<?, ?> project) {
+    protected BuildStatusAction(AbstractProject<?, ?> project, AbstractBuild<?, ?> build) {
         this.project = project;
+        this.build = build;
     }
 
     public void execute(StaplerResponse response) {
@@ -27,11 +28,8 @@ public abstract class BuildStatusAction implements WebHookAction {
         if (!hasGitSCM(item)) {
             throw HttpResponses.error(409, "The project has no GitSCM configured");
         }
-        AbstractBuild<?, ?> build = retrieveBuild(project);
         writeStatusBody(response, build, getStatus(build));
     }
-
-    protected abstract AbstractBuild<?, ?> retrieveBuild(AbstractProject<?, ?> project);
 
     protected abstract void writeStatusBody(StaplerResponse response, AbstractBuild<?, ?> build, BuildStatus status);
 
