@@ -9,6 +9,7 @@ import hudson.model.ParameterValue;
 import hudson.model.Result;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParametersAction;
@@ -222,102 +223,90 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         if (triggerOnPush && this.isBranchAllowed(this.getSourceBranch(req))) {
 
-            getDescriptor().queue.execute(new Runnable() {
+            LOGGER.log(Level.INFO, "{0} triggered for push.", job.getFullName());
 
-                public void run() {
-                    LOGGER.log(Level.INFO, "{0} triggered for push.", job.getFullName());
+            String name = " #" + job.getNextBuildNumber();
+            Action[] actions = createActions(req, job);
 
-            		String name = " #" + job.getNextBuildNumber();
-            		GitLabPushCause cause = createGitLabPushCause(req);
-                    Action[] actions = createActions(req);
+            int projectbuildDelay = 0;
 
-                    boolean scheduled;
-
-                    if (job instanceof AbstractProject<?,?>) {
-                        AbstractProject job_ap = (AbstractProject<?, ?>) job;
-                        scheduled = job_ap.scheduleBuild(job_ap.getQuietPeriod(), cause, actions);
-                    }
-                    else {
-                        scheduled = scheduledJob.scheduleBuild(cause);
-                    }
-
-                    if (scheduled) {
-                        LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Triggering {1}",
-                                new String[] { job.getFullName(), name });
-                    } else {
-                        LOGGER.log(Level.INFO, "GitLab Push Request detected in {0}. Job is already in the queue.",
-                                job.getFullName());
-                    }
-
-                    if(addCiMessage) {
-                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
-                    }
+            if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+                ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob)job;
+                if (abstractProject.getQuietPeriod() > projectbuildDelay) {
+                    projectbuildDelay = abstractProject.getQuietPeriod();
                 }
+            }
 
-                private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
-                    GitLabPushCause cause;
-                    try {
-                        cause = new GitLabPushCause(req, getLogFile());
-                    } catch (IOException ex) {
-                        cause = new GitLabPushCause(req);
-                    }
-                    return cause;
-                }
+            if(addCiMessage) {
+                req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
+            }
 
-                private Action[] createActions(GitLabPushRequest req) {
-                    ArrayList<Action> actions = new ArrayList<Action>();
-
-                    String branch = getSourceBranch(req);
-
-                    LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
-
-                    Map<String, ParameterValue> values = getDefaultParameters();
-                    values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
-                    values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
-                    values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
-
-                    values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
-                    values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getCommits().get(0).getAuthor().getName()));
-                    values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getCommits().get(0).getAuthor().getEmail()));
-                    values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle", ""));
-                    values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", ""));
-                    values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", ""));
-
-                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getFullName());
-                    String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
-                    String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
-
-                    if (!getDescriptor().getGitlabHostUrl().isEmpty()) {
-                        // Get source repository if communication to Gitlab is possible
-                        try {
-                            sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();
-                            sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
-                        } catch (IOException ex) {
-                            LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
-                        }
-                    }
-
-                    values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
-                    values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
-
-                    List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
-
-                    ParametersAction parametersAction = new ParametersAction(listValues);
-                    actions.add(parametersAction);
-                    RevisionParameterAction revision;
-
-                    revision = createPushRequestRevisionParameter(job, req);
-                    if (revision==null) {
-                        return null;
-                    }
-
-                    actions.add(revision);
-                    Action[] actionsArray = actions.toArray(new Action[0]);
-
-                    return actionsArray;
-                }
-            });
+            scheduledJob.scheduleBuild2(projectbuildDelay, actions);
         }
+    }
+
+    private GitLabPushCause createGitLabPushCause(GitLabPushRequest req) {
+        GitLabPushCause cause;
+        try {
+            cause = new GitLabPushCause(req, getLogFile());
+        } catch (IOException ex) {
+            cause = new GitLabPushCause(req);
+        }
+        return cause;
+    }
+
+    private Action[] createActions(GitLabPushRequest req, Job job) {
+        ArrayList<Action> actions = new ArrayList<Action>();
+	    actions.add(new CauseAction(createGitLabPushCause(req)));
+
+        String branch = getSourceBranch(req);
+
+        LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
+
+        Map<String, ParameterValue> values = getDefaultParameters();
+        values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
+        values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
+        values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
+
+        values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
+        values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getCommits().get(0).getAuthor().getName()));
+        values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getCommits().get(0).getAuthor().getEmail()));
+        values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle", ""));
+        values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", ""));
+        values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", ""));
+
+        LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getFullName());
+        String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
+        String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
+
+        if (!getDescriptor().getGitlabHostUrl().isEmpty()) {
+            // Get source repository if communication to Gitlab is possible
+            try {
+                sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();
+                sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
+            }
+        }
+
+        values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
+        values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
+
+        List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
+
+        ParametersAction parametersAction = new ParametersAction(listValues);
+        actions.add(parametersAction);
+        RevisionParameterAction revision;
+
+        revision = createPushRequestRevisionParameter(job, req);
+        if (revision==null) {
+            return null;
+        }
+
+        actions.add(revision);
+        Action[] actionsArray = actions.toArray(new Action[0]);
+
+        return actionsArray;
     }
 
     public RevisionParameterAction createPushRequestRevisionParameter(Job<?, ?> job, GitLabPushRequest req) {
@@ -349,100 +338,93 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     // executes when the Trigger receives a merge request
     public void onPost(final GitLabMergeRequest req) {
+        final ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
+            @Override
+            protected Job asJob() {
+                return job;
+            }
+        };
+
         if (triggerOnMergeRequest && this.isBranchAllowed(req.getObjectAttribute().getTargetBranch())) {
 
-    		getDescriptor().queue.execute(new Runnable() {
-                public void run() {
-	                LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getFullName());
-                  String name = " #" + job.getNextBuildNumber();
+    	    LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getFullName());
+	        String name = " #" + job.getNextBuildNumber();
 
-	                GitLabMergeCause cause = createGitLabMergeCause(req);
-	                Action[] actions = createActions(req);
-                    ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
-                      @Override
-                      protected Job asJob() {
-                          return job;
-                      }
-                    };
+	        GitLabMergeCause cause = createGitLabMergeCause(req);
+	        Action[] actions = createActions(req, job);
 
-                    boolean scheduled;
-                    if (job instanceof AbstractProject<?,?>) {
-                        AbstractProject job_ap = (AbstractProject<?, ?>) job;
-                        scheduled = job_ap.scheduleBuild(job_ap.getQuietPeriod(), cause, actions);
-                    }
-                    else {
-                        scheduled = scheduledJob.scheduleBuild(cause);
-                    }
-
-                    if (scheduled) {
-	                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Triggering {1}", new String[]{job.getFullName(), name});
-	                } else {
-	                    LOGGER.log(Level.INFO, "GitLab Merge Request detected in {0}. Job is already in the queue.", job.getFullName());
-	                }
-
-                    if(addCiMessage) {
-                        req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
-                    }
+	        int projectbuildDelay = 0;
+	    
+	        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+                ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob)job;
+                if (abstractProject.getQuietPeriod() > projectbuildDelay) {
+                    projectbuildDelay = abstractProject.getQuietPeriod();
                 }
+	        }
 
-                private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
-                    GitLabMergeCause cause;
-                    try {
-                        cause = new GitLabMergeCause(req, getLogFile());
-                    } catch (IOException ex) {
-                        cause = new GitLabMergeCause(req);
-                    }
-                    return cause;
-                }
+    	    if(addCiMessage) {
+	    	    req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
+	        }
 
-                private Action[] createActions(GitLabMergeRequest req) {
-                    List<Action> actions = new ArrayList<Action>();
+	        scheduledJob.scheduleBuild2(projectbuildDelay, actions);
+    	} else {
+	        LOGGER.log(Level.INFO, "trigger on merge request not set");
+	    }
+    }
 
-                    Map<String, ParameterValue> values = getDefaultParameters();
-                    values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
-                    values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
-                    values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
-                    if (req.getObjectAttribute().getAuthor() != null) {
-                        values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getObjectAttribute().getAuthor().getName()));
-                        values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getObjectAttribute().getAuthor().getEmail()));
-                    }
-                    values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle",  req.getObjectAttribute().getTitle()));
-                    values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", req.getObjectAttribute().getIid().toString()));
-                    if (req.getObjectAttribute().getAssignee() != null) {
-                        values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", req.getObjectAttribute().getAssignee().getName()));
-                    }
-
-
-                    LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getFullName());
-                    String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
-                    String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
-
-                    if (!getDescriptor().getGitlabHostUrl().isEmpty()) {
-                    	// Get source repository if communication to Gitlab is possible
-                    	try {
-                        	sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();
-                        	sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
-                        } catch (IOException ex) {
-                        	LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
-                        }
-                    }
-
-                    values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
-                	values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
-
-                    List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
-
-                    ParametersAction parametersAction = new ParametersAction(listValues);
-                    actions.add(parametersAction);
-
-                    Action[] actionsArray = actions.toArray(new Action[0]);
-
-                    return actionsArray;
-                }
-
-
-            });
+    private GitLabMergeCause createGitLabMergeCause(GitLabMergeRequest req) {
+        GitLabMergeCause cause;
+        try {
+            cause = new GitLabMergeCause(req, getLogFile());
+        } catch (IOException ex) {
+            cause = new GitLabMergeCause(req);
         }
+        return cause;
+    }
+
+    private Action[] createActions(GitLabMergeRequest req, Job job) {
+        List<Action> actions = new ArrayList<Action>();
+
+        Map<String, ParameterValue> values = getDefaultParameters();
+        values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
+        values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
+        values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
+        if (req.getObjectAttribute().getAuthor() != null) {
+            values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getObjectAttribute().getAuthor().getName()));
+            values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getObjectAttribute().getAuthor().getEmail()));
+        }
+        values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle",  req.getObjectAttribute().getTitle()));
+        values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", req.getObjectAttribute().getIid().toString()));
+        if (req.getObjectAttribute().getAssignee() != null) {
+            values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", req.getObjectAttribute().getAssignee().getName()));
+        }
+
+
+        LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getFullName());
+        String sourceRepoName = getDesc().getSourceRepoNameDefault(job);
+        String sourceRepoURL = getDesc().getSourceRepoURLDefault(job).toString();
+
+        if (!getDescriptor().getGitlabHostUrl().isEmpty()) {
+            // Get source repository if communication to Gitlab is possible
+            try {
+                sourceRepoName = req.getSourceProject(getDesc().getGitlab()).getPathWithNamespace();
+                sourceRepoURL = req.getSourceProject(getDesc().getGitlab()).getSshUrl();
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "Could not fetch source project''s data from Gitlab. '('{0}':' {1}')'", new String[]{ex.toString(), ex.getMessage()});
+            }
+        }
+
+        values.put("gitlabSourceRepoName", new StringParameterValue("gitlabSourceRepoName", sourceRepoName));
+        values.put("gitlabSourceRepoURL", new StringParameterValue("gitlabSourceRepoURL", sourceRepoURL));
+
+        List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
+
+        ParametersAction parametersAction = new ParametersAction(listValues);
+        actions.add(parametersAction);
+
+        Action[] actionsArray = actions.toArray(new Action[0]);
+
+        return actionsArray;
     }
 
     private Map<String, ParameterValue> getDefaultParameters() {
