@@ -182,7 +182,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean isBranchAllowed(final String branchName) {
 
         final String branchFilterName = this.getBranchFilterName();
-        if (branchFilterName.isEmpty()) {
+        if (StringUtils.isEmpty(branchFilterName)) {
             // no filter is applied, allow all branches
             return true;
         }
