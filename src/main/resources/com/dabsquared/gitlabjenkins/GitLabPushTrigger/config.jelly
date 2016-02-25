@@ -34,7 +34,7 @@
         <table style="margin-left:10px">
             <!--<f:section title="">-->
             <f:radioBlock name="branchFilterName" value="" title="Allow all branches to trigger this job"
-                          checked="${instance.branchFilterName == ''}"
+                          checked="${instance.branchFilterName == '' || instance.branchFilterName == null}"
                           inline="true" help="/plugin/gitlab-plugin/help/help-noBranchFiltering.html"/>
             <f:radioBlock name="branchFilterName" value="NameBasedFilter" title="Filter branches by name"
                           checked="${instance.branchFilterName == 'NameBasedFilter'}" inline="true"
