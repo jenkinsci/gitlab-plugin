@@ -225,7 +225,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
             LOGGER.log(Level.INFO, "{0} triggered for push.", job.getFullName());
 
-            String name = " #" + job.getNextBuildNumber();
             Action[] actions = createActions(req, job);
 
             int projectbuildDelay = 0;
@@ -348,10 +347,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         if (triggerOnMergeRequest && this.isBranchAllowed(req.getObjectAttribute().getTargetBranch())) {
 
     	    LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getFullName());
-	        String name = " #" + job.getNextBuildNumber();
 
 	        GitLabMergeCause cause = createGitLabMergeCause(req);
-	        Action[] actions = createActions(req, job);
+	        Action action = createAction(req, job);
 
 	        int projectbuildDelay = 0;
 	    
@@ -366,7 +364,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 	    	    req.createCommitStatus(getDescriptor().getGitlab().instance(), "pending", Jenkins.getInstance().getRootUrl() + job.getUrl());
 	        }
 
-	        scheduledJob.scheduleBuild2(projectbuildDelay, actions);
+	        scheduledJob.scheduleBuild2(projectbuildDelay, action, new CauseAction(cause));
     	} else {
 	        LOGGER.log(Level.INFO, "trigger on merge request not set");
 	    }
@@ -382,9 +380,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return cause;
     }
 
-    private Action[] createActions(GitLabMergeRequest req, Job job) {
-        List<Action> actions = new ArrayList<Action>();
-
+    private Action createAction(GitLabMergeRequest req, Job job) {
         Map<String, ParameterValue> values = getDefaultParameters();
         values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
         values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
@@ -419,12 +415,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         List<ParameterValue> listValues = new ArrayList<ParameterValue>(values.values());
 
-        ParametersAction parametersAction = new ParametersAction(listValues);
-        actions.add(parametersAction);
-
-        Action[] actionsArray = actions.toArray(new Action[0]);
-
-        return actionsArray;
+        return new ParametersAction(listValues);
     }
 
     private Map<String, ParameterValue> getDefaultParameters() {
