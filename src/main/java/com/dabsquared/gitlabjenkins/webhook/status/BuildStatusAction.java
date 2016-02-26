@@ -46,7 +46,7 @@ abstract class BuildStatusAction implements WebHookAction {
 
     private BuildStatus getStatus(AbstractBuild<?, ?> build) {
         if (build == null) {
-            return BuildStatus.PENDING;
+            return BuildStatus.NOT_FOUND;
         } else if (build.isBuilding()) {
             return BuildStatus.RUNNING;
         } else if (build.getResult() == Result.ABORTED) {
@@ -61,7 +61,7 @@ abstract class BuildStatusAction implements WebHookAction {
     }
 
     protected enum BuildStatus {
-        PENDING("pending"), RUNNING("running"), CANCELED("canceled"), SUCCESS("success"), FAILED("failed"), UNSTABLE("failed");
+        NOT_FOUND("not_found"), RUNNING("running"), CANCELED("canceled"), SUCCESS("success"), FAILED("failed"), UNSTABLE("failed");
 
         private String value;
 
