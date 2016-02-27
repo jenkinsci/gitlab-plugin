@@ -84,6 +84,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean addNoteOnMergeRequest = true;
     private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
+    private transient boolean allowAllBranches = false;
     private final String branchFilterName;
     private final String includeBranchesSpec;
     private final String excludeBranchesSpec;
@@ -198,7 +199,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return false;
     }
 
-    public String getBranchFilterName() { return this.branchFilterName; }
+    // TODO use an enum instead of a String for this
+    public String getBranchFilterName() {
+        // TODO move this to a migration method during code cleanup
+        if (branchFilterName == null) {
+            return  allowAllBranches ? "" : "NameBasedFilter";
+        } else {
+            return branchFilterName;
+        }
+    }
 
     public String getIncludeBranchesSpec() {
         return this.includeBranchesSpec == null ? "" : this.includeBranchesSpec;
