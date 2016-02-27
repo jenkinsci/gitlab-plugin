@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.data.LastCommit;
 import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
 import com.google.common.base.Joiner;
@@ -27,6 +28,7 @@ import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabBranch;
 import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabMergeRequest;
@@ -379,71 +381,74 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
             if (!trigger.getTriggerOpenMergeRequestOnPush().equals("never")) {
             	// Fetch and build open merge requests with the same source branch
-            	buildOpenMergeRequests(trigger, request.getProject_id(), request.getRef());
+            	buildOpenMergeRequests(trigger, request.getProject_id(), request.getRef(), project);
             }
         } finally {
             SecurityContextHolder.getContext().setAuthentication(old);
         }
     }
 
-	protected void buildOpenMergeRequests(GitLabPushTrigger trigger, Integer projectId, String projectRef) {
+	protected void buildOpenMergeRequests(GitLabPushTrigger trigger, Integer projectId, String projectRef, Job<?, ?> project) {
 		try {
-			GitLab api = new GitLab();
-			List<GitlabMergeRequest> mergeRequests = api.instance().getOpenMergeRequests(projectId);
+            GitLabConnectionProperty property = project.getProperty(GitLabConnectionProperty.class);
+            if (property != null && property.getClient() != null) {
+                GitlabAPI client = property.getOldClient();
+                List<GitlabMergeRequest> mergeRequests = client.getOpenMergeRequests(projectId);
 
-			for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
-				if (projectRef.endsWith(mr.getSourceBranch()) || 
-                                        (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(mr.getTargetBranch()))) {
-                                    
-                                        if (trigger.getCiSkip() && mr.getDescription().contains("[ci-skip]")) {
-                                            LOGGER.log(Level.INFO, "Skipping MR " + mr.getTitle() + " due to ci-skip.");
-                                            continue;
-                                        }
-					GitlabBranch branch = api.instance().getBranch(api.instance().getProject(projectId), mr.getSourceBranch());
-                    LastCommit lastCommit = new LastCommit();
-                    lastCommit.setId(branch.getCommit().getId());
-                    lastCommit.setMessage(branch.getCommit().getMessage());
-                    lastCommit.setUrl(GitlabProject.URL + "/" + projectId + "/repository" + GitlabCommit.URL + "/"
-                            + branch.getCommit().getId());
+                for (org.gitlab.api.models.GitlabMergeRequest mr : mergeRequests) {
+                    if (projectRef.endsWith(mr.getSourceBranch()) ||
+                            (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(mr.getTargetBranch()))) {
 
-					LOGGER.log(Level.FINE,
-							"Generating new merge trigger from "
-									+ mr.toString() + "\n source: "
-									+ mr.getSourceBranch() + "\n target: "
-									+ mr.getTargetBranch() + "\n state: "
-									+ mr.getState() + "\n assign: "
-									+ mr.getAssignee().getName() + "\n author: "
-									+ mr.getAuthor().getName() + "\n id: "
-									+ mr.getId() + "\n iid: "
-                                    + mr.getIid() + "\n last commit: "
-                                    + lastCommit.getId() + "\n\n");
-					GitLabMergeRequest newReq = new GitLabMergeRequest();
-					newReq.setObject_kind("merge_request");
-					newReq.setObjectAttribute(new ObjectAttributes());
-					if (mr.getAssignee() != null)
-						newReq.getObjectAttribute().setAssignee(mr.getAssignee());
-					if (mr.getAuthor() != null)
-                        newReq.getObjectAttribute().setAuthor(mr.getAuthor());
-					newReq.getObjectAttribute().setDescription(mr.getDescription());
-					newReq.getObjectAttribute().setId(mr.getId());
-					newReq.getObjectAttribute().setIid(mr.getIid());
-					newReq.getObjectAttribute().setMergeStatus(mr.getState());
-					newReq.getObjectAttribute().setSourceBranch(mr.getSourceBranch());
-					newReq.getObjectAttribute().setSourceProjectId(mr.getSourceProjectId());
-					newReq.getObjectAttribute().setTargetBranch(mr.getTargetBranch());
-					newReq.getObjectAttribute().setTargetProjectId(projectId);
-					newReq.getObjectAttribute().setTitle(mr.getTitle());
-                    newReq.getObjectAttribute().setLastCommit(lastCommit);
+                        if (trigger.getCiSkip() && mr.getDescription().contains("[ci-skip]")) {
+                            LOGGER.log(Level.INFO, "Skipping MR " + mr.getTitle() + " due to ci-skip.");
+                            continue;
+                        }
+                        GitlabBranch branch = client.getBranch(client.getProject(projectId), mr.getSourceBranch());
+                        LastCommit lastCommit = new LastCommit();
+                        lastCommit.setId(branch.getCommit().getId());
+                        lastCommit.setMessage(branch.getCommit().getMessage());
+                        lastCommit.setUrl(GitlabProject.URL + "/" + projectId + "/repository" + GitlabCommit.URL + "/"
+                                + branch.getCommit().getId());
 
-					Authentication old = SecurityContextHolder.getContext().getAuthentication();
-					SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
-					try {
-						trigger.onPost(newReq);
-					} finally {
-						SecurityContextHolder.getContext().setAuthentication(old);
-					}
-				}
-			}
+                        LOGGER.log(Level.FINE,
+                                "Generating new merge trigger from "
+                                        + mr.toString() + "\n source: "
+                                        + mr.getSourceBranch() + "\n target: "
+                                        + mr.getTargetBranch() + "\n state: "
+                                        + mr.getState() + "\n assign: "
+                                        + mr.getAssignee().getName() + "\n author: "
+                                        + mr.getAuthor().getName() + "\n id: "
+                                        + mr.getId() + "\n iid: "
+                                        + mr.getIid() + "\n last commit: "
+                                        + lastCommit.getId() + "\n\n");
+                        GitLabMergeRequest newReq = new GitLabMergeRequest();
+                        newReq.setObject_kind("merge_request");
+                        newReq.setObjectAttribute(new ObjectAttributes());
+                        if (mr.getAssignee() != null)
+                            newReq.getObjectAttribute().setAssignee(mr.getAssignee());
+                        if (mr.getAuthor() != null)
+                            newReq.getObjectAttribute().setAuthor(mr.getAuthor());
+                        newReq.getObjectAttribute().setDescription(mr.getDescription());
+                        newReq.getObjectAttribute().setId(mr.getId());
+                        newReq.getObjectAttribute().setIid(mr.getIid());
+                        newReq.getObjectAttribute().setMergeStatus(mr.getState());
+                        newReq.getObjectAttribute().setSourceBranch(mr.getSourceBranch());
+                        newReq.getObjectAttribute().setSourceProjectId(mr.getSourceProjectId());
+                        newReq.getObjectAttribute().setTargetBranch(mr.getTargetBranch());
+                        newReq.getObjectAttribute().setTargetProjectId(projectId);
+                        newReq.getObjectAttribute().setTitle(mr.getTitle());
+                        newReq.getObjectAttribute().setLastCommit(lastCommit);
+
+                        Authentication old = SecurityContextHolder.getContext().getAuthentication();
+                        SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+                        try {
+                            trigger.onPost(newReq);
+                        } finally {
+                            SecurityContextHolder.getContext().setAuthentication(old);
+                        }
+                    }
+                }
+            }
 		} catch (Exception e) {
 			LOGGER.warning("failed to communicate with gitlab server to determine is this is an update for a merge request: "
 					+ e.getMessage());

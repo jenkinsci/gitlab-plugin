@@ -14,8 +14,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabCommitStatus;
 
 public abstract class GitLabRequest {
 	protected enum Builder {
@@ -52,7 +50,4 @@ public abstract class GitLabRequest {
 					+ Arrays.toString(DATE_FORMATS));
 		}
 	}
-
-    public abstract GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl);
-
 }

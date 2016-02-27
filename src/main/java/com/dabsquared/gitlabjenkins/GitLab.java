@@ -1,9 +1,10 @@
 package com.dabsquared.gitlabjenkins;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import jenkins.model.Jenkins;
 import org.gitlab.api.GitlabAPI;
 
 public class GitLab {
@@ -12,21 +13,15 @@ public class GitLab {
 
   public GitlabAPI instance() {
     if (api == null) {
-    	String token = GitLabPushTrigger.getDesc().getGitlabApiToken();
-        String url = GitLabPushTrigger.getDesc().getGitlabHostUrl();
-        boolean ignoreCertificateErrors = GitLabPushTrigger.getDesc().getIgnoreCertificateErrors();
-        LOGGER.log(Level.FINE, "Connecting to Gitlab server ({0})", url);
-        api = GitlabAPI.connect(url, token);
-        api.ignoreCertificateErrors(ignoreCertificateErrors);
+        // Use the first configured connection as work around for the GitLabProjectBranchesService
+        GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+        if (connectionConfig != null && connectionConfig.getConnections().size() > 0) {
+            GitLabConnection connection = connectionConfig.getConnections().get(0);
+            api = GitlabAPI.connect(connection.getUrl(), connection.getApiToken());
+            api.ignoreCertificateErrors(connection.isIgnoreCertificateErrors());
+        }
     }
 
     return api;
-  }
-  
-  public static boolean checkConnection (String token, String url, boolean ignoreCertificateErrors) throws IOException {
-	  GitlabAPI testApi = GitlabAPI.connect(url, token);
-	  testApi.ignoreCertificateErrors(ignoreCertificateErrors);
-	  testApi.getProjects();
-	  return true;
   }
 }
