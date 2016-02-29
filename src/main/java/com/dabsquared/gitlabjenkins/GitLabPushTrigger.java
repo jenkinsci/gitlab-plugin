@@ -324,10 +324,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     public RevisionParameterAction createPushRequestRevisionParameter(Job<?, ?> job, GitLabPushRequest req) {
         RevisionParameterAction revision = null;
 
-
-        // add url to remote to work with multiple scm plugin.
-        // See JENKINS-26587, https://github.com/jenkinsci/git-plugin/pull/296
-        // and https://github.com/jenkinsci/gitlab-plugin/issues/183
         URIish urIish = null;
         try {
             urIish = new URIish(req.getRepository().getUrl());
