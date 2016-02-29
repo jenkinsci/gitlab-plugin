@@ -11,7 +11,7 @@ import java.util.Date;
  * @author Robin Müller
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-public class ObjectAttributes {
+public class MergeRequestObjectAttributes {
 
     private Integer id;
     private Integer iid;
@@ -202,7 +202,7 @@ public class ObjectAttributes {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ObjectAttributes that = (ObjectAttributes) o;
+        MergeRequestObjectAttributes that = (MergeRequestObjectAttributes) o;
         return new EqualsBuilder()
                 .append(workInProgress, that.workInProgress)
                 .append(id, that.id)

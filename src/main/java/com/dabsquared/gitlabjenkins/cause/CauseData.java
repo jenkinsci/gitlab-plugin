@@ -209,6 +209,7 @@ public final class CauseData {
                 .append(mergeRequestTitle, causeData.mergeRequestTitle)
                 .append(mergeRequestDescription, causeData.mergeRequestDescription)
                 .append(mergeRequestId, causeData.mergeRequestId)
+                .append(mergeRequestIid, causeData.mergeRequestIid)
                 .append(targetBranch, causeData.targetBranch)
                 .append(targetRepoName, causeData.targetRepoName)
                 .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
@@ -234,6 +235,7 @@ public final class CauseData {
                 .append(mergeRequestTitle)
                 .append(mergeRequestDescription)
                 .append(mergeRequestId)
+                .append(mergeRequestIid)
                 .append(targetBranch)
                 .append(targetRepoName)
                 .append(targetRepoSshUrl)
@@ -259,6 +261,7 @@ public final class CauseData {
                 .append("mergeRequestTitle", mergeRequestTitle)
                 .append("mergeRequestDescription", mergeRequestDescription)
                 .append("mergeRequestId", mergeRequestId)
+                .append("mergeRequestIid", mergeRequestIid)
                 .append("targetBranch", targetBranch)
                 .append("targetRepoName", targetRepoName)
                 .append("targetRepoSshUrl", targetRepoSshUrl)
@@ -283,6 +286,13 @@ public final class CauseData {
             String getShortDescription(CauseData data) {
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
                 return "GitLab Merge Request #" + data.getMergeRequestIid() + ": " + forkNamespace + data.getSourceBranch() + " => " + data.getTargetBranch();
+            }
+        }, NOTE {
+            @Override
+            String getShortDescription(CauseData data) {
+                String triggeredBy = data.getTriggeredByUser();
+                String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
+                return "Triggered by " + triggeredBy + " GitLab Merge Request #" + data.getMergeRequestIid() + ": " + forkNamespace + data.getSourceBranch() + " => " + data.getTargetBranch();
             }
         };
 

@@ -2,14 +2,12 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
-import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import org.kohsuke.stapler.StaplerResponse;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +31,7 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
 
     void processForCompatibility() {
         // url and homepage are introduced in 8.x versions of Gitlab
-        final ObjectAttributes attributes = this.mergeRequestHook.getObjectAttributes();
+        final MergeRequestObjectAttributes attributes = this.mergeRequestHook.getObjectAttributes();
         if (attributes != null) {
             final Project source = attributes.getSource();
             if (source != null && source.getHttpUrl() != null) {

@@ -152,6 +152,71 @@ public class GitLabIT {
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 
+    @Test
+    public void buildOnNote() throws IOException, InterruptedException, GitAPIException {
+
+        // check for clean slate
+        assertTrue(gitlab.getProjectIds().isEmpty());
+
+        final String httpUrl = gitlab.createProject(projectRequest()
+            .withName("test")
+            .withWebHookUrl("http://" + getDocker0Ip() + ":" + jenkins.getURL().getPort() + "/jenkins/project/test")
+            .withNoteHook(true)
+            .build());
+
+        // Fix: Hack to get the project id
+        // A preferable approach would be here to get the target project by name using getProject function of the
+        // GitLabRule and to use the id from the project instance. However, due to a bug in GitLab (tested on 8.6.1)
+        // retrieving the project by name is not properly working.
+        // (see issue https://github.com/gitlabhq/gitlabhq/issues/4921).
+        // Once the issue is resolved, replace this implementation.
+        final List<String> projectIds = gitlab.getProjectIds();
+        assertSame(projectIds.size(), 1);
+        final Integer projectId = Integer.parseInt(projectIds.get(0));
+
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject("test");
+        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnNoteRequest(true).withBranchFilterType(BranchFilterType.All).build();
+        project.addTrigger(trigger);
+        trigger.start(project, true);
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                buildTriggered.signal();
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+
+        // Setup git repository
+        Git.init().setDirectory(tmp.getRoot()).call();
+        Git git = Git.open(tmp.getRoot());
+        StoredConfig config = git.getRepository().getConfig();
+        config.setString("remote", "origin", "url", httpUrl);
+        config.save();
+
+        // Setup remote master branch
+        tmp.newFile("test");
+        git.add().addFilepattern("test");
+        git.commit().setMessage("test").call();
+        git.push()
+            .setRemote("origin").add("master")
+            .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
+            .call();
+
+        // Setup remote feature branch
+        git.checkout().setName("feature").setCreateBranch(true).call();
+        tmp.newFile("feature");
+        git.commit().setMessage("feature").call();
+        git.push().setRemote("origin").add("feature").setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
+            .call();
+
+        gitlab.createMergeRequest(projectId, "feature", "master", "Merge feature branch to master.");
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
     private String getDocker0Ip() {
         try {
             Enumeration<InetAddress> docker0Addresses = NetworkInterface.getByName("docker0").getInetAddresses();
