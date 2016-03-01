@@ -548,10 +548,6 @@ public class GitLabWebHook implements UnprotectedRootAction {
                         return build;
                     }
                 } else {
-    				if (!isMergeRequestBuild)
-    					// skip Push builds
-    					continue;
-
     				if (hasBeenBuilt(data, ObjectId.fromString(commitSHA1), build)) {
     					return build;
     				}
