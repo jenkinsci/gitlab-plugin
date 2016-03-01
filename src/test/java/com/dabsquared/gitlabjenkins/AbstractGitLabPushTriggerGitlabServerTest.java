@@ -3,14 +3,23 @@ package com.dabsquared.gitlabjenkins;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
+import hudson.plugins.git.GitSCM;
+import jenkins.triggers.SCMTriggerItem;
+import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.transport.RemoteConfig;
 import org.junit.Test;
 
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
 
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 
@@ -30,6 +39,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
 		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
@@ -44,6 +54,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
 		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
@@ -58,6 +69,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
 		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
@@ -72,6 +84,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
 		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
@@ -86,6 +99,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
 		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
