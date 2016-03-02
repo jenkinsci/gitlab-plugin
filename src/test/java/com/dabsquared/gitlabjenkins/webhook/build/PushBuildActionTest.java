@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.model.PushHook;
 import hudson.model.FreeStyleProject;
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
@@ -46,7 +46,7 @@ public class PushBuildActionTest {
 
         new PushBuildAction(testProject, getJson("PushEvent_missingRepositoryUrl.json")).execute(response);
 
-        verify(trigger, never()).onPost(any(GitLabPushRequest.class));
+        verify(trigger, never()).onPost(any(PushHook.class));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class PushBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new PushBuildAction(testProject, getJson("PushEvent.json")).execute(response);
 
-        verify(trigger).onPost(any(GitLabPushRequest.class));
+        verify(trigger).onPost(any(PushHook.class));
     }
 
     private String getJson(String name) throws IOException {

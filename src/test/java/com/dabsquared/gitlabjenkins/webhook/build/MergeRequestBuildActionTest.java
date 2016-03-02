@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
@@ -73,7 +73,7 @@ public class MergeRequestBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent.json")).execute(response);
 
-        verify(trigger).onPost(any(GitLabMergeRequest.class));
+        verify(trigger).onPost(any(MergeRequestHook.class));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class MergeRequestBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_closedMR.json")).execute(response);
 
-        verify(trigger, never()).onPost(any(GitLabMergeRequest.class));
+        verify(trigger, never()).onPost(any(MergeRequestHook.class));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class MergeRequestBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json")).execute(response);
 
-        verify(trigger, never()).onPost(any(GitLabMergeRequest.class));
+        verify(trigger, never()).onPost(any(MergeRequestHook.class));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class MergeRequestBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json")).execute(response);
 
-        verify(trigger).onPost(any(GitLabMergeRequest.class));
+        verify(trigger).onPost(any(MergeRequestHook.class));
     }
 
     private String getJson(String name) throws IOException {
