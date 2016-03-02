@@ -29,12 +29,12 @@
 
   <distributionManagement>
     <repository>
-      <id>central</id>
+      <id>maven.jenkins-ci.org</id>
       <name>jenkinsci-releases</name>
       <url>https://repo.jenkins-ci.org/releases</url>
     </repository>
     <snapshotRepository>
-      <id>snapshots</id>
+      <id>maven.jenkins-ci.org</id>
       <name>jenkinsci-snapshots</name>
       <url>https://repo.jenkins-ci.org/snapshots</url>
     </snapshotRepository>
