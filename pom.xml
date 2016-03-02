@@ -27,6 +27,19 @@
     </developer>
   </developers>
 
+  <distributionManagement>
+    <repository>
+      <id>central</id>
+      <name>jenkinsci-releases</name>
+      <url>https://repo.jenkins-ci.org/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <name>jenkinsci-snapshots</name>
+      <url>https://repo.jenkins-ci.org/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <scm>
       <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
       <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
