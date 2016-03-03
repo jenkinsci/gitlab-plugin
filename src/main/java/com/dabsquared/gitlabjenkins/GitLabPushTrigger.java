@@ -340,62 +340,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return new File(job.getRootDir(), "gitlab-polling.log");
     }
 
-    public static final class ConverterImpl extends XStream2.PassthruConverter<GitLabPushTrigger> {
-
-        public ConverterImpl(final XStream2 xstream) {
-            super(xstream);
-
-            xstream.registerLocalConverter(GitLabPushTrigger.class, "includeBranchesSpec", new Converter() {
-
-                public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
-                    if ("includeBranchesSpec".equalsIgnoreCase(reader.getNodeName())) {
-                        return reader.getValue();
-                    }
-                    if ("allowedBranchesSpec".equalsIgnoreCase(reader.getNodeName())) {
-                        return reader.getValue();
-                    }
-                    if ("allowedBranches".equalsIgnoreCase(reader.getNodeName())) {
-                        final Converter iconv = new CollectionConverter(xstream.getMapper(), List.class);
-                        final List<?> list = (List<?>) iconv.unmarshal(reader, context);
-                        return Joiner.on(',').join(list);
-                    }
-
-                    throw new AbstractReflectionConverter.UnknownFieldException(context.getRequiredType().getName(), reader.getNodeName());
-                }
-
-                public void marshal(final Object source, final HierarchicalStreamWriter writer, final MarshallingContext context) {
-                    writer.setValue(String.valueOf(source));
-                }
-
-                public boolean canConvert(final Class type) {
-                    return List.class.isAssignableFrom(type) || String.class.isAssignableFrom(type);
-                }
-            });
-
-            synchronized (xstream) {
-                xstream.setMapper(new MapperWrapper(xstream.getMapperInjectionPoint()) {
-
-                    @Override
-                    public String realMember(final Class type, final String serialized) {
-                        if (GitLabPushTrigger.class.equals(type)) {
-                            if ("allowedBranchesSpec".equalsIgnoreCase(serialized) || "allowedBranches".equalsIgnoreCase(serialized)) {
-                                return "includeBranchesSpec";
-                            }
-                        }
-                        return super.realMember(type, serialized);
-                    }
-
-                });
-            }
-        }
-
-        @Override
-        protected void callback(final GitLabPushTrigger obj, final UnmarshallingContext context) {
-            /* no-op */
-        }
-
-    }
-
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
