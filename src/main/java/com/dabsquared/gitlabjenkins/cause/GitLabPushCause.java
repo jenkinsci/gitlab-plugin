@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.cause;
 
-import com.dabsquared.gitlabjenkins.GitLabPushRequest;
 import com.dabsquared.gitlabjenkins.model.PushHook;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
