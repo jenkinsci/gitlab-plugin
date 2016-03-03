@@ -2,66 +2,13 @@ package com.dabsquared.gitlabjenkins;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.model.PushHook;
-import com.dabsquared.gitlabjenkins.model.WebHook;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
-import hudson.Extension;
-import hudson.Util;
-import hudson.model.Action;
-import hudson.model.AutoCompletionCandidates;
-import hudson.model.Item;
-import hudson.model.ParameterValue;
-import hudson.model.AbstractProject;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.Job;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParametersAction;
-import hudson.model.ParametersDefinitionProperty;
-import hudson.model.Run;
-import hudson.model.StringParameterValue;
-import hudson.plugins.git.RevisionParameterAction;
-import hudson.plugins.git.GitSCM;
-import hudson.scm.SCM;
-import hudson.triggers.Trigger;
-import hudson.triggers.TriggerDescriptor;
-import hudson.util.FormValidation;
-import hudson.util.SequentialExecutionQueue;
-import hudson.util.XStream2;
-import hudson.util.ListBoxModel;
-import hudson.util.ListBoxModel.Option;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import jenkins.model.Jenkins;
-import jenkins.model.ParameterizedJobMixIn;
-import jenkins.triggers.SCMTriggerItem;
-import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
-import net.sf.json.JSONObject;
-
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
-import org.gitlab.api.GitlabAPI;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.springframework.util.AntPathMatcher;
-
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -75,6 +22,52 @@ import com.thoughtworks.xstream.converters.reflection.AbstractReflectionConverte
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import hudson.Extension;
+import hudson.Util;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
+import hudson.model.Action;
+import hudson.model.AutoCompletionCandidates;
+import hudson.model.Item;
+import hudson.model.AbstractProject;
+import hudson.model.AutoCompletionCandidates;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.Item;
+import hudson.model.Job;
+import hudson.model.Run;
+import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.RevisionParameterAction;
+import hudson.scm.SCM;
+import hudson.triggers.Trigger;
+import hudson.triggers.TriggerDescriptor;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
+import hudson.util.SequentialExecutionQueue;
+import hudson.util.XStream2;
+import jenkins.model.Jenkins;
+import jenkins.model.ParameterizedJobMixIn;
+import jenkins.triggers.SCMTriggerItem;
+import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.springframework.util.AntPathMatcher;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 
 
 /**
@@ -93,17 +86,18 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
     private transient boolean allowAllBranches = false;
-    private final String branchFilterName;
-    private final String includeBranchesSpec;
-    private final String excludeBranchesSpec;
-    private final String targetBranchRegex;
+    private transient String branchFilterName;
+    private transient String includeBranchesSpec;
+    private transient String excludeBranchesSpec;
+    private transient String targetBranchRegex;
+    private BranchFilter branchFilter;
     private boolean acceptMergeRequestOnSuccess = false;
 
 
     @DataBoundConstructor
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush,
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
-                             boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, String branchFilterName,
+                             boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -113,11 +107,30 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
         this.addCiMessage = addCiMessage;
         this.addVoteOnMergeRequest = addVoteOnMergeRequest;
-        this.branchFilterName = branchFilterName;
-        this.includeBranchesSpec = includeBranchesSpec;
-        this.excludeBranchesSpec = excludeBranchesSpec;
-        this.targetBranchRegex = targetBranchRegex;
+        this.branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+                .withIncludeBranchesSpec(includeBranchesSpec)
+                .withExcludeBranchesSpec(excludeBranchesSpec)
+                .withTargetBranchRegex(targetBranchRegex)
+                .build(branchFilterType));
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
+    }
+
+    @Initializer(after = InitMilestone.JOB_LOADED)
+    public static void migrate() throws IOException {
+        for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+            GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+            if (trigger != null) {
+                if (trigger.branchFilter == null) {
+                    String name = StringUtils.isNotEmpty(trigger.branchFilterName) ? trigger.branchFilterName : "All";
+                    trigger.branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+                            .withIncludeBranchesSpec(trigger.includeBranchesSpec)
+                            .withExcludeBranchesSpec(trigger.excludeBranchesSpec)
+                            .withTargetBranchRegex(trigger.targetBranchRegex)
+                            .build(BranchFilterType.valueOf(name)));
+                }
+                project.save();
+            }
+        }
     }
 
     public boolean getTriggerOnPush() {
@@ -168,77 +181,13 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return ciSkip;
     }
 
-    private boolean isAllowedByTargetBranchRegex(String branchName) {
-        final String regex = this.getTargetBranchRegex();
-
-        if (StringUtils.isEmpty(regex)) {
-            return true;
-        }
-        final Pattern pattern = Pattern.compile(regex);
-        return pattern.matcher(branchName).matches();
-    }
-
-    private boolean isAllowedByList(final String branchName) {
-
-        final List<String> exclude = DescriptorImpl.splitBranchSpec(this.getExcludeBranchesSpec());
-        final List<String> include = DescriptorImpl.splitBranchSpec(this.getIncludeBranchesSpec());
-        if (exclude.isEmpty() && include.isEmpty()) {
-            return true;
-        }
-
-        final AntPathMatcher matcher = new AntPathMatcher();
-        for (final String pattern : exclude) {
-            if (matcher.match(pattern, branchName)) {
-                return false;
-            }
-        }
-        for (final String pattern : include) {
-            if (matcher.match(pattern, branchName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private boolean isBranchAllowed(final String branchName) {
-
-        final String branchFilterName = this.getBranchFilterName();
-        if (branchFilterName.isEmpty()) {
-            // no filter is applied, allow all branches
-            return true;
-        }
-
-        if (Objects.equal(branchFilterName, "NameBasedFilter")) {
-            return this.isAllowedByList(branchName);
-        }
-
-        if (Objects.equal(branchFilterName, "RegexBasedFilter")) {
-            return this.isAllowedByTargetBranchRegex(branchName);
-        }
-
-        return false;
+        return branchFilter.isBranchAllowed(branchName);
     }
 
-    // TODO use an enum instead of a String for this
-    public String getBranchFilterName() {
-        // TODO move this to a migration method during code cleanup
-        if (branchFilterName == null) {
-            return  allowAllBranches ? "" : "NameBasedFilter";
-        } else {
-            return branchFilterName;
-        }
+    public BranchFilter getBranchFilter() {
+        return branchFilter;
     }
-
-    public String getIncludeBranchesSpec() {
-        return this.includeBranchesSpec == null ? "" : this.includeBranchesSpec;
-    }
-
-    public String getExcludeBranchesSpec() {
-        return this.excludeBranchesSpec == null ? "" : this.excludeBranchesSpec;
-    }
-
-    public String getTargetBranchRegex() { return this.targetBranchRegex == null ? "" : this.targetBranchRegex; }
 
     // executes when the Trigger receives a push request
     public void onPost(final PushHook pushHook) {
@@ -663,33 +612,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             }
 
             return null;
-        }
-
-        /**
-         * Get the Name of the first declared repository in the project configuration.
-         * Use this as default source repository Name.
-         *
-         * @return String with the default name of the source repository
-         */
-        protected String getSourceRepoNameDefault(Job job) {
-            String result = null;
-            SCMTriggerItem item = SCMTriggerItems.asSCMTriggerItem(job);
-            GitSCM gitSCM = getGitSCM(item);
-            if(gitSCM == null) {
-                LOGGER.log(
-                        Level.WARNING,
-                        "Could not find GitSCM for project. Project = {1}, next build = {2}",
-                        new String[] {
-                                project.getName(),
-                                String.valueOf(project.getNextBuildNumber()) });
-                throw new IllegalArgumentException("This project does not use git:" + project.getName());
-            } else {
-                List<RemoteConfig> repositories = gitSCM.getRepositories();
-                if (!repositories.isEmpty()){
-                    result = repositories.get(repositories.size()-1).getName();
-                }
-            }
-            return result;
         }
 
         public GitLab getGitlab() {
