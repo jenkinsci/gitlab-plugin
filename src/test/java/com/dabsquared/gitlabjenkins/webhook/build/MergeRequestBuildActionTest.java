@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
@@ -25,6 +26,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import static com.dabsquared.gitlabjenkins.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
+import static com.dabsquared.gitlabjenkins.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -106,7 +109,9 @@ public class MergeRequestBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
+        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabMergeCause(mergeRequestHook()
+                .withObjectAttributes(objectAttributes().withTargetBranch("master").build())
+                .build()));
         future.get();
 
         exception.expect(HttpResponses.HttpResponseException.class);

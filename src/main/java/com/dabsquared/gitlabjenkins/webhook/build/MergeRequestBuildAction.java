@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.model.State;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
@@ -67,6 +68,7 @@ public class MergeRequestBuildAction implements WebHookAction {
     }
 
     private String getTargetBranchFromBuild(AbstractBuild<?, ?> mergeBuild) {
-        return (String) mergeBuild.getAction(ParametersAction.class).getParameter("gitlabTargetBranch").getValue();
+        GitLabMergeCause cause = mergeBuild.getCause(GitLabMergeCause.class);
+        return cause == null ? null : cause.getTargetBranch();
     }
 }

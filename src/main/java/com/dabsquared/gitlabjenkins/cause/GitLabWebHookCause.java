@@ -31,44 +31,77 @@ public abstract class GitLabWebHookCause<T extends WebHook> extends SCMTrigger.S
 
     public Map<String, String> getBuildVariables() {
         HashMap<String, String> variables = new HashMap<String, String>();
-        putIfNotNull(variables, "gitlabBranch", getBranch());
-        putIfNotNull(variables, "gitlabSourceBranch", getSourceBranch());
-        putIfNotNull(variables, "gitlabActionType", getActionType().name());
-        putIfNotNull(variables, "gitlabUserName", getUserName());
-        putIfNotNull(variables, "gitlabUserEmail", getUserEmail());
-        putIfNotNull(variables, "gitlabSourceRepoHomepage", getSourceRepoHomepage());
-        putIfNotNull(variables, "gitlabSourceRepoName", getSourceRepoName());
-        putIfNotNull(variables, "gitlabSourceRepoURL", getSourceRepoUrl());
-        putIfNotNull(variables, "gitlabSourceRepoSshUrl", getSourceRepoSshUrl());
-        putIfNotNull(variables, "gitlabSourceRepoHttpUrl", getSourceRepoHttpUrl());
+        putWithNullCheck(variables, "gitlabBranch", getBranch());
+        putWithNullCheck(variables, "gitlabSourceBranch", getSourceBranch());
+        putWithNullCheck(variables, "gitlabActionType", getActionType().name());
+        putWithNullCheck(variables, "gitlabUserName", getUserName());
+        putWithNullCheck(variables, "gitlabUserEmail", getUserEmail());
+        putWithNullCheck(variables, "gitlabSourceRepoHomepage", getSourceRepoHomepage());
+        putWithNullCheck(variables, "gitlabSourceRepoName", getSourceRepoName());
+        putWithNullCheck(variables, "gitlabSourceRepoURL", getSourceRepoUrl());
+        putWithNullCheck(variables, "gitlabSourceRepoSshUrl", getSourceRepoSshUrl());
+        putWithNullCheck(variables, "gitlabSourceRepoHttpUrl", getSourceRepoHttpUrl());
+        putWithNullCheck(variables, "gitlabMergeRequestTitle", getMergeRequestTitle());
+        putWithNullCheck(variables, "gitlabMergeRequestDescription", getMergeRequestDescription());
+        putWithNullCheck(variables, "gitlabMergeRequestId", getMergeRequestId());
+        putWithNullCheck(variables, "gitlabTargetBranch", getTargetBranch());
+        putWithNullCheck(variables, "gitlabTargetRepoName", getTargetRepoName());
+        putWithNullCheck(variables, "gitlabTargetRepoSshUrl", getTargetRepoSshUrl());
+        putWithNullCheck(variables, "gitlabTargetRepoHttpUrl", getTargetRepoHttpUrl());
         return variables;
     }
 
-    protected void putIfNotNull(Map<String, String> variables, String name, String value) {
-        if (value != null) {
-            variables.put(name, value);
-        }
+    protected void putWithNullCheck(Map<String, String> variables, String name, String value) {
+        variables.put(name, value == null ? "" : value);
     }
 
-    protected abstract String getBranch();
+    public abstract String getBranch();
 
-    protected abstract String getSourceBranch();
+    public abstract String getSourceBranch();
 
-    protected abstract ActionType getActionType();
+    public abstract ActionType getActionType();
 
-    protected abstract String getUserName();
+    public abstract String getUserName();
 
-    protected abstract String getUserEmail();
+    public abstract String getUserEmail();
 
-    protected abstract String getSourceRepoHomepage();
+    public abstract String getSourceRepoHomepage();
 
-    protected abstract String getSourceRepoName();
+    public abstract String getSourceRepoName();
 
-    protected abstract String getSourceRepoUrl();
+    public abstract String getSourceRepoUrl();
 
-    protected abstract String getSourceRepoSshUrl();
+    public abstract String getSourceRepoSshUrl();
 
-    protected abstract String getSourceRepoHttpUrl();
+    public abstract String getSourceRepoHttpUrl();
+
+    public String getMergeRequestTitle() {
+        return null;
+    }
+
+    public String getMergeRequestDescription() {
+        return null;
+    }
+
+    public String getMergeRequestId() {
+        return null;
+    }
+
+    public String getTargetBranch() {
+        return null;
+    }
+
+    public String getTargetRepoName() {
+        return null;
+    }
+
+    public String getTargetRepoSshUrl() {
+        return null;
+    }
+
+    public String getTargetRepoHttpUrl() {
+        return null;
+    }
 
     public enum  ActionType {
         PUSH, MERGE

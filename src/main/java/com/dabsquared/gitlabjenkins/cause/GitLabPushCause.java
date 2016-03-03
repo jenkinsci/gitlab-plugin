@@ -26,52 +26,52 @@ public class GitLabPushCause extends GitLabWebHookCause<PushHook> {
     }
 
     @Override
-    protected String getBranch() {
+    public String getBranch() {
         return getRequest().getRef().replaceFirst("^refs/heads/", "");
     }
 
     @Override
-    protected String getSourceBranch() {
+    public String getSourceBranch() {
         return getBranch();
     }
 
     @Override
-    protected ActionType getActionType() {
+    public ActionType getActionType() {
         return ActionType.PUSH;
     }
 
     @Override
-    protected String getUserName() {
+    public String getUserName() {
         return getRequest().getUserName();
     }
 
     @Override
-    protected String getUserEmail() {
+    public String getUserEmail() {
         return getRequest().getUserEmail();
     }
 
     @Override
-    protected String getSourceRepoHomepage() {
+    public String getSourceRepoHomepage() {
         return getRequest().getProject().getHomepage();
     }
 
     @Override
-    protected String getSourceRepoName() {
+    public String getSourceRepoName() {
         return getRequest().getProject().getName();
     }
 
     @Override
-    protected String getSourceRepoUrl() {
+    public String getSourceRepoUrl() {
         return getRequest().getProject().getUrl();
     }
 
     @Override
-    protected String getSourceRepoSshUrl() {
+    public String getSourceRepoSshUrl() {
         return getRequest().getProject().getSshUrl();
     }
 
     @Override
-    protected String getSourceRepoHttpUrl() {
+    public String getSourceRepoHttpUrl() {
         return getRequest().getProject().getHttpUrl();
     }
 
