@@ -3,8 +3,14 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.609</version>
+        <version>2.3</version>
     </parent>
+
+    <properties>
+      <jenkins.version>1.609.1</jenkins.version>
+      <hpi-plugin.version>1.115</hpi-plugin.version>
+      <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
+    </properties>
 
   <artifactId>gitlab-plugin</artifactId>
   <version>1.1.30-SNAPSHOT</version>
