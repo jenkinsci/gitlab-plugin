@@ -422,7 +422,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 					newReq.setObjectAttribute(new ObjectAttributes());
 					if (mr.getAssignee() != null)
 						newReq.getObjectAttribute().setAssignee(mr.getAssignee());
-					if (mr.getAuthor() != null)
+					if (mr.getAuthor() != null && mr.getAuthor().getName() != null && mr.getAuthor().getEmail() != null)
                         newReq.getObjectAttribute().setAuthor(mr.getAuthor());
 					newReq.getObjectAttribute().setDescription(mr.getDescription());
 					newReq.getObjectAttribute().setId(mr.getId());
