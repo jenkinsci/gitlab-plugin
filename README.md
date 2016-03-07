@@ -146,20 +146,35 @@ Known Issues
 * GitLab CI Merge Status pages says pending when there is no build scheduled, or the status is unknown. This is because I coded a workaround until this bug gets resolved: https://github.com/gitlabhq/gitlabhq/issues/7047
 
 
-Contributing
-=====================
+Contributing to the Plugin
+==========================
 
-1. Fork it ( https://github.com/[my-github-username]/gitlab-plugin/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+Plugin source code is hosted on [Github](https://github.com/jenkinsci/gitlab-plugin).
+New feature proposals and bug fix proposals should be submitted as
+[Github pull requests](https://help.github.com/articles/creating-a-pull-request).
+Fork the repository on Github, prepare your change on your forked
+copy, and submit a pull request (see [here](https://github.com/jenkinsci/gitlab-plugin/pulls) for open pull requests). Your pull request will be evaluated by the [Cloudbees Jenkins job](https://jenkins.ci.cloudbees.com/job/plugins/job/gitlab-plugin/).
+
+If you are adding new features please make sure that they support the Jenkins Workflow Plugin.
+See [here](https://github.com/jenkinsci/workflow-plugin/blob/master/COMPATIBILITY.md) for some information.
+
+Before submitting your change make sure that:
+* new features are provided with tests
+* refactored code is provided with regression tests
+* the code formatting follows the plugin standard
+* imports are organised
+* you updated the help docs
+* you updated the README
+* you have used findbugs to see if you haven't introduced any new warnings.
 
 Contributors
 =====================
 
-* @bass_rock, base ground work, primary developer.
+* @bass\_rock, base ground work, primary developer.
 * @DABSquared, company sponsoring development.
 * @xaniasd
+* @omehegan
+* @coder\_hugo
+* @omorillo
 
 Parts of this code inspired by https://github.com/timols/jenkins-gitlab-merge-request-builder-plugin
