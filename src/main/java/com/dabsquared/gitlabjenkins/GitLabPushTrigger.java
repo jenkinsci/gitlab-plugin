@@ -7,33 +7,23 @@ import com.dabsquared.gitlabjenkins.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerConfig;
+import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.converters.collections.CollectionConverter;
-import com.thoughtworks.xstream.converters.reflection.AbstractReflectionConverter;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.mapper.MapperWrapper;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import hudson.model.Action;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.AbstractProject;
-import hudson.model.AutoCompletionCandidates;
 import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
@@ -45,7 +35,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
 import hudson.util.SequentialExecutionQueue;
-import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
@@ -75,9 +64,9 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
  *
  * @author Daniel Brooks
  */
-public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
+public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTriggerConfig {
 	private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
-	private boolean triggerOnPush = true;
+	private transient boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private final String triggerOpenMergeRequestOnPush;
     private boolean ciSkip = true;
@@ -91,6 +80,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient String excludeBranchesSpec;
     private transient String targetBranchRegex;
     private BranchFilter branchFilter;
+    private PushHookTriggerHandler pushHookTriggerHandler;
     private boolean acceptMergeRequestOnSuccess = false;
 
 
@@ -99,8 +89,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
-        this.triggerOnPush = triggerOnPush;
-        this.triggerOnMergeRequest = triggerOnMergeRequest;
+        pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(triggerOnPush);
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
@@ -128,13 +117,16 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                             .withTargetBranchRegex(trigger.targetBranchRegex)
                             .build(BranchFilterType.valueOf(name)));
                 }
+                if (trigger.pushHookTriggerHandler == null) {
+                    trigger.pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(trigger.triggerOnPush);
+                }
                 project.save();
             }
         }
     }
 
     public boolean getTriggerOnPush() {
-    	return triggerOnPush;
+    	return pushHookTriggerHandler.isTriggerOnPush();
     }
 
     public boolean getTriggerOnMergeRequest() {
@@ -177,6 +169,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.addCiMessage = addCiMessage;
     }
 
+    @Override
     public boolean getCiSkip() {
         return ciSkip;
     }
@@ -185,89 +178,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return branchFilter.isBranchAllowed(branchName);
     }
 
+    @Override
     public BranchFilter getBranchFilter() {
         return branchFilter;
     }
 
     // executes when the Trigger receives a push request
-    public void onPost(final PushHook pushHook) {
-        // TODO 1.621+ use standard method
-        final ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
-            @Override
-            protected Job asJob() {
-                return job;
-            }
-        };
-
-        if (triggerOnPush && this.isBranchAllowed(pushHook.getRef().replaceFirst("^refs/heads/", ""))) {
-
-            LOGGER.log(Level.INFO, "{0} triggered for push.", job.getFullName());
-
-            Action[] actions = createActions(pushHook, job);
-
-            int projectbuildDelay = 0;
-
-            if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-                ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob)job;
-                if (abstractProject.getQuietPeriod() > projectbuildDelay) {
-                    projectbuildDelay = abstractProject.getQuietPeriod();
-                }
-            }
-
-            scheduledJob.scheduleBuild2(projectbuildDelay, actions);
-        }
-    }
-
-    private GitLabPushCause createGitLabPushCause(PushHook pushHook) {
-        GitLabPushCause cause;
-        try {
-            cause = new GitLabPushCause(pushHook, getLogFile());
-        } catch (IOException ex) {
-            cause = new GitLabPushCause(pushHook);
-        }
-        return cause;
-    }
-
-    private Action[] createActions(PushHook pushHook, Job job) {
-        ArrayList<Action> actions = new ArrayList<Action>();
-	    actions.add(new CauseAction(createGitLabPushCause(pushHook)));
-        RevisionParameterAction revision;
-        revision = createPushRequestRevisionParameter(job, pushHook);
-        if (revision==null) {
-            return null;
-        }
-
-        actions.add(revision);
-        Action[] actionsArray = actions.toArray(new Action[0]);
-
-        return actionsArray;
-    }
-
-    public RevisionParameterAction createPushRequestRevisionParameter(Job<?, ?> job, PushHook pushHook) {
-        RevisionParameterAction revision = null;
-
-        URIish urIish = null;
-        try {
-            urIish = new URIish(pushHook.getRepository().getUrl());
-        } catch (URISyntaxException e) {
-            LOGGER.log(Level.WARNING, "could not parse URL");
-        }
-
-        if (pushHook.getCommits().isEmpty()) {
-            if (pushHook.getBefore() != null
-                    && pushHook.getBefore().contains("0000000000000000000000000000000000000000")) {
-                // new branches
-                revision = new RevisionParameterAction(pushHook.getAfter(), urIish);
-            } else {
-                LOGGER.log(Level.WARNING,
-                        "unknown handled situation, dont know what revision to build for req {0} for job {1}",
-                        new Object[] {pushHook, (job!=null?job.getFullName():null)});
-                return null;
-            }
-        } else {
-            revision = new RevisionParameterAction(pushHook.getCommits().get(0).getId(), urIish);
-        }
-        return revision;
+    public void onPost(final PushHook hook) {
+        pushHookTriggerHandler.handle(this, job, hook);
     }
 
     // executes when the Trigger receives a merge request
