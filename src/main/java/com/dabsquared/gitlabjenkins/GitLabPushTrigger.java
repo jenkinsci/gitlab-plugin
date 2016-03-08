@@ -190,23 +190,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
         mergeRequestHookTriggerHandler.handle(this, job, hook);
     }
 
-    private void setBuildCauseInJob(Run run){
-        if(setBuildDescription){
-            Cause pcause= run.getCause(GitLabPushCause.class);
-            Cause mcause= run.getCause(GitLabMergeCause.class);
-            String desc = null;
-            if(pcause!=null) desc = pcause.getShortDescription();
-            if(mcause!=null) desc = mcause.getShortDescription();
-            if(desc!=null && desc.length()>0){
-                try {
-                    run.setDescription(desc);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     @Override
     public DescriptorImpl getDescriptor() {
         return DescriptorImpl.get();
@@ -214,10 +197,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
     public static DescriptorImpl getDesc() {
         return DescriptorImpl.get();
-    }
-
-    public File getLogFile() {
-        return new File(job.getRootDir(), "gitlab-polling.log");
     }
 
     @Extension
