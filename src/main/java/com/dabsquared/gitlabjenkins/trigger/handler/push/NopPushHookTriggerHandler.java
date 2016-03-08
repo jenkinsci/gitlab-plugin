@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
 import hudson.model.Job;
 
 /**
@@ -8,12 +9,12 @@ import hudson.model.Job;
  */
 class NopPushHookTriggerHandler implements PushHookTriggerHandler {
     @Override
-    public void handle(PushHookTriggerConfig config, Job<?, ?> job, PushHook hook) {
+    public void handle(WebHookTriggerConfig config, Job<?, ?> job, PushHook hook) {
         // do nothing
     }
 
     @Override
-    public boolean isTriggerOnPush() {
+    public boolean isEnabled() {
         return false;
     }
 }

@@ -1,13 +1,13 @@
 package com.dabsquared.gitlabjenkins;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
-import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
-import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerConfig;
+import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
+import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
@@ -23,11 +23,8 @@ import hudson.init.Initializer;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.AbstractProject;
-import hudson.model.Cause;
 import hudson.model.Job;
-import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.RevisionParameterAction;
 import hudson.scm.SCM;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -49,9 +46,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.springframework.util.AntPathMatcher;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,10 +59,10 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
  *
  * @author Daniel Brooks
  */
-public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTriggerConfig {
+public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTriggerConfig {
 	private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 	private transient boolean triggerOnPush = true;
-    private boolean triggerOnMergeRequest = true;
+    private transient boolean triggerOnMergeRequest = true;
     private final String triggerOpenMergeRequestOnPush;
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
@@ -81,6 +76,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTri
     private transient String targetBranchRegex;
     private BranchFilter branchFilter;
     private PushHookTriggerHandler pushHookTriggerHandler;
+    private MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private boolean acceptMergeRequestOnSuccess = false;
 
 
@@ -89,6 +85,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTri
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
+        mergeRequestHookTriggerHandler = MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(triggerOnMergeRequest);
         pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(triggerOnPush);
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.ciSkip = ciSkip;
@@ -120,17 +117,21 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTri
                 if (trigger.pushHookTriggerHandler == null) {
                     trigger.pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(trigger.triggerOnPush);
                 }
+                if (trigger.mergeRequestHookTriggerHandler == null) {
+                    trigger.mergeRequestHookTriggerHandler =
+                            MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(trigger.triggerOnMergeRequest);
+                }
                 project.save();
             }
         }
     }
 
     public boolean getTriggerOnPush() {
-    	return pushHookTriggerHandler.isTriggerOnPush();
+    	return pushHookTriggerHandler.isEnabled();
     }
 
     public boolean getTriggerOnMergeRequest() {
-    	return triggerOnMergeRequest;
+    	return mergeRequestHookTriggerHandler.isEnabled();
     }
 
     public String getTriggerOpenMergeRequestOnPush() {
@@ -174,10 +175,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTri
         return ciSkip;
     }
 
-    private boolean isBranchAllowed(final String branchName) {
-        return branchFilter.isBranchAllowed(branchName);
-    }
-
     @Override
     public BranchFilter getBranchFilter() {
         return branchFilter;
@@ -189,43 +186,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements PushHookTri
     }
 
     // executes when the Trigger receives a merge request
-    public void onPost(final MergeRequestHook mergeRequestHook) {
-        final ParameterizedJobMixIn scheduledJob = new ParameterizedJobMixIn() {
-            @Override
-            protected Job asJob() {
-                return job;
-            }
-        };
-
-        if (triggerOnMergeRequest && this.isBranchAllowed(mergeRequestHook.getObjectAttributes().getTargetBranch())) {
-
-    	    LOGGER.log(Level.INFO, "{0} triggered for merge request.", job.getFullName());
-
-	        GitLabMergeCause cause = createGitLabMergeCause(mergeRequestHook);
-
-	        int projectbuildDelay = 0;
-
-	        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-                ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob)job;
-                if (abstractProject.getQuietPeriod() > projectbuildDelay) {
-                    projectbuildDelay = abstractProject.getQuietPeriod();
-                }
-	        }
-
-	        scheduledJob.scheduleBuild2(projectbuildDelay, new CauseAction(cause));
-    	} else {
-	        LOGGER.log(Level.INFO, "trigger on merge request not set");
-	    }
-    }
-
-    private GitLabMergeCause createGitLabMergeCause(MergeRequestHook mergeRequestHook) {
-        GitLabMergeCause cause;
-        try {
-            cause = new GitLabMergeCause(mergeRequestHook, getLogFile());
-        } catch (IOException ex) {
-            cause = new GitLabMergeCause(mergeRequestHook);
-        }
-        return cause;
+    public void onPost(final MergeRequestHook hook) {
+        mergeRequestHookTriggerHandler.handle(this, job, hook);
     }
 
     private void setBuildCauseInJob(Run run){

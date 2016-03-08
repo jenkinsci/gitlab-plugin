@@ -4,11 +4,11 @@ import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
 import com.dabsquared.gitlabjenkins.model.Commit;
 import com.dabsquared.gitlabjenkins.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
+import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
-import jenkins.model.ParameterizedJobMixIn;
 import org.eclipse.jgit.transport.URIish;
 
 import java.io.File;
@@ -22,29 +22,21 @@ import java.util.logging.Logger;
 /**
  * @author Robin Müller
  */
-class PushHookTriggerHandlerImpl implements PushHookTriggerHandler {
+class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
 
     private final static Logger LOGGER = Logger.getLogger(PushHookTriggerHandlerImpl.class.getName());
 
     @Override
-    public void handle(PushHookTriggerConfig config, Job<?, ?> job, PushHook hook) {
-        if (config.getCiSkip() && isLastCommitCiSkip(hook)) {
-            LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
-            return;
-        }
-
-        if (config.getBranchFilter().isBranchAllowed(hook.getRef().replaceFirst("^refs/heads/", ""))) {
-            LOGGER.log(Level.INFO, "{0} triggered for push.", job.getFullName());
-            scheduleBuild(job, createActions(job, hook));
-        }
-    }
-
-    @Override
-    public boolean isTriggerOnPush() {
+    public boolean isEnabled() {
         return true;
     }
 
-    private Action[] createActions(Job<?, ?> job, PushHook hook) {
+    @Override
+    protected boolean isCiSkip(PushHook hook) {
+        return !hook.getCommits().isEmpty() && hook.getCommits().get(0).getMessage().contains("[ci-skip]");
+    }
+
+    protected Action[] createActions(Job<?, ?> job, PushHook hook) {
         ArrayList<Action> actions = new ArrayList<Action>();
         actions.add(new CauseAction(createGitLabPushCause(job, hook)));
         try {
@@ -54,6 +46,16 @@ class PushHookTriggerHandlerImpl implements PushHookTriggerHandler {
                     new Object[]{hook, (job != null ? job.getFullName() : null)});
         }
         return actions.toArray(new Action[actions.size()]);
+    }
+
+    @Override
+    protected String getTargetBranch(PushHook hook) {
+        return hook.getRef().replaceFirst("^refs/heads/", "");
+    }
+
+    @Override
+    protected String getTriggerType() {
+        return "push";
     }
 
     private GitLabPushCause createGitLabPushCause(Job<?, ?> job, PushHook hook) {
@@ -92,31 +94,5 @@ class PushHookTriggerHandlerImpl implements PushHookTriggerHandler {
 
     private boolean isNewBranchPush(PushHook pushHook) {
         return pushHook.getBefore() != null && pushHook.getBefore().contains("0000000000000000000000000000000000000000");
-    }
-
-
-    private void scheduleBuild(Job<?, ?> job, Action[] actions) {
-        int projectBuildDelay = 0;
-        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-            ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob) job;
-            if (abstractProject.getQuietPeriod() > projectBuildDelay) {
-                projectBuildDelay = abstractProject.getQuietPeriod();
-            }
-        }
-        retrieveScheduleJob(job).scheduleBuild2(projectBuildDelay, actions);
-    }
-
-    private ParameterizedJobMixIn retrieveScheduleJob(final Job<?, ?> job) {
-        // TODO 1.621+ use standard method
-        return new ParameterizedJobMixIn() {
-            @Override
-            protected Job asJob() {
-                return job;
-            }
-        };
-    }
-
-    private boolean isLastCommitCiSkip(PushHook hook) {
-        return !hook.getCommits().isEmpty() && hook.getCommits().get(0).getMessage().contains("[ci-skip]");
     }
 }

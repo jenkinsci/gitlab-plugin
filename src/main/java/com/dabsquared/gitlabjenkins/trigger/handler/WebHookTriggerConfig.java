@@ -1,11 +1,11 @@
-package com.dabsquared.gitlabjenkins.trigger.handler.push;
+package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 
 /**
  * @author Robin Müller
  */
-public interface PushHookTriggerConfig {
+public interface WebHookTriggerConfig {
 
     boolean getCiSkip();
 

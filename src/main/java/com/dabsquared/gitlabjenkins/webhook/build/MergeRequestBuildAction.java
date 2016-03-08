@@ -43,10 +43,6 @@ public class MergeRequestBuildAction implements WebHookAction {
                     public void run() {
                         GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                         if (trigger != null) {
-                            if (trigger.getCiSkip() && mergeRequestHook.getObjectAttributes().getDescription().contains("[ci-skip]")) {
-                                LOGGER.log(Level.INFO, "Skipping MR " + mergeRequestHook.getObjectAttributes().getTitle() + " due to ci-skip.");
-                                return;
-                            }
                             trigger.onPost(mergeRequestHook);
                         }
                     }
