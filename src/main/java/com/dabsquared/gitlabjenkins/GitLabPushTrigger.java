@@ -191,15 +191,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
         mergeRequestHookTriggerHandler.handle(this, job, hook);
     }
 
-    @Override
-    public DescriptorImpl getDescriptor() {
-        return DescriptorImpl.get();
-    }
-
-    public static DescriptorImpl getDesc() {
-        return DescriptorImpl.get();
-    }
-
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
@@ -441,10 +432,5 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
         public boolean getIgnoreCertificateErrors() {
         	return ignoreCertificateErrors;
         }
-
-        public static DescriptorImpl get() {
-            return Trigger.all().get(DescriptorImpl.class);
-        }
-
     }
 }

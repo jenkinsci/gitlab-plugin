@@ -6,6 +6,7 @@ import hudson.Extension;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.AbstractProject;
+import hudson.triggers.Trigger;
 import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
@@ -104,7 +105,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public static void migrate() throws IOException {
         GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
         if (!gitLabConfig.migrationFinished) {
-            GitLabPushTrigger.DescriptorImpl oldConfig = GitLabPushTrigger.getDesc();
+            GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
             gitLabConfig.connections = new ArrayList<GitLabConnection>();
             gitLabConfig.connections.add(new GitLabConnection(oldConfig.getGitlabHostUrl(), oldConfig.getGitlabHostUrl(), oldConfig.getGitlabApiToken(),
                     oldConfig.getIgnoreCertificateErrors()));
