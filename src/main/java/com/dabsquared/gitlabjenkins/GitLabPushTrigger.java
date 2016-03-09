@@ -43,6 +43,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.springframework.util.AntPathMatcher;
 
@@ -202,7 +203,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
-        Job project;
         private String gitlabApiToken;
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
@@ -215,42 +215,48 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
         @Override
         public boolean isApplicable(Item item) {
-            if(item instanceof Job && SCMTriggerItems.asSCMTriggerItem(item) != null
-                    && item instanceof ParameterizedJobMixIn.ParameterizedJob) {
-                project = (Job) item;
-                return true;
-            } else {
-                return false;
-            }
+            return item instanceof Job
+                    && SCMTriggerItems.asSCMTriggerItem(item) != null
+                    && item instanceof ParameterizedJobMixIn.ParameterizedJob;
         }
 
         @Override
         public String getDisplayName() {
-            if(project == null) {
-                return "Build when a change is pushed to GitLab, unknown URL";
+            Job<?, ?> project = retrieveCurrentJob();
+            if (project != null) {
+                try {
+                    return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + retrieveProjectUrl(project);
+                } catch (IllegalStateException e) {
+                    // nothing to do
+                }
             }
+            return "Build when a change is pushed to GitLab, unknown URL";
+        }
 
-            final List<String> projectParentsUrl = new ArrayList<String>();
+        private StringBuilder retrieveProjectUrl(Job<?, ?> project) {
+            return new StringBuilder()
+                    .append(Jenkins.getInstance().getRootUrl())
+                    .append(GitLabWebHook.WEBHOOK_URL)
+                    .append(retrieveParentUrl(project))
+                    .append('/').append(Util.rawEncode(project.getName()));
+        }
 
-            try {
-				for (Object parent = project.getParent(); parent instanceof Item; parent = ((Item) parent)
-						.getParent()) {
-					projectParentsUrl.add(0, ((Item) parent).getName());
-				}
-			} catch (IllegalStateException e) {
-				return "Build when a change is pushed to GitLab, unknown URL";
-			}
-			final StringBuilder projectUrl = new StringBuilder();
-            projectUrl.append(Jenkins.getInstance().getRootUrl());
-            projectUrl.append(GitLabWebHook.WEBHOOK_URL);
-            projectUrl.append('/');
-            for (final String parentUrl : projectParentsUrl) {
-                projectUrl.append(Util.rawEncode(parentUrl));
-                projectUrl.append('/');
+        private StringBuilder retrieveParentUrl(Item item) {
+            if (item.getParent() instanceof Item) {
+                Item parent = (Item) item.getParent();
+                return retrieveParentUrl(parent).append('/').append(Util.rawEncode(parent.getName()));
+            } else {
+                return new StringBuilder();
             }
-            projectUrl.append(Util.rawEncode(project.getName()));
+        }
 
-            return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + projectUrl;
+        private Job<?, ?> retrieveCurrentJob() {
+            StaplerRequest request = Stapler.getCurrentRequest();
+            if (request != null) {
+                Ancestor ancestor = request.findAncestor(Job.class);
+                return ancestor == null ? null : (Job<?, ?>) ancestor.getObject();
+            }
+            return null;
         }
 
         @Override
@@ -400,9 +406,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
                         Level.WARNING,
                         "Could not find GitSCM for project. Project = {1}, next build = {2}",
                         new String[] {
-                                project.getName(),
-                                String.valueOf(project.getNextBuildNumber()) });
-                throw new IllegalStateException("This project does not use git:" + project.getName());
+                                job.getName(),
+                                String.valueOf(job.getNextBuildNumber()) });
+                throw new IllegalStateException("This project does not use git:" + job.getName());
             }
 
             List<RemoteConfig> repositories = gitSCM.getRepositories();
