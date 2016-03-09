@@ -3,18 +3,31 @@ package com.dabsquared.gitlabjenkins.trigger.branch;
 import com.dabsquared.gitlabjenkins.GitLabProjectBranchesService;
 import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import hudson.model.AutoCompletionCandidates;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
+import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
 import jenkins.triggers.SCMTriggerItem;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +71,44 @@ public final class ProjectBranchesProvider {
         }
         return result;
     }
+
+    public FormValidation doCheckBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
+        if (!project.hasPermission(Item.CONFIGURE) || containsNoBranches(value)) {
+            return FormValidation.ok();
+        }
+
+        try {
+            return checkMatchingBranches(value, getProjectBranches(project));
+        } catch (final IllegalStateException ex) {
+            return FormValidation.warning(Messages.GitLabPushTrigger_CannotConnectToGitLab(ex.getMessage()));
+        } catch (final IOException ex) {
+            return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? ex : null, Messages.GitLabPushTrigger_CannotCheckBranches());
+        }
+    }
+
+    private FormValidation checkMatchingBranches(@QueryParameter String value, List<String> projectBranches) {
+        Set<String> matchingSpecs = new HashSet<String>();
+        Set<String> unknownSpecs = new HashSet<String>();
+        AntPathMatcherSet projectBranchesMatcherSet = new AntPathMatcherSet(projectBranches);
+        for (String branchSpec : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
+            if (projectBranchesMatcherSet.contains(branchSpec)) {
+                matchingSpecs.add(branchSpec);
+            } else {
+                unknownSpecs.add(branchSpec);
+            }
+        }
+
+        if (unknownSpecs.isEmpty()) {
+            return FormValidation.ok(Messages.GitLabPushTrigger_BranchesMatched(matchingSpecs.size()));
+        } else {
+            return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(Joiner.on(", ").join(unknownSpecs)));
+        }
+    }
+
+    private boolean containsNoBranches(@QueryParameter String value) {
+        return StringUtils.isEmpty(value) || StringUtils.containsOnly(value, new char[]{',', ' '});
+    }
+
 
     private String[] getProjectBranchesAsArray(Job<?, ?> job) {
         try {

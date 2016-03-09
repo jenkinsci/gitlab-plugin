@@ -38,11 +38,13 @@
                           help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
                 <f:entry title="Include">
                     <f:textbox name="includeBranchesSpec" value="${instance.branchFilter.config.includeBranchesSpec}"
-                               autoCompleteField="includeBranchesSpec" autoCompleteDelimChar=","/>
+                               autoCompleteField="includeBranchesSpec" autoCompleteDelimChar=","
+                               checkUrl="'${descriptor.descriptorFullUrl}/checkIncludeBranchesSpec?value=' + this.value"/>
                 </f:entry>
                 <f:entry title="Exclude">
                     <f:textbox name="excludeBranchesSpec" value="${instance.branchFilter.config.excludeBranchesSpec}"
-                               autoCompleteField="excludeBranchesSpec" autoCompleteDelimChar=","/>
+                               autoCompleteField="excludeBranchesSpec" autoCompleteDelimChar=","
+                               checkUrl="'${descriptor.descriptorFullUrl}/checkIncludeBranchesSpec?value=' + this.value"/>
                 </f:entry>
             </f:radioBlock>
 

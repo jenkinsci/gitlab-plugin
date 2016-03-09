@@ -12,11 +12,6 @@ import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTrigge
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
-import com.google.common.base.Splitter;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
@@ -25,8 +20,6 @@ import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
-import hudson.plugins.git.GitSCM;
-import hudson.scm.SCM;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
@@ -35,23 +28,16 @@ import hudson.util.ListBoxModel.Option;
 import hudson.util.SequentialExecutionQueue;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
-import jenkins.triggers.SCMTriggerItem;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
-import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 
@@ -62,7 +48,6 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTriggerConfig {
-	private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
 	private transient boolean triggerOnPush = true;
     private transient boolean triggerOnMergeRequest = true;
     private final String triggerOpenMergeRequestOnPush;
@@ -264,10 +249,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
                     new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both") ));
         }
 
-        private static List<String> splitBranchSpec(final String spec) {
-            return Lists.newArrayList(Splitter.on(',').omitEmptyStrings().trimResults().split(spec));
-        }
-
         public AutoCompletionCandidates doAutoCompleteIncludeBranchesSpec(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
             return ProjectBranchesProvider.instance().doAutoCompleteBranchesSpec(job, value);
         }
@@ -276,52 +257,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
             return ProjectBranchesProvider.instance().doAutoCompleteBranchesSpec(job, value);
         }
 
-        private FormValidation doCheckBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
-            if (!project.hasPermission(Item.CONFIGURE)) {
-                return FormValidation.ok();
-            }
-
-            final List<String> branchSpecs = splitBranchSpec(value);
-            if (branchSpecs.isEmpty()) {
-                return FormValidation.ok();
-            }
-
-            final List<String> projectBranches;
-            try {
-                projectBranches = ProjectBranchesProvider.instance().getProjectBranches(project);
-            } catch (final IllegalStateException ex) {
-                return FormValidation.warning(Messages.GitLabPushTrigger_CannotConnectToGitLab(ex.getMessage()));
-            } catch (final IOException ex) {
-                return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? ex : null,
-                                              Messages.GitLabPushTrigger_CannotCheckBranches());
-            }
-
-            final Multimap<String, String> matchedSpecs = HashMultimap.create();
-            final AntPathMatcher matcher = new AntPathMatcher();
-            for (final String projectBranch : projectBranches) {
-                for (final String branchSpec : branchSpecs) {
-                    if (matcher.match(branchSpec, projectBranch)) {
-                        matchedSpecs.put(branchSpec, projectBranch);
-                    }
-                }
-            }
-
-            branchSpecs.removeAll(matchedSpecs.keySet());
-            if (!branchSpecs.isEmpty()) {
-                final String unknownBranchNames = StringUtils.join(branchSpecs, ", ");
-                return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(unknownBranchNames));
-            } else {
-                final int matchedBranchesCount = Sets.newHashSet(matchedSpecs.values()).size();
-                return FormValidation.ok(Messages.GitLabPushTrigger_BranchesMatched(matchedBranchesCount));
-            }
-        }
-
         public FormValidation doCheckIncludeBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
-            return this.doCheckBranchesSpec(project, value);
+            return ProjectBranchesProvider.instance().doCheckBranchesSpec(project, value);
         }
 
         public FormValidation doCheckExcludeBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
-            return this.doCheckBranchesSpec(project, value);
+            return ProjectBranchesProvider.instance().doCheckBranchesSpec(project, value);
         }
 
         public GitLab getGitlab() {
