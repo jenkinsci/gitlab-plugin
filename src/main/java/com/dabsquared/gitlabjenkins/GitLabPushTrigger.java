@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins;
 
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
@@ -263,37 +264,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
                     new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both") ));
         }
 
-        private List<String> getProjectBranches(final Job<?, ?> job) throws IOException, IllegalStateException {
-            if (!(job instanceof AbstractProject<?, ?>)) {
-                return Lists.newArrayList();
-            }
-
-            final URIish sourceRepository = getSourceRepoURLDefault(job);
-
-            if (sourceRepository == null) {
-                throw new IllegalStateException(Messages.GitLabPushTrigger_NoSourceRepository());
-            }
-
-            if (!getGitlabHostUrl().isEmpty()) {
-                return GitLabProjectBranchesService.instance().getBranches(getGitlab(), sourceRepository.toString());
-            } else {
-                LOGGER.log(Level.WARNING, "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.",
-                        job.getFullName());
-                return Lists.newArrayList();
-            }
-        }
-
-        private GitSCM getGitSCM(SCMTriggerItem item) {
-            if(item != null) {
-                for(SCM scm : item.getSCMs()) {
-                    if(scm instanceof GitSCM) {
-                        return (GitSCM) scm;
-                    }
-                }
-            }
-            return null;
-        }
-
         private static List<String> splitBranchSpec(final String spec) {
             return Lists.newArrayList(Splitter.on(',').omitEmptyStrings().trimResults().split(spec));
         }
@@ -305,7 +275,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
             List<String> values = ac.getValues();
 
             try {
-                List<String> branches = this.getProjectBranches(job);
+                List<String> branches = ProjectBranchesProvider.instance().getProjectBranches(job);
                 // show all suggestions for short strings
                 if (query.length() < 2){
                     values.addAll(branches);
@@ -345,7 +315,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
             final List<String> projectBranches;
             try {
-                projectBranches = this.getProjectBranches(project);
+                projectBranches = ProjectBranchesProvider.instance().getProjectBranches(project);
             } catch (final IllegalStateException ex) {
                 return FormValidation.warning(Messages.GitLabPushTrigger_CannotConnectToGitLab(ex.getMessage()));
             } catch (final IOException ex) {
@@ -379,39 +349,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
         public FormValidation doCheckExcludeBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
             return this.doCheckBranchesSpec(project, value);
-        }
-
-        /**
-         * Get the URL of the first declared repository in the project configuration.
-         * Use this as default source repository url.
-         *
-         * @return URIish the default value of the source repository url
-         * @throws IllegalStateException Project does not use git scm.
-         */
-        protected URIish getSourceRepoURLDefault(Job job) {
-            URIish url = null;
-            SCMTriggerItem item = SCMTriggerItems.asSCMTriggerItem(job);
-            GitSCM gitSCM = getGitSCM(item);
-            if(gitSCM == null) {
-                LOGGER.log(
-                        Level.WARNING,
-                        "Could not find GitSCM for project. Project = {1}, next build = {2}",
-                        new String[] {
-                                job.getName(),
-                                String.valueOf(job.getNextBuildNumber()) });
-                throw new IllegalStateException("This project does not use git:" + job.getName());
-            }
-
-            List<RemoteConfig> repositories = gitSCM.getRepositories();
-            if (!repositories.isEmpty()) {
-                RemoteConfig defaultRepository = repositories.get(repositories.size() - 1);
-                List<URIish> uris = defaultRepository.getURIs();
-                if (!uris.isEmpty()) {
-                    return uris.get(uris.size() - 1);
-                }
-            }
-
-            return null;
         }
 
         public GitLab getGitlab() {
