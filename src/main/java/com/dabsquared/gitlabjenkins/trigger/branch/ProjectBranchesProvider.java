@@ -3,12 +3,14 @@ package com.dabsquared.gitlabjenkins.trigger.branch;
 import com.dabsquared.gitlabjenkins.GitLabProjectBranchesService;
 import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import hudson.model.AutoCompletionCandidates;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
 import jenkins.triggers.SCMTriggerItem;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -24,7 +26,8 @@ public final class ProjectBranchesProvider {
     private static final Logger LOGGER = Logger.getLogger(ProjectBranchesProvider.class.getName());
     private static final ProjectBranchesProvider INSTANCE = new ProjectBranchesProvider();
 
-    private ProjectBranchesProvider() { }
+    private ProjectBranchesProvider() {
+    }
 
     public static ProjectBranchesProvider instance() {
         return INSTANCE;
@@ -41,6 +44,34 @@ public final class ProjectBranchesProvider {
         }
     }
 
+    public AutoCompletionCandidates doAutoCompleteBranchesSpec(Job<?, ?> job, String query) {
+        AutoCompletionCandidates result = new AutoCompletionCandidates();
+        // show all suggestions for short strings
+        if (query.length() < 2) {
+            result.add(getProjectBranchesAsArray(job));
+        } else {
+            for (String branch : getProjectBranchesAsArray(job)) {
+                if (branch.toLowerCase().contains(query.toLowerCase())) {
+                    result.add(branch);
+                }
+            }
+        }
+        return result;
+    }
+
+    private String[] getProjectBranchesAsArray(Job<?, ?> job) {
+        try {
+            List<String> branches = getProjectBranches(job);
+            return branches.toArray(new String[branches.size()]);
+        } catch (final IllegalStateException ex) {
+            LOGGER.log(Level.FINEST, "Unexpected IllegalStateException. Please check the logs and your configuration.", ex);
+        } catch (final IOException ex) {
+            LOGGER.log(Level.FINEST, "Unexpected IllegalStateException. Please check the logs and your configuration.", ex);
+        }
+        return new String[0];
+    }
+
+
     /**
      * Get the URL of the first declared repository in the project configuration.
      * Use this as default source repository url.
@@ -51,7 +82,7 @@ public final class ProjectBranchesProvider {
     private URIish getSourceRepoURLDefault(Job<?, ?> job) {
         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
         GitSCM gitSCM = getGitSCM(item);
-        if(gitSCM == null) {
+        if (gitSCM == null) {
             LOGGER.log(Level.WARNING, "Could not find GitSCM for project. Project = {1}, next build = {2}",
                     array(job.getName(), String.valueOf(job.getNextBuildNumber())));
             throw new IllegalStateException("This project does not use git:" + job.getName());
@@ -70,9 +101,9 @@ public final class ProjectBranchesProvider {
     }
 
     private GitSCM getGitSCM(SCMTriggerItem item) {
-        if(item != null) {
-            for(SCM scm : item.getSCMs()) {
-                if(scm instanceof GitSCM) {
+        if (item != null) {
+            for (SCM scm : item.getSCMs()) {
+                if (scm instanceof GitSCM) {
                     return (GitSCM) scm;
                 }
             }
