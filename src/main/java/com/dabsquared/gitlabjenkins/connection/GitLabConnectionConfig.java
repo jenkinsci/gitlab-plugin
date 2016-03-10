@@ -29,7 +29,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     private List<GitLabConnection> connections = new ArrayList<GitLabConnection>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<String, GitLabConnection>();
     private transient Map<String, GitlabAPI> clients = new HashMap<String, GitlabAPI>();
-    private boolean migrationFinished = false;
 
     public GitLabConnectionConfig() {
         load();
@@ -105,26 +104,5 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         testApi.ignoreCertificateErrors(ignoreCertificateErrors);
         testApi.getProjects();
         return true;
-    }
-
-    @Initializer(after = InitMilestone.JOB_LOADED)
-    public static void migrate() throws IOException {
-        GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-        if (!gitLabConfig.migrationFinished) {
-            GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
-            gitLabConfig.connections = new ArrayList<GitLabConnection>();
-            gitLabConfig.connections.add(new GitLabConnection(oldConfig.getGitlabHostUrl(), oldConfig.getGitlabHostUrl(), oldConfig.getGitlabApiToken(),
-                    oldConfig.getIgnoreCertificateErrors()));
-
-            String defaultConnectionName = gitLabConfig.connections.get(0).getName();
-            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                if (project.getTrigger(GitLabPushTrigger.class) != null) {
-                    project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
-                    project.save();
-                }
-            }
-            gitLabConfig.migrationFinished = true;
-            gitLabConfig.save();
-        }
     }
 }
