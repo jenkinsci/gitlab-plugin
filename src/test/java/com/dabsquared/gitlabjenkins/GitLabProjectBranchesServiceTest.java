@@ -26,7 +26,6 @@ public class GitLabProjectBranchesServiceTest {
     private GitLabProjectBranchesService branchesService;
 
     private GitlabAPI gitlabApi;
-    private GitLab gitLab;
     private TimeUtility timeUtility;
 
     private GitlabProject gitlabProjectA;
@@ -47,7 +46,7 @@ public class GitLabProjectBranchesServiceTest {
         branchNamesProjectB = asList("master", "B-branch-1", "B-branch-2");
 
         // mock the gitlab factory
-        gitLab = mockGitlab(asList(gitlabProjectA, gitlabProjectB), asList(branchNamesProjectA, branchNamesProjectB));
+        mockGitlab(asList(gitlabProjectA, gitlabProjectB), asList(branchNamesProjectA, branchNamesProjectB));
 
         // never expire cache for tests
         timeUtility = mock(TimeUtility.class);
@@ -60,7 +59,7 @@ public class GitLabProjectBranchesServiceTest {
     public void shouldReturnProjectFromGitlabApi() throws Exception {
         // when
         GitlabProject gitlabProject = branchesService.findGitlabProjectForRepositoryUrl(
-                gitLab.instance(), "git@git.example.com:groupOne/A.git");
+                gitlabApi, "git@git.example.com:groupOne/A.git");
 
         // then
         assertThat(gitlabProject, is(gitlabProjectA));
@@ -69,7 +68,7 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldReturnBranchNamesFromGitlabApi() throws Exception {
         // when
-        List<String> actualBranchNames = branchesService.getBranches(gitLab.instance(), "git@git.example.com:groupOne/B.git");
+        List<String> actualBranchNames = branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/B.git");
 
         // then
         assertThat(actualBranchNames, is(branchNamesProjectB));
@@ -78,9 +77,9 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldNotCallGitlabApiGetProjectsWhenElementIsCached() throws Exception {
         // when
-        branchesService.findGitlabProjectForRepositoryUrl(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.findGitlabProjectForRepositoryUrl(gitlabApi, "git@git.example.com:groupOne/A.git");
         verify(gitlabApi, times(1)).getProjects();
-        branchesService.findGitlabProjectForRepositoryUrl(gitLab.instance(), "git@git.example.com:groupOne/B.git");
+        branchesService.findGitlabProjectForRepositoryUrl(gitlabApi, "git@git.example.com:groupOne/B.git");
 
         // then
         verify(gitlabApi, times(1)).getProjects();
@@ -89,9 +88,9 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldCallGitlabApiGetProjectsWhenElementIsNotCached() throws Exception {
         // when
-        branchesService.findGitlabProjectForRepositoryUrl(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.findGitlabProjectForRepositoryUrl(gitlabApi, "git@git.example.com:groupOne/A.git");
         verify(gitlabApi, times(1)).getProjects();
-        branchesService.findGitlabProjectForRepositoryUrl(gitLab.instance(), "git@git.example.com:groupOne/DoesNotExist.git");
+        branchesService.findGitlabProjectForRepositoryUrl(gitlabApi, "git@git.example.com:groupOne/DoesNotExist.git");
 
         // then
         verify(gitlabApi, times(2)).getProjects();
@@ -100,9 +99,9 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shoulNotCallGitlabApiGetBranchesWhenElementIsCached() throws Exception {
         // when
-        branchesService.getBranches(gitLab.instance(), "git@git.example.com:groupOne/B.git");
+        branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/B.git");
         verify(gitlabApi, times(1)).getBranches(gitlabProjectB);
-        branchesService.getBranches(gitLab.instance(), "git@git.example.com:groupOne/B.git");
+        branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/B.git");
 
         // then
         verify(gitlabApi, times(1)).getProjects();
@@ -111,7 +110,7 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shoulNotMakeUnnecessaryCallsToGitlabApiGetBranches() throws Exception {
         // when
-        branchesService.getBranches(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/A.git");
 
         // then
         verify(gitlabApi, times(1)).getBranches(gitlabProjectA);
@@ -121,12 +120,12 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldExpireBranchCacheAtSetTime() throws Exception {
         // first call should retrieve branches from gitlabApi
-        branchesService.getBranches(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/A.git");
         verify(gitlabApi, times(1)).getBranches(gitlabProjectA);
 
         long timeAfterCacheExpiry = GitLabProjectBranchesService.BRANCH_CACHE_TIME_IN_MILLISECONDS + 2;
         when(timeUtility.getCurrentTimeInMillis()).thenReturn(timeAfterCacheExpiry);
-        branchesService.getBranches(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/A.git");
 
         // then
         verify(gitlabApi, times(2)).getBranches(gitlabProjectA);
@@ -135,19 +134,19 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldExpireProjectCacheAtSetTime() throws Exception {
         // first call should retrieve projects from gitlabApi
-        branchesService.findGitlabProjectForRepositoryUrl(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.findGitlabProjectForRepositoryUrl(gitlabApi, "git@git.example.com:groupOne/A.git");
         verify(gitlabApi, times(1)).getProjects();
 
         long timeAfterCacheExpiry = GitLabProjectBranchesService.PROJECT_MAP_CACHE_TIME_IN_MILLISECONDS + 2;
         when(timeUtility.getCurrentTimeInMillis()).thenReturn(timeAfterCacheExpiry);
-        branchesService.findGitlabProjectForRepositoryUrl(gitLab.instance(), "git@git.example.com:groupOne/A.git");
+        branchesService.findGitlabProjectForRepositoryUrl(gitlabApi, "git@git.example.com:groupOne/A.git");
 
         // then
         verify(gitlabApi, times(2)).getProjects();
     }
 
     /**
-     * mocks calls to GitLab.instance() and GitlabAPI.getProjects and GitlabAPI.getBranches(gitlabProject)
+     * mocks calls to gitlabApi and GitlabAPI.getProjects and GitlabAPI.getBranches(gitlabProject)
      *
      * projectList has to have the size as the branchNamesList list.
      *
@@ -158,16 +157,11 @@ public class GitLabProjectBranchesServiceTest {
      *            returned for GitlabAPI.getProjects
      * @param branchNamesList
      *            an array of lists of branch names used to mock getBranches
-     * @return a mocked gitlabAPI
      * @throws IOException
      */
-    private GitLab mockGitlab(List<GitlabProject> projectList, List<List<String>> branchNamesList) throws IOException {
+    private void mockGitlab(List<GitlabProject> projectList, List<List<String>> branchNamesList) throws IOException {
         // mock the actual API
         gitlabApi = mock(GitlabAPI.class);
-
-        // mock the gitlab API factory
-        GitLab gitLab = mock(GitLab.class);
-        when(gitLab.instance()).thenReturn(gitlabApi);
 
         when(gitlabApi.getProjects()).thenReturn(projectList);
 
@@ -176,7 +170,6 @@ public class GitLabProjectBranchesServiceTest {
             branchList = createGitlabBranches(projectList.get(i), branchNamesList.get(1));
             when(gitlabApi.getBranches(projectList.get(i))).thenReturn(branchList);
         }
-        return gitLab;
     }
 
     private List<GitlabBranch> createGitlabBranches(GitlabProject gitlabProject, List<String> branchNames) {

@@ -31,6 +31,7 @@ import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -184,7 +185,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
-        private transient GitLab gitlab;
 
         public DescriptorImpl() {
         	load();
@@ -239,7 +239,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             save();
-            gitlab = new GitLab();
             return super.configure(req, formData);
         }
 
@@ -263,13 +262,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
         public FormValidation doCheckExcludeBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
             return ProjectBranchesProvider.instance().doCheckBranchesSpec(project, value);
-        }
-
-        public GitLab getGitlab() {
-            if (gitlab == null) {
-                gitlab = new GitLab();
-            }
-            return gitlab;
         }
 
         public String getGitlabApiToken() {

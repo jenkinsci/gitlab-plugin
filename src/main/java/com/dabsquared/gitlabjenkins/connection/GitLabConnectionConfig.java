@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import com.dabsquared.gitlabjenkins.GitLab;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import hudson.Extension;
 import hudson.init.InitMilestone;
@@ -87,7 +86,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiToken, @QueryParameter boolean ignoreCertificateErrors) throws IOException {
         try {
-            GitLab.checkConnection(apiToken, url, ignoreCertificateErrors);
+            checkConnection(apiToken, url, ignoreCertificateErrors);
             return FormValidation.ok(Messages.connection_success());
         } catch (IOException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
@@ -99,6 +98,13 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         for (GitLabConnection connection : connections) {
             connectionMap.put(connection.getName(), connection);
         }
+    }
+
+    public static boolean checkConnection(String token, String url, boolean ignoreCertificateErrors) throws IOException {
+        GitlabAPI testApi = GitlabAPI.connect(url, token);
+        testApi.ignoreCertificateErrors(ignoreCertificateErrors);
+        testApi.getProjects();
+        return true;
     }
 
     @Initializer(after = InitMilestone.JOB_LOADED)
