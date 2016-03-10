@@ -3,8 +3,6 @@ package com.dabsquared.gitlabjenkins;
 import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabCommitStatus;
 import org.gitlab.api.models.GitlabProject;
 import org.gitlab.api.models.GitlabUser;
 
@@ -62,17 +60,4 @@ public class GitLabMergeRequest extends GitLabRequest {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
-    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
-        try {
-            if (objectAttributes.getLastCommit() != null) {
-                return api.createCommitStatus(sourceProject, objectAttributes.getLastCommit().getId(), status, objectAttributes.getLastCommit().getId(), "Jenkins", targetUrl, null);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
 }
