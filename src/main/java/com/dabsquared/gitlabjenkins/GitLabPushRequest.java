@@ -5,7 +5,6 @@ import com.dabsquared.gitlabjenkins.data.Repository;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.gitlab.api.GitlabAPI;
-import org.gitlab.api.models.GitlabCommitStatus;
 import org.gitlab.api.models.GitlabProject;
 
 import java.io.IOException;
@@ -31,22 +30,11 @@ public class GitLabPushRequest extends GitLabRequest {
 
     private GitlabProject sourceProject = null;
 
-    public GitlabProject getSourceProject (GitLab api) throws IOException {
+    public GitlabProject getSourceProject(GitlabAPI gitlabAPI) throws IOException {
         if (sourceProject == null) {
-            sourceProject = api.instance().getProject(project_id);
+            sourceProject = gitlabAPI.getProject(project_id);
         }
         return sourceProject;
-    }
-
-    public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
-        try {
-            if(getLastCommit()!=null) {
-                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     private String before;
