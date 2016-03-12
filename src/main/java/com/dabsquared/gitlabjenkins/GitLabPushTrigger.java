@@ -279,7 +279,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "PUSH"));
         values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getCommits().get(0).getAuthor().getName()));
-        values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getCommits().get(0).getAuthor().getEmail()));
+        values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", Util.fixNull(req.getCommits().get(0).getAuthor().getEmail())));
         values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle", ""));
         values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", ""));
         values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", ""));
@@ -404,7 +404,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
         if (req.getObjectAttribute().getAuthor() != null) {
             values.put("gitlabUserName", new StringParameterValue("gitlabUserName", req.getObjectAttribute().getAuthor().getName()));
-            values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getObjectAttribute().getAuthor().getEmail()));
+            values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", Util.fixNull(req.getObjectAttribute().getAuthor().getEmail())));
         }
         values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle",  req.getObjectAttribute().getTitle()));
         values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", req.getObjectAttribute().getIid().toString()));
