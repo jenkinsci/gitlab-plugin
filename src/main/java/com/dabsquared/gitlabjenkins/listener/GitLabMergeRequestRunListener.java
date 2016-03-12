@@ -31,8 +31,8 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
         if (trigger != null && gitLabMergeCause != null) {
             String buildUrl = getBuildUrl(build);
             Result buildResult = build.getResult();
-            Integer projectId = gitLabMergeCause.getRequest().getObjectAttribute().getSourceProjectId();
-            Integer mergeRequestId = gitLabMergeCause.getRequest().getObjectAttribute().getId();
+            Integer projectId = gitLabMergeCause.getRequest().getObjectAttributes().getSourceProjectId();
+            Integer mergeRequestId = gitLabMergeCause.getRequest().getObjectAttributes().getId();
             if (buildResult == Result.SUCCESS) {
                 acceptMergeRequestIfNecessary(build, trigger, listener, projectId, mergeRequestId);
             }

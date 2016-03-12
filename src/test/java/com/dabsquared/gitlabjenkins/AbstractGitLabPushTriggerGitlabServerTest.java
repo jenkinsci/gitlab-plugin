@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.dabsquared.gitlabjenkins.model.PushHook;
 import hudson.plugins.git.GitSCM;
 import jenkins.triggers.SCMTriggerItem;
 import org.eclipse.jgit.lib.Config;
@@ -30,86 +31,86 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 	@Test
 	public void createRevisionParameterAction_pushBrandNewMasterBranchRequest() throws Exception {
 		// given
-		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushBrandNewMasterBranchRequest();
+		PushHook pushHook = gitLabPushRequestSamples.pushBrandNewMasterBranchRequest();
 
 		// when
 		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
-				pushRequest);
+				pushHook);
 
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
-		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertThat(revisionParameterAction.commit, is(pushHook.getAfter()));
 		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
 	public void createRevisionParameterAction_mergeRequestMergePushRequest() throws Exception {
 		// given
-		GitLabPushRequest pushRequest = gitLabPushRequestSamples.mergePushRequest();
+		PushHook pushHook = gitLabPushRequestSamples.mergePushRequest();
 
 		// when
 		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
-				pushRequest);
+				pushHook);
 
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
-		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertThat(revisionParameterAction.commit, is(pushHook.getAfter()));
 		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
 	public void createRevisionParameterAction_pushCommitRequest() throws Exception {
 		// given
-		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushCommitRequest();
+		PushHook pushHook = gitLabPushRequestSamples.pushCommitRequest();
 
 		// when
 		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
-				pushRequest);
+				pushHook);
 
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
-		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertThat(revisionParameterAction.commit, is(pushHook.getAfter()));
 		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
 	public void createRevisionParameterAction_pushNewBranchRequest() throws Exception {
 		// given
-		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushNewBranchRequest();
+		PushHook pushHook = gitLabPushRequestSamples.pushNewBranchRequest();
 
 		// when
 		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
-				pushRequest);
+				pushHook);
 
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
-		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertThat(revisionParameterAction.commit, is(pushHook.getAfter()));
 		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
 	public void createRevisionParameterAction_pushNewTagRequest() throws Exception {
 		// given
-		GitLabPushRequest pushRequest = gitLabPushRequestSamples.pushNewTagRequest();
+		PushHook pushHook = gitLabPushRequestSamples.pushNewTagRequest();
 
 		// when
 		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
-				pushRequest);
+				pushHook);
 
 		// then
 		assertThat(revisionParameterAction, is(notNullValue()));
-		assertThat(revisionParameterAction.commit, is(pushRequest.getAfter()));
+		assertThat(revisionParameterAction.commit, is(pushHook.getAfter()));
 		assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
 	}
 
 	@Test
 	public void doNotCreateRevisionParameterAction_deleteBranchRequest() throws Exception {
 		// given
-		GitLabPushRequest pushRequest = gitLabPushRequestSamples.deleteBranchRequest();
+		PushHook pushHook = gitLabPushRequestSamples.deleteBranchRequest();
 
 		// when
 		RevisionParameterAction revisionParameterAction = pushTrigger.createPushRequestRevisionParameter(job,
-				pushRequest);
+				pushHook);
 
 		// then
 		assertThat(revisionParameterAction, is(nullValue()));

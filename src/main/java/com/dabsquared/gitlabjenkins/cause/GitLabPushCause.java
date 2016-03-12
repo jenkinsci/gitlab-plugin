@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.cause;
 
 import com.dabsquared.gitlabjenkins.GitLabPushRequest;
+import com.dabsquared.gitlabjenkins.model.PushHook;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Run;
@@ -9,22 +10,70 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by daniel on 6/8/14.
+ * @author Robin Müller
  */
-public class GitLabPushCause extends GitLabWebHookCause<GitLabPushRequest> {
+public class GitLabPushCause extends GitLabWebHookCause<PushHook> {
 
-    private transient GitLabPushRequest pushRequest;
-
-    public GitLabPushCause(GitLabPushRequest pushRequest) {
-        this(pushRequest, "");
+    public GitLabPushCause(PushHook pushHook) {
+        this(pushHook, "");
     }
 
-    public GitLabPushCause(GitLabPushRequest pushRequest, File logFile) throws IOException {
-        super(pushRequest, logFile);
+    public GitLabPushCause(PushHook pushHook, File logFile) throws IOException {
+        super(pushHook, logFile);
     }
 
-    public GitLabPushCause(GitLabPushRequest pushRequest, String pollingLog) {
-        super(pushRequest, pollingLog);
+    public GitLabPushCause(PushHook pushHook, String pollingLog) {
+        super(pushHook, pollingLog);
+    }
+
+    @Override
+    protected String getBranch() {
+        return getRequest().getRef().replaceFirst("^refs/heads/", "");
+    }
+
+    @Override
+    protected String getSourceBranch() {
+        return getBranch();
+    }
+
+    @Override
+    protected ActionType getActionType() {
+        return ActionType.PUSH;
+    }
+
+    @Override
+    protected String getUserName() {
+        return getRequest().getUserName();
+    }
+
+    @Override
+    protected String getUserEmail() {
+        return getRequest().getUserEmail();
+    }
+
+    @Override
+    protected String getSourceRepoHomepage() {
+        return getRequest().getProject().getHomepage();
+    }
+
+    @Override
+    protected String getSourceRepoName() {
+        return getRequest().getProject().getName();
+    }
+
+    @Override
+    protected String getSourceRepoUrl() {
+        return getRequest().getProject().getUrl();
+    }
+
+    @Override
+    protected String getSourceRepoSshUrl() {
+        return getRequest().getProject().getSshUrl();
+    }
+
+    @Override
+    protected String getSourceRepoHttpUrl() {
+        return getRequest().getProject().getHttpUrl();
     }
 
     @Override
@@ -41,20 +90,12 @@ public class GitLabPushCause extends GitLabWebHookCause<GitLabPushRequest> {
         if (getRequest().getCommits().size() > 0) {
             return getRequest().getCommits().get(0).getAuthor().getName();
         } else {
-            return getRequest().getUser_name();
+            return getRequest().getUserName();
         }
     }
 
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
     public static void addAliases() {
         Run.XSTREAM2.addCompatibilityAlias("com.dabsquared.gitlabjenkins.GitLabPushCause", GitLabPushCause.class);
-    }
-
-    protected Object readResolve() {
-        if (getRequest() == null) {
-            return new GitLabPushCause(pushRequest);
-        } else {
-            return this;
-        }
     }
 }

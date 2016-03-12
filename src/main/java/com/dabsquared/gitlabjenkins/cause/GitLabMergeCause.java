@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.cause;
 
-import com.dabsquared.gitlabjenkins.GitLabMergeRequest;
-import com.dabsquared.gitlabjenkins.data.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.model.ObjectAttributes;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Run;
@@ -10,27 +10,75 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by daniel on 6/8/14.
+ * @author Robin Müller
  */
-public class GitLabMergeCause extends GitLabWebHookCause<GitLabMergeRequest> {
+public class GitLabMergeCause extends GitLabWebHookCause<MergeRequestHook> {
 
-    private transient GitLabMergeRequest mergeRequest;
-
-    public GitLabMergeCause(GitLabMergeRequest mergeRequest) {
-        this(mergeRequest, "");
+    public GitLabMergeCause(MergeRequestHook mergeRequestHook) {
+        this(mergeRequestHook, "");
     }
 
-    public GitLabMergeCause(GitLabMergeRequest mergeRequest, File logFile) throws IOException {
-        super(mergeRequest, logFile);
+    public GitLabMergeCause(MergeRequestHook mergeRequestHook, String pollingLog) {
+        super(mergeRequestHook, pollingLog);
     }
 
-    public GitLabMergeCause(GitLabMergeRequest mergeRequest, String pollingLog) {
-        super(mergeRequest, pollingLog);
+    public GitLabMergeCause(MergeRequestHook mergeRequestHook, File logFile) throws IOException {
+        super(mergeRequestHook, logFile);
+    }
+
+    @Override
+    protected String getBranch() {
+        return getRequest().getObjectAttributes().getSourceBranch();
+    }
+
+    @Override
+    protected String getSourceBranch() {
+        return getRequest().getObjectAttributes().getSourceBranch();
+    }
+
+    @Override
+    protected GitLabWebHookCause.ActionType getActionType() {
+        return ActionType.MERGE;
+    }
+
+    @Override
+    protected String getUserName() {
+        return getRequest().getObjectAttributes().getLastCommit().getAuthor().getName();
+    }
+
+    @Override
+    protected String getUserEmail() {
+        return getRequest().getObjectAttributes().getLastCommit().getAuthor().getEmail();
+    }
+
+    @Override
+    protected String getSourceRepoHomepage() {
+        return getRequest().getObjectAttributes().getSource().getHomepage();
+    }
+
+    @Override
+    protected String getSourceRepoName() {
+        return getRequest().getObjectAttributes().getSource().getName();
+    }
+
+    @Override
+    protected String getSourceRepoUrl() {
+        return getRequest().getObjectAttributes().getSource().getUrl();
+    }
+
+    @Override
+    protected String getSourceRepoSshUrl() {
+        return getRequest().getObjectAttributes().getSource().getSshUrl();
+    }
+
+    @Override
+    protected String getSourceRepoHttpUrl() {
+        return getRequest().getObjectAttributes().getSource().getHttpUrl();
     }
 
     @Override
     public String getShortDescription() {
-        ObjectAttributes objectAttribute = getRequest().getObjectAttribute();
+        ObjectAttributes objectAttribute = getRequest().getObjectAttributes();
         return "GitLab Merge Request #" + objectAttribute.getIid() + " : " + objectAttribute.getSourceBranch() +
                 " => " + objectAttribute.getTargetBranch();
     }
@@ -38,13 +86,5 @@ public class GitLabMergeCause extends GitLabWebHookCause<GitLabMergeRequest> {
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
     public static void addAliases() {
         Run.XSTREAM2.addCompatibilityAlias("com.dabsquared.gitlabjenkins.GitLabMergeCause", GitLabMergeCause.class);
-    }
-
-    protected Object readResolve() {
-        if (getRequest() == null) {
-            return new GitLabMergeCause(mergeRequest);
-        } else {
-            return this;
-        }
     }
 }
