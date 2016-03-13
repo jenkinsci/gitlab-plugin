@@ -282,6 +282,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         values.put("gitlabUserEmail", new StringParameterValue("gitlabUserEmail", req.getCommits().get(0).getAuthor().getEmail()));
         values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle", ""));
         values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", ""));
+        values.put("gitlabMergeRequestDescription", new StringParameterValue("gitlabMergeRequestDescription", ""));
         values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", ""));
 
         LOGGER.log(Level.INFO, "Trying to get name and URL for job: {0}", job.getFullName());
@@ -412,6 +413,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
         values.put("gitlabMergeRequestTitle", new StringParameterValue("gitlabMergeRequestTitle",  req.getObjectAttribute().getTitle()));
         values.put("gitlabMergeRequestId", new StringParameterValue("gitlabMergeRequestId", req.getObjectAttribute().getIid().toString()));
+        values.put("gitlabMergeRequestDescription", new StringParameterValue("gitlabMergeRequestDescription", req.getObjectAttribute().getDescription()));
         if (req.getObjectAttribute().getAssignee() != null) {
             values.put("gitlabMergeRequestAssignee", new StringParameterValue("gitlabMergeRequestAssignee", req.getObjectAttribute().getAssignee().getName()));
         }
