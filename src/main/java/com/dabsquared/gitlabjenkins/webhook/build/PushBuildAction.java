@@ -20,6 +20,8 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.dabsquared.gitlabjenkins.util.GsonUtil.toPrettyPrint;
+
 /**
  * @author Robin Müller
  */
@@ -31,6 +33,7 @@ public class PushBuildAction implements WebHookAction {
     private GitLabPushRequest pushRequest;
 
     public PushBuildAction(AbstractProject<?, ?> project, String json) {
+        LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
         this.pushRequest = GitLabPushRequest.create(json);
     }

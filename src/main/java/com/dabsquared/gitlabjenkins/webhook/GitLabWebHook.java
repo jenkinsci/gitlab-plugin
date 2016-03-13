@@ -11,6 +11,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -19,6 +21,8 @@ import java.io.IOException;
 
 @Extension
 public class GitLabWebHook implements UnprotectedRootAction {
+
+    private static final Logger LOGGER = Logger.getLogger(GitLabWebHook.class.getName());
 
     public static final String WEBHOOK_URL = "project";
 
@@ -37,6 +41,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
     }
 
     public void getDynamic(final String projectName, final StaplerRequest request, StaplerResponse response) {
+        LOGGER.log(Level.INFO, "WebHook called with url: {0}", request.getRequestURIWithQueryString());
         actionResolver.resolve(projectName, request).execute(response);
     }
 

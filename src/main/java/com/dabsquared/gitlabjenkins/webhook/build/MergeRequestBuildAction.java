@@ -15,6 +15,8 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.dabsquared.gitlabjenkins.util.GsonUtil.toPrettyPrint;
+
 /**
  * @author Robin Müller
  */
@@ -25,6 +27,7 @@ public class MergeRequestBuildAction implements WebHookAction {
     private GitLabMergeRequest mergeRequest;
 
     public MergeRequestBuildAction(AbstractProject<?, ?> project, String json) {
+        LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
         this.project = project;
         this.mergeRequest = GitLabMergeRequest.create(json);
     }

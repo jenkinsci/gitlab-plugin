@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
+import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
@@ -22,14 +23,19 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 /**
  * @author Robin Müller
  */
 public class ActionResolver {
 
+    private static final Logger LOGGER = Logger.getLogger(ActionResolver.class.getName());
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
@@ -49,6 +55,7 @@ public class ActionResolver {
         } else if (method.equals("GET")) {
             return onGet(project, restOfPath, request);
         }
+        LOGGER.log(Level.FINE, "Unsupported HTTP method: {0}", method);
         return new NoopAction();
     }
 
@@ -61,6 +68,7 @@ public class ActionResolver {
         } else if (commitMatcher.matches()) {
             return onGetCommitStatus(project, commitMatcher.group("sha1"), commitMatcher.group("statusJson"));
         }
+        LOGGER.log(Level.FINE, "Unknown GET request: {0}", restOfPath);
         return new NoopAction();
     }
 
@@ -88,6 +96,7 @@ public class ActionResolver {
         } else if (eventHeader.equals("Push Hook")) {
             return new PushBuildAction(project, requestBody);
         }
+        LOGGER.log(Level.FINE, "Unsupported event header: {0}", eventHeader);
         return new NoopAction();
     }
 
@@ -114,6 +123,7 @@ public class ActionResolver {
                         return (AbstractProject<?, ?>) item;
                     }
                 }
+                LOGGER.log(Level.FINE, "No project found: {0}, {1}", toArray(projectName, Joiner.on('/').join(restOfPathParts)));
                 return null;
             }
         });
