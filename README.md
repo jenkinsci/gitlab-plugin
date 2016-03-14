@@ -1,11 +1,10 @@
-gitlab-plugin
-=====================
+Overview
+======
+This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created.
 
-This plugin lets you use Jenkins with GitLab.
-
-Help Needed
-=====================
-* We are seeking help to maintain and improve this plugin. This includes keeping up a Changelog, releasing builds, reviewing merge requests, etc. If you are interested, please post to the Jenkins Developers list (https://groups.google.com/forum/#!forum/jenkinsci-dev) or ping autojack (@omehegan on Github) in #jenkins on irc.freenode.org IRC and ask for commit access.
+User support
+======
+If you have a problem or question about using the plugin, please create an issue in the GitHub project. You can also try chatting with us in #gitlab-plugin on the Freenode IRC network.
 
 Supported GitLab versions
 ======
@@ -135,16 +134,9 @@ These include:
 
 Help Needed
 =====================
-
 * `/projects/` - seems to be already used by Jenkins, A way to use this path would be awesome
 * `?token=XYZ` - Can not find a way to include a token parameter on an AbstractProject to security check without an extra plugin configuration
 * `/PROJECT_NAME/`  should really be /PROJECT_ID_NUMBER/ - Can not find a project id number on an AbstractProject to use here instead.
-
-
-Known Issues
-=====================
-* GitLab CI Merge Status pages says pending when there is no build scheduled, or the status is unknown. This is because I coded a workaround until this bug gets resolved: https://github.com/gitlabhq/gitlabhq/issues/7047
-
 
 Contributing
 =====================
@@ -154,12 +146,3 @@ Contributing
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
-
-Contributors
-=====================
-
-* @bass_rock, base ground work, primary developer.
-* @DABSquared, company sponsoring development.
-* @xaniasd
-
-Parts of this code inspired by https://github.com/timols/jenkins-gitlab-merge-request-builder-plugin
