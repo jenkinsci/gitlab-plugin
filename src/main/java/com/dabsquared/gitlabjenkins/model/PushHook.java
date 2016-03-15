@@ -1,11 +1,14 @@
 package com.dabsquared.gitlabjenkins.model;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,58 +41,74 @@ public class PushHook extends WebHook {
         this.userEmail = userEmail;
         this.userAvatar = userAvatar;
         this.projectId = projectId;
-        this.project = project == null ? new Project() : project;
-        this.repository = repository == null ? new Repository() : repository;
-        this.commits = commits == null ? new ArrayList<Commit>() : commits;
+        this.project = project;
+        this.repository = repository;
+        this.commits = commits;
         this.totalCommitsCount = totalCommitsCount;
     }
 
-    public String getBefore() {
-        return before;
+    PushHook() {
+        this(null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public String getAfter() {
-        return after;
+    public Optional<Project> optProject() {
+        return Optional.fromNullable(project);
     }
 
-    public String getRef() {
-        return ref;
+    public Optional<Integer> optProjectId() {
+        return Optional.fromNullable(projectId);
     }
 
-    public Integer getUserId() {
-        return userId;
+    public Optional<String> optUserAvatar() {
+        return Optional.fromNullable(userAvatar);
     }
 
-    public String getUserName() {
-        return userName;
+    public Optional<String> optUserEmail() {
+        return Optional.fromNullable(userEmail);
     }
 
-    public String getUserEmail() {
-        return userEmail;
+    public Optional<String> optUserName() {
+        return Optional.fromNullable(userName);
     }
 
-    public String getUserAvatar() {
-        return userAvatar;
+    public Optional<Integer> optUserId() {
+        return Optional.fromNullable(userId);
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Optional<String> optRef() {
+        return Optional.fromNullable(ref);
+    }
+
+    public Optional<String> optAfter() {
+        return Optional.fromNullable(after);
+    }
+
+    public Optional<String> optBefore() {
+        return Optional.fromNullable(before);
     }
 
     public Project getProject() {
-        return project;
+        return project == null ? new Project() : project;
+    }
+
+    public Optional<Repository> optRepository() {
+        return Optional.fromNullable(repository);
     }
 
     public Repository getRepository() {
-        return repository;
+        return repository == null ? new Repository() : repository;
+    }
+
+    public Optional<List<Commit>> optCommits() {
+        return Optional.fromNullable(commits);
     }
 
     public List<Commit> getCommits() {
-        return commits;
+        return commits == null ? Collections.<Commit>emptyList() : commits;
     }
 
-    public Integer getTotalCommitsCount() {
-        return totalCommitsCount;
+    public Optional<Integer> optTotalCommitsCount() {
+        return Optional.fromNullable(totalCommitsCount);
     }
 
     @Override

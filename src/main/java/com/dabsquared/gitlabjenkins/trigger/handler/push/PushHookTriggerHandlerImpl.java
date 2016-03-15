@@ -33,7 +33,8 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
 
     @Override
     protected boolean isCiSkip(PushHook hook) {
-        return !hook.getCommits().isEmpty() && hook.getCommits().get(0).getMessage().contains("[ci-skip]");
+        List<Commit> commits = hook.getCommits();
+        return !commits.isEmpty() && commits.get(0).optMessage().or("").contains("[ci-skip]");
     }
 
     protected Action[] createActions(Job<?, ?> job, PushHook hook) {
@@ -50,7 +51,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
 
     @Override
     protected String getTargetBranch(PushHook hook) {
-        return hook.getRef().replaceFirst("^refs/heads/", "");
+        return hook.optRef().or("").replaceFirst("^refs/heads/", "");
     }
 
     @Override
@@ -73,19 +74,19 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     private String retrieveRevisionToBuild(PushHook hook) throws NoRevisionToBuildException {
         if (hook.getCommits().isEmpty()) {
             if (isNewBranchPush(hook)) {
-                return hook.getAfter();
+                return hook.optAfter().orNull();
             } else {
                 throw new NoRevisionToBuildException();
             }
         } else {
             List<Commit> commits = hook.getCommits();
-            return commits.get(commits.size() - 1).getId();
+            return commits.get(commits.size() - 1).optId().orNull();
         }
     }
 
     private URIish retrieveUrIish(PushHook hook) {
         try {
-            return new URIish(hook.getRepository().getUrl());
+            return new URIish(hook.getRepository().optUrl().orNull());
         } catch (URISyntaxException e) {
             LOGGER.log(Level.WARNING, "could not parse URL");
             return null;
@@ -93,6 +94,6 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     private boolean isNewBranchPush(PushHook pushHook) {
-        return pushHook.getBefore() != null && pushHook.getBefore().contains("0000000000000000000000000000000000000000");
+        return pushHook.optBefore().or("").contains("0000000000000000000000000000000000000000");
     }
 }

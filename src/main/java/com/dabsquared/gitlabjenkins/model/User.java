@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.model;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -15,6 +17,15 @@ public class User {
     private final String email;
     private final String avatarUrl;
 
+    public static Supplier<User> nullUser() {
+        return new Supplier<User>() {
+            @Override
+            public User get() {
+                return new User();
+            }
+        };
+    }
+    
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
     public User(String name, String username, String email, String avatarUrl) {
         this.name = name;
@@ -27,20 +38,20 @@ public class User {
         this(null, null, null, null);
     }
 
-    public String getName() {
-        return name;
+    public Optional<String> optName() {
+        return Optional.fromNullable(name);
     }
 
-    public String getUsername() {
-        return username;
+    public Optional<String> optUsername() {
+        return Optional.fromNullable(username);
     }
 
-    public String getEmail() {
-        return email;
+    public Optional<String> optEmail() {
+        return Optional.fromNullable(email);
     }
 
-    public String getAvatarUrl() {
-        return avatarUrl;
+    public Optional<String> optAvatarUrl() {
+        return Optional.fromNullable(avatarUrl);
     }
 
     @Override

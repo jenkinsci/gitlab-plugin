@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import com.dabsquared.gitlabjenkins.model.Commit;
 import com.dabsquared.gitlabjenkins.model.PushHook;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -7,6 +8,7 @@ import hudson.model.Run;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Robin Müller
@@ -27,7 +29,7 @@ public class GitLabPushCause extends GitLabWebHookCause<PushHook> {
 
     @Override
     public String getBranch() {
-        return getRequest().getRef().replaceFirst("^refs/heads/", "");
+        return getRequest().optRef().or("").replaceFirst("^refs/heads/", "");
     }
 
     @Override
@@ -42,37 +44,37 @@ public class GitLabPushCause extends GitLabWebHookCause<PushHook> {
 
     @Override
     public String getUserName() {
-        return getRequest().getUserName();
+        return getRequest().optUserName().orNull();
     }
 
     @Override
     public String getUserEmail() {
-        return getRequest().getUserEmail();
+        return getRequest().optUserEmail().orNull();
     }
 
     @Override
     public String getSourceRepoHomepage() {
-        return getRequest().getProject().getHomepage();
+        return getRequest().getProject().optHomepage().orNull();
     }
 
     @Override
     public String getSourceRepoName() {
-        return getRequest().getProject().getName();
+        return getRequest().getProject().optName().orNull();
     }
 
     @Override
     public String getSourceRepoUrl() {
-        return getRequest().getProject().getUrl();
+        return getRequest().getProject().optUrl().orNull();
     }
 
     @Override
     public String getSourceRepoSshUrl() {
-        return getRequest().getProject().getSshUrl();
+        return getRequest().getProject().optSshUrl().orNull();
     }
 
     @Override
     public String getSourceRepoHttpUrl() {
-        return getRequest().getProject().getHttpUrl();
+        return getRequest().getProject().optHttpUrl().orNull();
     }
 
     @Override
@@ -86,10 +88,11 @@ public class GitLabPushCause extends GitLabWebHookCause<PushHook> {
     }
 
     private String retrievePushedBy() {
-        if (getRequest().getCommits().size() > 0) {
-            return getRequest().getCommits().get(0).getAuthor().getName();
+        List<Commit> commits = getRequest().getCommits();
+        if (commits.size() > 0) {
+            return commits.get(0).getAuthor().optName().orNull();
         } else {
-            return getRequest().getUserName();
+            return getRequest().optUserName().orNull();
         }
     }
 

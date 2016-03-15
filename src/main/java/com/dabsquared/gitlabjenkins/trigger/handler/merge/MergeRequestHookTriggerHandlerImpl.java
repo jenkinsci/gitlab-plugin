@@ -22,7 +22,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     @Override
     protected boolean isCiSkip(MergeRequestHook hook) {
-        return hook.getObjectAttributes().getDescription().contains("[ci-skip]");
+        return hook.getObjectAttributes().optDescription().or("").contains("[ci-skip]");
     }
 
     @Override
@@ -32,7 +32,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     @Override
     protected String getTargetBranch(MergeRequestHook hook) {
-        return hook.getObjectAttributes().getTargetBranch();
+        return hook.getObjectAttributes().optTargetBranch().orNull();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.model;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -44,52 +46,52 @@ public class Project {
         this(null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public String getName() {
-        return name;
+    public Optional<String> optName() {
+        return Optional.fromNullable(name);
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> optDescription() {
+        return Optional.fromNullable(description);
     }
 
-    public String getWebUrl() {
-        return webUrl;
+    public Optional<String> optWebUrl() {
+        return Optional.fromNullable(webUrl);
     }
 
-    public String getAvatarUrl() {
-        return avatarUrl;
+    public Optional<String> optAvatarUrl() {
+        return Optional.fromNullable(avatarUrl);
     }
 
-    public String getNamespace() {
-        return namespace;
+    public Optional<String> optNamespace() {
+        return Optional.fromNullable(namespace);
     }
 
-    public Integer getVisibilityLevel() {
-        return visibilityLevel;
+    public Optional<Integer> optVisibilityLevel() {
+        return Optional.fromNullable(visibilityLevel);
     }
 
-    public String getPathWithNamespace() {
-        return pathWithNamespace;
+    public Optional<String> optPathWithNamespace() {
+        return Optional.fromNullable(pathWithNamespace);
     }
 
-    public String getDefaultBranch() {
-        return defaultBranch;
+    public Optional<String> optDefaultBranch() {
+        return Optional.fromNullable(defaultBranch);
     }
 
-    public String getHomepage() {
-        return homepage;
+    public Optional<String> optHomepage() {
+        return Optional.fromNullable(homepage);
     }
 
-    public String getUrl() {
-        return url;
+    public Optional<String> optUrl() {
+        return Optional.fromNullable(url);
     }
 
-    public String getSshUrl() {
-        return sshUrl;
+    public Optional<String> optSshUrl() {
+        return Optional.fromNullable(sshUrl);
     }
 
-    public String getHttpUrl() {
-        return httpUrl;
+    public Optional<String> optHttpUrl() {
+        return Optional.fromNullable(httpUrl);
     }
 
     @Override

@@ -3,13 +3,13 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.model.ObjectAttributes;
 import com.dabsquared.gitlabjenkins.model.State;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import com.dabsquared.gitlabjenkins.util.GsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.ParametersAction;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import org.apache.commons.lang.StringUtils;
@@ -36,7 +36,7 @@ public class MergeRequestBuildAction implements WebHookAction {
     }
 
     public void execute(StaplerResponse response) {
-        State state = mergeRequestHook.getObjectAttributes().getState();
+        State state = mergeRequestHook.getObjectAttributes().optState().orNull();
         if (state == State.opened || state == State.reopened) {
             if (lastCommitNotYetBuild()) {
                 ACL.impersonate(ACL.SYSTEM, new Runnable() {
@@ -53,9 +53,10 @@ public class MergeRequestBuildAction implements WebHookAction {
     }
 
     private boolean lastCommitNotYetBuild() {
-        if (mergeRequestHook.getObjectAttributes().getLastCommit() != null) {
-            AbstractBuild<?, ?> mergeBuild = BuildUtil.getBuildBySHA1(project, mergeRequestHook.getObjectAttributes().getLastCommit().getId(), true);
-            if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), mergeRequestHook.getObjectAttributes().getTargetBranch())) {
+        ObjectAttributes objectAttributes = mergeRequestHook.getObjectAttributes();
+        if (objectAttributes.optLastCommit().isPresent()) {
+            AbstractBuild<?, ?> mergeBuild = BuildUtil.getBuildBySHA1(project, objectAttributes.optLastCommit().get().optId().get(), true);
+            if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.optTargetBranch().get())) {
                 LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
                 return false;
             }

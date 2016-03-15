@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins.listener;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.model.ObjectAttributes;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
@@ -31,8 +32,9 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
         if (trigger != null && gitLabMergeCause != null) {
             String buildUrl = getBuildUrl(build);
             Result buildResult = build.getResult();
-            Integer projectId = gitLabMergeCause.getRequest().getObjectAttributes().getSourceProjectId();
-            Integer mergeRequestId = gitLabMergeCause.getRequest().getObjectAttributes().getId();
+            ObjectAttributes objectAttributes = gitLabMergeCause.getRequest().getObjectAttributes();
+            Integer projectId = objectAttributes.optSourceProjectId().orNull();
+            Integer mergeRequestId = objectAttributes.optId().orNull();
             if (buildResult == Result.SUCCESS) {
                 acceptMergeRequestIfNecessary(build, trigger, listener, projectId, mergeRequestId);
             }

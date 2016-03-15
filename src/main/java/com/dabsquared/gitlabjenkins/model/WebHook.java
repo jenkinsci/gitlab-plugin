@@ -1,6 +1,6 @@
 package com.dabsquared.gitlabjenkins.model;
 
-import net.karneim.pojobuilder.GeneratePojoBuilder;
+import com.google.common.base.Optional;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -8,17 +8,16 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * @author Robin Müller
  */
-public class WebHook {
+public abstract class WebHook {
 
     private final String objectKind;
 
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public WebHook(String objectKind) {
-        this.objectKind = objectKind == null ? "" : objectKind;
+    protected WebHook(String objectKind) {
+        this.objectKind = objectKind;
     }
 
-    public String getObjectKind() {
-        return objectKind;
+    public Optional<String> optObjectKind() {
+        return Optional.fromNullable(objectKind);
     }
 
     @Override

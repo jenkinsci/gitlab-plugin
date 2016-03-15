@@ -19,6 +19,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.dabsquared.gitlabjenkins.model.Repository.nullRepository;
 import static com.dabsquared.gitlabjenkins.model.builder.generated.CommitBuilder.commit;
 import static com.dabsquared.gitlabjenkins.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
 import static com.dabsquared.gitlabjenkins.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
@@ -41,7 +42,7 @@ public class PushBuildAction implements WebHookAction {
     }
 
     public void execute(StaplerResponse response) {
-        String repositoryUrl = pushHook.getRepository().getUrl();
+        String repositoryUrl = pushHook.getRepository().optUrl().orNull();
         if (repositoryUrl == null) {
             LOGGER.log(Level.WARNING, "No repository url found.");
             return;
@@ -55,7 +56,7 @@ public class PushBuildAction implements WebHookAction {
 
                     if (!trigger.getTriggerOpenMergeRequestOnPush().equals("never")) {
                         // Fetch and build open merge requests with the same source branch
-                        buildOpenMergeRequests(trigger, pushHook.getProjectId(), pushHook.getRef());
+                        buildOpenMergeRequests(trigger, pushHook.optProjectId().orNull(), pushHook.optRef().orNull());
                     }
                 }
             }

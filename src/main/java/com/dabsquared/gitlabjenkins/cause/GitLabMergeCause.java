@@ -8,7 +8,6 @@ import hudson.model.Run;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Robin Müller
@@ -29,12 +28,12 @@ public class GitLabMergeCause extends GitLabWebHookCause<MergeRequestHook> {
 
     @Override
     public String getBranch() {
-        return getRequest().getObjectAttributes().getSourceBranch();
+        return getObjectAttributes().optSourceBranch().orNull();
     }
 
     @Override
     public String getSourceBranch() {
-        return getRequest().getObjectAttributes().getSourceBranch();
+        return getObjectAttributes().optSourceBranch().orNull();
     }
 
     @Override
@@ -44,80 +43,85 @@ public class GitLabMergeCause extends GitLabWebHookCause<MergeRequestHook> {
 
     @Override
     public String getUserName() {
-        return getRequest().getObjectAttributes().getLastCommit().getAuthor().getName();
+        return getObjectAttributes().getLastCommit().getAuthor().optName().orNull();
     }
 
     @Override
     public String getUserEmail() {
-        return getRequest().getObjectAttributes().getLastCommit().getAuthor().getEmail();
+        return getObjectAttributes().getLastCommit().getAuthor().optEmail().orNull();
     }
 
     @Override
     public String getSourceRepoHomepage() {
-        return getRequest().getObjectAttributes().getSource().getHomepage();
+        return getObjectAttributes().getSource().optHomepage().orNull();
     }
 
     @Override
     public String getSourceRepoName() {
-        return getRequest().getObjectAttributes().getSource().getName();
+        return getObjectAttributes().getSource().optName().orNull();
     }
 
     @Override
     public String getSourceRepoUrl() {
-        return getRequest().getObjectAttributes().getSource().getUrl();
+        return getObjectAttributes().getSource().optUrl().orNull();
     }
 
     @Override
     public String getSourceRepoSshUrl() {
-        return getRequest().getObjectAttributes().getSource().getSshUrl();
+        return getObjectAttributes().getSource().optSshUrl().orNull();
     }
 
     @Override
     public String getSourceRepoHttpUrl() {
-        return getRequest().getObjectAttributes().getSource().getHttpUrl();
+        return getObjectAttributes().getSource().optHttpUrl().orNull();
     }
 
     @Override
     public String getShortDescription() {
-        ObjectAttributes objectAttribute = getRequest().getObjectAttributes();
-        return "GitLab Merge Request #" + objectAttribute.getIid() + " : " + objectAttribute.getSourceBranch() +
-                " => " + objectAttribute.getTargetBranch();
+        ObjectAttributes objectAttribute = getObjectAttributes();
+        return "GitLab Merge Request #" + objectAttribute.optIid().orNull() + " : " + objectAttribute.optSourceBranch().orNull() +
+                " => " + objectAttribute.optTargetBranch().orNull();
     }
 
     @Override
     public String getMergeRequestTitle() {
-        return getRequest().getObjectAttributes().getTitle();
+        return getObjectAttributes().optTitle().orNull();
     }
 
     @Override
     public String getMergeRequestDescription() {
-        return getRequest().getObjectAttributes().getDescription();
+        return getObjectAttributes().optDescription().orNull();
     }
 
     @Override
     public String getMergeRequestId() {
-        return getRequest().getObjectAttributes().getId() == null ? null : getRequest().getObjectAttributes().getId().toString();
+        return getObjectAttributes().optId().isPresent() ? getObjectAttributes().optId().toString() : null;
     }
 
     @Override
     public String getTargetBranch() {
-        return getRequest().getObjectAttributes().getTargetBranch();
+        return getObjectAttributes().optTargetBranch().orNull();
     }
 
     @Override
     public String getTargetRepoName() {
-        return getRequest().getObjectAttributes().getTarget().getName();
+        return getObjectAttributes().getTarget().optName().orNull();
     }
 
     @Override
     public String getTargetRepoSshUrl() {
-        return getRequest().getObjectAttributes().getTarget().getSshUrl();
+        return getObjectAttributes().getTarget().optSshUrl().orNull();
     }
 
     @Override
     public String getTargetRepoHttpUrl() {
-        return getRequest().getObjectAttributes().getTarget().getHttpUrl();
+        return getObjectAttributes().getTarget().optHttpUrl().orNull();
     }
+
+    private ObjectAttributes getObjectAttributes() {
+        return getRequest().getObjectAttributes();
+    }
+
 
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
     public static void addAliases() {

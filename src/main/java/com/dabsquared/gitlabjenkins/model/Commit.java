@@ -1,14 +1,17 @@
 package com.dabsquared.gitlabjenkins.model;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static com.dabsquared.gitlabjenkins.model.User.nullUser;
 
 /**
  * @author Robin Müller
@@ -31,45 +34,61 @@ public class Commit {
         this.timestamp = timestamp;
         this.url = url;
         this.author = author;
-        this.added = added == null ? Collections.<String>emptyList() : added;
-        this.modified = modified == null ? Collections.<String>emptyList() : modified;
-        this.removed = removed == null ? Collections.<String>emptyList() : removed;
+        this.added = added;
+        this.modified = modified;
+        this.removed = removed;
     }
 
     Commit() {
         this(null, null, null, null, null, null, null, null);
     }
 
-    public String getId() {
-        return id;
+    public Optional<String> optId() {
+        return Optional.fromNullable(id);
     }
 
-    public String getMessage() {
-        return message;
+    public Optional<String> optMessage() {
+        return Optional.fromNullable(message);
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Optional<Date> optTimestamp() {
+        return Optional.fromNullable(timestamp);
     }
 
-    public String getUrl() {
-        return url;
+    public Optional<String> optUrl() {
+        return Optional.fromNullable(url);
+    }
+
+    public Optional<User> optAuthor() {
+        return Optional.fromNullable(author);
     }
 
     public User getAuthor() {
-        return author;
+        return author == null ? new User() : author;
+    }
+
+    public Optional<List<String>> optAdded() {
+        return Optional.fromNullable(added);
     }
 
     public List<String> getAdded() {
-        return added;
+        return added == null ? Collections.<String>emptyList() : added;
+    }
+
+    public Optional<List<String>> optModified() {
+        return Optional.fromNullable(modified);
     }
 
     public List<String> getModified() {
-        return modified;
+        return modified == null ? Collections.<String>emptyList() : modified;
+    }
+
+    public Optional<List<String>> optRemoved() {
+        return Optional.fromNullable(removed);
     }
 
     public List<String> getRemoved() {
-        return removed;
+        return removed == null ? Collections.<String>emptyList() : removed;
     }
 
     @Override

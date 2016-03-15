@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.model;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -18,6 +20,15 @@ public class Repository {
     private final String gitHttpUrl;
     private final Integer visibilityLevel;
 
+    public static Supplier<Repository> nullRepository() {
+        return new Supplier<Repository>() {
+            @Override
+            public Repository get() {
+                return new Repository();
+            }
+        };
+    }
+    
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
     public Repository(String name, String description, String url, String homepage, String gitSshUrl, String gitHttpUrl, Integer visibilityLevel) {
         this.name = name;
@@ -33,32 +44,32 @@ public class Repository {
         this(null, null, null, null, null, null, null);
     }
 
-    public String getName() {
-        return name;
+    public Optional<String> optName() {
+        return Optional.fromNullable(name);
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> optDescription() {
+        return Optional.fromNullable(description);
     }
 
-    public String getUrl() {
-        return url;
+    public Optional<String> optUrl() {
+        return Optional.fromNullable(url);
     }
 
-    public String getHomepage() {
-        return homepage;
+    public Optional<String> optHomepage() {
+        return Optional.fromNullable(homepage);
     }
 
-    public String getGitSshUrl() {
-        return gitSshUrl;
+    public Optional<String> optGitSshUrl() {
+        return Optional.fromNullable(gitSshUrl);
     }
 
-    public String getGitHttpUrl() {
-        return gitHttpUrl;
+    public Optional<String> optGitHttpUrl() {
+        return Optional.fromNullable(gitHttpUrl);
     }
 
-    public Integer getVisibilityLevel() {
-        return visibilityLevel;
+    public Optional<Integer> optVisibilityLevel() {
+        return Optional.fromNullable(visibilityLevel);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.dabsquared.gitlabjenkins.model;
 
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -19,26 +21,46 @@ public class MergeRequestHook extends WebHook {
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
     public MergeRequestHook(String objectKind, User user, Project project, ObjectAttributes objectAttributes, Repository repository) {
         super(objectKind);
-        this.user = user == null ? new User() : user;
-        this.project = project == null ? new Project() : project;
-        this.objectAttributes = objectAttributes == null ? new ObjectAttributes() : objectAttributes;
-        this.repository = repository == null ? new Repository() : repository;
+        this.user = user;
+        this.project = project;
+        this.objectAttributes = objectAttributes;
+        this.repository = repository;
+    }
+
+    MergeRequestHook() {
+        this(null, null, null, null, null);
+    }
+
+    public Optional<User> optUser() {
+        return Optional.fromNullable(user);
     }
 
     public User getUser() {
-        return user;
+        return user == null ? new User() : user;
+    }
+
+    public Optional<Project> optProject() {
+        return Optional.fromNullable(project);
     }
 
     public Project getProject() {
-        return project;
+        return project == null ? new Project() : project;
+    }
+
+    public Optional<ObjectAttributes> optObjectAttributes() {
+        return Optional.fromNullable(objectAttributes);
     }
 
     public ObjectAttributes getObjectAttributes() {
-        return objectAttributes;
+        return objectAttributes == null ? new ObjectAttributes() : objectAttributes;
+    }
+
+    public Optional<Repository> optRepository() {
+        return Optional.fromNullable(repository);
     }
 
     public Repository getRepository() {
-        return repository;
+        return repository == null ? new Repository() : repository;
     }
 
     @Override

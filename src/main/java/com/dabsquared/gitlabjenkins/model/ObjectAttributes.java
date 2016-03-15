@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.model;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -32,7 +34,7 @@ public class ObjectAttributes {
     private final String url;
     private final Action action;
     private final Boolean workInProgress;
-
+    
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
     public ObjectAttributes(Integer id, Integer iid, String sourceBranch, String targetBranch, Integer sourceProjectId, Integer targetProjectId,
                             Integer authorId, Integer assigneeId, String title, Date createdAt, Date updatedAt, State state, String description,
@@ -50,9 +52,9 @@ public class ObjectAttributes {
         this.updatedAt = updatedAt;
         this.state = state;
         this.description = description;
-        this.source = source == null ? new Project() : source;
-        this.target = target == null ? new Project() : target;
-        this.lastCommit = lastCommit == null ? new Commit() : lastCommit;
+        this.source = source;
+        this.target = target;
+        this.lastCommit = lastCommit;
         this.mergeStatus = mergeStatus;
         this.url = url;
         this.action = action;
@@ -63,84 +65,96 @@ public class ObjectAttributes {
         this(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public Integer getId() {
-        return id;
+    public Optional<Integer> optId() {
+        return Optional.fromNullable(id);
     }
 
-    public Integer getIid() {
-        return iid;
+    public Optional<Integer> optIid() {
+        return Optional.fromNullable(iid);
     }
 
-    public String getSourceBranch() {
-        return sourceBranch;
+    public Optional<String> optSourceBranch() {
+        return Optional.fromNullable(sourceBranch);
     }
 
-    public String getTargetBranch() {
-        return targetBranch;
+    public Optional<String> optTargetBranch() {
+        return Optional.fromNullable(targetBranch);
     }
 
-    public Integer getSourceProjectId() {
-        return sourceProjectId;
+    public Optional<Integer> optSourceProjectId() {
+        return Optional.fromNullable(sourceProjectId);
     }
 
-    public Integer getTargetProjectId() {
-        return targetProjectId;
+    public Optional<Integer> optTargetProjectId() {
+        return Optional.fromNullable(targetProjectId);
     }
 
-    public Integer getAuthorId() {
-        return authorId;
+    public Optional<Integer> optAuthorId() {
+        return Optional.fromNullable(authorId);
     }
 
-    public Integer getAssigneeId() {
-        return assigneeId;
+    public Optional<Integer> optAssigneeId() {
+        return Optional.fromNullable(assigneeId);
     }
 
-    public String getTitle() {
-        return title;
+    public Optional<String> optTitle() {
+        return Optional.fromNullable(title);
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Optional<Date> optCreatedAt() {
+        return Optional.fromNullable(createdAt);
     }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
+    public Optional<Date> optUpdatedAt() {
+        return Optional.fromNullable(updatedAt);
     }
 
-    public State getState() {
-        return state;
+    public Optional<State> optState() {
+        return Optional.fromNullable(state);
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> optDescription() {
+        return Optional.fromNullable(description);
+    }
+
+    public Optional<Project> optSource() {
+        return Optional.fromNullable(source);
     }
 
     public Project getSource() {
-        return source;
+        return source == null ? new Project() : source;
+    }
+
+    public Optional<Project> optTarget() {
+        return Optional.fromNullable(target);
     }
 
     public Project getTarget() {
-        return target;
+        return target == null ? new Project() : target;
+    }
+
+    public Optional<Commit> optLastCommit() {
+        return Optional.fromNullable(lastCommit);
     }
 
     public Commit getLastCommit() {
-        return lastCommit;
+        return lastCommit == null ? new Commit() : lastCommit;
     }
 
-    public String getMergeStatus() {
-        return mergeStatus;
+    public Optional<String> optMergeStatus() {
+        return Optional.fromNullable(mergeStatus);
     }
 
-    public String getUrl() {
-        return url;
+    public Optional<String> optUrl() {
+        return Optional.fromNullable(url);
     }
 
-    public Action getAction() {
-        return action;
+    public Optional<Action> optAction() {
+        return Optional.fromNullable(action);
     }
 
-    public Boolean getWorkInProgress() {
-        return workInProgress;
+    public Optional<Boolean> optWorkInProgress() {
+        return Optional.fromNullable(workInProgress);
     }
 
     @Override
