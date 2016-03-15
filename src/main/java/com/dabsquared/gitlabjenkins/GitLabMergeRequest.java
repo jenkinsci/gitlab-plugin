@@ -66,7 +66,7 @@ public class GitLabMergeRequest extends GitLabRequest {
     public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
         try {
             if (objectAttributes.getLastCommit() != null) {
-                return api.createCommitStatus(sourceProject, objectAttributes.getLastCommit().getId(), status, objectAttributes.getLastCommit().getId(), "Jenkins", targetUrl, null);
+                return api.createCommitStatus(sourceProject, objectAttributes.getLastCommit().getId(), status, objectAttributes.getSourceBranch(), "Jenkins", targetUrl, null);
             }
         } catch (IOException e) {
             e.printStackTrace();
