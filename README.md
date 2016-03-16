@@ -1,11 +1,10 @@
-gitlab-plugin
-=====================
+Overview
+======
+This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created.
 
-This plugin lets you use Jenkins with GitLab.
-
-Help Needed
-=====================
-* We are seeking help to maintain and improve this plugin. This includes keeping up a Changelog, releasing builds, reviewing merge requests, etc. If you are interested, please post to the Jenkins Developers list (https://groups.google.com/forum/#!forum/jenkinsci-dev) or ping autojack (@omehegan on Github) in #jenkins on irc.freenode.org IRC and ask for commit access.
+User support
+======
+If you have a problem or question about using the plugin, please create an issue in the GitHub project. You can also try chatting with us in #gitlab-plugin on the Freenode IRC network.
 
 Supported GitLab versions
 ======
@@ -86,7 +85,7 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
 ### GitLab Configuration (>= 8.1)
 GitLab 8.1 uses the same configuration as GitLab 8.0
 * GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
-* Configure access to GitLab as described above in "Configure access to GitLab"
+* Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
 ### Forked repositories
 If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
@@ -135,31 +134,27 @@ These include:
 
 Help Needed
 =====================
-
 * `/projects/` - seems to be already used by Jenkins, A way to use this path would be awesome
 * `?token=XYZ` - Can not find a way to include a token parameter on an AbstractProject to security check without an extra plugin configuration
 * `/PROJECT_NAME/`  should really be /PROJECT_ID_NUMBER/ - Can not find a project id number on an AbstractProject to use here instead.
 
+Contributing to the Plugin
+==========================
 
-Known Issues
-=====================
-* GitLab CI Merge Status pages says pending when there is no build scheduled, or the status is unknown. This is because I coded a workaround until this bug gets resolved: https://github.com/gitlabhq/gitlabhq/issues/7047
+Plugin source code is hosted on [Github](https://github.com/jenkinsci/gitlab-plugin).
+New feature proposals and bug fix proposals should be submitted as
+[Github pull requests](https://help.github.com/articles/creating-a-pull-request).
+Fork the repository on Github, prepare your change on your forked
+copy, and submit a pull request (see [here](https://github.com/jenkinsci/gitlab-plugin/pulls) for open pull requests). Your pull request will be evaluated by the [Cloudbees Jenkins job](https://jenkins.ci.cloudbees.com/job/plugins/job/gitlab-plugin/).
 
+If you are adding new features please make sure that they support the Jenkins Workflow Plugin.
+See [here](https://github.com/jenkinsci/workflow-plugin/blob/master/COMPATIBILITY.md) for some information.
 
-Contributing
-=====================
-
-1. Fork it ( https://github.com/[my-github-username]/gitlab-plugin/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
-
-Contributors
-=====================
-
-* @bass_rock, base ground work, primary developer.
-* @DABSquared, company sponsoring development.
-* @xaniasd
-
-Parts of this code inspired by https://github.com/timols/jenkins-gitlab-merge-request-builder-plugin
+Before submitting your change make sure that:
+* new features are provided with tests
+* refactored code is provided with regression tests
+* the code formatting follows the plugin standard
+* imports are organised
+* you updated the help docs
+* you updated the README
+* you have used findbugs to see if you haven't introduced any new warnings.
