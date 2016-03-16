@@ -8,6 +8,8 @@ ChangeLog
 * #216 Fix NPE when author email is not available
 * #235 mention required permissions for commit status API
 * #225 Enhance README section Contribution
+* #236 Fix the usage of CommitStatus
+* #215 Fix error "failed to communicate with gitlab server ..." when try to rebuild open MRs
 
 1.1.30 + 1.1.31
 =====================
