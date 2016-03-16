@@ -399,11 +399,17 @@ public class GitLabWebHook implements UnprotectedRootAction {
                                             LOGGER.log(Level.INFO, "Skipping MR " + mr.getTitle() + " due to ci-skip.");
                                             continue;
                                         }
-					GitlabBranch branch = api.instance().getBranch(api.instance().getProject(projectId), mr.getSourceBranch());
+
+					Integer srcProjectId = projectId;
+					if (!projectRef.endsWith(mr.getSourceBranch())) {
+						srcProjectId = mr.getSourceProjectId();
+					}
+
+					GitlabBranch branch = api.instance().getBranch(api.instance().getProject(srcProjectId), mr.getSourceBranch());
                     LastCommit lastCommit = new LastCommit();
                     lastCommit.setId(branch.getCommit().getId());
                     lastCommit.setMessage(branch.getCommit().getMessage());
-                    lastCommit.setUrl(GitlabProject.URL + "/" + projectId + "/repository" + GitlabCommit.URL + "/"
+                    lastCommit.setUrl(GitlabProject.URL + "/" + srcProjectId + "/repository" + GitlabCommit.URL + "/"
                             + branch.getCommit().getId());
 
 					LOGGER.log(Level.FINE,
