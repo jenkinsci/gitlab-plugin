@@ -85,7 +85,7 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
 ### GitLab Configuration (>= 8.1)
 GitLab 8.1 uses the same configuration as GitLab 8.0
 * GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
-* Configure access to GitLab as described above in "Configure access to GitLab"
+* Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
 ### Forked repositories
 If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
