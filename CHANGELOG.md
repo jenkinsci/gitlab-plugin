@@ -1,6 +1,28 @@
 ChangeLog
 =====================
 
+1.1.29
+=====================
+* #127 Added support for the GitLab 8.1 commit API
+* #128 Add two variable gitlabUserName and gitlabUserEmail
+* #129 Assorted minor fixes for merge requests
+* #139 Fix for issue #125: use reponame for branch caching
+* #140 Added missing documentation 8.1 CI features
+* #141 Refactoring data objects to own package
+* #146 Fixed Documentation after #128
+* #149 New feature: Add support for regex based filtering and more
+* #151 Update readme to reflect support for the commit status API
+* #154 8.1 is now a supported version
+* #163 Bugfix for issue #160: allow merge requests to different branches from one commit
+* #164 Not reporting build status 8.1+
+* #180 Parameter gitlabMergeRequestTitle is always blank
+* #182 Status to canceled instead of failed if Jenkins build is aborted
+* #195 Fix NPE if there is no assignee of the MR
+* #197 Reorganize README to be more clear about config for different versions of GitLab
+* #205 closes #183 Plugin not working with multiple SCM configuration
+* #206 Fix Jenkins Workflow support in build trigger code
+* #209 Don't ignore push builds when responding to status query
+
 1.1.28
 =====================
 * (#119 - @mfriedenhagen) Add buildUrl in the description of the merge (shown in GitLab)
