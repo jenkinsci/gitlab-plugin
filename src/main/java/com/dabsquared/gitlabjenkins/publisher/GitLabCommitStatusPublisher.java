@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import hudson.Extension;
 import hudson.Launcher;
@@ -39,8 +40,7 @@ public class GitLabCommitStatusPublisher extends Notifier {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         GitlabProject buildProject = retrieveGitlabProject(build, listener);
         if (buildProject != null) {
-            String commitHash = getBuildRevision(build);
-            updateCommitStatus(build, listener, buildProject, commitHash, "running", getBuildUrl(build));
+            updateCommitStatus(build, listener, buildProject, "running");
         }
         return true;
     }
@@ -49,15 +49,13 @@ public class GitLabCommitStatusPublisher extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         GitlabProject buildProject = retrieveGitlabProject(build, listener);
         if (buildProject != null) {
-            String commitHash = getBuildRevision(build);
-            String buildUrl = getBuildUrl(build);
             Result buildResult = build.getResult();
             if (buildResult == Result.SUCCESS) {
-                updateCommitStatus(build, listener, buildProject, commitHash, "success", buildUrl);
+                updateCommitStatus(build, listener, buildProject, "success");
             } else if (buildResult == Result.ABORTED) {
-                updateCommitStatus(build, listener, buildProject, commitHash, "canceled", buildUrl);
+                updateCommitStatus(build, listener, buildProject, "canceled");
             } else {
-                updateCommitStatus(build, listener, buildProject, commitHash, "failed", buildUrl);
+                updateCommitStatus(build, listener, buildProject, "failed");
             }
         }
         return true;
@@ -67,17 +65,22 @@ public class GitLabCommitStatusPublisher extends Notifier {
         return build.getAction(BuildData.class).getLastBuiltRevision().getSha1String();
     }
 
-    private void updateCommitStatus(AbstractBuild<?, ?> build, BuildListener listener, GitlabProject buildProject, String commitHash, String state, String buildUrl) {
+    private void updateCommitStatus(AbstractBuild<?, ?> build, BuildListener listener, GitlabProject buildProject, String state) {
         try {
             GitlabAPI client = getClient(build);
             if (client == null) {
                 listener.getLogger().println("No GitLab connection configured");
             } else {
-                client.createCommitStatus(buildProject, commitHash, state, commitHash, "jenkins", buildUrl, null);
+                client.createCommitStatus(buildProject, getBuildRevision(build), state, getBuildBranch(build), "jenkins", getBuildUrl(build), null);
             }
         } catch (IOException e) {
             listener.getLogger().println("Failed to update Gitlab commit status");
         }
+    }
+
+    private String getBuildBranch(AbstractBuild<?, ?> build) {
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        return cause == null ? null : cause.getSourceBranch();
     }
 
     private String getBuildUrl(AbstractBuild<?, ?> build) {
