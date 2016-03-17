@@ -1,7 +1,7 @@
 ChangeLog
 =====================
 
-1.1.32 (unreleased)
+1.1.32
 =====================
 * #218 license within pom.xml and LICENSE is different
 * #226 Add description to parameters actions
