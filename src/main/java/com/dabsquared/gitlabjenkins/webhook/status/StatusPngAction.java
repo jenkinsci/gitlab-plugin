@@ -1,29 +1,23 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.security.ACL;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.util.HttpResponses;
-import jenkins.model.Jenkins;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerResponse;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 
 /**
  * @author Robin Müller
  */
 class StatusPngAction extends BuildStatusAction {
-    protected StatusPngAction(AbstractProject<?, ?> project, AbstractBuild<?, ?> build) {
+    protected StatusPngAction(Job<?, ?> project, Run<?, ?> build) {
         super(project, build);
     }
 
     @Override
-    protected void writeStatusBody(StaplerResponse response, AbstractBuild<?, ?> build, BuildStatus status) {
+    protected void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status) {
         try {
             response.setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
             response.setHeader("Cache-Control", "no-cache, private");

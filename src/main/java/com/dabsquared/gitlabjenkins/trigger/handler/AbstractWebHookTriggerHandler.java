@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.model.WebHook;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.Action;
 import hudson.model.Job;
@@ -17,13 +18,13 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
 
     @Override
-    public void handle(WebHookTriggerConfig config, Job<?, ?> job, H hook) {
-        if (config.getCiSkip() && isCiSkip(hook)) {
+    public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter) {
+        if (ciSkip && isCiSkip(hook)) {
             LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
             return;
         }
 
-        if (config.getBranchFilter().isBranchAllowed(getTargetBranch(hook))) {
+        if (branchFilter.isBranchAllowed(getTargetBranch(hook))) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
             scheduleBuild(job, createActions(job, hook));
         }

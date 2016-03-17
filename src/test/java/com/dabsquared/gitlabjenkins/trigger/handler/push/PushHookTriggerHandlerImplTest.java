@@ -62,9 +62,9 @@ public class PushHookTriggerHandlerImplTest {
                 return true;
             }
         });
-        pushHookTriggerHandler.handle(webHookTriggerConfig(true), project, pushHook()
+        pushHookTriggerHandler.handle(project, pushHook()
                 .withCommits(Collections.singletonList(commit().withMessage("[ci-skip]").build()))
-                .build());
+                .build(), webHookTriggerConfig(true).getCiSkip(), webHookTriggerConfig(true).getBranchFilter());
 
         buildTriggered.block(1000);
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -90,12 +90,12 @@ public class PushHookTriggerHandlerImplTest {
                 return true;
             }
         });
-        pushHookTriggerHandler.handle(webHookTriggerConfig(true), project, pushHook()
+        pushHookTriggerHandler.handle(project, pushHook()
                 .withBefore("0000000000000000000000000000000000000000")
                 .withAfter(commit.name())
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
                 .withRepository(repository().withUrl(repositoryUrl).build())
-                .build());
+                .build(), webHookTriggerConfig(true).getCiSkip(), webHookTriggerConfig(true).getBranchFilter());
 
         buildTriggered.block();
         assertThat(buildTriggered.isSignaled(), is(true));

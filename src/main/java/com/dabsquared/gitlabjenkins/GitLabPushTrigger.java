@@ -6,6 +6,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.model.PushHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
+import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
@@ -43,7 +44,6 @@ import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 
@@ -56,7 +56,7 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
 public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTriggerConfig {
 	private transient boolean triggerOnPush = true;
     private transient boolean triggerOnMergeRequest = true;
-    private final String triggerOpenMergeRequestOnPush;
+    private final TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
@@ -74,12 +74,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
 
     @DataBoundConstructor
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, String triggerOpenMergeRequestOnPush,
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
-        mergeRequestHookTriggerHandler = MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(triggerOnMergeRequest);
-        pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(triggerOnPush);
+        mergeRequestHookTriggerHandler = MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(triggerOnMergeRequest, triggerOpenMergeRequestOnPush);
+        pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush);
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
@@ -102,7 +102,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
     	return mergeRequestHookTriggerHandler.isEnabled();
     }
 
-    public String getTriggerOpenMergeRequestOnPush() {
+    public TriggerOpenMergeRequest getTriggerOpenMergeRequestOnPush() {
         return triggerOpenMergeRequestOnPush;
     }
 
@@ -134,12 +134,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
 
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
-        pushHookTriggerHandler.handle(this, job, hook);
+        pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter);
     }
 
     // executes when the Trigger receives a merge request
     public void onPost(final MergeRequestHook hook) {
-        mergeRequestHookTriggerHandler.handle(this, job, hook);
+        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter);
     }
 
     @Extension
@@ -256,11 +256,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
                                 .build(BranchFilterType.valueOf(name)));
                     }
                     if (trigger.pushHookTriggerHandler == null) {
-                        trigger.pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(trigger.triggerOnPush);
+                        trigger.pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(trigger.triggerOnPush, trigger.triggerOpenMergeRequestOnPush);
                     }
                     if (trigger.mergeRequestHookTriggerHandler == null) {
                         trigger.mergeRequestHookTriggerHandler =
-                                MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(trigger.triggerOnMergeRequest);
+                                MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(trigger.triggerOnMergeRequest, trigger.triggerOpenMergeRequestOnPush);
                     }
                     project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
                     project.save();

@@ -1,9 +1,9 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
 import hudson.util.HttpResponses;
@@ -15,10 +15,10 @@ import org.kohsuke.stapler.StaplerResponse;
  */
 abstract class BuildStatusAction implements WebHookAction {
 
-    private final AbstractProject<?, ?> project;
-    private AbstractBuild<?, ?> build;
+    private final Job<?, ?> project;
+    private Run<?, ?> build;
 
-    protected BuildStatusAction(AbstractProject<?, ?> project, AbstractBuild<?, ?> build) {
+    protected BuildStatusAction(Job<?, ?> project, Run<?, ?> build) {
         this.project = project;
         this.build = build;
     }
@@ -31,7 +31,7 @@ abstract class BuildStatusAction implements WebHookAction {
         writeStatusBody(response, build, getStatus(build));
     }
 
-    protected abstract void writeStatusBody(StaplerResponse response, AbstractBuild<?, ?> build, BuildStatus status);
+    protected abstract void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status);
 
     private boolean hasGitSCM(SCMTriggerItem item) {
         if(item != null) {
@@ -44,7 +44,7 @@ abstract class BuildStatusAction implements WebHookAction {
         return false;
     }
 
-    private BuildStatus getStatus(AbstractBuild<?, ?> build) {
+    private BuildStatus getStatus(Run<?, ?> build) {
         if (build == null) {
             return BuildStatus.NOT_FOUND;
         } else if (build.isBuilding()) {

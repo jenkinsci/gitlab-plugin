@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins.webhook.status;
 
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.AbstractBuild;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerResponse;
@@ -13,9 +15,9 @@ import java.io.IOException;
  */
 abstract class BuildPageRedirectAction implements WebHookAction {
 
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
 
-    protected BuildPageRedirectAction(AbstractBuild<?, ?> build) {
+    protected BuildPageRedirectAction(Run<?, ?> build) {
         this.build = build;
     }
 

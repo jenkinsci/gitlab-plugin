@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
+import com.dabsquared.gitlabjenkins.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
@@ -23,14 +24,11 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
-import static com.dabsquared.gitlabjenkins.model.builder.generated.CommitBuilder.commit;
 import static com.dabsquared.gitlabjenkins.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
 import static com.dabsquared.gitlabjenkins.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
-import static com.dabsquared.gitlabjenkins.model.builder.generated.PushHookBuilder.pushHook;
-import static com.dabsquared.gitlabjenkins.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -50,7 +48,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Before
     public void setup() {
-        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl();
+        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened));
     }
 
     @Test
@@ -64,9 +62,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 return true;
             }
         });
-        mergeRequestHookTriggerHandler.handle(webHookTriggerConfig(true), project, mergeRequestHook()
+        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(objectAttributes().withDescription("[ci-skip]").build())
-                .build());
+                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(1000);
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -92,27 +90,14 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 return true;
             }
         });
-        mergeRequestHookTriggerHandler.handle(webHookTriggerConfig(true), project, mergeRequestHook()
+        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(objectAttributes()
                         .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
+                        .withState(State.opened)
                         .build())
-                .build());
+                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block();
         assertThat(buildTriggered.isSignaled(), is(true));
-    }
-
-    private WebHookTriggerConfig webHookTriggerConfig(final boolean ciSkip) {
-        return new WebHookTriggerConfig() {
-            @Override
-            public boolean getCiSkip() {
-                return ciSkip;
-            }
-
-            @Override
-            public BranchFilter getBranchFilter() {
-                return BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All));
-            }
-        };
     }
 }

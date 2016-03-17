@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.model.WebHook;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import hudson.model.Job;
 
 /**
@@ -8,7 +9,7 @@ import hudson.model.Job;
  */
 public interface WebHookTriggerHandler<H extends WebHook> {
 
-    void handle(WebHookTriggerConfig config, Job<?, ?> job, H hook);
+    void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter);
 
     boolean isEnabled();
 }

@@ -53,72 +53,9 @@ public class PushBuildAction implements WebHookAction {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     trigger.onPost(pushHook);
-
-                    if (!trigger.getTriggerOpenMergeRequestOnPush().equals("never")) {
-                        // Fetch and build open merge requests with the same source branch
-                        buildOpenMergeRequests(trigger, pushHook.optProjectId().orNull(), pushHook.optRef().orNull());
-                    }
                 }
             }
         });
         throw HttpResponses.ok();
-    }
-
-    protected void buildOpenMergeRequests(final GitLabPushTrigger trigger, final Integer projectId, String projectRef) {
-        try {
-            GitLabConnectionProperty property = project.getProperty(GitLabConnectionProperty.class);
-            if (property != null && property.getClient() != null) {
-                final GitlabAPI client = property.getClient();
-                for (final GitlabMergeRequest mergeRequest : client.getOpenMergeRequests(projectId)) {
-                    final String sourceBranch = mergeRequest.getSourceBranch();
-                    String targetBranch = mergeRequest.getTargetBranch();
-                    if (projectRef.endsWith(sourceBranch) || (trigger.getTriggerOpenMergeRequestOnPush().equals("both") && projectRef.endsWith(targetBranch))) {
-                        if (trigger.getCiSkip() && mergeRequest.getDescription().contains("[ci-skip]")) {
-                            LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
-                            continue;
-                        }
-                        final GitlabBranch branch = client.getBranch(createProject(projectId), sourceBranch);
-                        ACL.impersonate(ACL.SYSTEM, new Runnable() {
-                            public void run() {
-                                trigger.onPost(createMergeRequest(projectId, mergeRequest, branch));
-                            }
-                        });
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warning("Failed to communicate with gitlab server to determine if this is an update for a merge request: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private GitlabProject createProject(Integer projectId) {
-        GitlabProject project = new GitlabProject();
-        project.setId(projectId);
-        return project;
-    }
-
-    private MergeRequestHook createMergeRequest(Integer projectId, GitlabMergeRequest mergeRequest, GitlabBranch branch) {
-        return mergeRequestHook()
-                .withObjectKind("merge_request")
-                .withObjectAttributes(objectAttributes()
-                        .withAssigneeId(mergeRequest.getAssignee() == null ? null : mergeRequest.getAssignee().getId())
-                        .withAuthorId(mergeRequest.getAuthor().getId())
-                        .withDescription(mergeRequest.getDescription())
-                        .withId(mergeRequest.getId())
-                        .withIid(mergeRequest.getIid())
-                        .withMergeStatus(mergeRequest.getState())
-                        .withSourceBranch(mergeRequest.getSourceBranch())
-                        .withSourceProjectId(mergeRequest.getSourceProjectId())
-                        .withTargetBranch(mergeRequest.getTargetBranch())
-                        .withTargetProjectId(projectId)
-                        .withTitle(mergeRequest.getTitle())
-                        .withLastCommit(commit()
-                                .withId(branch.getCommit().getId())
-                                .withMessage(branch.getCommit().getMessage())
-                                .withUrl(GitlabProject.URL + "/" + projectId + "/repository" + GitlabCommit.URL + "/" + branch.getCommit().getId())
-                                .build())
-                        .build())
-                .build();
     }
 }
