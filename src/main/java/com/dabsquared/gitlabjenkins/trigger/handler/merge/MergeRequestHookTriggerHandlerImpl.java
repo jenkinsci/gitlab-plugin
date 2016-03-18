@@ -1,9 +1,12 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
+import com.dabsquared.gitlabjenkins.model.Commit;
 import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.model.PushHook;
 import com.dabsquared.gitlabjenkins.model.State;
+import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
@@ -11,10 +14,13 @@ import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.model.Run;
+import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.transport.URIish;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,11 +56,6 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     @Override
-    protected Action[] createActions(Job<?, ?> job, MergeRequestHook hook) {
-        return new Action[] { new CauseAction(createGitLabMergeCause(job, hook)) };
-    }
-
-    @Override
     protected String getTargetBranch(MergeRequestHook hook) {
         return hook.getObjectAttributes().optTargetBranch().orNull();
     }
@@ -64,11 +65,38 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return "merge request";
     }
 
+    @Override
+    protected CauseAction createCauseAction(Job<?, ?> job, MergeRequestHook hook) {
+        return new CauseAction(createGitLabMergeCause(job, hook));
+    }
+
+    @Override
+    protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook) throws NoRevisionToBuildException {
+        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+    }
+
     private GitLabMergeCause createGitLabMergeCause(Job<?, ?> job, MergeRequestHook mergeRequestHook) {
         try {
             return new GitLabMergeCause(mergeRequestHook, new File(job.getRootDir(), "gitlab-polling.log"));
         } catch (IOException ex) {
             return new GitLabMergeCause(mergeRequestHook);
+        }
+    }
+
+    private String retrieveRevisionToBuild(MergeRequestHook hook) throws NoRevisionToBuildException {
+        if (hook.getObjectAttributes().getLastCommit().optId().isPresent()) {
+            return hook.getObjectAttributes().getLastCommit().optId().get();
+        } else {
+            throw new NoRevisionToBuildException();
+        }
+    }
+
+    private URIish retrieveUrIish(MergeRequestHook hook) {
+        try {
+            return new URIish(hook.getRepository().optUrl().orNull());
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+            return null;
         }
     }
 

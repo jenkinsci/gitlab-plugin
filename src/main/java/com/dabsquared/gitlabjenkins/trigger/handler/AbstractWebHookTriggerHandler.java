@@ -1,12 +1,17 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
+import com.dabsquared.gitlabjenkins.model.PushHook;
 import com.dabsquared.gitlabjenkins.model.WebHook;
+import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.Action;
+import hudson.model.CauseAction;
 import hudson.model.Job;
+import hudson.plugins.git.RevisionParameterAction;
 import jenkins.model.ParameterizedJobMixIn;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,9 +39,23 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected abstract boolean isCiSkip(H hook);
 
-    protected abstract Action[] createActions(Job<?, ?> job, H hook);
+    protected Action[] createActions(Job<?, ?> job, H hook) {
+        ArrayList<Action> actions = new ArrayList<Action>();
+        actions.add(createCauseAction(job, hook));
+        try {
+            actions.add(createRevisionParameter(hook));
+        } catch (NoRevisionToBuildException e) {
+            LOGGER.log(Level.WARNING, "unknown handled situation, dont know what revision to build for req {0} for job {1}",
+                    new Object[]{hook, (job != null ? job.getFullName() : null)});
+        }
+        return actions.toArray(new Action[actions.size()]);
+    }
+
+    protected abstract CauseAction createCauseAction(Job<?, ?> job, H hook);
 
     protected abstract String getTargetBranch(H hook);
+
+    protected abstract RevisionParameterAction createRevisionParameter(H hook) throws NoRevisionToBuildException;
 
     private void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;

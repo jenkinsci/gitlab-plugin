@@ -37,16 +37,9 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         return !commits.isEmpty() && commits.get(0).optMessage().or("").contains("[ci-skip]");
     }
 
-    protected Action[] createActions(Job<?, ?> job, PushHook hook) {
-        ArrayList<Action> actions = new ArrayList<Action>();
-        actions.add(new CauseAction(createGitLabPushCause(job, hook)));
-        try {
-            actions.add(createPushRequestRevisionParameter(hook));
-        } catch (NoRevisionToBuildException e) {
-            LOGGER.log(Level.WARNING, "unknown handled situation, dont know what revision to build for req {0} for job {1}",
-                    new Object[]{hook, (job != null ? job.getFullName() : null)});
-        }
-        return actions.toArray(new Action[actions.size()]);
+    @Override
+    protected CauseAction createCauseAction(Job<?, ?> job, PushHook hook) {
+        return new CauseAction(createGitLabPushCause(job, hook));
     }
 
     @Override
@@ -67,7 +60,8 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         }
     }
 
-    RevisionParameterAction createPushRequestRevisionParameter(PushHook hook) throws NoRevisionToBuildException {
+    @Override
+    protected RevisionParameterAction createRevisionParameter(PushHook hook) throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }
 
