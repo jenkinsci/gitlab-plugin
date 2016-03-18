@@ -1,10 +1,8 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
-import com.dabsquared.gitlabjenkins.model.State;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
-import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -27,8 +25,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
-import static com.dabsquared.gitlabjenkins.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
-import static com.dabsquared.gitlabjenkins.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

@@ -2,7 +2,7 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
-import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
@@ -26,8 +26,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import static com.dabsquared.gitlabjenkins.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
-import static com.dabsquared.gitlabjenkins.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

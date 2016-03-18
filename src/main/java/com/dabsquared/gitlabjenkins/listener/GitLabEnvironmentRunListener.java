@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.listener;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.model.WebHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.WebHook;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;

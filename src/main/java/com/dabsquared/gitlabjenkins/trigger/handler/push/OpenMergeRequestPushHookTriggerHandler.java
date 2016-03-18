@@ -3,15 +3,14 @@ package com.dabsquared.gitlabjenkins.trigger.handler.push;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
-import hudson.security.ACL;
 import jenkins.model.ParameterizedJobMixIn;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabBranch;
@@ -23,9 +22,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.dabsquared.gitlabjenkins.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
-import static com.dabsquared.gitlabjenkins.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.CommitBuilder.commit;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
 
 /**
  * @author Robin Müller

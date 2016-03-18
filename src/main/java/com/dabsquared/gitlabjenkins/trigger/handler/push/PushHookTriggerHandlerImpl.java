@@ -1,11 +1,10 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabPushCause;
-import com.dabsquared.gitlabjenkins.model.Commit;
-import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
-import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
@@ -14,7 +13,6 @@ import org.eclipse.jgit.transport.URIish;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

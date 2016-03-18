@@ -1,8 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
-import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
-import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
 import hudson.model.Job;
 
 /**

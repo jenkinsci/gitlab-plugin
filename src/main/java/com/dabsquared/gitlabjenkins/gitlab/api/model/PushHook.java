@@ -1,13 +1,11 @@
-package com.dabsquared.gitlabjenkins.model;
+package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

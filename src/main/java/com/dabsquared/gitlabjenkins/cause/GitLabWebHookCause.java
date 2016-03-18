@@ -1,6 +1,6 @@
 package com.dabsquared.gitlabjenkins.cause;
 
-import com.dabsquared.gitlabjenkins.model.WebHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.WebHook;
 import hudson.triggers.SCMTrigger;
 
 import java.io.File;

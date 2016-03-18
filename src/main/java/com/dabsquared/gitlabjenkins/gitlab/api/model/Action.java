@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.model;
+package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 /**
  * @author Robin Müller

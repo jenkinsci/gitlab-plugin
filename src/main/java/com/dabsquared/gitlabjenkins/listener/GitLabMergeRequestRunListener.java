@@ -3,7 +3,7 @@ package com.dabsquared.gitlabjenkins.listener;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.ObjectAttributes;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;

@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.cause;
 
-import com.dabsquared.gitlabjenkins.model.Commit;
-import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Run;

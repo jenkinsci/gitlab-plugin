@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.model;
+package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 import com.google.common.base.Optional;
 import org.apache.commons.lang.builder.EqualsBuilder;

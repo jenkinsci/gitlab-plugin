@@ -1,8 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
-import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
-import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
 import hudson.model.Job;
 
 /**

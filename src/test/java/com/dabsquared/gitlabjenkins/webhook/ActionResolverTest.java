@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
-import com.dabsquared.gitlabjenkins.model.PushHook;
-import com.dabsquared.gitlabjenkins.util.GsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
@@ -9,19 +7,15 @@ import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.WithoutJenkins;
 import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.ServletInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 

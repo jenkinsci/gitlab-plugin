@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.util.GsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.AbstractProject;

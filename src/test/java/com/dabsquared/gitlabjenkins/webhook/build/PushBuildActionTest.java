@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import hudson.model.FreeStyleProject;
 import org.apache.commons.io.IOUtils;

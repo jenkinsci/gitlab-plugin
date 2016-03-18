@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.cause;
 
-import com.dabsquared.gitlabjenkins.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.ObjectAttributes;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Run;

@@ -1,6 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
-import com.dabsquared.gitlabjenkins.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.State;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 
 import java.util.ArrayList;
