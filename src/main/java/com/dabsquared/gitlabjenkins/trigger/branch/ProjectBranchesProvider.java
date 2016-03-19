@@ -50,7 +50,8 @@ public final class ProjectBranchesProvider {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
-            return GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
+            // TODO Adapt the branches service to use the JAX-RS gitlab API implementation
+            return null; //GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
         } else {
             LOGGER.log(Level.WARNING, "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
             return Collections.emptyList();
