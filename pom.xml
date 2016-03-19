@@ -1,17 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>2.3</version>
-    </parent>
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>2.3</version>
+  </parent>
 
-    <properties>
-      <jenkins.version>1.609.1</jenkins.version>
-      <hpi-plugin.version>1.115</hpi-plugin.version>
-      <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
-      <findbugs.failOnError>false</findbugs.failOnError>
-    </properties>
+  <properties>
+    <jenkins.version>1.609.1</jenkins.version>
+    <hpi-plugin.version>1.115</hpi-plugin.version>
+    <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
+    <findbugs.failOnError>false</findbugs.failOnError>
+  </properties>
 
   <artifactId>gitlab-plugin</artifactId>
   <version>1.1.32-SNAPSHOT</version>
@@ -28,9 +29,9 @@
 
   <developers>
     <developer>
-        <id>bass_rock</id>
-        <name>Daniel Brooks</name>
-        <email>daniel_brooks@dabsquared.com</email>
+      <id>bass_rock</id>
+      <name>Daniel Brooks</name>
+      <email>daniel_brooks@dabsquared.com</email>
     </developer>
   </developers>
 
@@ -48,22 +49,22 @@
   </distributionManagement>
 
   <scm>
-      <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
-      <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
-      <url>https://github.com/jenkinsci/gitlab-plugin</url>
+    <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/gitlab-plugin</url>
     <tag>HEAD</tag>
-  </scm> 
+  </scm>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
-      <repository>
-        <id>repo.jenkins-ci.org</id>
-        <url>http://repo.jenkins-ci.org/public/</url>
-      </repository>
-      <repository>
-          <id>jgit-repository</id>
-          <name>Eclipse JGit Repository</name>
-          <url>http://download.eclipse.org/jgit/maven</url>
-      </repository>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>http://repo.jenkins-ci.org/public/</url>
+    </repository>
+    <repository>
+      <id>jgit-repository</id>
+      <name>Eclipse JGit Repository</name>
+      <url>http://download.eclipse.org/jgit/maven</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -103,22 +104,22 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.2-beta-5</version>
         </plugin>
-                <plugin>
+        <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>2.8</version>
         </plugin>
         <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-release-plugin</artifactId>
-			<version>2.5.1</version>
-			<dependencies>
-			  <dependency>
-				<groupId>org.apache.maven.scm</groupId>
-				<artifactId>maven-scm-provider-gitexe</artifactId>
-				<version>1.9.2</version>
-			  </dependency>
-			</dependencies>
-		</plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5.1</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.maven.scm</groupId>
+              <artifactId>maven-scm-provider-gitexe</artifactId>
+              <version>1.9.2</version>
+            </dependency>
+          </dependencies>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -129,88 +130,92 @@
   </build>
 
   <dependencies>
-      <dependency>
-          <groupId>org.jenkins-ci.plugins</groupId>
-          <artifactId>git</artifactId>
-          <version>2.4.1</version>
-      </dependency>
-      <dependency>
-          <groupId>org.jenkins-ci.plugins</groupId>
-          <artifactId>git-client</artifactId>
-          <version>1.19.0</version>
-      </dependency>
-      <dependency>
-          <groupId>org.eclipse.jgit</groupId>
-          <artifactId>org.eclipse.jgit</artifactId>
-          <version>3.5.2.201411120430-r</version>
-      </dependency>
-      <dependency>
-          <groupId>org.jboss.spec.javax.ws.rs</groupId>
-          <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-          <version>1.0.0.Final</version>
-      </dependency>
+    <!-- Jenkins dependencies -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>git</artifactId>
+      <version>2.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>git-client</artifactId>
+      <version>1.19.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit</artifactId>
+      <version>3.5.2.201411120430-r</version>
+    </dependency>
 
-      <dependency>
-          <groupId>org.jboss.resteasy</groupId>
-          <artifactId>resteasy-client</artifactId>
-          <version>3.0.14.Final</version>
-      </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.jaxrs</groupId>
-          <artifactId>jackson-jaxrs-json-provider</artifactId>
-          <version>2.6.5</version>
-      </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-          <version>2.6.5</version>
-      </dependency>
+    <!-- REST client dependencies -->
+    <dependency>
+      <groupId>org.jboss.spec.javax.ws.rs</groupId>
+      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+      <version>1.0.0.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>3.0.14.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>2.6.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.6.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.2.3</version>
+    </dependency>
 
-      <dependency>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-          <version>4.2.3</version>
-      </dependency>
-      <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-          <version>18.0</version>
-      </dependency>
+    <!-- util dependencies -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>18.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>net.karneim</groupId>
+      <artifactId>pojobuilder</artifactId>
+      <version>3.4.0</version>
+      <scope>provided</scope>
+    </dependency>
 
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.12</version>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.hamcrest</groupId>
-          <artifactId>hamcrest-all</artifactId>
-          <version>1.3</version>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-all</artifactId>
-          <version>1.9.5</version>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.mock-server</groupId>
-          <artifactId>mockserver-netty</artifactId>
-          <version>3.10.2</version>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>2.2.4</version>
-      </dependency>
-      <dependency>
-          <groupId>net.karneim</groupId>
-          <artifactId>pojobuilder</artifactId>
-          <version>3.4.0</version>
-          <scope>provided</scope>
-      </dependency>
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <version>3.10.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
