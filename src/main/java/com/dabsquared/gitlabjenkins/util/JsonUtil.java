@@ -19,7 +19,7 @@ import java.util.Locale;
 /**
  * @author Robin Müller
  */
-public final class GsonUtil {
+public final class JsonUtil {
 
     private static final Gson prettyPrint = new GsonBuilder().setPrettyPrinting().create();
     private static final Gson gson = new GsonBuilder()
@@ -27,15 +27,15 @@ public final class GsonUtil {
             .registerTypeAdapter(Date.class, new DateSerializer())
             .create();
 
-    private GsonUtil() { }
-
-    public static Gson getGson() {
-        return gson;
-    }
+    private JsonUtil() { }
 
     public static String toPrettyPrint(String json) {
         JsonParser parser = new JsonParser();
         return prettyPrint.toJson(parser.parse(json));
+    }
+
+    public static <T> T read(String json, Class<T> type) {
+        return gson.fromJson(json, type);
     }
 
     private static final String[] DATE_FORMATS = new String[] {

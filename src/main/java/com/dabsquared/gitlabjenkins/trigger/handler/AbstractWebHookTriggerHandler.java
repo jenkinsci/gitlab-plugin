@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.WebHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -9,7 +11,9 @@ import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
 import jenkins.model.ParameterizedJobMixIn;
+import org.eclipse.jgit.transport.URIish;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,9 +42,9 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected abstract boolean isCiSkip(H hook);
 
-    protected Action[] createActions(Job<?, ?> job, H hook) {
-        ArrayList<Action> actions = new ArrayList<Action>();
-        actions.add(createCauseAction(job, hook));
+    private Action[] createActions(Job<?, ?> job, H hook) {
+        ArrayList<Action> actions = new ArrayList<>();
+        actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook))));
         try {
             actions.add(createRevisionParameter(hook));
         } catch (NoRevisionToBuildException e) {
@@ -50,11 +54,22 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         return actions.toArray(new Action[actions.size()]);
     }
 
-    protected abstract CauseAction createCauseAction(Job<?, ?> job, H hook);
+    protected abstract CauseData retrieveCauseData(H hook);
 
     protected abstract String getTargetBranch(H hook);
 
     protected abstract RevisionParameterAction createRevisionParameter(H hook) throws NoRevisionToBuildException;
+
+    protected URIish retrieveUrIish(WebHook hook) {
+        try {
+            if (hook.getRepository() != null) {
+                return new URIish(hook.getRepository().getUrl());
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+        }
+        return null;
+    }
 
     private void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;

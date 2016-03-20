@@ -24,9 +24,9 @@ public class GitLabEnvironmentRunListener extends RunListener<AbstractBuild<?, ?
             @Override
             @SuppressWarnings("unchecked")
             public void buildEnvVars(Map<String, String> env) {
-                GitLabWebHookCause<WebHook> cause = (GitLabWebHookCause<WebHook>) build.getCause(GitLabWebHookCause.class);
+                GitLabWebHookCause cause = (GitLabWebHookCause) build.getCause(GitLabWebHookCause.class);
                 if (cause != null) {
-                    env.putAll(cause.getBuildVariables());
+                    env.putAll(cause.getData().getBuildVariables());
                 }
             }
         };

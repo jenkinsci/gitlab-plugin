@@ -1,8 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -11,36 +8,35 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Branch {
 
-    private final String name;
-    private final Boolean protectedBranch;
-    private final Commit commit;
+    private String name;
+    private Boolean protectedBranch;
+    private Commit commit;
 
-    @JsonCreator
-    @GeneratePojoBuilder(intoPackage = "*.generated.builder", withFactoryMethod = "*")
-    public Branch(@JsonProperty("name") String name,
-                  @JsonProperty("protected") Boolean protectedBranch,
-                  @JsonProperty("commit") Commit commit) {
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getProtectedBranch() {
+        return protectedBranch;
+    }
+
+    public void setProtectedBranch(Boolean protectedBranch) {
         this.protectedBranch = protectedBranch;
-        this.commit = commit;
-    }
-
-    public Optional<String> optName() {
-        return Optional.fromNullable(name);
-    }
-
-    public Optional<Boolean> optProtectedBranch() {
-        return Optional.fromNullable(protectedBranch);
-    }
-
-    public Optional<Commit> optCommit() {
-        return Optional.fromNullable(commit);
     }
 
     public Commit getCommit() {
-        return commit == null ? new Commit() : commit;
+        return commit;
+    }
+
+    public void setCommit(Commit commit) {
+        this.commit = commit;
     }
 
     @Override

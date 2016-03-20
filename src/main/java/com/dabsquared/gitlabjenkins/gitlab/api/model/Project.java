@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -9,88 +8,116 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Project {
 
-    private final String name;
-    private final String description;
-    private final String webUrl;
-    private final String avatarUrl;
-    private final String namespace;
-    private final Integer visibilityLevel;
-    private final String pathWithNamespace;
-    private final String defaultBranch;
-    private final String homepage;
-    private final String url;
-    private final String sshUrl;
-    private final String httpUrl;
+    private String name;
+    private String description;
+    private String webUrl;
+    private String avatarUrl;
+    private String namespace;
+    private Integer visibilityLevel;
+    private String pathWithNamespace;
+    private String defaultBranch;
+    private String homepage;
+    private String url;
+    private String sshUrl;
+    private String httpUrl;
 
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public Project(String name, String description, String webUrl, String avatarUrl, String namespace, Integer visibilityLevel,
-                   String pathWithNamespace, String defaultBranch, String homepage, String url, String sshUrl, String httpUrl) {
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getWebUrl() {
+        return webUrl;
+    }
+
+    public void setWebUrl(String webUrl) {
         this.webUrl = webUrl;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public Integer getVisibilityLevel() {
+        return visibilityLevel;
+    }
+
+    public void setVisibilityLevel(Integer visibilityLevel) {
         this.visibilityLevel = visibilityLevel;
+    }
+
+    public String getPathWithNamespace() {
+        return pathWithNamespace;
+    }
+
+    public void setPathWithNamespace(String pathWithNamespace) {
         this.pathWithNamespace = pathWithNamespace;
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
+    }
+
+    public void setDefaultBranch(String defaultBranch) {
         this.defaultBranch = defaultBranch;
+    }
+
+    public String getHomepage() {
+        return homepage;
+    }
+
+    public void setHomepage(String homepage) {
         this.homepage = homepage;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getSshUrl() {
+        return sshUrl;
+    }
+
+    public void setSshUrl(String sshUrl) {
         this.sshUrl = sshUrl;
+    }
+
+    public String getHttpUrl() {
+        return httpUrl;
+    }
+
+    public void setHttpUrl(String httpUrl) {
         this.httpUrl = httpUrl;
-    }
-
-    Project() {
-        this(null, null, null, null, null, null, null, null, null, null, null, null);
-    }
-
-    public Optional<String> optName() {
-        return Optional.fromNullable(name);
-    }
-
-    public Optional<String> optDescription() {
-        return Optional.fromNullable(description);
-    }
-
-    public Optional<String> optWebUrl() {
-        return Optional.fromNullable(webUrl);
-    }
-
-    public Optional<String> optAvatarUrl() {
-        return Optional.fromNullable(avatarUrl);
-    }
-
-    public Optional<String> optNamespace() {
-        return Optional.fromNullable(namespace);
-    }
-
-    public Optional<Integer> optVisibilityLevel() {
-        return Optional.fromNullable(visibilityLevel);
-    }
-
-    public Optional<String> optPathWithNamespace() {
-        return Optional.fromNullable(pathWithNamespace);
-    }
-
-    public Optional<String> optDefaultBranch() {
-        return Optional.fromNullable(defaultBranch);
-    }
-
-    public Optional<String> optHomepage() {
-        return Optional.fromNullable(homepage);
-    }
-
-    public Optional<String> optUrl() {
-        return Optional.fromNullable(url);
-    }
-
-    public Optional<String> optSshUrl() {
-        return Optional.fromNullable(sshUrl);
-    }
-
-    public Optional<String> optHttpUrl() {
-        return Optional.fromNullable(httpUrl);
     }
 
     @Override

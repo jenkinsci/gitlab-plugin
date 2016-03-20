@@ -96,7 +96,7 @@ public class GitLabCommitStatusPublisher extends Notifier {
 
     private String getBuildBranch(AbstractBuild<?, ?> build) {
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getSourceBranch();
+        return cause == null ? null : cause.getData().getSourceBranch();
     }
 
     private String getBuildUrl(AbstractBuild<?, ?> build) {

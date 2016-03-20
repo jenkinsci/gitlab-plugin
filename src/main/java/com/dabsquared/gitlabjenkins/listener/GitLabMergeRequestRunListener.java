@@ -1,10 +1,10 @@
 package com.dabsquared.gitlabjenkins.listener;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.ObjectAttributes;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
@@ -25,14 +25,13 @@ public class GitLabMergeRequestRunListener extends RunListener<AbstractBuild<?, 
     @Override
     public void onCompleted(AbstractBuild<?, ?> build, @Nonnull TaskListener listener) {
         GitLabPushTrigger trigger = build.getProject().getTrigger(GitLabPushTrigger.class);
-        GitLabMergeCause gitLabMergeCause = build.getCause(GitLabMergeCause.class);
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
 
-        if (trigger != null && gitLabMergeCause != null) {
+        if (trigger != null && cause != null && cause.getData().getActionType() == CauseData.ActionType.MERGE) {
             String buildUrl = getBuildUrl(build);
             Result buildResult = build.getResult();
-            ObjectAttributes objectAttributes = gitLabMergeCause.getRequest().getObjectAttributes();
-            Integer projectId = objectAttributes.optSourceProjectId().orNull();
-            Integer mergeRequestId = objectAttributes.optId().orNull();
+            Integer projectId = cause.getData().getProjectId();
+            Integer mergeRequestId = cause.getData().getMergeRequestId();
             if (buildResult == Result.SUCCESS) {
                 acceptMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId);
             }

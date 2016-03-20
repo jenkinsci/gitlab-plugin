@@ -4,12 +4,9 @@ import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
-import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -71,10 +68,7 @@ public class GitLabProjectBranchesService {
             List<String> result = new ArrayList<>();
             String projectId = ProjectIdUtil.retrieveProjectId(sourceRepository);
             for (Branch branch : client.getBranches(projectId)) {
-                Optional<String> name = branch.optName();
-                if (name.isPresent()) {
-                    result.add(name.get());
-                }
+                result.add(branch.getName());
             }
             LOGGER.log(Level.FINEST, "found these branches for repo {0} : {1}", LoggerUtil.toArray(sourceRepository, result));
             return result;

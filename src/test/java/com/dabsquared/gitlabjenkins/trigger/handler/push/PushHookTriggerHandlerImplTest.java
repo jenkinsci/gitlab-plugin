@@ -92,9 +92,17 @@ public class PushHookTriggerHandlerImplTest {
         });
         pushHookTriggerHandler.handle(project, pushHook()
                 .withBefore("0000000000000000000000000000000000000000")
+                .withProjectId(1)
+                .withUserName("test")
+                .withRepository(repository()
+                        .withName("test")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withGitSshUrl("git@gitlab.org:test.git")
+                        .withGitHttpUrl("https://gitlab.org/test.git")
+                        .build())
                 .withAfter(commit.name())
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
-                .withRepository(repository().withUrl(repositoryUrl).build())
                 .build(), webHookTriggerConfig(true).getCiSkip(), webHookTriggerConfig(true).getBranchFilter());
 
         buildTriggered.block();

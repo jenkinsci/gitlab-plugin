@@ -1,101 +1,90 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Commit {
 
-    private final String id;
-    private final String message;
-    private final Date timestamp;
-    private final String url;
-    private final User author;
-    private final List<String> added;
-    private final List<String> modified;
-    private final List<String> removed;
+    private String id;
+    private String message;
+    private Date timestamp;
+    private String url;
+    private User author;
+    private List<String> added;
+    private List<String> modified;
+    private List<String> removed;
 
-    @JsonCreator
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public Commit(@JsonProperty("id") String id,
-                  @JsonProperty("message") String message,
-                  @JsonProperty("timestamp") Date timestamp,
-                  @JsonProperty("url") String url,
-                  @JsonProperty("author") User author,
-                  @JsonProperty("added") List<String> added,
-                  @JsonProperty("modified") List<String> modified,
-                  @JsonProperty("removed") List<String> removed) {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
         this.url = url;
-        this.author = author;
-        this.added = added;
-        this.modified = modified;
-        this.removed = removed;
-    }
-
-    Commit() {
-        this(null, null, null, null, null, null, null, null);
-    }
-
-    public Optional<String> optId() {
-        return Optional.fromNullable(id);
-    }
-
-    public Optional<String> optMessage() {
-        return Optional.fromNullable(message);
-    }
-
-    public Optional<Date> optTimestamp() {
-        return Optional.fromNullable(timestamp);
-    }
-
-    public Optional<String> optUrl() {
-        return Optional.fromNullable(url);
-    }
-
-    public Optional<User> optAuthor() {
-        return Optional.fromNullable(author);
     }
 
     public User getAuthor() {
-        return author == null ? new User() : author;
+        return author;
     }
 
-    public Optional<List<String>> optAdded() {
-        return Optional.fromNullable(added);
+    public void setAuthor(User author) {
+        this.author = author;
     }
 
     public List<String> getAdded() {
-        return added == null ? Collections.<String>emptyList() : added;
+        return added;
     }
 
-    public Optional<List<String>> optModified() {
-        return Optional.fromNullable(modified);
+    public void setAdded(List<String> added) {
+        this.added = added;
     }
 
     public List<String> getModified() {
-        return modified == null ? Collections.<String>emptyList() : modified;
+        return modified;
     }
 
-    public Optional<List<String>> optRemoved() {
-        return Optional.fromNullable(removed);
+    public void setModified(List<String> modified) {
+        this.modified = modified;
     }
 
     public List<String> getRemoved() {
-        return removed == null ? Collections.<String>emptyList() : removed;
+        return removed;
+    }
+
+    public void setRemoved(List<String> removed) {
+        this.removed = removed;
     }
 
     @Override

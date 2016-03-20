@@ -1,8 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -13,145 +10,170 @@ import java.util.List;
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class MergeRequest {
 
-    private final Integer id;
-    private final Integer iid;
-    private final String sourceBranch;
-    private final String targetBranch;
-    private final Integer projectId;
-    private final String title;
-    private final State state;
-    private final Integer upvotes;
-    private final Integer downvotes;
-    private final User author;
-    private final User assignee;
-    private final Integer sourceProjectId;
-    private final Integer targetProjectId;
-    private final List<String> labels;
-    private final String description;
-    private final Boolean workInProgress;
-    private final Boolean mergeWhenBuildSucceeds;
-    private final String mergeStatus;
+    private Integer id;
+    private Integer iid;
+    private String sourceBranch;
+    private String targetBranch;
+    private Integer projectId;
+    private String title;
+    private State state;
+    private Integer upvotes;
+    private Integer downvotes;
+    private User author;
+    private User assignee;
+    private Integer sourceProjectId;
+    private Integer targetProjectId;
+    private List<String> labels;
+    private String description;
+    private Boolean workInProgress;
+    private Boolean mergeWhenBuildSucceeds;
+    private String mergeStatus;
 
-    @JsonCreator
-    @GeneratePojoBuilder(intoPackage = "*.generated.builder", withFactoryMethod = "*")
-    public MergeRequest(@JsonProperty("id") Integer id,
-                        @JsonProperty("iid") Integer iid,
-                        @JsonProperty("source_branch") String sourceBranch,
-                        @JsonProperty("target_branch") String targetBranch,
-                        @JsonProperty("project_id") Integer projectId,
-                        @JsonProperty("title") String title,
-                        @JsonProperty("state") State state,
-                        @JsonProperty("upvotes") Integer upvotes,
-                        @JsonProperty("downvotes") Integer downvotes,
-                        @JsonProperty("author") User author,
-                        @JsonProperty("assignee") User assignee,
-                        @JsonProperty("source_project_id") Integer sourceProjectId,
-                        @JsonProperty("target_project_id") Integer targetProjectId,
-                        @JsonProperty("labels") List<String> labels,
-                        @JsonProperty("description") String description,
-                        @JsonProperty("work_in_progress") Boolean workInProgress,
-                        @JsonProperty("merge_when_build_succeeds") Boolean mergeWhenBuildSucceeds,
-                        @JsonProperty("merge_status") String mergeStatus) {
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getIid() {
+        return iid;
+    }
+
+    public void setIid(Integer iid) {
         this.iid = iid;
+    }
+
+    public String getSourceBranch() {
+        return sourceBranch;
+    }
+
+    public void setSourceBranch(String sourceBranch) {
         this.sourceBranch = sourceBranch;
+    }
+
+    public String getTargetBranch() {
+        return targetBranch;
+    }
+
+    public void setTargetBranch(String targetBranch) {
         this.targetBranch = targetBranch;
+    }
+
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Integer projectId) {
         this.projectId = projectId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
         this.title = title;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
         this.state = state;
+    }
+
+    public Integer getUpvotes() {
+        return upvotes;
+    }
+
+    public void setUpvotes(Integer upvotes) {
         this.upvotes = upvotes;
+    }
+
+    public Integer getDownvotes() {
+        return downvotes;
+    }
+
+    public void setDownvotes(Integer downvotes) {
         this.downvotes = downvotes;
-        this.author = author;
-        this.assignee = assignee;
-        this.sourceProjectId = sourceProjectId;
-        this.targetProjectId = targetProjectId;
-        this.labels = labels;
-        this.description = description;
-        this.workInProgress = workInProgress;
-        this.mergeWhenBuildSucceeds = mergeWhenBuildSucceeds;
-        this.mergeStatus = mergeStatus;
-    }
-
-    public Optional<Integer> optId() {
-        return Optional.fromNullable(id);
-    }
-
-    public Optional<Integer> optIid() {
-        return Optional.fromNullable(iid);
-    }
-
-    public Optional<String> optSourceBranch() {
-        return Optional.fromNullable(sourceBranch);
-    }
-
-    public Optional<String> optTargetBranch() {
-        return Optional.fromNullable(targetBranch);
-    }
-
-    public Optional<Integer> optProjectId() {
-        return Optional.fromNullable(projectId);
-    }
-
-    public Optional<String> optTitle() {
-        return Optional.fromNullable(title);
-    }
-
-    public Optional<State> optState() {
-        return Optional.fromNullable(state);
-    }
-
-    public Optional<Integer> optUpvotes() {
-        return Optional.fromNullable(upvotes);
-    }
-
-    public Optional<Integer> optDownvotes() {
-        return Optional.fromNullable(downvotes);
-    }
-
-    public Optional<User> optAuthor() {
-        return Optional.fromNullable(author);
     }
 
     public User getAuthor() {
-        return author == null ? new User() : author;
+        return author;
     }
 
-    public Optional<User> optAssignee() {
-        return Optional.fromNullable(assignee);
+    public void setAuthor(User author) {
+        this.author = author;
     }
 
     public User getAssignee() {
-        return assignee == null ? new User() : assignee;
+        return assignee;
     }
 
-    public Optional<Integer> optSourceProjectId() {
-        return Optional.fromNullable(sourceProjectId);
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
     }
 
-    public Optional<Integer> optTargetProjectId() {
-        return Optional.fromNullable(targetProjectId);
+    public Integer getSourceProjectId() {
+        return sourceProjectId;
     }
 
-    public Optional<List<String>> optLabels() {
-        return Optional.fromNullable(labels);
+    public void setSourceProjectId(Integer sourceProjectId) {
+        this.sourceProjectId = sourceProjectId;
     }
 
-    public Optional<String> optDescription() {
-        return Optional.fromNullable(description);
+    public Integer getTargetProjectId() {
+        return targetProjectId;
     }
 
-    public Optional<Boolean> optWorkInProgress() {
-        return Optional.fromNullable(workInProgress);
+    public void setTargetProjectId(Integer targetProjectId) {
+        this.targetProjectId = targetProjectId;
     }
 
-    public Optional<Boolean> optMergeWhenBuildSucceeds() {
-        return Optional.fromNullable(mergeWhenBuildSucceeds);
+    public List<String> getLabels() {
+        return labels;
     }
 
-    public Optional<String> optMergeStatus() {
-        return Optional.fromNullable(mergeStatus);
+    public void setLabels(List<String> labels) {
+        this.labels = labels;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getWorkInProgress() {
+        return workInProgress;
+    }
+
+    public void setWorkInProgress(Boolean workInProgress) {
+        this.workInProgress = workInProgress;
+    }
+
+    public Boolean getMergeWhenBuildSucceeds() {
+        return mergeWhenBuildSucceeds;
+    }
+
+    public void setMergeWhenBuildSucceeds(Boolean mergeWhenBuildSucceeds) {
+        this.mergeWhenBuildSucceeds = mergeWhenBuildSucceeds;
+    }
+
+    public String getMergeStatus() {
+        return mergeStatus;
+    }
+
+    public void setMergeStatus(String mergeStatus) {
+        this.mergeStatus = mergeStatus;
     }
 
     @Override

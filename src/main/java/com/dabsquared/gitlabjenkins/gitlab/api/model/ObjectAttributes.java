@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -11,149 +10,188 @@ import java.util.Date;
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class ObjectAttributes {
 
-    private final Integer id;
-    private final Integer iid;
-    private final String sourceBranch;
-    private final String targetBranch;
-    private final Integer sourceProjectId;
-    private final Integer targetProjectId;
-    private final Integer authorId;
-    private final Integer assigneeId;
-    private final String title;
-    private final Date createdAt;
-    private final Date updatedAt;
-    private final State state;
-    private final String description;
-    private final Project source;
-    private final Project target;
-    private final Commit lastCommit;
-    private final String mergeStatus;
-    private final String url;
-    private final Action action;
-    private final Boolean workInProgress;
-    
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public ObjectAttributes(Integer id, Integer iid, String sourceBranch, String targetBranch, Integer sourceProjectId, Integer targetProjectId,
-                            Integer authorId, Integer assigneeId, String title, Date createdAt, Date updatedAt, State state, String description,
-                            Project source, Project target, Commit lastCommit, String mergeStatus, String url, Action action, Boolean workInProgress) {
+    private Integer id;
+    private Integer iid;
+    private String sourceBranch;
+    private String targetBranch;
+    private Integer sourceProjectId;
+    private Integer targetProjectId;
+    private Integer authorId;
+    private Integer assigneeId;
+    private String title;
+    private Date createdAt;
+    private Date updatedAt;
+    private State state;
+    private String description;
+    private Project source;
+    private Project target;
+    private Commit lastCommit;
+    private String mergeStatus;
+    private String url;
+    private Action action;
+    private Boolean workInProgress;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getIid() {
+        return iid;
+    }
+
+    public void setIid(Integer iid) {
         this.iid = iid;
+    }
+
+    public String getSourceBranch() {
+        return sourceBranch;
+    }
+
+    public void setSourceBranch(String sourceBranch) {
         this.sourceBranch = sourceBranch;
+    }
+
+    public String getTargetBranch() {
+        return targetBranch;
+    }
+
+    public void setTargetBranch(String targetBranch) {
         this.targetBranch = targetBranch;
+    }
+
+    public Integer getSourceProjectId() {
+        return sourceProjectId;
+    }
+
+    public void setSourceProjectId(Integer sourceProjectId) {
         this.sourceProjectId = sourceProjectId;
+    }
+
+    public Integer getTargetProjectId() {
+        return targetProjectId;
+    }
+
+    public void setTargetProjectId(Integer targetProjectId) {
         this.targetProjectId = targetProjectId;
+    }
+
+    public Integer getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Integer authorId) {
         this.authorId = authorId;
+    }
+
+    public Integer getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(Integer assigneeId) {
         this.assigneeId = assigneeId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
         this.state = state;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
         this.description = description;
-        this.source = source;
-        this.target = target;
-        this.lastCommit = lastCommit;
-        this.mergeStatus = mergeStatus;
-        this.url = url;
-        this.action = action;
-        this.workInProgress = workInProgress;
-    }
-
-    ObjectAttributes() {
-        this(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-    }
-
-    public Optional<Integer> optId() {
-        return Optional.fromNullable(id);
-    }
-
-    public Optional<Integer> optIid() {
-        return Optional.fromNullable(iid);
-    }
-
-    public Optional<String> optSourceBranch() {
-        return Optional.fromNullable(sourceBranch);
-    }
-
-    public Optional<String> optTargetBranch() {
-        return Optional.fromNullable(targetBranch);
-    }
-
-    public Optional<Integer> optSourceProjectId() {
-        return Optional.fromNullable(sourceProjectId);
-    }
-
-    public Optional<Integer> optTargetProjectId() {
-        return Optional.fromNullable(targetProjectId);
-    }
-
-    public Optional<Integer> optAuthorId() {
-        return Optional.fromNullable(authorId);
-    }
-
-    public Optional<Integer> optAssigneeId() {
-        return Optional.fromNullable(assigneeId);
-    }
-
-    public Optional<String> optTitle() {
-        return Optional.fromNullable(title);
-    }
-
-    public Optional<Date> optCreatedAt() {
-        return Optional.fromNullable(createdAt);
-    }
-
-    public Optional<Date> optUpdatedAt() {
-        return Optional.fromNullable(updatedAt);
-    }
-
-    public Optional<State> optState() {
-        return Optional.fromNullable(state);
-    }
-
-    public Optional<String> optDescription() {
-        return Optional.fromNullable(description);
-    }
-
-    public Optional<Project> optSource() {
-        return Optional.fromNullable(source);
     }
 
     public Project getSource() {
-        return source == null ? new Project() : source;
+        return source;
     }
 
-    public Optional<Project> optTarget() {
-        return Optional.fromNullable(target);
+    public void setSource(Project source) {
+        this.source = source;
     }
 
     public Project getTarget() {
-        return target == null ? new Project() : target;
+        return target;
     }
 
-    public Optional<Commit> optLastCommit() {
-        return Optional.fromNullable(lastCommit);
+    public void setTarget(Project target) {
+        this.target = target;
     }
 
     public Commit getLastCommit() {
-        return lastCommit == null ? new Commit() : lastCommit;
+        return lastCommit;
     }
 
-    public Optional<String> optMergeStatus() {
-        return Optional.fromNullable(mergeStatus);
+    public void setLastCommit(Commit lastCommit) {
+        this.lastCommit = lastCommit;
     }
 
-    public Optional<String> optUrl() {
-        return Optional.fromNullable(url);
+    public String getMergeStatus() {
+        return mergeStatus;
     }
 
-    public Optional<Action> optAction() {
-        return Optional.fromNullable(action);
+    public void setMergeStatus(String mergeStatus) {
+        this.mergeStatus = mergeStatus;
     }
 
-    public Optional<Boolean> optWorkInProgress() {
-        return Optional.fromNullable(workInProgress);
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
+    public Boolean getWorkInProgress() {
+        return workInProgress;
+    }
+
+    public void setWorkInProgress(Boolean workInProgress) {
+        this.workInProgress = workInProgress;
     }
 
     @Override

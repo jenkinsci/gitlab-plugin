@@ -25,8 +25,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.CommitBuilder.commit;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ProjectBuilder.project;
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -92,6 +95,27 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 .withObjectAttributes(objectAttributes()
                         .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
                         .withState(State.opened)
+                        .withIid(1)
+                        .withTitle("test")
+                        .withTargetProjectId(1)
+                        .withSourceProjectId(1)
+                        .withSourceBranch("feature")
+                        .withTargetBranch("master")
+                        .withLastCommit(commit().withAuthor(user().withName("test").build()).build())
+                        .withSource(project()
+                                .withName("test")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withSshUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
+                                .build())
+                        .withTarget(project()
+                                .withName("test")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withSshUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
+                                .build())
                         .build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 

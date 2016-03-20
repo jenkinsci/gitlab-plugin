@@ -1,7 +1,8 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
@@ -26,8 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -109,8 +109,24 @@ public class MergeRequestBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabMergeCause(mergeRequestHook()
-                .withObjectAttributes(objectAttributes().withTargetBranch("master").build())
+        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabWebHookCause(causeData()
+                .withActionType(CauseData.ActionType.MERGE)
+                .withProjectId(1)
+                .withBranch("feature")
+                .withSourceBranch("feature")
+                .withUserName("")
+                .withSourceRepoHomepage("https://gitlab.org/test")
+                .withSourceRepoName("test")
+                .withSourceRepoUrl("git@gitlab.org:test.git")
+                .withSourceRepoSshUrl("git@gitlab.org:test.git")
+                .withSourceRepoHttpUrl("https://gitlab.org/test.git")
+                .withMergeRequestTitle("Test")
+                .withMergeRequestId(1)
+                .withTargetBranch("master")
+                .withTargetRepoName("test")
+                .withTargetRepoSshUrl("git@gitlab.org:test.git")
+                .withTargetRepoHttpUrl("https://gitlab.org/test.git")
+                .withTriggeredByUser("test")
                 .build()));
         future.get();
 

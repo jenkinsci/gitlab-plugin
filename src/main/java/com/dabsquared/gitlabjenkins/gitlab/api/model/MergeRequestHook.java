@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -10,56 +9,35 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class MergeRequestHook extends WebHook {
 
-    private final User user;
-    private final Project project;
-    private final ObjectAttributes objectAttributes;
-    private final Repository repository;
-
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public MergeRequestHook(String objectKind, User user, Project project, ObjectAttributes objectAttributes, Repository repository) {
-        super(objectKind);
-        this.user = user;
-        this.project = project;
-        this.objectAttributes = objectAttributes;
-        this.repository = repository;
-    }
-
-    MergeRequestHook() {
-        this(null, null, null, null, null);
-    }
-
-    public Optional<User> optUser() {
-        return Optional.fromNullable(user);
-    }
+    private User user;
+    private Project project;
+    private ObjectAttributes objectAttributes;
 
     public User getUser() {
-        return user == null ? new User() : user;
+        return user;
     }
 
-    public Optional<Project> optProject() {
-        return Optional.fromNullable(project);
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Project getProject() {
-        return project == null ? new Project() : project;
+        return project;
     }
 
-    public Optional<ObjectAttributes> optObjectAttributes() {
-        return Optional.fromNullable(objectAttributes);
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public ObjectAttributes getObjectAttributes() {
-        return objectAttributes == null ? new ObjectAttributes() : objectAttributes;
+        return objectAttributes;
     }
 
-    public Optional<Repository> optRepository() {
-        return Optional.fromNullable(repository);
-    }
-
-    public Repository getRepository() {
-        return repository == null ? new Repository() : repository;
+    public void setObjectAttributes(ObjectAttributes objectAttributes) {
+        this.objectAttributes = objectAttributes;
     }
 
     @Override
@@ -75,7 +53,6 @@ public class MergeRequestHook extends WebHook {
                 .append(user, that.user)
                 .append(project, that.project)
                 .append(objectAttributes, that.objectAttributes)
-                .append(repository, that.repository)
                 .isEquals();
     }
 
@@ -85,7 +62,6 @@ public class MergeRequestHook extends WebHook {
                 .append(user)
                 .append(project)
                 .append(objectAttributes)
-                .append(repository)
                 .toHashCode();
     }
 
@@ -95,7 +71,6 @@ public class MergeRequestHook extends WebHook {
                 .append("user", user)
                 .append("project", project)
                 .append("objectAttributes", objectAttributes)
-                .append("repository", repository)
                 .toString();
     }
 }

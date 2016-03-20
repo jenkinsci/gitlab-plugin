@@ -46,7 +46,7 @@ public class PushHookTriggerHandlerGitlabServerTest {
         RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl().createRevisionParameter(hook);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.optAfter().get()));
+        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
@@ -57,7 +57,7 @@ public class PushHookTriggerHandlerGitlabServerTest {
         RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl().createRevisionParameter(hook);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.optAfter().get()));
+        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
@@ -68,7 +68,7 @@ public class PushHookTriggerHandlerGitlabServerTest {
         RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl().createRevisionParameter(hook);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.optAfter().get()));
+        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
@@ -79,7 +79,7 @@ public class PushHookTriggerHandlerGitlabServerTest {
         RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl().createRevisionParameter(hook);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.optAfter().get()));
+        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
@@ -90,7 +90,7 @@ public class PushHookTriggerHandlerGitlabServerTest {
         RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl().createRevisionParameter(hook);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.optAfter().get()));
+        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 

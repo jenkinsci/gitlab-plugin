@@ -2,7 +2,7 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
-import com.dabsquared.gitlabjenkins.util.GsonUtil;
+import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.AbstractProject;
 import hudson.security.ACL;
@@ -12,7 +12,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.dabsquared.gitlabjenkins.util.GsonUtil.toPrettyPrint;
+import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 
 /**
  * @author Robin Müller
@@ -27,12 +27,11 @@ public class PushBuildAction implements WebHookAction {
     public PushBuildAction(AbstractProject<?, ?> project, String json) {
         LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
-        this.pushHook = GsonUtil.getGson().fromJson(json, PushHook.class);
+        this.pushHook = JsonUtil.read(json, PushHook.class);
     }
 
     public void execute(StaplerResponse response) {
-        String repositoryUrl = pushHook.getRepository().optUrl().orNull();
-        if (repositoryUrl == null) {
+        if (pushHook.getRepository() != null && pushHook.getRepository().getUrl() == null) {
             LOGGER.log(Level.WARNING, "No repository url found.");
             return;
         }

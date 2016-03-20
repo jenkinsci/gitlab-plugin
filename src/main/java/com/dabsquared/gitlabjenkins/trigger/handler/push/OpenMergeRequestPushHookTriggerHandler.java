@@ -1,17 +1,16 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.cause.GitLabMergeCause;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import com.google.common.base.Optional;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.ObjectAttributesBuilder.objectAttributes;
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 
 /**
  * @author Robin Müller
@@ -45,11 +42,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
                 final GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                Optional<Integer> projectId = hook.optProjectId();
-                if (property != null && property.getClient() != null && projectId.isPresent() && trigger != null) {
+                Integer projectId = hook.getProjectId();
+                if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                     GitLabApi client = property.getClient();
-                    for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.get().toString())) {
-                            handleMergeRequest(job, hook, ciSkip, branchFilter, client, projectId.get(), mergeRequest);
+                    for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
+                            handleMergeRequest(job, hook, ciSkip, branchFilter, client, projectId, mergeRequest);
                     }
                 }
             }
@@ -78,22 +75,40 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabApi client, Integer projectId, MergeRequest mergeRequest) {
-        if (ciSkip && mergeRequest.optDescription().or("").contains("[ci-skip]")) {
-            LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.optTitle().or("") + " due to ci-skip.");
+        if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
+            LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
         }
-        Optional<String> targetBranch = mergeRequest.optTargetBranch();
-        Optional<String> sourceBranch = mergeRequest.optSourceBranch();
-        if (targetBranch.isPresent()
-                && branchFilter.isBranchAllowed(targetBranch.get())
-                && hook.optRef().or("").endsWith(targetBranch.get())
-                && sourceBranch.isPresent()) {
+        String targetBranch = mergeRequest.getTargetBranch();
+        String sourceBranch = mergeRequest.getSourceBranch();
+        if (targetBranch != null && branchFilter.isBranchAllowed(targetBranch) && hook.getRef().endsWith(targetBranch) && sourceBranch != null) {
             LOGGER.log(Level.INFO, "{0} triggered for push to target branch of open merge request #{1}.",
-                    LoggerUtil.toArray(job.getFullName(), mergeRequest.optIid().orNull()));
+                    LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
-            Branch branch = client.getBranch(projectId.toString(), sourceBranch.get());
-            scheduleBuild(job, new CauseAction(new GitLabMergeCause(createMergeRequest(projectId, mergeRequest, branch))));
+            Branch branch = client.getBranch(projectId.toString(), sourceBranch);
+            scheduleBuild(job, new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, mergeRequest, branch))));
         }
+    }
+
+    private CauseData retrieveCauseData(PushHook hook, MergeRequest mergeRequest, Branch branch) {
+        return causeData()
+                .withActionType(CauseData.ActionType.MERGE)
+                .withProjectId(hook.getProjectId())
+                .withBranch(branch.getName())
+                .withSourceBranch(branch.getName())
+                .withUserName(branch.getCommit().getAuthor().getName())
+                .withUserEmail(branch.getCommit().getAuthor().getEmail())
+                //.withSourceRepoHomepage()
+                //.withSourceRepoUrl()
+                .withMergeRequestTitle(mergeRequest.getTitle())
+                .withMergeRequestDescription(mergeRequest.getDescription())
+                .withMergeRequestId(mergeRequest.getIid())
+                .withTargetBranch(mergeRequest.getTargetBranch())
+                .withTargetRepoName(hook.getRepository().getName())
+                .withTargetRepoSshUrl(hook.getRepository().getGitSshUrl())
+                .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
+                .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
+                .build();
     }
 
     @Override
@@ -120,29 +135,5 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 return job;
             }
         };
-    }
-
-    private MergeRequestHook createMergeRequest(Integer projectId, MergeRequest mergeRequest, Branch branch) {
-        return mergeRequestHook()
-                .withObjectKind("merge_request")
-                .withObjectAttributes(objectAttributes()
-                        .withAssigneeId(mergeRequest.getAssignee().optId().orNull())
-                        .withAuthorId(mergeRequest.getAuthor().optId().orNull())
-                        .withDescription(mergeRequest.optDescription().orNull())
-                        .withId(mergeRequest.optId().orNull())
-                        .withIid(mergeRequest.optIid().orNull())
-                        .withMergeStatus(mergeRequest.optMergeStatus().orNull())
-                        .withSourceBranch(mergeRequest.optSourceBranch().orNull())
-                        .withSourceProjectId(mergeRequest.optSourceProjectId().orNull())
-                        .withTargetBranch(mergeRequest.optTargetBranch().orNull())
-                        .withTargetProjectId(projectId)
-                        .withTitle(mergeRequest.optTitle().orNull())
-                        .withLastCommit(commit()
-                                .withId(branch.getCommit().optId().orNull())
-                                .withMessage(branch.getCommit().optMessage().orNull())
-                                .withUrl("/projects/" + projectId + "/repository/commits/" + branch.getCommit().optId().orNull())
-                                .build())
-                        .build())
-                .build();
     }
 }

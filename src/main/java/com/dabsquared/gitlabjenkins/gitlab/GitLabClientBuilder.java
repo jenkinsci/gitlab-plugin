@@ -2,7 +2,7 @@ package com.dabsquared.gitlabjenkins.gitlab;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import com.dabsquared.gitlabjenkins.util.GsonUtil;
+import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.base.Function;
@@ -34,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.RuntimeDelegate;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -141,7 +140,7 @@ public class GitLabClientBuilder {
         private String getPrettyPrintResponseBody(ClientResponseContext responseContext) {
             String responseBody = getResponseBody(responseContext);
             if (StringUtils.isNotEmpty(responseBody) && responseContext.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
-                return GsonUtil.toPrettyPrint(responseBody);
+                return JsonUtil.toPrettyPrint(responseBody);
             }
             return responseBody;
         }

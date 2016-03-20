@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -10,66 +8,71 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Repository {
 
-    private final String name;
-    private final String description;
-    private final String url;
-    private final String homepage;
-    private final String gitSshUrl;
-    private final String gitHttpUrl;
-    private final Integer visibilityLevel;
+    private String name;
+    private String description;
+    private String url;
+    private String homepage;
+    private String gitSshUrl;
+    private String gitHttpUrl;
+    private Integer visibilityLevel;
 
-    public static Supplier<Repository> nullRepository() {
-        return new Supplier<Repository>() {
-            @Override
-            public Repository get() {
-                return new Repository();
-            }
-        };
+    public String getName() {
+        return name;
     }
-    
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public Repository(String name, String description, String url, String homepage, String gitSshUrl, String gitHttpUrl, Integer visibilityLevel) {
+
+    public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getHomepage() {
+        return homepage;
+    }
+
+    public void setHomepage(String homepage) {
         this.homepage = homepage;
+    }
+
+    public String getGitSshUrl() {
+        return gitSshUrl;
+    }
+
+    public void setGitSshUrl(String gitSshUrl) {
         this.gitSshUrl = gitSshUrl;
+    }
+
+    public String getGitHttpUrl() {
+        return gitHttpUrl;
+    }
+
+    public void setGitHttpUrl(String gitHttpUrl) {
         this.gitHttpUrl = gitHttpUrl;
+    }
+
+    public Integer getVisibilityLevel() {
+        return visibilityLevel;
+    }
+
+    public void setVisibilityLevel(Integer visibilityLevel) {
         this.visibilityLevel = visibilityLevel;
-    }
-
-    Repository() {
-        this(null, null, null, null, null, null, null);
-    }
-
-    public Optional<String> optName() {
-        return Optional.fromNullable(name);
-    }
-
-    public Optional<String> optDescription() {
-        return Optional.fromNullable(description);
-    }
-
-    public Optional<String> optUrl() {
-        return Optional.fromNullable(url);
-    }
-
-    public Optional<String> optHomepage() {
-        return Optional.fromNullable(homepage);
-    }
-
-    public Optional<String> optGitSshUrl() {
-        return Optional.fromNullable(gitSshUrl);
-    }
-
-    public Optional<String> optGitHttpUrl() {
-        return Optional.fromNullable(gitHttpUrl);
-    }
-
-    public Optional<Integer> optVisibilityLevel() {
-        return Optional.fromNullable(visibilityLevel);
     }
 
     @Override

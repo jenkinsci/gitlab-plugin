@@ -1,112 +1,116 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.google.common.base.Optional;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Robin Müller
  */
+@GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class PushHook extends WebHook {
 
-    private final String before;
-    private final String after;
-    private final String ref;
-    private final Integer userId;
-    private final String userName;
-    private final String userEmail;
-    private final String userAvatar;
-    private final Integer projectId;
-    private final Project project;
-    private final Repository repository;
-    private final List<Commit> commits;
-    private final Integer totalCommitsCount;
+    private String before;
+    private String after;
+    private String ref;
+    private Integer userId;
+    private String userName;
+    private String userEmail;
+    private String userAvatar;
+    private Integer projectId;
+    private Project project;
+    private List<Commit> commits;
+    private Integer totalCommitsCount;
 
-    @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public PushHook(String objectKind, String before, String after, String ref, Integer userId, String userName, String userEmail, String userAvatar,
-                    Integer projectId, Project project, Repository repository, List<Commit> commits, Integer totalCommitsCount) {
-        super(objectKind);
+    public String getBefore() {
+        return before;
+    }
+
+    public void setBefore(String before) {
         this.before = before;
+    }
+
+    public String getAfter() {
+        return after;
+    }
+
+    public void setAfter(String after) {
         this.after = after;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
         this.ref = ref;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
         this.userAvatar = userAvatar;
+    }
+
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Integer projectId) {
         this.projectId = projectId;
-        this.project = project;
-        this.repository = repository;
-        this.commits = commits;
-        this.totalCommitsCount = totalCommitsCount;
-    }
-
-    PushHook() {
-        this(null, null, null, null, null, null, null, null, null, null, null, null, null);
-    }
-
-    public Optional<Project> optProject() {
-        return Optional.fromNullable(project);
-    }
-
-    public Optional<Integer> optProjectId() {
-        return Optional.fromNullable(projectId);
-    }
-
-    public Optional<String> optUserAvatar() {
-        return Optional.fromNullable(userAvatar);
-    }
-
-    public Optional<String> optUserEmail() {
-        return Optional.fromNullable(userEmail);
-    }
-
-    public Optional<String> optUserName() {
-        return Optional.fromNullable(userName);
-    }
-
-    public Optional<Integer> optUserId() {
-        return Optional.fromNullable(userId);
-    }
-
-    public Optional<String> optRef() {
-        return Optional.fromNullable(ref);
-    }
-
-    public Optional<String> optAfter() {
-        return Optional.fromNullable(after);
-    }
-
-    public Optional<String> optBefore() {
-        return Optional.fromNullable(before);
     }
 
     public Project getProject() {
-        return project == null ? new Project() : project;
+        return project;
     }
 
-    public Optional<Repository> optRepository() {
-        return Optional.fromNullable(repository);
-    }
-
-    public Repository getRepository() {
-        return repository == null ? new Repository() : repository;
-    }
-
-    public Optional<List<Commit>> optCommits() {
-        return Optional.fromNullable(commits);
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public List<Commit> getCommits() {
-        return commits == null ? Collections.<Commit>emptyList() : commits;
+        return commits;
     }
 
-    public Optional<Integer> optTotalCommitsCount() {
-        return Optional.fromNullable(totalCommitsCount);
+    public void setCommits(List<Commit> commits) {
+        this.commits = commits;
+    }
+
+    public Integer getTotalCommitsCount() {
+        return totalCommitsCount;
+    }
+
+    public void setTotalCommitsCount(Integer totalCommitsCount) {
+        this.totalCommitsCount = totalCommitsCount;
     }
 
     @Override
@@ -128,7 +132,6 @@ public class PushHook extends WebHook {
                 .append(userAvatar, pushHook.userAvatar)
                 .append(projectId, pushHook.projectId)
                 .append(project, pushHook.project)
-                .append(repository, pushHook.repository)
                 .append(commits, pushHook.commits)
                 .append(totalCommitsCount, pushHook.totalCommitsCount)
                 .isEquals();
@@ -146,7 +149,6 @@ public class PushHook extends WebHook {
                 .append(userAvatar)
                 .append(projectId)
                 .append(project)
-                .append(repository)
                 .append(commits)
                 .append(totalCommitsCount)
                 .toHashCode();
@@ -164,7 +166,6 @@ public class PushHook extends WebHook {
                 .append("userAvatar", userAvatar)
                 .append("projectId", projectId)
                 .append("project", project)
-                .append("repository", repository)
                 .append("commits", commits)
                 .append("totalCommitsCount", totalCommitsCount)
                 .toString();

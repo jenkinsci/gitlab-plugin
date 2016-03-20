@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.google.common.base.Optional;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -10,14 +9,23 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public abstract class WebHook {
 
-    private final String objectKind;
+    private Repository repository;
+    private String objectKind;
 
-    protected WebHook(String objectKind) {
+    public String getObjectKind() {
+        return objectKind;
+    }
+
+    public void setObjectKind(String objectKind) {
         this.objectKind = objectKind;
     }
 
-    public Optional<String> optObjectKind() {
-        return Optional.fromNullable(objectKind);
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(Repository repository) {
+        this.repository = repository;
     }
 
     @Override
@@ -30,6 +38,7 @@ public abstract class WebHook {
         }
         WebHook webHook = (WebHook) o;
         return new EqualsBuilder()
+                .append(repository, webHook.repository)
                 .append(objectKind, webHook.objectKind)
                 .isEquals();
     }
@@ -37,6 +46,7 @@ public abstract class WebHook {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
+                .append(repository)
                 .append(objectKind)
                 .toHashCode();
     }
@@ -44,6 +54,7 @@ public abstract class WebHook {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .append("repository", repository)
                 .append("objectKind", objectKind)
                 .toString();
     }
