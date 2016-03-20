@@ -158,3 +158,61 @@ Before submitting your change make sure that:
 * you updated the help docs
 * you updated the README
 * you have used findbugs to see if you haven't introduced any new warnings.
+
+Setup test environment using Docker
+===================================
+
+In order to test the plugin on different versions of `GitLab` and `Jenkins` you may want to use `Docker` containers.
+
+Below you will find example docker instructions to quickly setup a `GitLab` and `Jenkins` container.
+
+### Setup GitLab
+
+Step 1. Launch a postgresql container
+
+```bash
+docker run --name gitlab-postgresql -d \
+    --env 'DB_NAME=gitlabhq_production' \
+    --env 'DB_USER=gitlab' --env 'DB_PASS=password' \
+    --volume /srv/docker/gitlab/postgresql:/var/lib/postgresql \
+    sameersbn/postgresql:9.4-15
+```
+
+Step 2. Launch a redis container
+
+```bash
+docker run --name gitlab-redis -d \
+    --volume /srv/docker/gitlab/redis:/var/lib/redis \
+    sameersbn/redis:latest
+```
+
+Step 3. Launch the gitlab container
+
+```bash
+docker run --name gitlab -d \
+    --link gitlab-postgresql:postgresql --link gitlab-redis:redisio \
+    --publish 10022:22 --publish 10080:80 \
+    --env 'GITLAB_PORT=10080' --env 'GITLAB_SSH_PORT=10022' \
+    --env 'GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alpha-numeric-string' \
+    --volume /srv/docker/gitlab/gitlab:/home/git/data \
+    sameersbn/gitlab:8.5.8
+```
+
+Point your browser to `http://localhost:10080` and login using the default username and password:
+
+* username: **root**
+* password: **5iveL!fe**
+
+For more information on the supported `Gitlab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
+
+### Setup Jenkins
+
+Launch Jenkins server
+
+```bash
+docker run -d -p 8080:8080 -p 50000:50000 jenkins
+```
+
+To see Jenkins, point your browser to `http://localhost:8080`.
+
+For more information on the supported `Jenkins` tags and how to configure the containers, visit https://hub.docker.com/r/library/jenkins.
