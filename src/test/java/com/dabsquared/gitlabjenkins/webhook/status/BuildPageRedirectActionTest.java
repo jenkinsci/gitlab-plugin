@@ -33,13 +33,11 @@ public abstract class BuildPageRedirectActionTest {
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
-
-    @Mock
-    private StaplerResponse response;
-
-    private String gitRepoUrl;
     protected String commitSha1;
     protected String branch = "master";
+    @Mock
+    private StaplerResponse response;
+    private String gitRepoUrl;
 
     @Before
     public void setup() throws Exception {

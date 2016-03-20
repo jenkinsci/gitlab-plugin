@@ -18,7 +18,7 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
     protected void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
-        verify(response).setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+        verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
         assertThat(out.toByteArray(), is(IOUtils.toByteArray(getClass().getResourceAsStream("success.png"))));
@@ -26,7 +26,7 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
     protected void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
-        verify(response).setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+        verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
         assertThat(out.toByteArray(), is(IOUtils.toByteArray(getClass().getResourceAsStream("failed.png"))));
@@ -34,7 +34,7 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
     protected void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
-        verify(response).setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+        verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
         assertThat(out.toByteArray(), is(IOUtils.toByteArray(getClass().getResourceAsStream("running.png"))));
@@ -42,7 +42,7 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
     protected void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
-        verify(response).setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+        verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
         assertThat(out.toByteArray(), is(IOUtils.toByteArray(getClass().getResourceAsStream("unknown.png"))));
@@ -50,7 +50,7 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
     protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
-        verify(response).setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+        verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
         assertThat(out.toByteArray(), is(IOUtils.toByteArray(getClass().getResourceAsStream("unstable.png"))));
@@ -58,7 +58,7 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
     protected void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse response) throws IOException {
-        verify(response).setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+        verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
         assertThat(out.toByteArray(), is(IOUtils.toByteArray(getClass().getResourceAsStream("unknown.png"))));

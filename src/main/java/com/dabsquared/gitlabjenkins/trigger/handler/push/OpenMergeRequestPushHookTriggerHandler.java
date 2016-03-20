@@ -47,7 +47,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                     GitLabApi client = property.getClient();
                     for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
-                            handleMergeRequest(job, hook, ciSkip, branchFilter, client, projectId, mergeRequest);
+                        handleMergeRequest(job, hook, ciSkip, branchFilter, client, projectId, mergeRequest);
                     }
                 }
             }

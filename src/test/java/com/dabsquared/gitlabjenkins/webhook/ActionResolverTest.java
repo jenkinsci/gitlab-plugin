@@ -139,7 +139,6 @@ public class ActionResolverTest {
     }
 
 
-
     private static class ResourceServletInputStream extends ServletInputStream {
 
         private final InputStream input;

@@ -19,7 +19,7 @@ class StatusPngAction extends BuildStatusAction {
     @Override
     protected void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status) {
         try {
-            response.setHeader("Expires","Fri, 01 Jan 1984 00:00:00 GMT");
+            response.setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
             response.setHeader("Cache-Control", "no-cache, private");
             response.setHeader("Content-Type", "image/png");
             IOUtils.copy(getStatusImage(status), response.getOutputStream());

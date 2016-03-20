@@ -22,7 +22,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

@@ -1,23 +1,14 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_7_10_5_489b413;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_7_5_1_36679b5;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_8_1_2_8c8af7b;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
+import hudson.plugins.git.RevisionParameterAction;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.junit.Rule;
-
-import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
-
-import hudson.plugins.git.RevisionParameterAction;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
@@ -25,6 +16,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
 public class PushHookTriggerHandlerGitlabServerTest {

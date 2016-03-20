@@ -96,12 +96,42 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         initializeBranchFilter();
     }
 
+    @Initializer(after = InitMilestone.JOB_LOADED)
+    public static void migrateJobs() throws IOException {
+        GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
+        if (!oldConfig.jobsMigrated) {
+            GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+            gitLabConfig.getConnections().add(new GitLabConnection(oldConfig.gitlabHostUrl,
+                    oldConfig.gitlabHostUrl,
+                    oldConfig.gitlabApiToken,
+                    oldConfig.ignoreCertificateErrors));
+
+            String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
+            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                if (trigger != null) {
+                    if (trigger.addCiMessage) {
+                        project.getPublishersList().add(new GitLabCommitStatusPublisher());
+                    }
+                    if (trigger.branchFilterType == null) {
+                        trigger.branchFilterType = trigger.branchFilterName;
+                    }
+                    project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
+                    project.save();
+                }
+            }
+            gitLabConfig.save();
+            oldConfig.jobsMigrated = true;
+            oldConfig.save();
+        }
+    }
+
     public boolean getTriggerOnPush() {
-    	return triggerOnPush;
+        return triggerOnPush;
     }
 
     public boolean getTriggerOnMergeRequest() {
-    	return triggerOnMergeRequest;
+        return triggerOnMergeRequest;
     }
 
     public TriggerOpenMergeRequest getTriggerOpenMergeRequestOnPush() {
@@ -177,14 +207,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
+        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private boolean jobsMigrated = false;
         private String gitlabApiToken;
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
-        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
 
         public DescriptorImpl() {
-        	load();
+            load();
         }
 
         @Override
@@ -240,9 +270,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
 
         public ListBoxModel doFillTriggerOpenMergeRequestOnPushItems(@QueryParameter String triggerOpenMergeRequestOnPush) {
-            return new ListBoxModel(new Option("Never", "never", triggerOpenMergeRequestOnPush.matches("never") ),
-                    new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source") ),
-                    new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both") ));
+            return new ListBoxModel(new Option("Never", "never", triggerOpenMergeRequestOnPush.matches("never")),
+                    new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source")),
+                    new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both")));
         }
 
         public AutoCompletionCandidates doAutoCompleteIncludeBranchesSpec(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
@@ -259,36 +289,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         public FormValidation doCheckExcludeBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
             return ProjectBranchesProvider.instance().doCheckBranchesSpec(project, value);
-        }
-    }
-
-    @Initializer(after = InitMilestone.JOB_LOADED)
-    public static void migrateJobs() throws IOException {
-        GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
-        if (!oldConfig.jobsMigrated) {
-            GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            gitLabConfig.getConnections().add(new GitLabConnection(oldConfig.gitlabHostUrl,
-                    oldConfig.gitlabHostUrl,
-                    oldConfig.gitlabApiToken,
-                    oldConfig.ignoreCertificateErrors));
-
-            String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
-            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                if (trigger != null) {
-                    if (trigger.addCiMessage) {
-                        project.getPublishersList().add(new GitLabCommitStatusPublisher());
-                    }
-                    if (trigger.branchFilterType == null) {
-                        trigger.branchFilterType = trigger.branchFilterName;
-                    }
-                    project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
-                    project.save();
-                }
-            }
-            gitLabConfig.save();
-            oldConfig.jobsMigrated = true;
-            oldConfig.save();
         }
     }
 }

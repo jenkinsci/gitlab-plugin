@@ -28,11 +28,11 @@ import static org.junit.Assert.assertThat;
  */
 public class GitLabConnectionConfigSSLTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
-
     private static int port;
     private static Server server;
+
+    @Rule
+    public JenkinsRule jenkins = new JenkinsRule();
 
     @BeforeClass
     public static void startJetty() throws Exception {
@@ -42,7 +42,7 @@ public class GitLabConnectionConfigSSLTest {
         sslSocketConnector.setKeystore("src/test/resources/keystore");
         sslSocketConnector.setKeyPassword("password");
         sslSocketConnector.setPort(port);
-        server.setConnectors(new Connector[] {sslSocketConnector});
+        server.setConnectors(new Connector[]{sslSocketConnector});
         server.addHandler(new AbstractHandler() {
             public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
                 response.setStatus(Response.Status.OK.getStatusCode());

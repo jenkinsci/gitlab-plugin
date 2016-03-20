@@ -1,8 +1,8 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -175,12 +175,12 @@ public class GitLabCommitStatusPublisherTest {
 
     private HttpRequest prepareUpdateCommitStatus(String projectId, String sha, String targetUrl, BuildState state) throws UnsupportedEncodingException {
         return request()
-                    .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/statuses/" + sha)
-                    .withMethod("POST")
-                    .withHeader("PRIVATE-TOKEN", "secret")
-                    .withQueryStringParameter("state", state.name())
-                    .withQueryStringParameter("context", "jenkins")
-                    .withQueryStringParameter("target_url", targetUrl);
+                .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/statuses/" + sha)
+                .withMethod("POST")
+                .withHeader("PRIVATE-TOKEN", "secret")
+                .withQueryStringParameter("state", state.name())
+                .withQueryStringParameter("context", "jenkins")
+                .withQueryStringParameter("target_url", targetUrl);
     }
 
     private HttpRequest prepareExistsCommitWithSuccessResponse(String projectId, String sha) throws UnsupportedEncodingException {
@@ -191,9 +191,9 @@ public class GitLabCommitStatusPublisherTest {
 
     private HttpRequest prepareExistsCommit(String projectId, String sha) throws UnsupportedEncodingException {
         return request()
-                    .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/repository/commits/" + sha)
-                    .withMethod("HEAD")
-                    .withHeader("PRIVATE-TOKEN", "secret");
+                .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/repository/commits/" + sha)
+                .withMethod("HEAD")
+                .withHeader("PRIVATE-TOKEN", "secret");
     }
 
     private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String... remoteUrls) {

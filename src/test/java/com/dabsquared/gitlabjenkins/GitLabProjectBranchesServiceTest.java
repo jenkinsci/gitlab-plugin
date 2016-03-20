@@ -23,12 +23,12 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class GitLabProjectBranchesServiceTest {
 
+    private final static List<String> BRANCH_NAMES_PROJECT_B = asList("master", "B-branch-1", "B-branch-2");
+
     private GitLabProjectBranchesService branchesService;
 
     @Mock
     private GitLabApi gitlabApi;
-
-    private final static List<String> BRANCH_NAMES_PROJECT_B = asList("master", "B-branch-1", "B-branch-2");
 
     @Before
     public void setUp() throws IOException {

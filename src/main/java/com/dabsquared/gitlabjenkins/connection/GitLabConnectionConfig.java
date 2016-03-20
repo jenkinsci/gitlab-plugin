@@ -11,7 +11,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

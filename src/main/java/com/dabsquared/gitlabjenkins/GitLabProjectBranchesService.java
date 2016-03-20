@@ -20,9 +20,8 @@ public class GitLabProjectBranchesService {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabProjectBranchesService.class.getName());
 
-    private final Cache<String, List<String>> projectBranchCache;
-
     private static transient GitLabProjectBranchesService gitLabProjectBranchesService;
+    private final Cache<String, List<String>> projectBranchCache;
 
     GitLabProjectBranchesService() {
         this.projectBranchCache = CacheBuilder.<String, String>newBuilder()

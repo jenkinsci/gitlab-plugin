@@ -1,8 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
-import hudson.model.AbstractBuild;
-import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
@@ -22,7 +20,7 @@ abstract class BuildPageRedirectAction implements WebHookAction {
     }
 
     public void execute(StaplerResponse response) {
-        if(build != null) {
+        if (build != null) {
             try {
                 response.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
             } catch (IOException e) {

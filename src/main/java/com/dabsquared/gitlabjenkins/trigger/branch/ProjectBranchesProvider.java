@@ -5,10 +5,6 @@ import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -23,7 +19,6 @@ import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

@@ -10,11 +10,11 @@ import java.util.HashSet;
  */
 class AntPathMatcherSet extends HashSet<String> {
 
+    private transient final AntPathMatcher matcher = new AntPathMatcher();
+
     public AntPathMatcherSet(Collection<? extends String> c) {
         super(c);
     }
-
-    private transient final AntPathMatcher matcher = new AntPathMatcher();
 
     @Override
     public boolean contains(Object o) {

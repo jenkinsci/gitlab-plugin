@@ -15,16 +15,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Daniel Brooks
  */
 
 @Extension
 public class GitLabWebHook implements UnprotectedRootAction {
 
-    private static final Logger LOGGER = Logger.getLogger(GitLabWebHook.class.getName());
-
     public static final String WEBHOOK_URL = "project";
+
+    private static final Logger LOGGER = Logger.getLogger(GitLabWebHook.class.getName());
 
     private transient final ActionResolver actionResolver = new ActionResolver();
 

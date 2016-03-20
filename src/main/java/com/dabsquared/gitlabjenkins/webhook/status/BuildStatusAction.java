@@ -34,9 +34,9 @@ abstract class BuildStatusAction implements WebHookAction {
     protected abstract void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status);
 
     private boolean hasGitSCM(SCMTriggerItem item) {
-        if(item != null) {
-            for(SCM scm : item.getSCMs()) {
-                if(scm instanceof GitSCM) {
+        if (item != null) {
+            for (SCM scm : item.getSCMs()) {
+                if (scm instanceof GitSCM) {
                     return true;
                 }
             }

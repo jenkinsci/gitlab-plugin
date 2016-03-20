@@ -3,15 +3,15 @@ package com.dabsquared.gitlabjenkins.testhelpers;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 
 public interface GitLabPushRequestSamples {
-	PushHook pushBrandNewMasterBranchRequest();
+    PushHook pushBrandNewMasterBranchRequest();
 
-	PushHook pushNewBranchRequest();
+    PushHook pushNewBranchRequest();
 
-	PushHook pushCommitRequest();
+    PushHook pushCommitRequest();
 
-	PushHook mergePushRequest();
+    PushHook mergePushRequest();
 
-	PushHook pushNewTagRequest();
+    PushHook pushNewTagRequest();
 
-	PushHook deleteBranchRequest();
+    PushHook deleteBranchRequest();
 }

@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
-import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;

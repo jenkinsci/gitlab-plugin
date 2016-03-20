@@ -6,9 +6,7 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
-import hudson.tasks.Shell;
 import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -44,12 +42,13 @@ public abstract class BuildStatusActionTest {
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
 
+    protected String commitSha1;
+    protected String branch = "master";
+
     @Mock
     private StaplerResponse response;
 
     private String gitRepoUrl;
-    protected String commitSha1;
-    protected String branch = "master";
 
     @Before
     public void setup() throws Exception {

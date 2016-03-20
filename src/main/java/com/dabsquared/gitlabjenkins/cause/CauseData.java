@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Robin Müller
@@ -258,7 +258,7 @@ public final class CauseData {
         }, MERGE {
             @Override
             String getShortDescription(CauseData data) {
-                return "GitLab Merge Request #" + data.getMergeRequestId()+ " : " + data.getSourceBranch() + " => " + data.getTargetBranch();
+                return "GitLab Merge Request #" + data.getMergeRequestId() + " : " + data.getSourceBranch() + " => " + data.getTargetBranch();
             }
         };
 
