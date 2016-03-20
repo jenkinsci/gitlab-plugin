@@ -2,7 +2,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.WebHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;

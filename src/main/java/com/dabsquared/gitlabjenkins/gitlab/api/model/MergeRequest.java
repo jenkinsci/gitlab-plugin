@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

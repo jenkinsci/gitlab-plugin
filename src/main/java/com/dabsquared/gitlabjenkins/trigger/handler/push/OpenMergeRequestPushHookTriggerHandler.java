@@ -6,9 +6,10 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
@@ -86,20 +87,24 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
             Branch branch = client.getBranch(projectId.toString(), sourceBranch);
-            scheduleBuild(job, new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, mergeRequest, branch))));
+            Project project = client.getProject(mergeRequest.getSourceProjectId().toString());
+            scheduleBuild(job, new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))));
         }
     }
 
-    private CauseData retrieveCauseData(PushHook hook, MergeRequest mergeRequest, Branch branch) {
+    private CauseData retrieveCauseData(PushHook hook, Project project, MergeRequest mergeRequest, Branch branch) {
         return causeData()
                 .withActionType(CauseData.ActionType.MERGE)
                 .withProjectId(hook.getProjectId())
                 .withBranch(branch.getName())
                 .withSourceBranch(branch.getName())
-                .withUserName(branch.getCommit().getAuthor().getName())
-                .withUserEmail(branch.getCommit().getAuthor().getEmail())
-                //.withSourceRepoHomepage()
-                //.withSourceRepoUrl()
+                .withUserName(branch.getCommit().getAuthorName())
+                .withUserEmail(branch.getCommit().getAuthorEmail())
+                .withSourceRepoHomepage(project.getWebUrl())
+                .withSourceRepoName(project.getName())
+                .withSourceRepoUrl(project.getSshUrlToRepo())
+                .withSourceRepoSshUrl(project.getSshUrlToRepo())
+                .withSourceRepoHttpUrl(project.getHttpUrlToRepo())
                 .withMergeRequestTitle(mergeRequest.getTitle())
                 .withMergeRequestDescription(mergeRequest.getDescription())
                 .withMergeRequestId(mergeRequest.getIid())

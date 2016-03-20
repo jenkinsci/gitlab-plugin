@@ -6,7 +6,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author Robin Müller
@@ -16,12 +15,9 @@ public class Commit {
 
     private String id;
     private String message;
-    private Date timestamp;
-    private String url;
-    private User author;
-    private List<String> added;
-    private List<String> modified;
-    private List<String> removed;
+    private Date authoredDate;
+    private String authorName;
+    private String authorEmail;
 
     public String getId() {
         return id;
@@ -39,52 +35,28 @@ public class Commit {
         this.message = message;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getAuthoredDate() {
+        return authoredDate;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setAuthoredDate(Date authoredDate) {
+        this.authoredDate = authoredDate;
     }
 
-    public String getUrl() {
-        return url;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
-    public User getAuthor() {
-        return author;
+    public String getAuthorEmail() {
+        return authorEmail;
     }
 
-    public void setAuthor(User author) {
-        this.author = author;
-    }
-
-    public List<String> getAdded() {
-        return added;
-    }
-
-    public void setAdded(List<String> added) {
-        this.added = added;
-    }
-
-    public List<String> getModified() {
-        return modified;
-    }
-
-    public void setModified(List<String> modified) {
-        this.modified = modified;
-    }
-
-    public List<String> getRemoved() {
-        return removed;
-    }
-
-    public void setRemoved(List<String> removed) {
-        this.removed = removed;
+    public void setAuthorEmail(String authorEmail) {
+        this.authorEmail = authorEmail;
     }
 
     @Override
@@ -99,12 +71,9 @@ public class Commit {
         return new EqualsBuilder()
                 .append(id, commit.id)
                 .append(message, commit.message)
-                .append(timestamp, commit.timestamp)
-                .append(url, commit.url)
-                .append(author, commit.author)
-                .append(added, commit.added)
-                .append(modified, commit.modified)
-                .append(removed, commit.removed)
+                .append(authoredDate, commit.authoredDate)
+                .append(authorName, commit.authorName)
+                .append(authorEmail, commit.authorEmail)
                 .isEquals();
     }
 
@@ -113,12 +82,9 @@ public class Commit {
         return new HashCodeBuilder(17, 37)
                 .append(id)
                 .append(message)
-                .append(timestamp)
-                .append(url)
-                .append(author)
-                .append(added)
-                .append(modified)
-                .append(removed)
+                .append(authoredDate)
+                .append(authorName)
+                .append(authorEmail)
                 .toHashCode();
     }
 
@@ -127,12 +93,9 @@ public class Commit {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("message", message)
-                .append("timestamp", timestamp)
-                .append("url", url)
-                .append("author", author)
-                .append("added", added)
-                .append("modified", modified)
-                .append("removed", removed)
+                .append("authoredDate", authoredDate)
+                .append("authorName", authorName)
+                .append("authorEmail", authorEmail)
                 .toString();
     }
 }

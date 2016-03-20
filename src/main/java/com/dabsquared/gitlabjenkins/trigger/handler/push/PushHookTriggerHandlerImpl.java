@@ -1,8 +1,8 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Commit;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.plugins.git.RevisionParameterAction;

@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.AbstractProject;

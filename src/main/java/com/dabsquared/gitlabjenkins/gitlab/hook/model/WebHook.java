@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.gitlab.api.model;
+package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

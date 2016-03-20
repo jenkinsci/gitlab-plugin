@@ -1,13 +1,13 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.PushHookBuilder.pushHook;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.RepositoryBuilder.repository;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 
 public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequestSamples {
 

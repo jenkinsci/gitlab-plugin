@@ -3,7 +3,7 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;

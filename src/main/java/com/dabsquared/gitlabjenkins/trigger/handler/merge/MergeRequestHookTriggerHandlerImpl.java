@@ -2,9 +2,9 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.ObjectAttributes;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;

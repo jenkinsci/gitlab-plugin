@@ -2,8 +2,8 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -22,6 +22,12 @@ import java.util.List;
  */
 @Path("/api/v3")
 public interface GitLabApi {
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}")
+    Project getProject(@PathParam("projectId") String projectId);
+
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

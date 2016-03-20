@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.PushHookBuilder.pushHook;
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.RepositoryBuilder.repository;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

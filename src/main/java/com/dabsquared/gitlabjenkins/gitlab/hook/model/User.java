@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.gitlab.api.model;
+package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -15,6 +15,7 @@ public class User {
     private String name;
     private String username;
     private String email;
+    private String avatarUrl;
 
     public Integer getId() {
         return id;
@@ -48,6 +49,14 @@ public class User {
         this.email = email;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -62,6 +71,7 @@ public class User {
                 .append(name, user.name)
                 .append(username, user.username)
                 .append(email, user.email)
+                .append(avatarUrl, user.avatarUrl)
                 .isEquals();
     }
 
@@ -72,6 +82,7 @@ public class User {
                 .append(name)
                 .append(username)
                 .append(email)
+                .append(avatarUrl)
                 .toHashCode();
     }
 
@@ -82,6 +93,7 @@ public class User {
                 .append("name", name)
                 .append("username", username)
                 .append("email", email)
+                .append("avatarUrl", avatarUrl)
                 .toString();
     }
 }
