@@ -12,9 +12,4 @@ class NopPushHookTriggerHandler implements PushHookTriggerHandler {
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter) {
         // nothing to do
     }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
 }

@@ -1,13 +1,10 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 
 /**
  * @author Robin Müller
@@ -25,14 +22,6 @@ class NameBasedFilter implements BranchFilter {
     @Override
     public boolean isBranchAllowed(String branchName) {
         return hasNoBranchSpecs() || (isBranchNotExcluded(branchName) && isBranchIncluded(branchName));
-    }
-
-    @Override
-    public BranchFilterConfig getConfig() {
-        return branchFilterConfig()
-                .withIncludeBranchesSpec(Joiner.on(", ").join(includedBranches))
-                .withExcludeBranchesSpec(Joiner.on(", ").join(excludedBranches))
-                .build(BranchFilterType.NameBasedFilter);
     }
 
     private boolean hasNoBranchSpecs() {
@@ -60,7 +49,7 @@ class NameBasedFilter implements BranchFilter {
     }
 
     private List<String> convert(String commaSeparatedString) {
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> result = new ArrayList<>();
         for (String s : Splitter.on(',').omitEmptyStrings().trimResults().split(commaSeparatedString)) {
             result.add(s);
         }

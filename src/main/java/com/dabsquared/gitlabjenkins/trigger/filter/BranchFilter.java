@@ -6,6 +6,4 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
 public interface BranchFilter {
 
     boolean isBranchAllowed(String branchName);
-
-    BranchFilterConfig getConfig();
 }

@@ -1,9 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
-import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -30,6 +27,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.C
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory.newBranchFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -64,7 +62,7 @@ public class PushHookTriggerHandlerImplTest {
         });
         pushHookTriggerHandler.handle(project, pushHook()
                 .withCommits(Collections.singletonList(commit().withMessage("[ci-skip]").build()))
-                .build(), webHookTriggerConfig(true).getCiSkip(), webHookTriggerConfig(true).getBranchFilter());
+                .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(1000);
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -103,23 +101,9 @@ public class PushHookTriggerHandlerImplTest {
                         .build())
                 .withAfter(commit.name())
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
-                .build(), webHookTriggerConfig(true).getCiSkip(), webHookTriggerConfig(true).getBranchFilter());
+                .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block();
         assertThat(buildTriggered.isSignaled(), is(true));
-    }
-
-    private WebHookTriggerConfig webHookTriggerConfig(final boolean ciSkip) {
-        return new WebHookTriggerConfig() {
-            @Override
-            public boolean getCiSkip() {
-                return ciSkip;
-            }
-
-            @Override
-            public BranchFilter getBranchFilter() {
-                return BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All));
-            }
-        };
     }
 }

@@ -17,11 +17,6 @@ import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     protected boolean isCiSkip(PushHook hook) {
         List<Commit> commits = hook.getCommits();
         return commits != null && !commits.isEmpty() && commits.get(0).getMessage() != null && commits.get(0).getMessage().contains("[ci-skip]");

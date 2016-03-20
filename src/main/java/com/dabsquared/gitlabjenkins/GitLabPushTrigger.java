@@ -11,19 +11,16 @@ import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
-import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerConfig;
 import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
-import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
-import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
-import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -35,7 +32,6 @@ import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -44,8 +40,11 @@ import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.io.ObjectStreamException;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
+import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory.newPushHookTriggerHandler;
 
 
 /**
@@ -53,9 +52,9 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
  *
  * @author Daniel Brooks
  */
-public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTriggerConfig {
-	private transient boolean triggerOnPush = true;
-    private transient boolean triggerOnMergeRequest = true;
+public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
+	private boolean triggerOnPush = true;
+    private boolean triggerOnMergeRequest = true;
     private final TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean ciSkip = true;
     private boolean setBuildDescription = true;
@@ -63,13 +62,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
     private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
     private transient boolean allowAllBranches = false;
-    private transient String branchFilterName;
-    private transient String includeBranchesSpec;
-    private transient String excludeBranchesSpec;
-    private transient String targetBranchRegex;
-    private BranchFilter branchFilter;
-    private PushHookTriggerHandler pushHookTriggerHandler;
-    private MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
+    private transient BranchFilterType branchFilterName;
+    private BranchFilterType branchFilterType;
+    private String includeBranchesSpec;
+    private String excludeBranchesSpec;
+    private String targetBranchRegex;
+    private transient BranchFilter branchFilter;
+    private transient PushHookTriggerHandler pushHookTriggerHandler;
+    private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private boolean acceptMergeRequestOnSuccess = false;
 
 
@@ -78,28 +78,30 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
-        mergeRequestHookTriggerHandler = MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(triggerOnMergeRequest, triggerOpenMergeRequestOnPush);
-        pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush);
+        this.triggerOnPush = triggerOnPush;
+        this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.ciSkip = ciSkip;
         this.setBuildDescription = setBuildDescription;
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
         this.addCiMessage = addCiMessage;
         this.addVoteOnMergeRequest = addVoteOnMergeRequest;
-        this.branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
-                .withIncludeBranchesSpec(includeBranchesSpec)
-                .withExcludeBranchesSpec(excludeBranchesSpec)
-                .withTargetBranchRegex(targetBranchRegex)
-                .build(branchFilterType));
+        this.branchFilterType = branchFilterType;
+        this.includeBranchesSpec = includeBranchesSpec;
+        this.excludeBranchesSpec = excludeBranchesSpec;
+        this.targetBranchRegex = targetBranchRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
+
+        initializeTriggerHandler();
+        initializeBranchFilter();
     }
 
     public boolean getTriggerOnPush() {
-    	return pushHookTriggerHandler.isEnabled();
+    	return triggerOnPush;
     }
 
     public boolean getTriggerOnMergeRequest() {
-    	return mergeRequestHookTriggerHandler.isEnabled();
+    	return triggerOnMergeRequest;
     }
 
     public TriggerOpenMergeRequest getTriggerOpenMergeRequestOnPush() {
@@ -122,14 +124,24 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
         return acceptMergeRequestOnSuccess;
     }
 
-    @Override
     public boolean getCiSkip() {
         return ciSkip;
     }
 
-    @Override
-    public BranchFilter getBranchFilter() {
-        return branchFilter;
+    public BranchFilterType getBranchFilterType() {
+        return branchFilterType;
+    }
+
+    public String getIncludeBranchesSpec() {
+        return includeBranchesSpec;
+    }
+
+    public String getExcludeBranchesSpec() {
+        return excludeBranchesSpec;
+    }
+
+    public String getTargetBranchRegex() {
+        return targetBranchRegex;
     }
 
     // executes when the Trigger receives a push request
@@ -140,6 +152,26 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
     // executes when the Trigger receives a merge request
     public void onPost(final MergeRequestHook hook) {
         mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter);
+    }
+
+    private void initializeTriggerHandler() {
+        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest, triggerOpenMergeRequestOnPush);
+        pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush);
+    }
+
+    private void initializeBranchFilter() {
+        branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+                .withIncludeBranchesSpec(includeBranchesSpec)
+                .withExcludeBranchesSpec(excludeBranchesSpec)
+                .withTargetBranchRegex(targetBranchRegex)
+                .build(branchFilterType));
+    }
+
+    @Override
+    protected Object readResolve() throws ObjectStreamException {
+        initializeTriggerHandler();
+        initializeBranchFilter();
+        return super.readResolve();
     }
 
     @Extension
@@ -247,20 +279,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements WebHookTrig
                     if (trigger.addCiMessage) {
                         project.getPublishersList().add(new GitLabCommitStatusPublisher());
                     }
-                    if (trigger.branchFilter == null) {
-                        String name = StringUtils.isNotEmpty(trigger.branchFilterName) ? trigger.branchFilterName : "All";
-                        trigger.branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
-                                .withIncludeBranchesSpec(trigger.includeBranchesSpec)
-                                .withExcludeBranchesSpec(trigger.excludeBranchesSpec)
-                                .withTargetBranchRegex(trigger.targetBranchRegex)
-                                .build(BranchFilterType.valueOf(name)));
-                    }
-                    if (trigger.pushHookTriggerHandler == null) {
-                        trigger.pushHookTriggerHandler = PushHookTriggerHandlerFactory.newPushHookTriggerHandler(trigger.triggerOnPush, trigger.triggerOpenMergeRequestOnPush);
-                    }
-                    if (trigger.mergeRequestHookTriggerHandler == null) {
-                        trigger.mergeRequestHookTriggerHandler =
-                                MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(trigger.triggerOnMergeRequest, trigger.triggerOpenMergeRequestOnPush);
+                    if (trigger.branchFilterType == null) {
+                        trigger.branchFilterType = trigger.branchFilterName;
                     }
                     project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
                     project.save();

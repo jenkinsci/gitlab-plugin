@@ -41,11 +41,6 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     protected boolean isCiSkip(MergeRequestHook hook) {
         return hook.getObjectAttributes() != null
                 && hook.getObjectAttributes().getDescription() != null

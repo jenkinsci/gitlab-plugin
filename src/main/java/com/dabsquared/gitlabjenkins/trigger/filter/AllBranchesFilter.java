@@ -8,9 +8,4 @@ class AllBranchesFilter implements BranchFilter {
     public boolean isBranchAllowed(String branchName) {
         return true;
     }
-
-    @Override
-    public BranchFilterConfig getConfig() {
-        return BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig().build(BranchFilterType.All);
-    }
 }

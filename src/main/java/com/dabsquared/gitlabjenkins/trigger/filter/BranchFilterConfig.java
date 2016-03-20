@@ -21,15 +21,15 @@ public final class BranchFilterConfig {
         return type;
     }
 
-    public String getIncludeBranchesSpec() {
+    String getIncludeBranchesSpec() {
         return includeBranchesSpec;
     }
 
-    public String getExcludeBranchesSpec() {
+    String getExcludeBranchesSpec() {
         return excludeBranchesSpec;
     }
 
-    public String getTargetBranchRegex() {
+    String getTargetBranchRegex() {
         return targetBranchRegex;
     }
 

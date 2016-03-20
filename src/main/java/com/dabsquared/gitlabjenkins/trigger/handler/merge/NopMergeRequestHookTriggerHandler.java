@@ -12,9 +12,4 @@ class NopMergeRequestHookTriggerHandler implements MergeRequestHookTriggerHandle
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter) {
         // nothing to do
     }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
 }

@@ -6,8 +6,8 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -114,11 +114,6 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
                 .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
                 .build();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
     }
 
     private void scheduleBuild(Job<?, ?> job, Action action) {

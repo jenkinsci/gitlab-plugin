@@ -23,14 +23,4 @@ class PushHookTriggerHandlerList implements PushHookTriggerHandler {
             handler.handle(job, hook, ciSkip, branchFilter);
         }
     }
-
-    @Override
-    public boolean isEnabled() {
-        for (PushHookTriggerHandler handler : handlers) {
-            if (handler.isEnabled()) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
