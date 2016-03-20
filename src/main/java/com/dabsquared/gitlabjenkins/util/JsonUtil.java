@@ -1,15 +1,13 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -21,40 +19,53 @@ import java.util.Locale;
  */
 public final class JsonUtil {
 
-    private static final Gson prettyPrint = new GsonBuilder().setPrettyPrinting().create();
-    private static final Gson gson = new GsonBuilder()
-            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .registerTypeAdapter(Date.class, new DateSerializer())
-            .create();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+            .configure(SerializationFeature.INDENT_OUTPUT, true)
+            .registerModule(new DateModule());
 
     private JsonUtil() { }
 
     public static String toPrettyPrint(String json) {
-        JsonParser parser = new JsonParser();
-        return prettyPrint.toJson(parser.parse(json));
+        try {
+            return OBJECT_MAPPER.writeValueAsString(OBJECT_MAPPER.readValue(json, Object.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static <T> T read(String json, Class<T> type) {
-        return gson.fromJson(json, type);
+        try {
+            return OBJECT_MAPPER.readValue(json, type);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private static final String[] DATE_FORMATS = new String[] {
-            "yyyy-MM-dd HH:mm:ss Z", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ssX" };
+    private static class DateModule extends SimpleModule {
+        private static final String[] DATE_FORMATS = new String[] {
+                "yyyy-MM-dd HH:mm:ss Z", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ssX"
+        };
 
-    private static class DateSerializer implements JsonDeserializer<Date> {
-        public Date deserialize(JsonElement jsonElement, Type typeOF,
-                                JsonDeserializationContext context) throws JsonParseException {
-            for (String format : DATE_FORMATS) {
-                try {
-                    return new SimpleDateFormat(format, Locale.US)
-                            .parse(jsonElement.getAsString());
-                } catch (ParseException e) {
-                    // nothing to do
+        private DateModule() {
+            addDeserializer(Date.class, new com.fasterxml.jackson.databind.JsonDeserializer<Date>() {
+                @Override
+                public Date deserialize(com.fasterxml.jackson.core.JsonParser p, DeserializationContext ctxt) throws IOException {
+                    for (String format : DATE_FORMATS) {
+                        try {
+                            return new SimpleDateFormat(format, Locale.US)
+                                    .parse(p.getValueAsString());
+                        } catch (ParseException e) {
+                            // nothing to do
+                        }
+                    }
+                    throw new IOException("Unparseable date: \""
+                            + p.getValueAsString() + "\". Supported formats: "
+                            + Arrays.toString(DATE_FORMATS));
                 }
-            }
-            throw new JsonParseException("Unparseable date: \""
-                    + jsonElement.getAsString() + "\". Supported formats: "
-                    + Arrays.toString(DATE_FORMATS));
+            });
         }
     }
 }
