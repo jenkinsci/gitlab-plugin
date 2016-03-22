@@ -383,14 +383,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 	        }
 
 	        scheduledJob.scheduleBuild2(projectbuildDelay, action, new CauseAction(cause));
-    	} else {
-            
-            if (triggerOnMergeRequest ) {
-	            LOGGER.log(Level.INFO, "trigger on merge request not set");
-            } else if ( this.isBranchAllowed(req.getObjectAttribute().getTargetBranch())) {
-                LOGGER.log(Level.INFO, "branch {0} is not allowed", req.getObjectAttribute().getTargetBranch());
-            }
 
+        } else if ( ! triggerOnMergeRequest ) {
+	        LOGGER.log(Level.INFO, "trigger on merge request not set");
+        } else {
+            LOGGER.log(Level.INFO, "branch {0} is not allowed", req.getObjectAttribute().getTargetBranch());
 	    }
     }
 
