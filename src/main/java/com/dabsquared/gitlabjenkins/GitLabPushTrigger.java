@@ -938,12 +938,24 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             return gitlabApiToken;
         }
 
+        public void setGitlabApiToken(String gitlabApiToken) {
+            this.gitlabApiToken = gitlabApiToken;
+        }
+
         public String getGitlabHostUrl() {
             return gitlabHostUrl;
         }
 
+        public void setGitlabHostUrl(String gitlabHostUrl) {
+            this.gitlabHostUrl = gitlabHostUrl;
+        }
+
         public boolean getIgnoreCertificateErrors() {
         	return ignoreCertificateErrors;
+        }
+
+        public void setIgnoreCertificateErrors(boolean ignoreCertificateErrors) {
+            this.ignoreCertificateErrors = ignoreCertificateErrors;
         }
 
         public static DescriptorImpl get() {
