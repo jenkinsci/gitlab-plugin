@@ -1,4 +1,5 @@
 <?jelly escape-by-default='true'?>
 <div>
-    This plugin integrates <a href="http://gitlab.com/">GitLab</a> to Jenkins by faking a GitLab CI Server.
+    This plugin integrates <a href="http://gitlab.com/">GitLab</a> to Jenkins by faking a GitLab CI Server
+    and provides a Security Realm to use GitLab as an OAuth2 authentication service provider.
 </div>
