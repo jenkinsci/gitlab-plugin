@@ -1,20 +1,20 @@
-Overview
-======
+# Introduction
+
 This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created.
 
-User support
-======
+# User support
+
 If you have a problem or question about using the plugin, please create an issue in the GitHub project. You can also try chatting with us in #gitlab-plugin on the Freenode IRC network.
 
-Supported GitLab versions
-======
+# Supported GitLab versions
+
 * 7.14.x where it emulates Jenkins as a GitlabCI Web Service
 * 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
 
 **Note:** GitLab version **8.0.x** is **not** supported! In this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. Jenkins build status will never work with GitLab 8.0.x!
 
-Supported GitLabCI Functions
-=====================
+# Supported GitLabCI Functions
+
 * `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json` (used for Merge Request pages) returns build result for Merge Request build with `COMMIT_SHA1` as last commit
 * `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME` returns build status icon for latest build for `BRANCH_NAME`
 * `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1` returns build status icon for latest build for `COMMIT_SHA1` as last commit
@@ -23,14 +23,13 @@ Supported GitLabCI Functions
 * `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
 * `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
-Configuring access to Gitlab
-=======================================
+# Configuring access to Gitlab
 
 Optionally, the plugin communicates with the Gitlab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories. 
 
 To enable this functionality, a user should be set up on Gitlab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
 
-### Jenkins Job Configuration
+## Jenkins Job Configuration
 * Create a new job by going to *New Job*
 * Set the _Project Name_ to whatever you like
 * In the *Source Code Management* section:
@@ -56,7 +55,7 @@ To enable this functionality, a user should be set up on Gitlab, with adequate p
 * Configure any other pre build, build or post build actions as necessary
 * Click *Save* to preserve your changes in Jenkins.
 
-### GitLab Configuration (7.x)
+## GitLab Configuration (7.x)
 * In GitLab go to your repository's project *Settings*
     * Click on *Services*
     * Click on *GitLab CI*
@@ -68,7 +67,7 @@ To enable this functionality, a user should be set up on Gitlab, with adequate p
         * Add a Web Hook for *Merge Request Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
         **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
 
-### GitLab Configuration (>= 8.1)
+## GitLab Configuration (>= 8.1)
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
@@ -83,7 +82,7 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
 * GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
-### Forked repositories
+## Forked repositories
 If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
 * Go to the Settings page in each developer's fork
 * Click on *Services*
@@ -94,15 +93,13 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
       * Click *Save* <br />
       **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
-Branch filtering
-================
+# Branch filtering
 
 Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
 
 This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
 
-Build Tags
-================
+# Build Tags
 
 In order to build when a new tag is pushed:
 * In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
@@ -110,8 +107,7 @@ In order to build when a new tag is pushed:
     * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
     * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
 
-Parameterized builds
-====================
+# Parameterized builds
 
 You can trigger a job a manually by clicking ``This build is parameterized`` and adding the relevant build parameters.
 These include:
@@ -128,14 +124,13 @@ These include:
 * gitlabUserName
 * gitlabUserEmail
 
-Help Needed
-=====================
+# Help Needed
+
 * `/projects/` - seems to be already used by Jenkins, A way to use this path would be awesome
 * `?token=XYZ` - Can not find a way to include a token parameter on an AbstractProject to security check without an extra plugin configuration
 * `/PROJECT_NAME/`  should really be /PROJECT_ID_NUMBER/ - Can not find a project id number on an AbstractProject to use here instead.
 
-Contributing to the Plugin
-==========================
+# Contributing to the Plugin
 
 Plugin source code is hosted on [Github](https://github.com/jenkinsci/gitlab-plugin).
 New feature proposals and bug fix proposals should be submitted as
@@ -155,14 +150,13 @@ Before submitting your change make sure that:
 * you updated the README
 * you have used findbugs to see if you haven't introduced any new warnings.
 
-Setup test environment using Docker
-===================================
+# Setup test environment using Docker
 
 In order to test the plugin on different versions of `GitLab` and `Jenkins` you may want to use `Docker` containers.
 
 Below you will find example docker instructions to quickly setup a `GitLab` and `Jenkins` container.
 
-### Setup GitLab
+## Setup GitLab
 
 Step 1. Launch a postgresql container
 
@@ -201,7 +195,7 @@ Point your browser to `http://localhost:10080` and login using the default usern
 
 For more information on the supported `Gitlab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
 
-### Setup Jenkins
+## Setup Jenkins
 
 Launch Jenkins server
 
