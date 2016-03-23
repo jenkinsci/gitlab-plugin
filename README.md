@@ -13,8 +13,8 @@
 - [Parameterized builds](#parameterized-builds)
 - [Help Needed](#help-needed)
 - [Setup test environment using Docker](#setup-test-environment-using-docker)
-- [Setup GitLab](#setup-gitlab)
-- [Setup Jenkins](#setup-jenkins)
+    - [Setup GitLab](#setup-gitlab)
+    - [Setup Jenkins](#setup-jenkins)
 
 # Introduction
 
