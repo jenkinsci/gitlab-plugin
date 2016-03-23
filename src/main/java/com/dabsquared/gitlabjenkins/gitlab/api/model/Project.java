@@ -11,10 +11,19 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Project {
 
+    private Integer id;
     private String name;
     private String webUrl;
     private String sshUrlToRepo;
     private String httpUrlToRepo;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -56,32 +65,35 @@ public class Project {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Project that = (Project) o;
+        Project project = (Project) o;
         return new EqualsBuilder()
-                .append(name, that.name)
-                .append(webUrl, that.webUrl)
-                .append(sshUrlToRepo, that.sshUrlToRepo)
-                .append(httpUrlToRepo, that.httpUrlToRepo)
-                .isEquals();
+            .append(id, project.id)
+            .append(name, project.name)
+            .append(webUrl, project.webUrl)
+            .append(sshUrlToRepo, project.sshUrlToRepo)
+            .append(httpUrlToRepo, project.httpUrlToRepo)
+            .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(name)
-                .append(webUrl)
-                .append(sshUrlToRepo)
-                .append(httpUrlToRepo)
-                .toHashCode();
+            .append(id)
+            .append(name)
+            .append(webUrl)
+            .append(sshUrlToRepo)
+            .append(httpUrlToRepo)
+            .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("name", name)
-                .append("webUrl", webUrl)
-                .append("sshUrlToRepo", sshUrlToRepo)
-                .append("httpUrlToRepo", httpUrlToRepo)
-                .toString();
+            .append("id", id)
+            .append("name", name)
+            .append("webUrl", webUrl)
+            .append("sshUrlToRepo", sshUrlToRepo)
+            .append("httpUrlToRepo", httpUrlToRepo)
+            .toString();
     }
 }

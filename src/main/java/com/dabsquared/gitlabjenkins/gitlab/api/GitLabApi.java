@@ -3,8 +3,10 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
@@ -23,11 +25,34 @@ import java.util.List;
 @Path("/api/v3")
 public interface GitLabApi {
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects")
+    Project createProject(@QueryParam("name") String projectName);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}")
     Project getProject(@PathParam("projectId") String projectId);
 
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}")
+    Project updateProject(@PathParam("projectId") String projectId,
+                          @QueryParam("name") String name,
+                          @QueryParam("path") String path);
+
+    @DELETE
+    @Path("/projects/{projectId}")
+    void deleteProject(@PathParam("projectId") String projectId);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/hooks")
+    void addProjectHook(@PathParam("projectId") String projectId,
+                        @QueryParam("url") String url,
+                        @QueryParam("push_events") Boolean pushEvents,
+                        @QueryParam("merge_request_events") Boolean mergeRequestEvents);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -84,4 +109,26 @@ public interface GitLabApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/user")
     void headCurrentUser();
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/user")
+    User getCurrentUser();
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/users")
+    User addUser(@QueryParam("email") String email,
+                 @QueryParam("username") String username,
+                 @QueryParam("name") String name,
+                 @QueryParam("password") String password);
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/users/{userId}")
+    User updateUser(@PathParam("userId") String userId,
+                    @QueryParam("email") String email,
+                    @QueryParam("username") String username,
+                    @QueryParam("name") String name,
+                    @QueryParam("password") String password);
 }
