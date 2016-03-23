@@ -11,9 +11,8 @@ Supported GitLab versions
 * 7.14.x where it emulates Jenkins as a GitlabCI Web Service
 * 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
 
-Unsupported GitLab versions
-======
-* 8.0.x - in this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. **Jenkins build status will never work with GitLab 8.0.x!**
+**Note:** GitLab version **8.0.x** is **not** supported! In this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. Jenkins build status will never work with GitLab 8.0.x!
+
 
 Current Supported GitLabCI Functions
 =====================
