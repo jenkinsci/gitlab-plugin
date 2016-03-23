@@ -13,8 +13,7 @@ Supported GitLab versions
 
 **Note:** GitLab version **8.0.x** is **not** supported! In this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. Jenkins build status will never work with GitLab 8.0.x!
 
-
-Current Supported GitLabCI Functions
+Supported GitLabCI Functions
 =====================
 * `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json` (used for Merge Request pages) returns build result for Merge Request build with `COMMIT_SHA1` as last commit
 * `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME` returns build status icon for latest build for `BRANCH_NAME`
@@ -70,7 +69,17 @@ To enable this functionality, a user should be set up on Gitlab, with adequate p
         **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
 
 ### GitLab Configuration (>= 8.1)
-GitLab 8.1 uses the same configuration as GitLab 8.0
+* In GitLab go to you primary repository's project *Settings*
+    * Click on *Web Hooks*
+        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+
+If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
+* Go to the Settings page in each developer's fork
+* Click on *Services*
+    * Click on *Web Hooks*
+        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+        **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
+
 * GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
