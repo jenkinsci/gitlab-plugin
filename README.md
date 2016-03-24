@@ -3,7 +3,7 @@
 - [User support](#user-support)
 - [Supported GitLab versions](#supported-gitLab-versions)
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
-- [Configuring access to Gitlab](#configuring-access-to-gitlab)
+- [Configuring access to GitLab](#configuring-access-to-gitlab)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
     - [GitLab Configuration (7.14.x)](#gitLab-configuration-7.14.x)
     - [GitLab Configuration (>= 8.1)](#gitLab-configuration>=8.1)
@@ -12,7 +12,7 @@
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
 - [Help Needed](#help-needed)
-- [Setup test environment using Docker](#setup-test-environment-using-docker)
+- [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
     - [Setup GitLab](#setup-gitlab)
     - [Setup Jenkins](#setup-jenkins)
 - [Release Workflow](#release-workflow)
@@ -27,7 +27,7 @@ If you have a problem or question about using the plugin, please create an issue
 
 # Supported GitLab versions
 
-* 7.14.x where it emulates Jenkins as a GitlabCI Web Service
+* 7.14.x where it emulates Jenkins as a GitLabCI Web Service
 * 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
 
 **Note:** GitLab version **8.0.x** is **not** supported! In this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. Jenkins build status will never work with GitLab 8.0.x!
@@ -42,11 +42,11 @@ If you have a problem or question about using the plugin, please create an issue
 * `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
 * `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
-# Configuring access to Gitlab
+# Configuring access to GitLab
 
-Optionally, the plugin communicates with the Gitlab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories. 
+Optionally, the plugin communicates with the GitLab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories.
 
-To enable this functionality, a user should be set up on Gitlab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
+To enable this functionality, a user should be set up on GitLab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
 
 ## Jenkins Job Configuration
 * Create a new job by going to *New Job*
@@ -55,7 +55,7 @@ To enable this functionality, a user should be set up on Gitlab, with adequate p
     * Click *Git*
     * Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
       * In the Advanced settings, set its *Name* to ``origin``
-    * To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the Gitlab server](#configuring-access-to-gitlab)
+    * To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
       * Add a second repository with:
         * *URL*: ``${gitlabSourceRepoURL}`` 
         * *Name* (in Advanced): ``${gitlabSourceRepoName}``
@@ -116,7 +116,7 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
 
 Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
 
-This functionality requires accessing the Gitlab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
+This functionality requires accessing the GitLab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
 
 # Build Tags
 
@@ -170,60 +170,30 @@ Before submitting your change make sure that:
 * you updated the README
 * you have used findbugs to see if you haven't introduced any new warnings.
 
-# Setup test environment using Docker
+# Quick test environment setup using Docker
 
 In order to test the plugin on different versions of `GitLab` and `Jenkins` you may want to use `Docker` containers.
 
-Below you will find example docker instructions to quickly setup a `GitLab` and `Jenkins` container.
+A example docker-compose file is available at `gitlab-plugin/src/docker` which allows to set up instances of the latest `GitLab` and `Jenkins` versions.
 
-## Setup GitLab
-
-Step 1. Launch a postgresql container
+To start the containers, run below command from the `docker` folder:
 
 ```bash
-docker run --name gitlab-postgresql -d \
-    --env 'DB_NAME=gitlabhq_production' \
-    --env 'DB_USER=gitlab' --env 'DB_PASS=password' \
-    --volume /srv/docker/gitlab/postgresql:/var/lib/postgresql \
-    sameersbn/postgresql:9.4-15
+docker-compose up -d
 ```
 
-Step 2. Launch a redis container
+## Access GitLab
 
-```bash
-docker run --name gitlab-redis -d \
-    --volume /srv/docker/gitlab/redis:/var/lib/redis \
-    sameersbn/redis:latest
-```
-
-Step 3. Launch the gitlab container
-
-```bash
-docker run --name gitlab -d \
-    --link gitlab-postgresql:postgresql --link gitlab-redis:redisio \
-    --publish 10022:22 --publish 10080:80 \
-    --env 'GITLAB_PORT=10080' --env 'GITLAB_SSH_PORT=10022' \
-    --env 'GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alpha-numeric-string' \
-    --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.5.8
-```
-
-Point your browser to `http://localhost:10080` and login using the default username and password:
+To access `GitLab`, point your browser to `http://localhost:10080` and login using the default username and password:
 
 * username: **root**
 * password: **5iveL!fe**
 
-For more information on the supported `Gitlab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
+For more information on the supported `GitLab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
 
-## Setup Jenkins
+## Access Jenkins
 
-Launch Jenkins server
-
-```bash
-docker run -d -p 8080:8080 -p 50000:50000 jenkins
-```
-
-To see Jenkins, point your browser to `http://localhost:8080`.
+To see `Jenkins`, point your browser to `http://localhost:8080`.
 
 For more information on the supported `Jenkins` tags and how to configure the containers, visit https://hub.docker.com/r/library/jenkins.
 
