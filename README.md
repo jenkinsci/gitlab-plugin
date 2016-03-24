@@ -5,8 +5,8 @@
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
-    - [GitLab Configuration (7.14.x)](#gitLab-configuration-7.14.x)
-    - [GitLab Configuration (>= 8.1)](#gitLab-configuration>=8.1)
+    - [Gitlab Configuration (7.14.x)](#gitlab-configuration-714x)
+    - [Gitlab Configuration (>= 8.1)](#gitlab-configuration--81)
     - [Forked repositories](#forked-repositories)
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
@@ -74,7 +74,7 @@ To enable this functionality, a user should be set up on GitLab, with adequate p
 * Configure any other pre build, build or post build actions as necessary
 * Click *Save* to preserve your changes in Jenkins.
 
-## GitLab Configuration (7.14.x)
+## Gitlab Configuration (7.14.x)
 * In GitLab go to your repository's project *Settings*
     * Click on *Services*
     * Click on *GitLab CI*
@@ -86,7 +86,7 @@ To enable this functionality, a user should be set up on GitLab, with adequate p
         * Add a Web Hook for *Merge Request Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
         **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
 
-## GitLab Configuration (>= 8.1)
+## Gitlab Configuration (>= 8.1)
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
