@@ -5,7 +5,7 @@
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to Gitlab](#configuring-access-to-gitlab)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
-    - [GitLab Configuration (7.x)](#gitLab-configuration-7.x)
+    - [GitLab Configuration (7.14.x)](#gitLab-configuration-7.14.x)
     - [GitLab Configuration (>= 8.1)](#gitLab-configuration>=8.1)
     - [Forked repositories](#forked-repositories)
 - [Branch filtering](#branch-filtering)
@@ -74,7 +74,7 @@ To enable this functionality, a user should be set up on Gitlab, with adequate p
 * Configure any other pre build, build or post build actions as necessary
 * Click *Save* to preserve your changes in Jenkins.
 
-## GitLab Configuration (7.x)
+## GitLab Configuration (7.14.x)
 * In GitLab go to your repository's project *Settings*
     * Click on *Services*
     * Click on *GitLab CI*
