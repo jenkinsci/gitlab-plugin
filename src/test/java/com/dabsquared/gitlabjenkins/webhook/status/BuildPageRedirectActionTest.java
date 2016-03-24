@@ -18,6 +18,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -51,11 +53,12 @@ public abstract class BuildPageRedirectActionTest {
     }
 
     @Test
-    public void redirectToBuildUrl() throws IOException, ExecutionException, InterruptedException {
+    public void redirectToBuildUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
         testProject.setScm(new GitSCM(gitRepoUrl));
+        testProject.setQuietPeriod(0);
         QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
-        FreeStyleBuild build = future.get();
+        FreeStyleBuild build = future.get(5, TimeUnit.SECONDS);
 
         getBuildPageRedirectAction(testProject).execute(response);
 
@@ -63,11 +66,12 @@ public abstract class BuildPageRedirectActionTest {
     }
 
     @Test
-    public void redirectToBuildStatusUrl() throws IOException, ExecutionException, InterruptedException {
+    public void redirectToBuildStatusUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
         testProject.setScm(new GitSCM(gitRepoUrl));
+        testProject.setQuietPeriod(0);
         QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
-        FreeStyleBuild build = future.get();
+        FreeStyleBuild build = future.get(5, TimeUnit.SECONDS);
 
         doThrow(IOException.class).when(response).sendRedirect2(jenkins.getInstance().getRootUrl() + build.getUrl());
         getBuildPageRedirectAction(testProject).execute(response);

@@ -63,11 +63,12 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 return true;
             }
         });
+        project.setQuietPeriod(0);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(objectAttributes().withDescription("[ci-skip]").build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
-        buildTriggered.block(1000);
+        buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(false));
     }
 
@@ -91,6 +92,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 return true;
             }
         });
+        project.setQuietPeriod(0);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(objectAttributes()
                         .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
@@ -119,7 +121,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                         .build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
-        buildTriggered.block();
+        buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 }

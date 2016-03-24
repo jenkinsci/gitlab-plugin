@@ -60,11 +60,12 @@ public class PushHookTriggerHandlerImplTest {
                 return true;
             }
         });
+        project.setQuietPeriod(0);
         pushHookTriggerHandler.handle(project, pushHook()
                 .withCommits(Collections.singletonList(commit().withMessage("[ci-skip]").build()))
                 .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
-        buildTriggered.block(1000);
+        buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(false));
     }
 
@@ -88,6 +89,7 @@ public class PushHookTriggerHandlerImplTest {
                 return true;
             }
         });
+        project.setQuietPeriod(0);
         pushHookTriggerHandler.handle(project, pushHook()
                 .withBefore("0000000000000000000000000000000000000000")
                 .withProjectId(1)
@@ -103,7 +105,7 @@ public class PushHookTriggerHandlerImplTest {
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
                 .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
-        buildTriggered.block();
+        buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 }
