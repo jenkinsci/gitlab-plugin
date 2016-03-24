@@ -15,6 +15,7 @@
 - [Setup test environment using Docker](#setup-test-environment-using-docker)
     - [Setup GitLab](#setup-gitlab)
     - [Setup Jenkins](#setup-jenkins)
+- [Release Workflow](#release-workflow)
 
 # Introduction
 
@@ -225,3 +226,15 @@ docker run -d -p 8080:8080 -p 50000:50000 jenkins
 To see Jenkins, point your browser to `http://localhost:8080`.
 
 For more information on the supported `Jenkins` tags and how to configure the containers, visit https://hub.docker.com/r/library/jenkins.
+
+# Release Workflow
+
+GitLab-Plugin admins should adhere to the following rules when releasing a new plugin version:
+
+* Ensure codestyle conformity
+* Run unit tests
+* Run manual tests on both, oldest and latest GitLab versions
+* Update documentation
+* Create change log
+* Create release tag
+* Create release notes (on github)
