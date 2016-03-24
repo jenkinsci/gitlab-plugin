@@ -13,8 +13,8 @@
 - [Parameterized builds](#parameterized-builds)
 - [Help Needed](#help-needed)
 - [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
-    - [Setup GitLab](#setup-gitlab)
-    - [Setup Jenkins](#setup-jenkins)
+    - [Access GitLab](#access-gitlab)
+    - [Access Jenkins](#access-jenkins)
 - [Release Workflow](#release-workflow)
 
 # Introduction
