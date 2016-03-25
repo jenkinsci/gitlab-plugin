@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -71,6 +72,6 @@ public class GitLabConnectionConfigSSLTest {
         String apiToken = "secret";
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
         FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", apiToken, false);
-        assertThat(formValidation.getMessage(), is(Messages.connection_error("peer not authenticated")));
+        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
     }
 }
