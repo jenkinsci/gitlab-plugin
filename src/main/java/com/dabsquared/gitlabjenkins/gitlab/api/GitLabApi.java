@@ -30,6 +30,15 @@ public interface GitLabApi {
     @Path("/projects")
     Project createProject(@QueryParam("name") String projectName);
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/merge_requests")
+    void createMergeRequest(
+        @PathParam("projectId") Integer projectId,
+        @QueryParam("source_branch") String sourceBranch,
+        @QueryParam("target_branch") String targetBranch,
+        @QueryParam("title") String title);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}")
