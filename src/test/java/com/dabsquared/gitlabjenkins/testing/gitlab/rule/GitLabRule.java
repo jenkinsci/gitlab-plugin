@@ -55,8 +55,8 @@ public class GitLabRule implements TestRule {
     public String createProject(ProjectRequest request) {
         Project project = client.createProject(request.getName());
         projectIds.add(project.getId().toString());
-        if (request.getWebHookUrl() != null && (request.isPushHock() || request.isMergeRequestHook())) {
-            client.addProjectHook(project.getId().toString(), request.getWebHookUrl(), request.isPushHock(), request.isMergeRequestHook());
+        if (request.getWebHookUrl() != null && (request.isPushHook() || request.isMergeRequestHook())) {
+            client.addProjectHook(project.getId().toString(), request.getWebHookUrl(), request.isPushHook(), request.isMergeRequestHook());
         }
         return project.getHttpUrlToRepo();
     }

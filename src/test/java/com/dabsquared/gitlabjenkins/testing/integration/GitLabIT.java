@@ -50,7 +50,7 @@ public class GitLabIT {
         String httpUrl = gitlab.createProject(projectRequest()
             .withName("test")
             .withWebHookUrl("http://" + getDocker0Ip() + ":" + jenkins.getURL().getPort() + "/jenkins/project/test")
-            .withPushHock(true)
+            .withPushHook(true)
             .build());
 
         final OneShotEvent buildTriggered = new OneShotEvent();

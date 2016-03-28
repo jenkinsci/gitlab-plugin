@@ -9,14 +9,14 @@ public class ProjectRequest {
 
     private final String name;
     private final String webHookUrl;
-    private final boolean pushHock;
+    private final boolean pushHook;
     private final boolean mergeRequestHook;
 
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public ProjectRequest(String name, String webHookUrl, boolean pushHock, boolean mergeRequestHook) {
+    public ProjectRequest(String name, String webHookUrl, boolean pushHook, boolean mergeRequestHook) {
         this.name = name;
         this.webHookUrl = webHookUrl;
-        this.pushHock = pushHock;
+        this.pushHook = pushHook;
         this.mergeRequestHook = mergeRequestHook;
     }
 
@@ -28,8 +28,8 @@ public class ProjectRequest {
         return webHookUrl;
     }
 
-    public boolean isPushHock() {
-        return pushHock;
+    public boolean isPushHook() {
+        return pushHook;
     }
 
     public boolean isMergeRequestHook() {
