@@ -61,6 +61,13 @@ public class GitLabRule implements TestRule {
         return project.getHttpUrlToRepo();
     }
 
+    public void createMergeRequest(final Integer projectId,
+                                   final String sourceBranch,
+                                   final String targetBranch,
+                                   final String title) {
+        client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+    }
+
     public String getUsername() {
         return username;
     }
