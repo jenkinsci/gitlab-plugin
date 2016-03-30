@@ -41,8 +41,8 @@ public interface GitLabApi {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/projects/{projectId}")
-    Project getProject(@PathParam("projectId") String projectId);
+    @Path("/projects/{projectName}")
+    Project getProject(@PathParam("projectName") String projectName);
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
