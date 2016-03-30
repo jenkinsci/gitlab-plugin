@@ -32,8 +32,12 @@ public class GitLabPushRequest extends GitLabRequest {
     private GitlabProject sourceProject = null;
 
     public GitlabProject getSourceProject (GitLab api) throws IOException {
+        return getSourceProject(api.instance());
+    }
+    
+    private GitlabProject getSourceProject (GitlabAPI api) throws IOException {
         if (sourceProject == null) {
-            sourceProject = api.instance().getProject(project_id);
+            sourceProject = api.getProject(project_id);
         }
         return sourceProject;
     }
@@ -41,7 +45,7 @@ public class GitLabPushRequest extends GitLabRequest {
     public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
         try {
             if(getLastCommit()!=null) {
-                return api.createCommitStatus(sourceProject, checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
+                return api.createCommitStatus(getSourceProject(api), checkout_sha, status, checkout_sha, "Jenkins", targetUrl, null);
             }
         } catch (IOException e) {
             e.printStackTrace();

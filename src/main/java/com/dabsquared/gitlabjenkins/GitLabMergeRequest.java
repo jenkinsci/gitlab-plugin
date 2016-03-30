@@ -35,10 +35,14 @@ public class GitLabMergeRequest extends GitLabRequest {
     private GitlabProject sourceProject = null;
     
     public GitlabProject getSourceProject (GitLab api) throws IOException {
-    	if (sourceProject == null) {
-    		sourceProject = api.instance().getProject(objectAttributes.getSourceProjectId());
-    	}
-    	return sourceProject;
+        return getSourceProject(api.instance());
+    }
+    
+    private GitlabProject getSourceProject(GitlabAPI api) throws IOException {
+        if (sourceProject == null) {
+            sourceProject = api.getProject(objectAttributes.getSourceProjectId());
+        }
+        return sourceProject;
     }
 
     public String getObject_kind() {
@@ -66,7 +70,7 @@ public class GitLabMergeRequest extends GitLabRequest {
     public GitlabCommitStatus createCommitStatus(GitlabAPI api, String status, String targetUrl) {
         try {
             if (objectAttributes.getLastCommit() != null) {
-                return api.createCommitStatus(sourceProject, objectAttributes.getLastCommit().getId(), status, objectAttributes.getSourceBranch(), "Jenkins", targetUrl, null);
+                return api.createCommitStatus(getSourceProject(api), objectAttributes.getLastCommit().getId(), status, objectAttributes.getSourceBranch(), "Jenkins", targetUrl, null);
             }
         } catch (IOException e) {
             e.printStackTrace();
