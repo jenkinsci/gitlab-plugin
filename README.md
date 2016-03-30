@@ -1,17 +1,22 @@
 # Table of Contents
 - [Introduction](#introduction)
 - [User support](#user-support)
-- [Supported GitLab versions](#supported-gitLab-versions)
+- [Plugin Modes and Supported GitLab versions](#plugin-modes-and-supported=gitlab-versions)
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
+- [Modern Mode](#modern-mode)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
-    - [Gitlab Configuration (7.14.x)](#gitlab-configuration-714x)
     - [Gitlab Configuration (>= 8.1)](#gitlab-configuration--81)
+    - [Manual Trigger](#manual-trigger)
+- [Legacy Mode](#legacy-mode)
+    - [Jenkins Job Configuration](#jenkins-job-configuration-1)
+    - [Gitlab Configuration (7.14.x)](#gitlab-configuration-714x)
+    - [Gitlab Configuration (>= 8.1)](#gitlab-configuration--81-1)
     - [Forked repositories](#forked-repositories)
-- [Branch filtering](#branch-filtering)
-- [Build Tags](#build-tags)
-- [Parameterized builds](#parameterized-builds)
+- [Branch filtering (Modern & Legacy)](#branch-filtering-modern--legacy)
+- [Build Tags (Modern & Legacy)](#build-tags-modern--legacy)
 - [Help Needed](#help-needed)
+- [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
     - [Access GitLab](#access-gitlab)
     - [Access Jenkins](#access-jenkins)
@@ -25,10 +30,17 @@ This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/
 
 If you have a problem or question about using the plugin, please create an issue in the GitHub project. You can also try chatting with us in #gitlab-plugin on the Freenode IRC network.
 
-# Supported GitLab versions
+# Plugin Modes and Supported GitLab versions
 
-* 7.14.x where it emulates Jenkins as a GitLabCI Web Service
-* 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
+The Plugin supports two operation modes: **Modern** and **Legacy**. The main difference between these modes is how they deal with Merge Requests from GitLab. While the Legacy mode requires setting up multiple Git repositories and using parameterized builds, the Modern mode works with a single Git repository and relies on GitLab's availability of Merge Requests from the `origin` repository. The rest of this document is split for these two modes of operation (unless specified).
+
+The following versions of GitLab are supported by each of the modes:
+
+* Modern
+  * 8.1.x and newer
+* Legacy
+  * 7.14.x where it emulates Jenkins as a GitLabCI Web Service
+  * 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
 
 **Note:** GitLab version **8.0.x** is **not** supported! In this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. Jenkins build status will never work with GitLab 8.0.x!
 
@@ -48,7 +60,38 @@ Optionally, the plugin communicates with the GitLab server in order to fetch add
 
 To enable this functionality, a user should be set up on GitLab, with adequate permissions to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
 
-## Jenkins Job Configuration
+
+## Modern Mode
+
+### Jenkins Job Configuration
+
+* Create a new job by going to *New Job*
+* Set the _Project Name_ to whatever you like
+* In the *Source Code Management* section:
+    * Click *Git*
+    * Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
+      * In the Advanced settings:
+        * Set its *Name* to ``origin``
+        * Set its *Refspec* to ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
+* In the *Build Triggers* section:
+    * Check the ``Build when a change is pushed to GitLab.``
+    * Use the check boxes to trigger builds on Push and/or Merge Request events
+    * Optionally enable building open merge requests again after a push to the source branch.
+* Configure any other pre build, build or post build actions as necessary
+* Click *Save* to preserve your changes in Jenkins.
+
+### Gitlab Configuration (>= 8.1)
+* In GitLab go to you primary repository's project *Settings*
+    * Click on *Web Hooks*
+        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME``
+
+### Manual trigger
+
+You can trigger a build manually from Jenkins. By default, it will fetch from `origin` and build the `master` branch.
+
+## Legacy Mode
+
+### Jenkins Job Configuration
 * Create a new job by going to *New Job*
 * Set the _Project Name_ to whatever you like
 * In the *Source Code Management* section:
@@ -74,7 +117,7 @@ To enable this functionality, a user should be set up on GitLab, with adequate p
 * Configure any other pre build, build or post build actions as necessary
 * Click *Save* to preserve your changes in Jenkins.
 
-## Gitlab Configuration (7.14.x)
+### Gitlab Configuration (7.14.x)
 * In GitLab go to your repository's project *Settings*
     * Click on *Services*
     * Click on *GitLab CI*
@@ -86,7 +129,7 @@ To enable this functionality, a user should be set up on GitLab, with adequate p
         * Add a Web Hook for *Merge Request Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
         **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
 
-## Gitlab Configuration (>= 8.1)
+### Gitlab Configuration (>= 8.1)
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
@@ -101,7 +144,7 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
 * GitLab 8.1 has implemented a commit status api. To enable this check the ``Use GitLab CI features`` under the project settings.
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
-## Forked repositories
+### Forked repositories
 If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
 * Go to the Settings page in each developer's fork
 * Click on *Services*
@@ -112,21 +155,7 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
       * Click *Save* <br />
       **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
-# Branch filtering
-
-Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
-
-This functionality requires accessing the GitLab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
-
-# Build Tags
-
-In order to build when a new tag is pushed:
-* In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
-* In the ``Jenkins`` under the ``Source Code Management`` section:
-    * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
-    * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
-
-# Parameterized builds
+### Parameterized builds
 
 You can trigger a job a manually by clicking ``This build is parameterized`` and adding the relevant build parameters.
 These include:
@@ -142,6 +171,20 @@ These include:
 * gitlabMergeRequestAssignee
 * gitlabUserName
 * gitlabUserEmail
+
+# Branch filtering (Modern & Legacy)
+
+Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
+
+This functionality requires accessing the GitLab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
+
+# Build Tags (Modern & Legacy)
+
+In order to build when a new tag is pushed:
+* In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
+* In the ``Jenkins`` under the ``Source Code Management`` section:
+    * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
+    * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
 
 # Help Needed
 
