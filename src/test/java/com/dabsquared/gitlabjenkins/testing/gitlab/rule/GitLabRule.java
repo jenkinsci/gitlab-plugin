@@ -52,6 +52,14 @@ public class GitLabRule implements TestRule {
         return new GitlabStatement(base);
     }
 
+    public Project getProject(final String projectName) {
+        return client.getProject(projectName);
+    }
+
+    public List<String> getProjectIds() {
+        return projectIds;
+    }
+
     public String createProject(ProjectRequest request) {
         Project project = client.createProject(request.getName());
         projectIds.add(project.getId().toString());
