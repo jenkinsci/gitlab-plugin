@@ -129,7 +129,7 @@ public abstract class AbstractGitLabPushTriggerGitlabServerTest {
 		String includeBranchesSpec = null;
 		String excludeBranchesSpec = null;
 		String targetBranchRegex = null;
-		GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger(triggerOnPush, triggerOnMergeRequest,
+		GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger(GitLabPluginMode.LEGACY.toString(), triggerOnPush, triggerOnMergeRequest,
 				triggerOpenMergeRequestOnPush, ciSkip, setBuildDescription, addNoteOnMergeRequest, addCiMessage,
 				addVoteOnMergeRequest, acceptMergeRequestOnSuccess, branchFilter, includeBranchesSpec,
 				excludeBranchesSpec, targetBranchRegex);
