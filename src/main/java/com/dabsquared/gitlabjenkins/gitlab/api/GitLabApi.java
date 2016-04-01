@@ -61,7 +61,7 @@ public interface GitLabApi {
     void addProjectHook(@PathParam("projectId") String projectId,
                         @QueryParam("url") String url,
                         @QueryParam("push_events") Boolean pushEvents,
-                        @QueryParam("merge_request_events") Boolean mergeRequestEvents);
+                        @QueryParam("merge_requests_events") Boolean mergeRequestEvents);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
