@@ -112,6 +112,11 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
       * Click *Save* <br />
       **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
+In addition, you will need to make sure that the Git plugin has an appropriate setting for user.name and user.email in the global Jenkins configuration. This is good practice generally, but is required for forked repos to work.
+
+1. Click on Manage Jenkins, then Configure System
+2. Under the Git Plugin section, set something for 'Global Config user.name Value' and 'Global Config user.email Value'
+
 # Branch filtering
 
 Triggers from push events may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, a list of all branches on the remote repository is displayed under ``Build when a change is pushed to GitLab.``. It is possible to select multiple branches by holding Ctrl and clicking. 
