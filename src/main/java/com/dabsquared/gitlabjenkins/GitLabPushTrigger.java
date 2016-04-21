@@ -273,6 +273,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         LOGGER.log(Level.INFO, "GitLab Push Request from branch {0}.", branch);
 
         Map<String, ParameterValue> values = getDefaultParameters();
+        values.put("gitlabBefore", new StringParameterValue("gitlabBefore", req.getBefore()));
+        values.put("gitlabAfter", new StringParameterValue("gitlabAfter", req.getAfter()));
         values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", branch));
         values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", branch));
         values.put("gitlabBranch", new StringParameterValue("gitlabBranch", branch));
@@ -403,6 +405,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     private Action createAction(GitLabMergeRequest req, Job job) {
         Map<String, ParameterValue> values = getDefaultParameters();
+        values.put("gitlabBefore", new StringParameterValue("gitlabBefore", ""));
+        values.put("gitlabAfter", new StringParameterValue("gitlabAfter", ""));
         values.put("gitlabSourceBranch", new StringParameterValue("gitlabSourceBranch", getSourceBranch(req)));
         values.put("gitlabTargetBranch", new StringParameterValue("gitlabTargetBranch", req.getObjectAttribute().getTargetBranch()));
         values.put("gitlabActionType", new StringParameterValue("gitlabActionType", "MERGE"));
