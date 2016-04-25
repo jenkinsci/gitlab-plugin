@@ -1,6 +1,25 @@
 ChangeLog
 =====================
 
+1.2.0
+=====================
+* #217 Inconsistent code formatting
+* #212 branch names with non-URL safe characters
+* #211 Provide useful values of the Push and MR events as build variables
+* #210 Listen for update MR events instead of push events to rebuild open MRs
+* #203 Use JAX-RS and resteasy for implementing the GitLab API
+* #179 NPE if description of MR event is null
+* #175 Retrieve author name from MR event 'last_commit'
+* #162 Build status for first push to new branch does not get reported to GitLab
+* #159 Utilize "not_found" state for GitLab CI Merge Status page
+* #136 gitlabSourceRepoURL from hook request
+* #121 Configure GitLab host url and API token at job level
+* #77 "Ignore SSL Certificate Errors" has no effect
+* #231 Cleanup GitLabWebHook
+* #230 Add functionality to configure multiple gitlab connections
+* #229 Add publisher to update the commit/merge request status in GitLab
+* #228 Cleanup GitLabPushTrigger
+
 1.1.32
 =====================
 * #218 license within pom.xml and LICENSE is different
