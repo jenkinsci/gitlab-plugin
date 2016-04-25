@@ -32,9 +32,12 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
             return;
         }
 
-        if (branchFilter.isBranchAllowed(getTargetBranch(hook))) {
+        String targetBranch = getTargetBranch(hook);
+        if (branchFilter.isBranchAllowed(targetBranch)) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
             scheduleBuild(job, createActions(job, hook));
+        } else {
+            LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
         }
     }
 
