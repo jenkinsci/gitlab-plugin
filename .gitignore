@@ -1,13 +1,6 @@
 .idea/
 *.iml
 target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.next
-release.properties
-work
 .classpath
 .project
 .settings
-/bin/
-/bin
