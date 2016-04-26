@@ -4,7 +4,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
@@ -20,10 +20,10 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 public class MergeRequestBuildAction implements WebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
-    private AbstractProject<?, ?> project;
+    private Job<?, ?> project;
     private MergeRequestHook mergeRequestHook;
 
-    public MergeRequestBuildAction(AbstractProject<?, ?> project, String json) {
+    public MergeRequestBuildAction(Job<?, ?> project, String json) {
         LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
         this.project = project;
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
@@ -32,7 +32,7 @@ public class MergeRequestBuildAction implements WebHookAction {
     public void execute(StaplerResponse response) {
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             public void run() {
-                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
                 if (trigger != null) {
                     trigger.onPost(mergeRequestHook);
                 }

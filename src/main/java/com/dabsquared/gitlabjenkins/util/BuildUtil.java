@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.Branch;
@@ -12,8 +10,8 @@ import hudson.plugins.git.util.MergeRecord;
  * @author Robin Müller
  */
 public class BuildUtil {
-    public static AbstractBuild<?, ?> getBuildByBranch(AbstractProject<?, ?> project, String branchName) {
-        for (AbstractBuild<?, ?> build : project.getBuilds()) {
+    public static Run<?, ?> getBuildByBranch(Job<?, ?> project, String branchName) {
+        for (Run<?, ?> build : project.getBuilds()) {
             BuildData data = build.getAction(BuildData.class);
             MergeRecord merge = build.getAction(MergeRecord.class);
             if (hasLastBuild(data) && isNoMergeBuild(data, merge)) {

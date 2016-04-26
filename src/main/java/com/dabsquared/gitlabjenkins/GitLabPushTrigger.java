@@ -206,6 +206,19 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return super.readResolve();
     }
 
+    public static GitLabPushTrigger getFromJob(Job<?, ?> job) {
+        GitLabPushTrigger trigger = null;
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+            ParameterizedJobMixIn.ParameterizedJob p = (ParameterizedJobMixIn.ParameterizedJob) job;
+            for (Trigger t : p.getTriggers().values()) {
+                if (t instanceof GitLabPushTrigger) {
+                    trigger = (GitLabPushTrigger) t;
+                }
+            }
+        }
+        return trigger;
+    }
+
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 

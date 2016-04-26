@@ -3,8 +3,8 @@ package com.dabsquared.gitlabjenkins.listener;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 
@@ -17,11 +17,11 @@ import java.io.IOException;
  * @author Robin Müller
  */
 @Extension
-public class GitLabBuildDescriptionRunListener extends RunListener<AbstractBuild<?, ?>> {
+public class GitLabBuildDescriptionRunListener extends RunListener<Run<?, ?>> {
 
     @Override
-    public void onStarted(AbstractBuild<?, ?> build, TaskListener listener) {
-        GitLabPushTrigger trigger = build.getProject().getTrigger(GitLabPushTrigger.class);
+    public void onStarted(Run<?, ?> build, TaskListener listener) {
+        GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(build.getParent());
         if (trigger != null && trigger.getSetBuildDescription()) {
             Cause cause = build.getCause(GitLabWebHookCause.class);
             if (cause != null && !cause.getShortDescription().isEmpty()) {

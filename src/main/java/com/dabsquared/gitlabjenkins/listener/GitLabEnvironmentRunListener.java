@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Robin Müller
  */
 @Extension
-public class GitLabEnvironmentRunListener extends RunListener<AbstractBuild<?, ?>> {
+public class GitLabEnvironmentRunListener extends RunListener<Run<?, ?>> {
     @Override
     public Environment setUpEnvironment(final AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException, Run.RunnerAbortedException {
         return new Environment() {

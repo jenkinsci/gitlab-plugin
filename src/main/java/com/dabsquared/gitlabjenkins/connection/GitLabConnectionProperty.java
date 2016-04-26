@@ -2,7 +2,6 @@ package com.dabsquared.gitlabjenkins.connection;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
-import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
@@ -16,7 +15,7 @@ import org.kohsuke.stapler.StaplerRequest;
 /**
  * @author Robin Müller
  */
-public class GitLabConnectionProperty extends JobProperty<AbstractProject<?, ?>> {
+public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
     private String gitLabConnection;
 

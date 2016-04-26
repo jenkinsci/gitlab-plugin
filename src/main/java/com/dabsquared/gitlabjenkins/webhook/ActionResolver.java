@@ -10,9 +10,9 @@ import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
@@ -40,14 +40,14 @@ public class ActionResolver {
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
         Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(request.getRestOfPath()).iterator();
-        AbstractProject<?, ?> project = resolveProject(projectName, restOfPathParts);
+        Job<?, ?> project = resolveProject(projectName, restOfPathParts);
         if (project == null) {
             throw HttpResponses.notFound();
         }
         return resolveAction(project, Joiner.on('/').join(restOfPathParts), request);
     }
 
-    private WebHookAction resolveAction(AbstractProject<?, ?> project, String restOfPath, StaplerRequest request) {
+    private WebHookAction resolveAction(Job<?, ?> project, String restOfPath, StaplerRequest request) {
         String method = request.getMethod();
         if (method.equals("POST")) {
             return onPost(project, request);
@@ -58,7 +58,7 @@ public class ActionResolver {
         return new NoopAction();
     }
 
-    private WebHookAction onGet(AbstractProject<?, ?> project, String restOfPath, StaplerRequest request) {
+    private WebHookAction onGet(Job<?, ?> project, String restOfPath, StaplerRequest request) {
         Matcher commitMatcher = COMMIT_STATUS_PATTERN.matcher(restOfPath);
         if (restOfPath.isEmpty() && request.hasParameter("ref")) {
             return new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
@@ -71,7 +71,7 @@ public class ActionResolver {
         return new NoopAction();
     }
 
-    private WebHookAction onGetCommitStatus(AbstractProject<?, ?> project, String sha1, String statusJson) {
+    private WebHookAction onGetCommitStatus(Job<?, ?> project, String sha1, String statusJson) {
         if (statusJson == null) {
             return new CommitBuildPageRedirectAction(project, sha1);
         } else {
@@ -79,7 +79,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onGetStatusPng(AbstractProject<?, ?> project, StaplerRequest request) {
+    private WebHookAction onGetStatusPng(Job<?, ?> project, StaplerRequest request) {
         if (request.hasParameter("ref")) {
             return new BranchStatusPngAction(project, request.getParameter("ref"));
         } else {
@@ -87,7 +87,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onPost(AbstractProject<?, ?> project, StaplerRequest request) {
+    private WebHookAction onPost(Job<?, ?> project, StaplerRequest request) {
         String requestBody = getRequestBody(request);
         String eventHeader = request.getHeader("X-Gitlab-Event");
         if (eventHeader.equals("Merge Request Hook")) {
@@ -109,17 +109,17 @@ public class ActionResolver {
         return requestBody;
     }
 
-    private AbstractProject<?, ?> resolveProject(final String projectName, final Iterator<String> restOfPathParts) {
-        return ACLUtil.impersonate(ACL.SYSTEM, new ACLUtil.Function<AbstractProject<?, ?>>() {
-            public AbstractProject<?, ?> invoke() {
+    private Job<?, ?> resolveProject(final String projectName, final Iterator<String> restOfPathParts) {
+        return ACLUtil.impersonate(ACL.SYSTEM, new ACLUtil.Function<Job<?, ?>>() {
+            public Job<?, ?> invoke() {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
                     Item item = jenkins.getItemByFullName(projectName);
-                    while (item instanceof ItemGroup<?> && !(item instanceof AbstractProject<?, ?>) && restOfPathParts.hasNext()) {
+                    while (item instanceof ItemGroup<?> && !(item instanceof Job<?, ?>) && restOfPathParts.hasNext()) {
                         item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
                     }
-                    if (item instanceof AbstractProject<?, ?>) {
-                        return (AbstractProject<?, ?>) item;
+                    if (item instanceof Job<?, ?>) {
+                        return (Job<?, ?>) item;
                     }
                 }
                 LOGGER.log(Level.FINE, "No project found: {0}, {1}", toArray(projectName, Joiner.on('/').join(restOfPathParts)));

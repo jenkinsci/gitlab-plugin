@@ -4,7 +4,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
@@ -20,11 +20,11 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 public class PushBuildAction implements WebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(PushBuildAction.class.getName());
-    private final AbstractProject<?, ?> project;
+    private final Job<?, ?> project;
 
     private PushHook pushHook;
 
-    public PushBuildAction(AbstractProject<?, ?> project, String json) {
+    public PushBuildAction(Job<?, ?> project, String json) {
         LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
         this.pushHook = JsonUtil.read(json, PushHook.class);
@@ -38,7 +38,7 @@ public class PushBuildAction implements WebHookAction {
 
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             public void run() {
-                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
                 if (trigger != null) {
                     trigger.onPost(pushHook);
                 }
