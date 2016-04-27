@@ -45,9 +45,9 @@ public final class CauseData {
         this.sourceBranch = checkNotNull(sourceBranch, "sourceBranch must not be null.");
         this.userName = checkNotNull(userName, "userName must not be null.");
         this.userEmail = userEmail == null ? "" : userEmail;
-        this.sourceRepoHomepage = checkNotNull(sourceRepoHomepage, "sourceRepoHomepage must not be null.");
+        this.sourceRepoHomepage = sourceRepoHomepage == null ? "" : sourceRepoHomepage;
         this.sourceRepoName = checkNotNull(sourceRepoName, "sourceRepoName must not be null.");
-        this.sourceRepoUrl = checkNotNull(sourceRepoUrl, "sourceRepoUrl must not be null.");
+        this.sourceRepoUrl = sourceRepoUrl == null ? sourceRepoSshUrl : sourceRepoUrl;
         this.sourceRepoSshUrl = checkNotNull(sourceRepoSshUrl, "sourceRepoSshUrl must not be null.");
         this.sourceRepoHttpUrl = checkNotNull(sourceRepoHttpUrl, "sourceRepoHttpUrl must not be null.");
         this.mergeRequestTitle = checkNotNull(mergeRequestTitle, "mergeRequestTitle must not be null.");
