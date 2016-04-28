@@ -90,10 +90,10 @@ public interface GitLabApi {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/projects/{projectId}/merge_request/{mergeRequestId}/comments")
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
     void createMergeRequestNote(@PathParam("projectId") String projectId,
                                 @PathParam("mergeRequestId") Integer mergeRequestId,
-                                @QueryParam("note") String note);
+                                @QueryParam("body") String body);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
