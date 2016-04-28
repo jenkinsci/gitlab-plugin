@@ -4,11 +4,13 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
+import hudson.model.TaskListener;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
 import org.hamcrest.CoreMatchers;
@@ -17,6 +19,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
@@ -32,6 +36,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
@@ -209,6 +215,18 @@ public class GitLabCommitStatusPublisherTest {
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         when(project.getProperty(GitLabConnectionProperty.class)).thenReturn(new GitLabConnectionProperty(gitLabConnection));
         when(build.getProject()).thenReturn(project);
+        EnvVars environment = mock(EnvVars.class);
+        when(environment.expand(anyString())).thenAnswer(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return (String) invocation.getArguments()[0];
+            }
+        });
+        try {
+            when(build.getEnvironment(any(TaskListener.class))).thenReturn(environment);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         return build;
     }
 }
