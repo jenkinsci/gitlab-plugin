@@ -54,7 +54,8 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerH
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
-	private boolean triggerOnPush = true;
+    private GitLabPluginMode gitLabPluginMode = GitLabPluginMode.LEGACY;
+    private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private final TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean ciSkip = true;
@@ -76,10 +77,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     @DataBoundConstructor
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
+    public GitLabPushTrigger(GitLabPluginMode gitLabPluginMode, boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
                              boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
+        this.gitLabPluginMode = gitLabPluginMode;
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
@@ -128,6 +130,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
     }
 
+    public GitLabPluginMode getGitLabPluginMode() {
+        return gitLabPluginMode;
+    }
+    
     public boolean getTriggerOnPush() {
         return triggerOnPush;
     }
@@ -187,8 +193,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     private void initializeTriggerHandler() {
-        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest, triggerOpenMergeRequestOnPush);
-        pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush);
+        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(gitLabPluginMode, triggerOnMergeRequest, triggerOpenMergeRequestOnPush);
+        pushHookTriggerHandler = newPushHookTriggerHandler(gitLabPluginMode, triggerOnPush, triggerOpenMergeRequestOnPush);
     }
 
     private void initializeBranchFilter() {
@@ -282,6 +288,13 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             save();
             return super.configure(req, formData);
+        }
+        
+        public ListBoxModel doFillGitLabPluginModeItems(@QueryParameter String gitLabPluginMode) {
+            return new ListBoxModel(
+                    new Option("Legacy (GitLab < 8.1)", GitLabPluginMode.LEGACY.name(), gitLabPluginMode.matches(GitLabPluginMode.LEGACY.name())),
+                    new Option("Modern (GitLab >= 8.1)", GitLabPluginMode.MODERN.name(), gitLabPluginMode.matches(GitLabPluginMode.MODERN.name()))
+            );
         }
 
         public ListBoxModel doFillTriggerOpenMergeRequestOnPushItems(@QueryParameter String triggerOpenMergeRequestOnPush) {

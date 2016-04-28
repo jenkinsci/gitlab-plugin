@@ -2,6 +2,9 @@
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form">
 
+  <f:entry title="GitLab Plugin Mode" field="gitLabPluginMode">
+    <f:select/>
+  </f:entry>
   <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
     <f:checkbox default="true"/>
   </f:entry>

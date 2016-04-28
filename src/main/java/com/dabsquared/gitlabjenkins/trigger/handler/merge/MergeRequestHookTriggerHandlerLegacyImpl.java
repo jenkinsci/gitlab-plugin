@@ -18,18 +18,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 
 /**
  * @author Robin Müller
  */
-class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<MergeRequestHook> implements MergeRequestHookTriggerHandler {
+class MergeRequestHookTriggerHandlerLegacyImpl extends AbstractMergeRequestHookTriggerHandler implements MergeRequestHookTriggerHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerLegacyImpl.class.getName());
 
     private final List<State> allowedStates;
 
-    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates) {
+    MergeRequestHookTriggerHandlerLegacyImpl(List<State> allowedStates) {
         this.allowedStates = allowedStates;
     }
 
@@ -57,32 +56,6 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return "merge request";
     }
 
-    @Override
-    protected CauseData retrieveCauseData(MergeRequestHook hook) {
-        return causeData()
-                .withActionType(CauseData.ActionType.MERGE)
-                .withProjectId(hook.getObjectAttributes().getTargetProjectId())
-                .withBranch(hook.getObjectAttributes().getSourceBranch())
-                .withSourceBranch(hook.getObjectAttributes().getSourceBranch())
-                .withUserName(hook.getObjectAttributes().getLastCommit().getAuthor().getName())
-                .withUserEmail(hook.getObjectAttributes().getLastCommit().getAuthor().getEmail())
-                .withSourceRepoHomepage(hook.getObjectAttributes().getSource().getHomepage())
-                .withSourceRepoName(hook.getObjectAttributes().getSource().getName())
-                .withSourceRepoUrl(hook.getObjectAttributes().getSource().getUrl())
-                .withSourceRepoSshUrl(hook.getObjectAttributes().getSource().getSshUrl())
-                .withSourceRepoHttpUrl(hook.getObjectAttributes().getSource().getHttpUrl())
-                .withMergeRequestTitle(hook.getObjectAttributes().getTitle())
-                .withMergeRequestDescription(hook.getObjectAttributes().getDescription())
-                .withMergeRequestId(hook.getObjectAttributes().getId())
-                .withTargetBranch(hook.getObjectAttributes().getTargetBranch())
-                .withTargetRepoName(hook.getObjectAttributes().getTarget().getName())
-                .withTargetRepoSshUrl(hook.getObjectAttributes().getTarget().getSshUrl())
-                .withTargetRepoHttpUrl(hook.getObjectAttributes().getTarget().getHttpUrl())
-                .withTriggeredByUser(hook.getObjectAttributes().getLastCommit().getAuthor().getName())
-                .build();
-    }
-
-    @Override
     protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook) throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }

@@ -13,7 +13,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Robin Müller
  */
-public final class CauseData {
+public class CauseData {
     private final ActionType actionType;
     private final Integer projectId;
     private final String branch;
@@ -28,6 +28,7 @@ public final class CauseData {
     private final String mergeRequestTitle;
     private final String mergeRequestDescription;
     private final Integer mergeRequestId;
+    private final Integer mergeRequestIid;
     private final String targetBranch;
     private final String targetRepoName;
     private final String targetRepoSshUrl;
@@ -37,7 +38,7 @@ public final class CauseData {
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer projectId, String branch, String sourceBranch, String userName, String userEmail,
               String sourceRepoHomepage, String sourceRepoName, String sourceRepoUrl, String sourceRepoSshUrl, String sourceRepoHttpUrl,
-              String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId, String targetBranch, String targetRepoName,
+              String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId, Integer mergeRequestIid, String targetBranch, String targetRepoName,
               String targetRepoSshUrl, String targetRepoHttpUrl, String triggeredByUser) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
         this.projectId = checkNotNull(projectId, "projectId must not be null.");
@@ -53,6 +54,7 @@ public final class CauseData {
         this.mergeRequestTitle = checkNotNull(mergeRequestTitle, "mergeRequestTitle must not be null.");
         this.mergeRequestDescription = mergeRequestDescription == null ? "" : mergeRequestDescription;
         this.mergeRequestId = mergeRequestId;
+        this.mergeRequestIid = mergeRequestIid;
         this.targetBranch = checkNotNull(targetBranch, "targetBranch must not be null.");
         this.targetRepoName = checkNotNull(targetRepoName, "targetRepoName must not be null.");
         this.targetRepoSshUrl = checkNotNull(targetRepoSshUrl, "targetRepoSshUrl must not be null.");
@@ -137,6 +139,10 @@ public final class CauseData {
     public Integer getMergeRequestId() {
         return mergeRequestId;
     }
+    
+    public Integer getMergeRequestIid() {
+        return mergeRequestIid;
+    }
 
     public String getTargetBranch() {
         return targetBranch;
@@ -186,6 +192,7 @@ public final class CauseData {
                 .append(mergeRequestTitle, causeData.mergeRequestTitle)
                 .append(mergeRequestDescription, causeData.mergeRequestDescription)
                 .append(mergeRequestId, causeData.mergeRequestId)
+                .append(mergeRequestIid, causeData.mergeRequestIid)
                 .append(targetBranch, causeData.targetBranch)
                 .append(targetRepoName, causeData.targetRepoName)
                 .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
@@ -211,6 +218,7 @@ public final class CauseData {
                 .append(mergeRequestTitle)
                 .append(mergeRequestDescription)
                 .append(mergeRequestId)
+                .append(mergeRequestIid)
                 .append(targetBranch)
                 .append(targetRepoName)
                 .append(targetRepoSshUrl)
@@ -236,6 +244,7 @@ public final class CauseData {
                 .append("mergeRequestTitle", mergeRequestTitle)
                 .append("mergeRequestDescription", mergeRequestDescription)
                 .append("mergeRequestId", mergeRequestId)
+                .append("mergeRequestIid", mergeRequestIid)
                 .append("targetBranch", targetBranch)
                 .append("targetRepoName", targetRepoName)
                 .append("targetRepoSshUrl", targetRepoSshUrl)
@@ -258,7 +267,7 @@ public final class CauseData {
         }, MERGE {
             @Override
             String getShortDescription(CauseData data) {
-                return "GitLab Merge Request #" + data.getMergeRequestId() + " : " + data.getSourceBranch() + " => " + data.getTargetBranch();
+                return "GitLab Merge Request #" + data.getMergeRequestIid() + " : " + data.getSourceBranch() + " => " + data.getTargetBranch();
             }
         };
 

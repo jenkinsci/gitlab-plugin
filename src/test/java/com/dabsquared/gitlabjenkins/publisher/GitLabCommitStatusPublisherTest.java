@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
@@ -78,7 +81,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project", null);
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -92,7 +95,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.canceled)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project", null);
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.perform(build, null, listener);
@@ -106,7 +109,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.success)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project", null);
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.perform(build, null, listener);
@@ -120,7 +123,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.failed)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project", null);
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.perform(build, null, listener);
@@ -147,7 +150,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_commitNotExists() throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project", null);
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -160,7 +163,7 @@ public class GitLabCommitStatusPublisherTest {
         prepareExistsCommitWithSuccessResponse("test/project", "123abc");
         HttpRequest updateCommitStatus = prepareUpdateCommitStatus("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(403));
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project", null);
         BuildListener buildListener = mock(BuildListener.class);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         when(buildListener.getLogger()).thenReturn(new PrintStream(outputStream));
@@ -202,13 +205,19 @@ public class GitLabCommitStatusPublisherTest {
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
-    private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String... remoteUrls) {
+    private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String sourceRepoUrl, String targetRepoUrl) {
         AbstractBuild build = mock(AbstractBuild.class);
         BuildData buildData = mock(BuildData.class);
         Revision revision = mock(Revision.class);
+        GitLabWebHookCause cause = mock(GitLabWebHookCause.class);
+        CauseData causeData = mock(CauseData.class);
+        when(cause.getData()).thenReturn(causeData);
+        when(causeData.getSourceRepoSshUrl()).thenReturn(sourceRepoUrl);
+        when(causeData.getTargetRepoSshUrl()).thenReturn(targetRepoUrl);
         when(revision.getSha1String()).thenReturn(sha);
         when(buildData.getLastBuiltRevision()).thenReturn(revision);
-        when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
+        when(build.getCause(GitLabWebHookCause.class)).thenReturn(cause);
+        when(cause.getData()).thenReturn(causeData);
         when(build.getAction(BuildData.class)).thenReturn(buildData);
         when(build.getResult()).thenReturn(result);
         when(build.getUrl()).thenReturn(buildUrl);
