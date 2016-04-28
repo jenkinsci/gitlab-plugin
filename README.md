@@ -123,6 +123,12 @@ If you plan to use forked repositories, you will need to enable the GitLab CI in
         **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
 * GitLab 8.1 has implemented a commit status api. To enable add the post-build step ``Publish build status to GitLab commit (GitLab 8.1+ required)`` to the job.
+  For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
+  ```
+  gitlabCommitStatus {
+    <script that builds your project>
+  }
+  ```
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
 ## Forked repositories

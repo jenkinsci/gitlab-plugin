@@ -7,7 +7,7 @@
   </parent>
 
   <properties>
-    <jenkins.version>1.609.1</jenkins.version>
+    <jenkins.version>1.609.3</jenkins.version>
     <hpi-plugin.version>1.115</hpi-plugin.version>
     <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
@@ -160,6 +160,11 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>git-client</artifactId>
       <version>1.19.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-step-api</artifactId>
+      <version>1.15</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
