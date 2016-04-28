@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -68,18 +69,22 @@ public class GitLabCommitStatusPublisher extends Notifier {
     }
 
     private void updateCommitStatus(AbstractBuild<?, ?> build, BuildListener listener, BuildState state, String commitHash, String buildUrl) {
-        for (String gitlabProjectId : retrieveGitlabProjectIds(build)) {
-            try {
-                GitLabApi client = getClient(build);
-                if (client == null) {
-                    listener.getLogger().println("No GitLab connection configured");
-                } else if (existsCommit(client, gitlabProjectId, commitHash)) {
-                    client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
+        try {
+            for (String gitlabProjectId : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
+                try {
+                    GitLabApi client = getClient(build);
+                    if (client == null) {
+                        listener.getLogger().println("No GitLab connection configured");
+                    } else if (existsCommit(client, gitlabProjectId, commitHash)) {
+                        client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
+                    }
+                } catch (WebApplicationException e) {
+                    listener.getLogger().printf("Failed to update Gitlab commit status for project '%s': %s%n", gitlabProjectId, e.getMessage());
+                    LOGGER.log(Level.SEVERE, String.format("Failed to update Gitlab commit status for project '%s'", gitlabProjectId), e);
                 }
-            } catch (WebApplicationException e) {
-                listener.getLogger().printf("Failed to update Gitlab commit status for project '%s': %s%n", gitlabProjectId, e.getMessage());
-                LOGGER.log(Level.SEVERE, String.format("Failed to update Gitlab commit status for project '%s'", gitlabProjectId), e);
             }
+        } catch (IOException | InterruptedException e) {
+            listener.getLogger().printf("Failed to update Gitlab commit status: %s%n", e.getMessage());
         }
     }
 
@@ -110,11 +115,11 @@ public class GitLabCommitStatusPublisher extends Notifier {
         return null;
     }
 
-    private List<String> retrieveGitlabProjectIds(AbstractBuild<?, ?> build) {
+    private List<String> retrieveGitlabProjectIds(AbstractBuild<?, ?> build, EnvVars environment) {
         List<String> result = new ArrayList<>();
         for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
             try {
-                result.add(ProjectIdUtil.retrieveProjectId(remoteUrl));
+                result.add(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl)));
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 // nothing to do
             }
