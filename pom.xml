@@ -28,9 +28,14 @@
 
   <developers>
     <developer>
-      <id>bass_rock</id>
-      <name>Daniel Brooks</name>
-      <email>daniel_brooks@dabsquared.com</email>
+      <id>coderhugo</id>
+      <name>Robin Müller</name>
+      <email>coderhugo@googlemail.com</email>
+    </developer>
+    <developer>
+      <id>owenmehegan</id>
+      <name>Owen Mehegan</name>
+      <email>owen@nerdnetworks.org</email>
     </developer>
   </developers>
 
