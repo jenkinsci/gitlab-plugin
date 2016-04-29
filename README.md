@@ -23,7 +23,21 @@ This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/
 
 # User support
 
-If you have a problem or question about using the plugin, please create an issue in the GitHub project. You can also try chatting with us in #gitlab-plugin on the Freenode IRC network.
+If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
+* GitLab plugin version (e.g. 1.2.0)
+* GitLab version (e.g. 8.1.1)
+* Jenkins version (e.g. 1.651.1)
+* Relevant log output from the plugin (see below for instructions on capturing this)
+
+Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it: 
+1. Go to Jenkins -> Manage Jenkins -> System Log
+2. Add new log recorder
+3. Enter 'Gitlab plugin' or whatever you want for the name
+4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINE, and save
+5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
+6. Refresh the log page and you should see output
+
+You can also try chatting with us in the #gitlab-plugin channel on the Freenode IRC network.
 
 # Supported GitLab versions
 
@@ -147,12 +161,6 @@ These include:
 * gitlabMergeRequestAssignee
 * gitlabUserName
 * gitlabUserEmail
-
-# Help Needed
-
-* `/projects/` - seems to be already used by Jenkins, A way to use this path would be awesome
-* `?token=XYZ` - Can not find a way to include a token parameter on an AbstractProject to security check without an extra plugin configuration
-* `/PROJECT_NAME/`  should really be /PROJECT_ID_NUMBER/ - Can not find a project id number on an AbstractProject to use here instead.
 
 # Contributing to the Plugin
 
