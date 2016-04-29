@@ -5,6 +5,7 @@ ChangeLog
 =====================
 * #271 Version 1.2.0 breaks support for Workflow/Pipeline jobs
  * **This version of the plugin is incompatible with earlier versions if you are using Pipeline jobs!** You will need to manually change your job configurations. Please see the README section on using the plugin with Pipeline for more information about this.
+* #275 Handle GitLab API deprecations >= 8.5.0
 
 1.2.0
 =====================
