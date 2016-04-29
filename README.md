@@ -63,30 +63,40 @@ Optionally, the plugin communicates with the GitLab server in order to fetch add
 To enable this functionality, a user should be set up on GitLab, with GitLab 'Developer' permissions, to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
 
 ## Jenkins Job Configuration
-* Create a new job by going to *New Job*
-* Set the _Project Name_ to whatever you like
-* In the *Source Code Management* section:
-    * Click *Git*
-    * Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
+### Git configuration for Freestyle jobs
+1. In the *Source Code Management* section:
+    1. Click *Git*
+    2. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
       * In the Advanced settings, set its *Name* to ``origin``
-    * To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
+    3. To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
       * Add a second repository with:
         * *URL*: ``${gitlabSourceRepoURL}`` 
         * *Name* (in Advanced): ``${gitlabSourceRepoName}``
-    * In *Branch Specifier* enter:
+    4. In *Branch Specifier* enter:
       * For single-repository setups: ``origin/${gitlabSourceBranch}``
       * For forked repository setups: ``${gitlabSourceRepoName}/${gitlabSourceBranch}``
-    * In *Additional Behaviours*:
+    5. In *Additional Behaviours*:
         * Click the *Add* drop-down button.
         * Select *Merge before build* from the drop-down.
         * Set *Name of the repository" to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
-* In the *Build Triggers* section:
+
+### Git configuration for Pipeline/Workflow jobs
+**Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. ${gitlabSourceBranch}. After version 1.2.1, these variables are only accessible in the env[] map. E.g. ${env.gitlabSourceBranch}. 
+
+1. Use the Snippet generator, General SCM step, to generate sample Groovy code for the git checkout/merge etc. 
+2. Example: `checkout changelog: true, poll: true, scm: [$class: 'GitSCM', branches: [[name: "origin/${env.gitlabSourceBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]], submoduleCfg: [], userRemoteConfigs: [[name: 'origin', url: 'git@mygitlab:foo/testrepo.git']]]` 
+
+### Freestyle and Pipeline jobs
+1. In the *Build Triggers* section:
     * Check the ``Build when a change is pushed to GitLab.``
     * Use the check boxes to trigger builds on Push and/or Merge Request events
     * Optionally enable building open merge requests again after a push to the source branch.
-* Configure any other pre build, build or post build actions as necessary
-* Click *Save* to preserve your changes in Jenkins.
+2. Configure any other pre build, build or post build actions as necessary
+3. Click *Save* to preserve your changes in Jenkins.
+
+### Matrix/Multi-configuration jobs
+**The Jenkins Matrix/Multi-configuration job type is not supported.**
 
 ## Gitlab Configuration (7.14.x)
 * In GitLab go to your repository's project *Settings*
