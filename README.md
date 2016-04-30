@@ -30,6 +30,7 @@ If you have a problem or question about using the plugin, please make sure you a
 * Relevant log output from the plugin (see below for instructions on capturing this)
 
 Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it: 
+
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
 3. Enter 'Gitlab plugin' or whatever you want for the name
