@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.EnvVars;
+import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
@@ -96,9 +97,19 @@ public class CommitStatusUpdater {
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
         List<String> result = new ArrayList<>();
-        for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        String sourceRepoSshUrl = cause.getData().getSourceRepoSshUrl();
+        String targetRepoSshUrl = cause.getData().getTargetRepoSshUrl();
+        if (sourceRepoSshUrl != null) {
             try {
-                result.add(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl)));
+                result.add(ProjectIdUtil.retrieveProjectId(sourceRepoSshUrl));
+            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+                // nothing to do
+            }
+        }
+        if (targetRepoSshUrl != null) {
+            try {
+                result.add(ProjectIdUtil.retrieveProjectId(targetRepoSshUrl));
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 // nothing to do
             }
