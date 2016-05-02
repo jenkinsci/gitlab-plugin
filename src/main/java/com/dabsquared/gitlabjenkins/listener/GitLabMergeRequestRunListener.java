@@ -36,7 +36,7 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
                 acceptMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId);
             }
             addNoteOnMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId, build.getParent().getDisplayName(), build.getNumber(),
-                    buildUrl, getResultIcon(trigger, Result.SUCCESS), buildResult.color.getDescription());
+                    buildUrl, getResultIcon(trigger, buildResult), buildResult.color.getDescription());
         }
     }
 
