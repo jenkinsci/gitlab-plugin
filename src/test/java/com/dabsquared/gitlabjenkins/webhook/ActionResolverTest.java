@@ -138,6 +138,21 @@ public class ActionResolverTest {
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
 
+    @Test
+    public void postPushTag() throws IOException {
+        String projectName = "test";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("Tag Push Hook");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(PushBuildAction.class));
+    }
+
+
 
     private static class ResourceServletInputStream extends ServletInputStream {
 

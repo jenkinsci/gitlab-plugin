@@ -95,7 +95,7 @@ public class ActionResolver {
         String eventHeader = request.getHeader("X-Gitlab-Event");
         if (StringUtils.equals(eventHeader, "Merge Request Hook") ) {
             return new MergeRequestBuildAction(project, requestBody);
-        } else if ( StringUtils.equals(eventHeader,"Push Hook")) {
+        } else if ( StringUtils.equals(eventHeader,"Push Hook") || StringUtils.equals(eventHeader,"Tag Push Hook")) {
             return new PushBuildAction(project, requestBody);
         }
         LOGGER.log(Level.FINE, "Unsupported event header: {0}", eventHeader);
