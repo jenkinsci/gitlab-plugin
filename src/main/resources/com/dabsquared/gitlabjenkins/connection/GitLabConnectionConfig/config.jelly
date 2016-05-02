@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
   <f:section title="Gitlab">
     <f:entry title="${%GitLab connections}">
       <f:repeatable var="connection" items="${descriptor.connections}" name="connections">
@@ -11,14 +11,14 @@
           <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%i.e. http://gitlab.org})">
             <f:textbox value="${connection.url}"/>
           </f:entry>
-          <f:entry title="${%API Token}" field="apiToken" description="${%API Token for accessing Gitlab}">
-            <f:password value="${connection.apiToken}"/>
+          <f:entry title="${%API Token}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
+            <c:select/>
           </f:entry>
           <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
             <f:checkbox checked="${connection.ignoreCertificateErrors}"/>
           </f:entry>
           <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
-                            with="apiToken,url,ignoreCertificateErrors"/>
+                            with="apiTokenId,url,ignoreCertificateErrors"/>
           <f:entry title="">
             <div align="right">
               <f:repeatableDeleteButton/>
