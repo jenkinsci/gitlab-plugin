@@ -5,7 +5,6 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
