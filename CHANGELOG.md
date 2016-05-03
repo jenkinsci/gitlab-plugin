@@ -3,6 +3,7 @@ ChangeLog
 
 1.2.2
 =====================
+* #283 Send thumbs-down icon when build fails
 * #284 NullPointerException when using the GitLabCommitStatusPublisher
 * Use jenkins credentials-plugin for storing the GitLab API Token
 * Clear clients cache if connection config has changed
