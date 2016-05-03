@@ -35,6 +35,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         connections = req.bindJSONToList(GitLabConnection.class, json.get("connections"));
         refreshConnectionMap();
+        clients.clear();
         save();
         return super.configure(req, json);
     }
