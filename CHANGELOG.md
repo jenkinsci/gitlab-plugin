@@ -1,6 +1,12 @@
 ChangeLog
 =====================
 
+1.2.2
+=====================
+* #284 NullPointerException when using the GitLabCommitStatusPublisher
+* Use jenkins credentials-plugin for storing the GitLab API Token
+* Clear clients cache if connection config has changed
+
 1.2.1
 =====================
 * #271 Version 1.2.0 breaks support for Workflow/Pipeline jobs
