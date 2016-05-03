@@ -90,9 +90,9 @@ public class ActionResolver {
     private WebHookAction onPost(Job<?, ?> project, StaplerRequest request) {
         String requestBody = getRequestBody(request);
         String eventHeader = request.getHeader("X-Gitlab-Event");
-        if (eventHeader.equals("Merge Request Hook")) {
+        if ("Merge Request Hook".equals(eventHeader)) {
             return new MergeRequestBuildAction(project, requestBody);
-        } else if (eventHeader.equals("Push Hook")) {
+        } else if ("Push Hook".equals(eventHeader)) {
             return new PushBuildAction(project, requestBody);
         }
         LOGGER.log(Level.FINE, "Unsupported event header: {0}", eventHeader);
