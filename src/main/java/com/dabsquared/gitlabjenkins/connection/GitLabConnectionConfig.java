@@ -1,11 +1,24 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.dabsquared.gitlabjenkins.gitlab.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.model.Item;
+import hudson.security.ACL;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -35,6 +48,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         connections = req.bindJSONToList(GitLabConnection.class, json.get("connections"));
         refreshConnectionMap();
+        clients.clear();
         save();
         return super.configure(req, json);
     }
@@ -73,7 +87,8 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public FormValidation doCheckApiToken(@QueryParameter String value) {
+    // TODO check why this gets called twice on page load once with the correct id and once with an empty string
+    public FormValidation doCheckApiTokenId(@QueryParameter String value) {
         if (value == null || value.isEmpty()) {
             return FormValidation.error(Messages.apiToken_required());
         } else {
@@ -81,9 +96,9 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiToken, @QueryParameter boolean ignoreCertificateErrors) {
+    public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiTokenId, @QueryParameter boolean ignoreCertificateErrors) {
         try {
-            GitLabClientBuilder.buildClient(url, apiToken, ignoreCertificateErrors).headCurrentUser();
+            GitLabClientBuilder.buildClient(url, apiTokenId, ignoreCertificateErrors).headCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
@@ -92,10 +107,41 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
+    public ListBoxModel doFillApiTokenIdItems(@QueryParameter String name) {
+        if (Jenkins.getInstance().hasPermission(Item.CONFIGURE)) {
+            AbstractIdCredentialsListBoxModel<StandardListBoxModel, StandardCredentials> options = new StandardListBoxModel()
+                .withEmptySelection()
+                .withMatching(
+                    new GitLabCredentialMatcher(),
+                    CredentialsProvider.lookupCredentials(
+                        StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, new ArrayList<DomainRequirement>()
+                    )
+                );
+            if (name != null && connectionMap.containsKey(name)) {
+                String apiTokenId = connectionMap.get(name).getApiTokenId();
+                for (ListBoxModel.Option option : options) {
+                    if (option.value.equals(apiTokenId)) {
+                        option.selected = true;
+                    }
+                }
+            }
+            return options;
+        }
+
+        return new StandardListBoxModel();
+    }
+
     private void refreshConnectionMap() {
         connectionMap.clear();
         for (GitLabConnection connection : connections) {
             connectionMap.put(connection.getName(), connection);
+        }
+    }
+
+    private static class GitLabCredentialMatcher implements CredentialsMatcher {
+        @Override
+        public boolean matches(@NonNull Credentials credentials) {
+            return credentials instanceof StringCredentials;
         }
     }
 }

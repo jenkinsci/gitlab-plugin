@@ -1,8 +1,12 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.CredentialsStore;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
@@ -16,7 +20,10 @@ import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
+import hudson.util.Secret;
+import jenkins.model.Jenkins;
 import org.hamcrest.CoreMatchers;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +44,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -64,10 +72,18 @@ public class GitLabCommitStatusPublisherTest {
     private BuildListener listener;
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        connectionConfig.addConnection(new GitLabConnection(GIT_LAB_CONNECTION, "http://localhost:" + mockServer.getPort() + "/gitlab", API_TOKEN, false));
+        String apiTokenId = "apiTokenId";
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+            if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
+                List<Domain> domains = credentialsStore.getDomains();
+                credentialsStore.addCredentials(domains.get(0),
+                    new StringCredentialsImpl(CredentialsScope.SYSTEM, apiTokenId, "GitLab API Token", Secret.fromString(API_TOKEN)));
+            }
+        }
+        connectionConfig.addConnection(new GitLabConnection(GIT_LAB_CONNECTION, "http://localhost:" + mockServer.getPort() + "/gitlab", apiTokenId, false));
     }
 
     @After
