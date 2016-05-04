@@ -74,10 +74,10 @@ public interface GitLabApi {
                            @QueryParam("target_url") String targetUrl,
                            @QueryParam("description") String description);
 
-    @HEAD
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/repository/commits/{sha}")
-    void headCommit(@PathParam("projectId") String projectId, @PathParam("sha") String sha);
+    void getCommit(@PathParam("projectId") String projectId, @PathParam("sha") String sha);
 
 
     @PUT

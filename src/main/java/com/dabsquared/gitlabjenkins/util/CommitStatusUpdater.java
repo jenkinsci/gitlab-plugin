@@ -69,7 +69,7 @@ public class CommitStatusUpdater {
 
     private static boolean existsCommit(GitLabApi client, String gitlabProjectId, String commitHash) {
         try {
-            client.headCommit(gitlabProjectId, commitHash);
+            client.getCommit(gitlabProjectId, commitHash);
             return true;
         } catch (NotFoundException e) {
             LOGGER.log(Level.FINE, String.format("Project (%s) and commit (%s) combination not found", gitlabProjectId, commitHash));
