@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
@@ -10,6 +12,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import hudson.model.Item;
+import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +28,7 @@ import org.apache.http.impl.conn.BasicClientConnectionManager;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.ClientRequestContext;
@@ -39,10 +44,13 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
 /**
  * @author Robin Müller
@@ -52,12 +60,12 @@ public class GitLabClientBuilder {
     private final static Logger LOGGER = Logger.getLogger(GitLabClientBuilder.class.getName());
     private static final String PRIVATE_TOKEN = "PRIVATE-TOKEN";
 
-    public static GitLabApi buildClient(String gitlabHostUrl, final String gitlabApiToken, boolean ignoreCertificateErrors) {
+    public static GitLabApi buildClient(String gitlabHostUrl, final String gitlabApiTokenId, boolean ignoreCertificateErrors) {
         return new ResteasyClientBuilder()
                 .httpEngine(new ApacheHttpClient4Engine(createHttpClient(ignoreCertificateErrors)))
                 .register(new JacksonJsonProvider())
                 .register(new JacksonConfig())
-                .register(new ApiHeaderTokenFilter(gitlabApiToken)).build().target(gitlabHostUrl)
+                .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId))).build().target(gitlabHostUrl)
                 .register(new LoggingFilter())
                 .proxyBuilder(GitLabApi.class)
                 .classloader(Jenkins.getInstance().getPluginManager().uberClassLoader)
@@ -65,12 +73,19 @@ public class GitLabClientBuilder {
     }
 
     public static GitLabApi buildClient(GitLabConnection connection) {
-        return buildClient(connection.getUrl(), connection.getApiToken(), connection.isIgnoreCertificateErrors());
+        return buildClient(connection.getUrl(), connection.getApiTokenId(), connection.isIgnoreCertificateErrors());
     }
 
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
     public static void setRuntimeDelegate() {
         RuntimeDelegate.setInstance(new ResteasyProviderFactory());
+    }
+
+    private static String getApiToken(String apiTokenId) {
+        StringCredentials credentials = CredentialsMatchers.firstOrNull(
+            lookupCredentials(StringCredentials.class, (Item) null, ACL.SYSTEM, new ArrayList<DomainRequirement>()),
+            CredentialsMatchers.withId(apiTokenId));
+        return credentials == null ? null : credentials.getSecret().getPlainText();
     }
 
     private static DefaultHttpClient createHttpClient(boolean ignoreCertificateErrors) {

@@ -1,7 +1,16 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.CredentialsStore;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.Domain;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -29,9 +39,11 @@ import static org.junit.Assert.assertThat;
  */
 public class GitLabConnectionConfigSSLTest {
 
-    private static int port;
-    private static Server server;
+    private static final String API_TOKEN_ID = "apiTokenId";
 
+    private static int port;
+
+    private static Server server;
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
@@ -59,19 +71,30 @@ public class GitLabConnectionConfigSSLTest {
         server.stop();
     }
 
+    @Before
+    public void setup() throws IOException {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+            if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
+                List<Domain> domains = credentialsStore.getDomains();
+                credentialsStore.addCredentials(domains.get(0),
+                    new StringCredentialsImpl(CredentialsScope.SYSTEM, API_TOKEN_ID, "GitLab API Token", Secret.fromString(API_TOKEN_ID)));
+            }
+        }
+    }
+
     @Test
     public void doCheckConnection_ignoreCertificateErrors() {
-        String apiToken = "secret";
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", apiToken, true);
+
+        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, true);
         assertThat(formValidation.getMessage(), is(Messages.connection_success()));
     }
 
     @Test
-    public void doCheckConnection_certificateError() {
-        String apiToken = "secret";
+    public void doCheckConnection_certificateError() throws IOException {
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", apiToken, false);
+
+        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, false);
         assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
     }
 }
