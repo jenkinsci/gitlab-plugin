@@ -7,6 +7,7 @@ ChangeLog
 * #284 NullPointerException when using the GitLabCommitStatusPublisher
 * Use jenkins credentials-plugin for storing the GitLab API Token
 * Clear clients cache if connection config has changed
+* Add workflow step that updates the GitLab commit status depending on the build status
 
 1.2.1
 =====================
