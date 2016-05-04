@@ -17,6 +17,7 @@ import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -90,9 +91,9 @@ public class ActionResolver {
     private WebHookAction onPost(Job<?, ?> project, StaplerRequest request) {
         String requestBody = getRequestBody(request);
         String eventHeader = request.getHeader("X-Gitlab-Event");
-        if ("Merge Request Hook".equals(eventHeader)) {
+        if (StringUtils.equals(eventHeader, "Merge Request Hook") ) {
             return new MergeRequestBuildAction(project, requestBody);
-        } else if ("Push Hook".equals(eventHeader)) {
+        } else if ( StringUtils.equals(eventHeader,"Push Hook")) {
             return new PushBuildAction(project, requestBody);
         }
         LOGGER.log(Level.FINE, "Unsupported event header: {0}", eventHeader);
