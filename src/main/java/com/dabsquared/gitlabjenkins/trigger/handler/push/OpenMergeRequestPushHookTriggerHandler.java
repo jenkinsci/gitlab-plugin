@@ -86,7 +86,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             LOGGER.log(Level.INFO, "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
-            Branch branch = client.getBranch(projectId.toString(), sourceBranch);
+            Branch branch = client.getBranch(mergeRequest.getSourceProjectId().toString(), sourceBranch);
             Project project = client.getProject(mergeRequest.getSourceProjectId().toString());
             scheduleBuild(job, new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))));
         }
