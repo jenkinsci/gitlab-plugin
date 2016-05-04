@@ -215,7 +215,7 @@ public class GitLabCommitStatusPublisherTest {
     private HttpRequest prepareExistsCommit(String projectId, String sha) throws UnsupportedEncodingException {
         return request()
                 .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/repository/commits/" + sha)
-                .withMethod("HEAD")
+                .withMethod("GET")
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
