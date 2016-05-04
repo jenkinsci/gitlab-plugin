@@ -4,7 +4,9 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
+import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
 
 import java.util.List;
@@ -15,6 +17,15 @@ import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
  * @author Robin Müller
  */
 class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
+
+    private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
+
+    @Override
+    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter) {
+        if (isNoRemoveBranchPush(hook)) {
+            super.handle(job, hook, ciSkip, branchFilter);
+        }
+    }
 
     @Override
     protected boolean isCiSkip(PushHook hook) {
@@ -84,7 +95,11 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         }
     }
 
-    private boolean isNewBranchPush(PushHook pushHook) {
-        return pushHook.getBefore() != null && pushHook.getBefore().contains("0000000000000000000000000000000000000000");
+    private boolean isNewBranchPush(PushHook hook) {
+        return hook.getBefore() != null && hook.getBefore().equals(NO_COMMIT);
+    }
+
+    private boolean isNoRemoveBranchPush(PushHook hook) {
+        return hook.getAfter() != null && !hook.getAfter().equals(NO_COMMIT);
     }
 }
