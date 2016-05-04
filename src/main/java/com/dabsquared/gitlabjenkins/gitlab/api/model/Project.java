@@ -13,6 +13,7 @@ public class Project {
 
     private Integer id;
     private String name;
+    private Namespace namespace;
     private String webUrl;
     private String sshUrlToRepo;
     private String httpUrlToRepo;
@@ -31,6 +32,14 @@ public class Project {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Namespace getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(Namespace namespace) {
+        this.namespace = namespace;
     }
 
     public String getWebUrl() {

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
@@ -100,6 +101,9 @@ public class PushHookTriggerHandlerImplTest {
                         .withUrl("git@gitlab.org:test.git")
                         .withGitSshUrl("git@gitlab.org:test.git")
                         .withGitHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                .withProject(project()
+                        .withNamespace("test-namespace")
                         .build())
                 .withAfter(commit.name())
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
