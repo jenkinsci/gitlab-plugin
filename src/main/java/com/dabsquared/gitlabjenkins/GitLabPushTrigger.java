@@ -7,6 +7,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
+import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -66,8 +67,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean ciSkip = true;
     private boolean skipWorkInProgressMergeRequest;
     private boolean setBuildDescription = true;
-    private boolean addNoteOnMergeRequest = true;
-    private boolean addCiMessage = false;
+    private transient boolean addNoteOnMergeRequest;
+    private transient boolean addCiMessage;
     private boolean addVoteOnMergeRequest = true;
     private transient boolean allowAllBranches = false;
     private transient String branchFilterName;
@@ -137,6 +138,19 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             oldConfig.jobsMigrated = true;
             oldConfig.save();
         }
+        if (!oldConfig.jobsMigrated2) {
+            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                if (trigger != null) {
+                    if (trigger.addNoteOnMergeRequest) {
+                        project.getPublishersList().add(new GitLabMessagePublisher());
+                    }
+                    project.save();
+                }
+            }
+            oldConfig.jobsMigrated2 = true;
+            oldConfig.save();
+        }
     }
 
     public boolean getTriggerOnPush() {
@@ -161,10 +175,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     public boolean getSetBuildDescription() {
         return setBuildDescription;
-    }
-
-    public boolean getAddNoteOnMergeRequest() {
-        return addNoteOnMergeRequest;
     }
 
     public boolean getAddVoteOnMergeRequest() {
@@ -256,6 +266,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private boolean jobsMigrated = false;
+        private boolean jobsMigrated2 = false;
         private String gitlabApiToken;
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
