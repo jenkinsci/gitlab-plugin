@@ -1,9 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 import javax.ws.rs.DELETE;
@@ -102,6 +99,12 @@ public interface GitLabApi {
                               @QueryParam("state") State state,
                               @QueryParam("page") int page,
                               @QueryParam("per_page") int perPage);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}")
+    MergeRequest getMergeRequest(@PathParam("projectId") String projectId,
+                                 @PathParam("mergeRequestId") Integer mergeRequestId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
