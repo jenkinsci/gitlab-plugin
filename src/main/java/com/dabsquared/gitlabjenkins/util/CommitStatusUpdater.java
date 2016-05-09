@@ -14,7 +14,9 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,25 +97,35 @@ public class CommitStatusUpdater {
     }
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
-        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
+        for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
+            try {
+                result.add(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl)));
+            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+                // nothing to do
+            }
+        }
+        
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        String sourceRepoSshUrl = cause.getData().getSourceRepoSshUrl();
-        String targetRepoSshUrl = cause.getData().getTargetRepoSshUrl();
-        if (sourceRepoSshUrl != null) {
-            try {
-                result.add(ProjectIdUtil.retrieveProjectId(sourceRepoSshUrl));
-            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
-                // nothing to do
+        if (cause != null) {
+            String sourceRepoSshUrl = cause.getData().getSourceRepoSshUrl();
+            String targetRepoSshUrl = cause.getData().getTargetRepoSshUrl();
+            if (sourceRepoSshUrl != null) {
+                try {
+                    result.add(ProjectIdUtil.retrieveProjectId(sourceRepoSshUrl));
+                } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+                    // nothing to do
+                }
+            }
+            if (targetRepoSshUrl != null) {
+                try {
+                    result.add(ProjectIdUtil.retrieveProjectId(targetRepoSshUrl));
+                } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+                    // nothing to do
+                }
             }
         }
-        if (targetRepoSshUrl != null) {
-            try {
-                result.add(ProjectIdUtil.retrieveProjectId(targetRepoSshUrl));
-            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
-                // nothing to do
-            }
-        }
-        return result;
+        return new ArrayList(result);
     }
 
 }
