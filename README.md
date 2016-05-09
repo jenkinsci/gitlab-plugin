@@ -196,20 +196,29 @@ In addition, you will need to make sure that the Git plugin has an appropriate s
 
 ### Parameterized builds
 
-You can trigger a job a manually by clicking ``This build is parameterized`` and adding the relevant build parameters.
+You can trigger a job a manually by clicking ``This build is parameterized`` and adding the any of the relevant build parameters.
 These include:
 
+* gitlabBranch
 * gitlabSourceBranch
-* gitlabTargetBranch
-* gitlabSourceRepoURL
-* gitlabSourceRepoName
-* gitlabBranch (This is optional and can be used in shell scripts for the branch being built by the push request)
-* gitlabActionType (This is optional and can be used in shell scripts or other plugins to change the build behaviour. Possible values are PUSH or MERGE)
-* gitlabMergeRequestTitle
-* gitlabMergeRequestId
-* gitlabMergeRequestAssignee
+* gitlabActionType
 * gitlabUserName
 * gitlabUserEmail
+* gitlabSourceRepoHomepage
+* gitlabSourceRepoName
+* gitlabSourceNamespace
+* gitlabSourceRepoURL
+* gitlabSourceRepoSshUrl
+* gitlabSourceRepoHttpUrl
+* gitlabMergeRequestTitle
+* gitlabMergeRequestDescription
+* gitlabMergeRequestId
+* gitlabMergeRequestIid
+* gitlabTargetBranch
+* gitlabTargetRepoName
+* gitlabTargetNamespace
+* gitlabTargetRepoSshUrl
+* gitlabTargetRepoHttpUrl
 
 # Branch filtering
 

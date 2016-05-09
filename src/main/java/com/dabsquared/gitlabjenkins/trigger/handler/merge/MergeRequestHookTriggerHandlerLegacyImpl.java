@@ -56,6 +56,7 @@ class MergeRequestHookTriggerHandlerLegacyImpl extends AbstractMergeRequestHookT
         return "merge request";
     }
 
+    @Override
     protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook) throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }

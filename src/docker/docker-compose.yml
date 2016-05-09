@@ -1,6 +1,6 @@
 postgresql:
   restart: always
-  image: sameersbn/postgresql:9.4-17
+  image: sameersbn/postgresql:9.4-21
   environment:
     - DB_USER=gitlab
     - DB_PASS=password
@@ -10,7 +10,7 @@ postgresql:
     - /srv/docker/gitlab/postgresql:/var/lib/postgresql
 gitlab:
   restart: always
-  image: sameersbn/gitlab:8.5.8-1
+  image: sameersbn/gitlab:8.7.3
   links:
     - redis:redisio
     - postgresql:postgresql
@@ -64,7 +64,7 @@ redis:
     - /srv/docker/gitlab/redis:/var/lib/redis
 jenkins:
   restart: always
-  image: jenkins:1.642.2
+  image: blacklabelops/jenkins:2.1
   ports:
     - "8080:8080"
     - "50000:50000"
