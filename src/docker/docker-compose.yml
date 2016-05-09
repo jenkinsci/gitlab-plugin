@@ -64,7 +64,7 @@ redis:
     - /srv/docker/gitlab/redis:/var/lib/redis
 jenkins:
   restart: always
-  image: jenkins:1.642.2
+  image: blacklabelops/jenkins:2.1
   ports:
     - "8080:8080"
     - "50000:50000"
