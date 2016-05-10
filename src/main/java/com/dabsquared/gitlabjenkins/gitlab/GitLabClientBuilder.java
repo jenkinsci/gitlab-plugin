@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,6 +56,10 @@ public class GitLabClientBuilder {
             builder.disableTrustManager();
         }
         return builder
+            .connectionPoolSize(60)
+            .maxPooledPerRoute(30)
+            .establishConnectionTimeout(10, TimeUnit.SECONDS)
+            .socketTimeout(10, TimeUnit.SECONDS)
             .register(new JacksonJsonProvider())
             .register(new JacksonConfig())
             .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId))).build().target(gitlabHostUrl)
