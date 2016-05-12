@@ -17,10 +17,12 @@ import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Robin Müller
@@ -90,9 +93,9 @@ public class ActionResolver {
     private WebHookAction onPost(Job<?, ?> project, StaplerRequest request) {
         String requestBody = getRequestBody(request);
         String eventHeader = request.getHeader("X-Gitlab-Event");
-        if (eventHeader.equals("Merge Request Hook")) {
+        if (StringUtils.equals(eventHeader, "Merge Request Hook") ) {
             return new MergeRequestBuildAction(project, requestBody);
-        } else if (eventHeader.equals("Push Hook")) {
+        } else if ( StringUtils.equals(eventHeader,"Push Hook")) {
             return new PushBuildAction(project, requestBody);
         }
         LOGGER.log(Level.FINE, "Unsupported event header: {0}", eventHeader);
@@ -102,7 +105,8 @@ public class ActionResolver {
     private String getRequestBody(StaplerRequest request) {
         String requestBody;
         try {
-            requestBody = IOUtils.toString(request.getInputStream());
+            Charset charset = request.getCharacterEncoding() == null ?  UTF_8 : Charset.forName(request.getCharacterEncoding());
+            requestBody = IOUtils.toString(request.getInputStream(), charset);
         } catch (IOException e) {
             throw HttpResponses.error(500, "Failed to read request body");
         }

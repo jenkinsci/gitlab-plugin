@@ -17,16 +17,7 @@ import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.BasicClientConnectionManager;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -41,12 +32,10 @@ import javax.ws.rs.ext.RuntimeDelegate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,14 +50,22 @@ public class GitLabClientBuilder {
     private static final String PRIVATE_TOKEN = "PRIVATE-TOKEN";
 
     public static GitLabApi buildClient(String gitlabHostUrl, final String gitlabApiTokenId, boolean ignoreCertificateErrors) {
-        return new ResteasyClientBuilder()
-                .httpEngine(new ApacheHttpClient4Engine(createHttpClient(ignoreCertificateErrors)))
-                .register(new JacksonJsonProvider())
-                .register(new JacksonConfig())
-                .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId))).build().target(gitlabHostUrl)
-                .register(new LoggingFilter())
-                .proxyBuilder(GitLabApi.class)
-                .classloader(Jenkins.getInstance().getPluginManager().uberClassLoader)
+        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        if (ignoreCertificateErrors) {
+            builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
+            builder.disableTrustManager();
+        }
+        return builder
+            .connectionPoolSize(60)
+            .maxPooledPerRoute(30)
+            .establishConnectionTimeout(10, TimeUnit.SECONDS)
+            .socketTimeout(10, TimeUnit.SECONDS)
+            .register(new JacksonJsonProvider())
+            .register(new JacksonConfig())
+            .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId))).build().target(gitlabHostUrl)
+            .register(new LoggingFilter())
+            .proxyBuilder(GitLabApi.class)
+            .classloader(Jenkins.getInstance().getPluginManager().uberClassLoader)
                 .build();
     }
 
@@ -86,32 +83,6 @@ public class GitLabClientBuilder {
             lookupCredentials(StringCredentials.class, (Item) null, ACL.SYSTEM, new ArrayList<DomainRequirement>()),
             CredentialsMatchers.withId(apiTokenId));
         return credentials == null ? null : credentials.getSecret().getPlainText();
-    }
-
-    private static DefaultHttpClient createHttpClient(boolean ignoreCertificateErrors) {
-        ClientConnectionManager connectionManager;
-        if (ignoreCertificateErrors) {
-            connectionManager = new BasicClientConnectionManager(createSchemeRegistry());
-        } else {
-            connectionManager = new BasicClientConnectionManager();
-        }
-        return new DefaultHttpClient(connectionManager, new DefaultHttpClient().getParams());
-    }
-
-    private static SchemeRegistry createSchemeRegistry() {
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        try {
-            SSLSocketFactory factory = new SSLSocketFactory(new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                    return true;
-                }
-            }, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            registry.register(new Scheme("https", 10443, factory));
-        } catch (GeneralSecurityException e) {
-            LOGGER.log(Level.SEVERE, "Failed to set ignoreCertificateErrors", e);
-        }
-        return registry;
     }
 
     private static class ApiHeaderTokenFilter implements ClientRequestFilter {
