@@ -1,7 +1,7 @@
 # Table of Contents
 - [Introduction](#introduction)
 - [User support](#user-support)
-- [Supported GitLab versions](#supported-gitLab-versions)
+- [Supported GitLab versions](#supported-gitlab-versions)
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
@@ -11,7 +11,6 @@
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
-- [Help Needed](#help-needed)
 - [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
     - [Access GitLab](#access-gitlab)
     - [Access Jenkins](#access-jenkins)
