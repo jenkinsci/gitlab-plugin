@@ -81,6 +81,8 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
         * Set *Name of the repository" to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
+**Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EvnInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
+
 ### Git configuration for Pipeline/Workflow jobs
 **Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. ${gitlabSourceBranch}. After version 1.2.1, these variables are only accessible in the env[] map. E.g. ${env.gitlabSourceBranch}. 
 
