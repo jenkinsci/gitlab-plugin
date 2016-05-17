@@ -70,6 +70,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return clients.get(connectionName);
     }
 
+    //TODO: remove if superfluous!
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
         if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.name_required());
