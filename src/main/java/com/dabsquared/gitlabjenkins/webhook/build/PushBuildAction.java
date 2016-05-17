@@ -1,14 +1,18 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerResponse;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +31,7 @@ public class PushBuildAction implements WebHookAction {
     public PushBuildAction(Job<?, ?> project, String json) {
         LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
-        this.pushHook = JsonUtil.read(json, PushHook.class);
+        this.pushHook = processForCompatibility(JsonUtil.read(json, PushHook.class));
     }
 
     public void execute(StaplerResponse response) {
@@ -45,5 +49,27 @@ public class PushBuildAction implements WebHookAction {
             }
         });
         throw HttpResponses.ok();
+    }
+
+    private static PushHook processForCompatibility(PushHook pushHook) {
+        // Fill in project if it's not defined.
+        if (pushHook.getProject() == null) {
+            if (pushHook.getRepository() != null) {
+                try {
+                    String path = new URL(pushHook.getRepository().getGitHttpUrl()).getPath();
+                    if (StringUtils.isNotBlank(path)) {
+                        Project project = new Project();
+                        project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
+                        pushHook.setProject(project);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                    }
+                } catch (MalformedURLException ignored) {
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                }
+            }
+        }
+
+        return pushHook;
     }
 }
