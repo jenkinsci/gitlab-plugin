@@ -17,7 +17,7 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 /**
  * @author Robin Müller
  */
-public class MergeRequestBuildAction implements WebHookAction {
+public class MergeRequestBuildAction extends BuildWebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
     private Job<?, ?> project;
@@ -29,7 +29,12 @@ public class MergeRequestBuildAction implements WebHookAction {
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
     }
 
-    public void execute(StaplerResponse response) {
+    /**
+    * Noop for merge request hooks.
+    */
+    void processForCompatibility() {}
+
+    public void execute() {
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             public void run() {
                 GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
