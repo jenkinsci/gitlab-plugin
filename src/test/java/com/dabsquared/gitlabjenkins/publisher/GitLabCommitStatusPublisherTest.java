@@ -17,6 +17,7 @@ import hudson.model.Result;
 import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.git.Revision;
+import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
@@ -193,6 +194,7 @@ public class GitLabCommitStatusPublisherTest {
         BuildData buildData = mock(BuildData.class);
         Revision revision = mock(Revision.class);
         when(revision.getSha1String()).thenReturn(sha);
+        buildData.lastBuild = new Build(revision, 123, result);
         when(buildData.getLastBuiltRevision()).thenReturn(revision);
         when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
         when(build.getAction(BuildData.class)).thenReturn(buildData);

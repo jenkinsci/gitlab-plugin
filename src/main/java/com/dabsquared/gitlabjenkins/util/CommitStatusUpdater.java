@@ -64,7 +64,7 @@ public class CommitStatusUpdater {
     }
 
     private static String getBuildRevision(Run<?, ?> build) {
-        return build.getAction(BuildData.class).getLastBuiltRevision().getSha1String();
+        return build.getAction(BuildData.class).lastBuild.marked.getSha1String();
     }
 
     private static String getBuildBranch(Run<?, ?> build) {
