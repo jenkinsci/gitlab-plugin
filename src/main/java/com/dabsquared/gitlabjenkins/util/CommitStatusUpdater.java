@@ -4,19 +4,21 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import hudson.EnvVars;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.git.util.BuildData;
-import jenkins.model.Jenkins;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
+
+import hudson.EnvVars;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.git.util.BuildData;
+import jenkins.model.Jenkins;
 
 /**
  * @author Robin Müller
@@ -98,7 +100,7 @@ public class CommitStatusUpdater {
         List<String> result = new ArrayList<>();
         for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
             try {
-                result.add(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl)));
+                result.add(getClient(build).getProject(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl))).getId().toString());
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 // nothing to do
             }
