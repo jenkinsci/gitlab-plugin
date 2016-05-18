@@ -34,7 +34,7 @@ public class CommitStatusUpdater {
                     GitLabApi client = getClient(build);
                     if (client == null) {
                         println(listener, "No GitLab connection configured");
-                    } else if (existsCommit(client, gitlabProjectId, commitHash)) {
+                    } else {
                         client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
                     }
                 } catch (WebApplicationException e) {
@@ -65,16 +65,6 @@ public class CommitStatusUpdater {
 
     private static String getBuildRevision(Run<?, ?> build) {
         return build.getAction(BuildData.class).getLastBuiltRevision().getSha1String();
-    }
-
-    private static boolean existsCommit(GitLabApi client, String gitlabProjectId, String commitHash) {
-        try {
-            client.getCommit(gitlabProjectId, commitHash);
-            return true;
-        } catch (NotFoundException e) {
-            LOGGER.log(Level.FINE, String.format("Project (%s) and commit (%s) combination not found", gitlabProjectId, commitHash));
-            return false;
-        }
     }
 
     private static String getBuildBranch(Run<?, ?> build) {
