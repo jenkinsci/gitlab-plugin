@@ -4,19 +4,23 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import hudson.EnvVars;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.git.util.BuildData;
-import jenkins.model.Jenkins;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
+
+import hudson.EnvVars;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.git.util.BuildData;
+import jenkins.model.Jenkins;
 
 /**
  * @author Robin Müller
@@ -26,15 +30,17 @@ public class CommitStatusUpdater {
     private final static Logger LOGGER = Logger.getLogger(CommitStatusUpdater.class.getName());
 
     public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state) {
+        GitLabApi client = getClient(build);
+        if (client == null) {
+            println(listener, "No GitLab connection configured");
+            return;
+        }
         String commitHash = getBuildRevision(build);
         String buildUrl = getBuildUrl(build);
         try {
             for (String gitlabProjectId : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
-                    GitLabApi client = getClient(build);
-                    if (client == null) {
-                        println(listener, "No GitLab connection configured");
-                    } else if (existsCommit(client, gitlabProjectId, commitHash)) {
+                    if (existsCommit(client, gitlabProjectId, commitHash)) {
                         client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
                     }
                 } catch (WebApplicationException e) {
@@ -98,9 +104,20 @@ public class CommitStatusUpdater {
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
         List<String> result = new ArrayList<>();
+        GitLabApi gitLabClient = getClient(build);
+        if (gitLabClient == null) {
+            return result;
+        }
         for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
             try {
-                result.add(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl)));
+                String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
+                if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
+                    String projectId = projectNameWithNameSpace;
+                    if (projectNameWithNameSpace.contains(".")) {
+                         projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
+                    }
+                    result.add(projectId);
+                }
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 // nothing to do
             }

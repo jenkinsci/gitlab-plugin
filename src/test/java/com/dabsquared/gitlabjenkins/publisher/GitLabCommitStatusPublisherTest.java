@@ -21,6 +21,8 @@ import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
@@ -34,6 +36,7 @@ import org.mockito.stubbing.Answer;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
 import org.mockserver.verify.VerificationTimes;
 
 import java.io.ByteArrayOutputStream;
@@ -94,10 +97,25 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running() throws UnsupportedEncodingException {
         HttpRequest[] requests = new HttpRequest[] {
-                prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-                prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
+            prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
+            prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        publisher.prebuild(build, listener);
+
+        mockServerClient.verify(requests);
+    }
+
+    @Test
+    public void runningWithDotInProjectId() throws IOException {
+        HttpRequest[] requests = new HttpRequest[] {
+            prepareGetProjectResponse("test/project.test",1),
+            prepareExistsCommitWithSuccessResponse("1", "123abc"),
+            prepareUpdateCommitStatusWithSuccessResponse("1", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
+        };
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.test");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -198,6 +216,7 @@ public class GitLabCommitStatusPublisherTest {
         return updateCommitStatus;
     }
 
+
     private HttpRequest prepareUpdateCommitStatus(String projectId, String sha, String targetUrl, BuildState state) throws UnsupportedEncodingException {
         return request()
                 .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/statuses/" + sha)
@@ -219,6 +238,19 @@ public class GitLabCommitStatusPublisherTest {
                 .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/repository/commits/" + sha)
                 .withMethod("GET")
                 .withHeader("PRIVATE-TOKEN", "secret");
+    }
+
+    private HttpRequest prepareGetProjectResponse(String projectName, int projectId) throws IOException {
+        HttpRequest request= request()
+                     .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectName, "UTF-8"))
+                     .withMethod("GET")
+                   .  withHeader("PRIVATE-TOKEN", "secret");
+
+        HttpResponse response = response().withBody(getSingleProjectJson("GetSingleProject.json",projectName,projectId));
+
+        response.withHeader("Content-Type", "application/json");
+        mockServerClient.when(request).respond(response.withStatusCode(200));
+        return request;
     }
 
     private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String... remoteUrls) {
@@ -250,5 +282,13 @@ public class GitLabCommitStatusPublisherTest {
             throw new RuntimeException(e);
         }
         return build;
+    }
+    private String getSingleProjectJson(String name,String projectNameWithNamespace, int porjectId) throws IOException {
+        String nameSpace = projectNameWithNamespace.split("/")[0];
+        String projectName = projectNameWithNamespace.split("/")[1];
+        return IOUtils.toString(getClass().getResourceAsStream(name))
+                 .replace("${projectId}", porjectId + "")
+                 .replace("${nameSpace}", nameSpace)
+                 .replace("${projectName}", projectName);
     }
 }
