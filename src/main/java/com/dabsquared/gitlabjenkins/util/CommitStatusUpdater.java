@@ -5,6 +5,8 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,15 +30,17 @@ public class CommitStatusUpdater {
     private final static Logger LOGGER = Logger.getLogger(CommitStatusUpdater.class.getName());
 
     public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state) {
+        GitLabApi client = getClient(build);
+        if (client == null) {
+            println(listener, "No GitLab connection configured");
+            return;
+        }
         String commitHash = getBuildRevision(build);
         String buildUrl = getBuildUrl(build);
         try {
             for (String gitlabProjectId : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
-                    GitLabApi client = getClient(build);
-                    if (client == null) {
-                        println(listener, "No GitLab connection configured");
-                    } else if (existsCommit(client, gitlabProjectId, commitHash)) {
+                    if (existsCommit(client, gitlabProjectId, commitHash)) {
                         client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
                     }
                 } catch (WebApplicationException e) {
@@ -98,9 +102,17 @@ public class CommitStatusUpdater {
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
         List<String> result = new ArrayList<>();
+        GitLabApi gitLabClient = getClient(build);
+        if (gitLabClient == null) {
+            return result;
+        }
         for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
             try {
-                result.add(getClient(build).getProject(ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl))).getId().toString());
+                String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
+                if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
+                    String projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
+                    result.add(projectId);
+                }
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 // nothing to do
             }
