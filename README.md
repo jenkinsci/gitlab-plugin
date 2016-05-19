@@ -60,7 +60,7 @@ You can also try chatting with us in the #gitlab-plugin channel on the Freenode 
 
 Optionally, the plugin communicates with the GitLab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories.
 
-To enable this functionality, a user should be set up on GitLab, with GitLab 'Developer' permissions, to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
+To enable this functionality, a user should be set up on GitLab, with GitLab 'Developer' permissions, to access the repository. You will need to give this user access to each repo you want Jenkins to be able to clone. Log in to GitLab as that user, go to its profile, and copy its secret API key. On the Global Configuration page in Jenkins, supply the GitLab host URL, e.g. ``http://your.gitlab.server.`` Click the 'Add' button to add a credential, choose 'Secret text' as the kind of credential, and paste your GitLab user's API key into the 'Secret' field. Testing the connection should succeed.
 
 ## Jenkins Job Configuration
 ### Git configuration for Freestyle jobs
