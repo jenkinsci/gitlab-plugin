@@ -152,7 +152,7 @@ public class CauseData {
     public Integer getMergeRequestId() {
         return mergeRequestId;
     }
-    
+
     public Integer getMergeRequestIid() {
         return mergeRequestIid;
     }

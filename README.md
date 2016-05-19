@@ -21,7 +21,11 @@
     - [Parameterized builds](#parameterized-builds)
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
+<<<<<<< HEAD
 - [Contributing to the Plugin](#contributing-to-the-plugin)
+=======
+- [Parameterized builds](#parameterized-builds)
+>>>>>>> master
 - [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
   - [Access GitLab](#access-gitlab)
   - [Access Jenkins](#access-jenkins)
@@ -128,7 +132,13 @@ You can trigger a build manually from Jenkins. By default, it will fetch from `o
         * Set *Name of the repository" to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
+<<<<<<< HEAD
 #### Git configuration for Pipeline/Workflow jobs
+=======
+**Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
+
+### Git configuration for Pipeline/Workflow jobs
+>>>>>>> master
 **Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. ${gitlabSourceBranch}. After version 1.2.1, these variables are only accessible in the env[] map. E.g. ${env.gitlabSourceBranch}. 
 
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
@@ -197,7 +207,25 @@ In addition, you will need to make sure that the Git plugin has an appropriate s
 1. Click on Manage Jenkins, then Configure System
 2. Under the Git Plugin section, set something for 'Global Config user.name Value' and 'Global Config user.email Value'
 
+<<<<<<< HEAD
 ### Parameterized builds
+=======
+# Branch filtering
+
+Triggers may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, when you configure the GitLab trigger, you can choose 'Filter branches by name' or 'Filter branches by regex.' Filter by name takes comma-separated lists of branch names to include and/or exclude from triggering a build. Filter by regex takes a Java regular expression to include and/or exclude.
+
+**Note:** This functionality requires accessing the GitLab server (see [above](#configuring-access-to-gitlab)) and for the time being also a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to select the allowed branches. For Workflow/Pipeline jobs, the configuration must be saved *and* the job must be run once before the list is populated. For existing projects, all branches are allowed to push by default.
+
+# Build Tags
+
+In order to build when a new tag is pushed:
+* In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
+* In the ``Jenkins`` under the ``Source Code Management`` section:
+    * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
+    * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
+
+# Parameterized builds
+>>>>>>> master
 
 You can trigger a job a manually by clicking ``This build is parameterized`` and adding the any of the relevant build parameters.
 These include:
