@@ -64,7 +64,9 @@ public class CommitStatusUpdater {
     }
 
     private static String getBuildRevision(Run<?, ?> build) {
-        return build.getAction(BuildData.class).getLastBuiltRevision().getSha1String();
+        BuildData action = build.getAction(BuildData.class);
+
+        return action.getLastBuild(action.getLastBuiltRevision().getSha1()).getMarked().getSha1String();
     }
 
     private static boolean existsCommit(GitLabApi client, String gitlabProjectId, String commitHash) {
