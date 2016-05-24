@@ -8,6 +8,7 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
+import org.eclipse.jgit.util.StringUtils;
 
 import java.util.List;
 
@@ -76,13 +77,19 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }
 
-    private String retrievePushedBy(PushHook hook) {
-        List<Commit> commits = hook.getCommits();
-        if (commits != null && commits.size() > 0) {
-            return commits.get(0).getAuthor().getName();
-        } else {
-            return hook.getUserName();
+    private String retrievePushedBy(final PushHook hook) {
+
+        final String userName = hook.getUserName();
+        if (!StringUtils.isEmptyOrNull(userName)) {
+            return userName;
         }
+
+        final List<Commit> commits = hook.getCommits();
+        if (commits != null && !commits.isEmpty()) {
+            return commits.get(0).getAuthor().getName();
+        }
+
+        return null;
     }
 
     private String retrieveRevisionToBuild(PushHook hook) throws NoRevisionToBuildException {
