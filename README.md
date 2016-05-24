@@ -1,6 +1,7 @@
 # Table of Contents
 - [Introduction](#introduction)
 - [User support](#user-support)
+- [Known bugs/issues](#known-bugsissues)
 - [Supported GitLab versions](#supported-gitlab-versions)
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
@@ -38,6 +39,11 @@ Version 1.2.0 of the plugin introduced improved logging for debugging purposes. 
 6. Refresh the log page and you should see output
 
 You can also try chatting with us in the #gitlab-plugin channel on the Freenode IRC network.
+
+# Known bugs/issues
+
+This is not an exhaustive list of issues, but rather a place for us to note significant bugs that may impact your use of the plugin in certain circumstances. For most things, please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section and open a new one if you don't find anything.
+* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition, due to a bug on their side.
 
 # Supported GitLab versions
 
