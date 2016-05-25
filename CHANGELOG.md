@@ -1,6 +1,33 @@
 ChangeLog
 =====================
 
+1.2.3
+=====================
+* #294 Fix: Do not trigger a build for remove branch push event
+* #246, #290 Add gitlabMergeRequestIid, gitlabSourceNamespace and gitlabTargetNamespace to CauseData and show the correct MR id within the build description
+* #281 Fix: Builds not be triggered on tag push events
+* #304 Utilizing SpringUtils to safely perform string comparison
+* #308 Use the character encoding of the request or UTF-8 if no character encoding is available for decoding the request body of a web hook
+* #311 Fix finding related commit of the build
+* #312 Fix setting MR IID
+* #319: Wrong username in Jenkins build description on push event
+* #322 Git push hook namespace compatibility for Gitlab pre ~v8.5
+* #327 Fix to support NameSpace or ProjectName with dot in it
+* Update tests for new commit status publisher behavior
+* Use HTTP Get instead of HEAD to check for the existence of a commit as workaround for RESTEASY-1347
+* Fix: HTTP 404 error for the rebuild open MRs on push to target branch for forked repositories
+* Update list of variables available in builds
+* Add notes to README about known Pipeline bugs
+* Use ResteasyClientBuilder to configure ignoreCertificateErrors
+* Configure connection pooling and timeouts for the client
+* Docker: Update Jenkins version to 2.3
+* Readme: Fix contents links
+* Readme: Update branch name filtering section
+* Readme: Add note on gitlab hook values injection
+* Readme: Add known bugs section
+* Readme: Note Jenkins parameter security update that can cause problems
+* Readme: Explain how to add the GitLab API key as a credential.
+
 1.2.2
 =====================
 * #283 Send thumbs-down icon when build fails
