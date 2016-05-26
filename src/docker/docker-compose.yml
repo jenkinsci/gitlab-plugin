@@ -1,4 +1,5 @@
 postgresql:
+  container_name: docker-postgresql
   restart: always
   image: sameersbn/postgresql:9.4-21
   environment:
@@ -9,6 +10,7 @@ postgresql:
   volumes:
     - /srv/docker/gitlab/postgresql:/var/lib/postgresql
 gitlab:
+  container_name: docker-gitlab
   restart: always
   image: sameersbn/gitlab:8.7.3
   links:
@@ -58,13 +60,15 @@ gitlab:
   volumes:
     - /srv/docker/gitlab/gitlab:/home/git/data
 redis:
+  container_name: docker-redis
   restart: always
   image: sameersbn/redis:latest
   volumes:
     - /srv/docker/gitlab/redis:/var/lib/redis
 jenkins:
+  container_name: docker-jenkins
   restart: always
-  image: blacklabelops/jenkins:2.1
+  image: jenkins:2.3
   ports:
     - "8080:8080"
     - "50000:50000"

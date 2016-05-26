@@ -3,6 +3,8 @@
 - [Introduction](#introduction)
 - [User support](#user-support)
 - [Plugin Modes and Supported GitLab versions](#plugin-modes-and-supported-gitlab-versions)
+- [Known bugs/issues](#known-bugsissues)
+- [Supported GitLab versions](#supported-gitlab-versions)
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
   - [Modern Mode](#modern-mode)
@@ -54,6 +56,14 @@ You can also try chatting with us in the #gitlab-plugin channel on the Freenode 
 
 The Plugin supports two operation modes: **Modern** and **Legacy**. The main difference between these modes is how they deal with Merge Requests from GitLab. While the Legacy mode requires setting up multiple Git repositories and using parameterized builds, the Modern mode works with a single Git repository and relies on GitLab's availability of Merge Requests from the `origin` repository. The rest of this document is split for these two modes of operation (unless specified).
 
+# Known bugs/issues
+
+This is not an exhaustive list of issues, but rather a place for us to note significant bugs that may impact your use of the plugin in certain circumstances. For most things, please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section and open a new one if you don't find anything.
+* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition, due to a bug on their side.
+* Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
+
+# Supported GitLab versions
+
 The following versions of GitLab are supported by each of the modes:
 
 * Modern
@@ -78,7 +88,7 @@ The following versions of GitLab are supported by each of the modes:
 
 Optionally, the plugin communicates with the GitLab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories.
 
-To enable this functionality, a user should be set up on GitLab, with GitLab 'Developer' permissions, to access the repository. On the global configuration screen, supply the gitlab host url ``http://your.gitlab.server`` and the API token of the user of choice.
+To enable this functionality, a user should be set up on GitLab, with GitLab 'Developer' permissions, to access the repository. You will need to give this user access to each repo you want Jenkins to be able to clone. Log in to GitLab as that user, go to its profile, and copy its secret API key. On the Global Configuration page in Jenkins, supply the GitLab host URL, e.g. ``http://your.gitlab.server.`` Click the 'Add' button to add a credential, choose 'Secret text' as the kind of credential, and paste your GitLab user's API key into the 'Secret' field. Testing the connection should succeed.
 
 ## Modern Mode
 

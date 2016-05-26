@@ -18,6 +18,7 @@ import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.eclipse.jgit.util.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -69,8 +70,9 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return clients.get(connectionName);
     }
 
+    //TODO: remove if superfluous!
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
-        if (value == null || value.isEmpty()) {
+        if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.name_required());
         } else if (connectionMap.containsKey(value) && !connectionMap.get(value).toString().equals(id)) {
             return FormValidation.error(Messages.name_exists(value));
@@ -80,7 +82,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     }
 
     public FormValidation doCheckUrl(@QueryParameter String value) {
-        if (value == null || value.isEmpty()) {
+        if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.url_required());
         } else {
             return FormValidation.ok();
@@ -89,7 +91,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     // TODO check why this gets called twice on page load once with the correct id and once with an empty string
     public FormValidation doCheckApiTokenId(@QueryParameter String value) {
-        if (value == null || value.isEmpty()) {
+        if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.apiToken_required());
         } else {
             return FormValidation.ok();

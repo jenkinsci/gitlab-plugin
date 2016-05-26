@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Job;
@@ -17,7 +19,7 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 /**
  * @author Robin Müller
  */
-public class MergeRequestBuildAction implements WebHookAction {
+public class MergeRequestBuildAction extends BuildWebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
     private Job<?, ?> project;
@@ -29,7 +31,23 @@ public class MergeRequestBuildAction implements WebHookAction {
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
     }
 
-    public void execute(StaplerResponse response) {
+    void processForCompatibility() {
+        // url and homepage are introduced in 8.x versions of Gitlab
+        final ObjectAttributes attributes = this.mergeRequestHook.getObjectAttributes();
+        if (attributes != null) {
+            final Project source = attributes.getSource();
+            if (source != null && source.getHttpUrl() != null) {
+                if (source.getUrl() == null) {
+                    source.setUrl(source.getHttpUrl());
+                }
+                if (source.getHomepage() == null) {
+                    source.setHomepage(source.getHttpUrl().substring(0, source.getHttpUrl().lastIndexOf(".git")));
+                }
+            }
+        }
+    }
+
+    public void execute() {
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             public void run() {
                 GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
