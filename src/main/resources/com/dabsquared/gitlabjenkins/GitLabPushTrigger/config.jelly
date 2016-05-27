@@ -29,7 +29,6 @@
 
   <f:block>
     <table style="margin-left:10px">
-      <!--<f:section title="">-->
       <f:radioBlock name="branchFilterType" value="All" title="Allow all branches to trigger this job"
                     checked="${instance.branchFilterType == null || instance.branchFilterType == 'All'}"
                     inline="true" help="/plugin/gitlab-plugin/help/help-noBranchFiltering.html"/>
@@ -51,7 +50,6 @@
           <f:textbox name="targetBranchRegex" field="targetBranchRegex"/>
         </f:entry>
       </f:radioBlock>
-      <!--</f:section> -->
     </table>
   </f:block>
 
