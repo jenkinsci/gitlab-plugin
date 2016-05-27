@@ -47,7 +47,6 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory.newPushHookTriggerHandler;
 
-
 /**
  * Triggers a build when we receive a GitLab WebHook.
  *
@@ -71,15 +70,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient BranchFilter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
-    private boolean acceptMergeRequestOnSuccess = false;
+    private AcceptMergeRequestBlock acceptMergeRequestOnSuccess;
 
 
     @DataBoundConstructor
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
                              boolean ciSkip, boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage,
-                             boolean addVoteOnMergeRequest, boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
-                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
+                             boolean addVoteOnMergeRequest, AcceptMergeRequestBlock acceptMergeRequestOnSuccess,
+                             BranchFilterType branchFilterType, String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
@@ -96,6 +95,19 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         initializeTriggerHandler();
         initializeBranchFilter();
+    }
+
+    public static class AcceptMergeRequestBlock
+    {
+        private boolean removeSourceBranchAfterMerge = false;
+
+        @DataBoundConstructor
+        public AcceptMergeRequestBlock(final boolean removeSourceBranchAfterMerge)
+        {
+            this.removeSourceBranchAfterMerge = removeSourceBranchAfterMerge;
+        }
+
+        public boolean getRemoveSourceBranchAfterMerge() { return removeSourceBranchAfterMerge; }
     }
 
     @Initializer(after = InitMilestone.JOB_LOADED)
@@ -154,9 +166,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return addVoteOnMergeRequest;
     }
 
-    public boolean getAcceptMergeRequestOnSuccess() {
-        return acceptMergeRequestOnSuccess;
-    }
+    public AcceptMergeRequestBlock getAcceptMergeRequestOnSuccess() { return acceptMergeRequestOnSuccess; }
 
     public boolean getCiSkip() {
         return ciSkip;

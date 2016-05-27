@@ -23,9 +23,17 @@
   <f:entry title="Vote added to note with build status on merge requests" field="addVoteOnMergeRequest">
     <f:checkbox default="true"/>
   </f:entry>
-  <f:entry title="Accept merge request on success" field="acceptMergeRequestOnSuccess">
-    <f:checkbox default="false"/>
-  </f:entry>
+
+  <f:block>
+    <table>
+      <f:optionalBlock title="Accept merge request on success" name="acceptMergeRequestOnSuccess" field="acceptMergeRequestOnSuccess"
+        checked="${instance.getAcceptMergeRequestOnSuccess() != null}">
+        <f:entry title="Remove source branch after merge" name="removeSourceBranchAfterMerge" field="removeSourceBranchAfterMerge">
+          <f:checkbox default="false" checked="${instance.getAcceptMergeRequestOnSuccess() != null &amp;&amp; instance.getAcceptMergeRequestOnSuccess().getRemoveSourceBranchAfterMerge()}" />
+        </f:entry>
+      </f:optionalBlock>
+    </table>
+  </f:block>
 
   <f:block>
     <table style="margin-left:10px">
