@@ -17,7 +17,6 @@ import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -91,15 +90,21 @@ public class ActionResolver {
     }
 
     private WebHookAction onPost(Job<?, ?> project, StaplerRequest request) {
-        String requestBody = getRequestBody(request);
         String eventHeader = request.getHeader("X-Gitlab-Event");
-        if (StringUtils.equals(eventHeader, "Merge Request Hook") ) {
-            return new MergeRequestBuildAction(project, requestBody);
-        } else if ( StringUtils.equals(eventHeader,"Push Hook") || StringUtils.equals(eventHeader,"Tag Push Hook")) {
-            return new PushBuildAction(project, requestBody);
+        if (eventHeader == null) {
+            LOGGER.log(Level.FINE, "Missing X-Gitlab-Event header");
+            return new NoopAction();
         }
-        LOGGER.log(Level.FINE, "Unsupported event header: {0}", eventHeader);
-        return new NoopAction();
+        switch (eventHeader) {
+            case "Merge Request Hook":
+                return new MergeRequestBuildAction(project, getRequestBody(request));
+            case "Push Hook":
+            case "Tag Push Hook":
+                return new PushBuildAction(project, getRequestBody(request));
+            default:
+                LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
+                return new NoopAction();
+        }
     }
 
     private String getRequestBody(StaplerRequest request) {
@@ -132,7 +137,7 @@ public class ActionResolver {
         });
     }
 
-    private static class NoopAction implements WebHookAction {
+    static class NoopAction implements WebHookAction {
         public void execute(StaplerResponse response) {
         }
     }

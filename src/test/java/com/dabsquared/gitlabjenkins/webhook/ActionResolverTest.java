@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
+import com.dabsquared.gitlabjenkins.webhook.ActionResolver.NoopAction;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
@@ -152,6 +153,33 @@ public class ActionResolverTest {
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
 
+    @Test
+    public void postPushMissingEventHeader() throws IOException {
+        String projectName = "test";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn(null);
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(NoopAction.class));
+    }
+
+    @Test
+    public void postPushUnsupportedEventHeader() throws IOException {
+        String projectName = "test";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("__Not Supported Header__");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(NoopAction.class));
+    }
 
 
     private static class ResourceServletInputStream extends ServletInputStream {
