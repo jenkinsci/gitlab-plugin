@@ -123,24 +123,27 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
         **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
 
 ## Gitlab Configuration (>= 8.1)
+
+GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
+
 * In GitLab go to you primary repository's project *Settings*
     * Click on *Web Hooks*
-        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-
-If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
-* Go to the Settings page in each developer's fork
-* Click on *Services*
+    * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+* If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
+    * Go to the Settings page in each developer's fork
+    * Click on *Services*
     * Click on *Web Hooks*
-        * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+    * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
         **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
-* GitLab 8.1 has implemented a commit status api. To enable add the post-build step ``Publish build status to GitLab commit (GitLab 8.1+ required)`` to the job.
-  For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
-  ```
-  gitlabCommitStatus {
-    <script that builds your project>
-  }
-  ```
+* Add a post-build step ``Publish build status to GitLab commit (GitLab 8.1+ required)`` to the job.
+* For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
+
+    ```
+    gitlabCommitStatus {
+        <script that builds your project>
+    }
+    ```
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
 ## Forked repositories
