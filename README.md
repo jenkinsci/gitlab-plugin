@@ -237,10 +237,7 @@ docker-compose up -d
 
 ## Access GitLab
 
-To access `GitLab`, point your browser to `http://localhost:10080` and login using the default username and password:
-
-* username: **root**
-* password: **5iveL!fe**
+To access `GitLab`, point your browser to `http://localhost:10080` and set a password for the `root` user account.
 
 For more information on the supported `GitLab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
 
