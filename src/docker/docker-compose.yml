@@ -73,4 +73,4 @@ jenkins:
     - "8080:8080"
     - "50000:50000"
   volumes:
-    - /srv/docker/jenkins:/var/jenkins
+    - /srv/docker/jenkins:/var/jenkins_home
