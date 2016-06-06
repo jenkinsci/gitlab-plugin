@@ -46,6 +46,8 @@ import java.io.ObjectStreamException;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory.newPushHookTriggerHandler;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -297,10 +299,20 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             );
         }
 
-        public ListBoxModel doFillTriggerOpenMergeRequestOnPushItems(@QueryParameter String triggerOpenMergeRequestOnPush) {
-            return new ListBoxModel(new Option("Never", "never", triggerOpenMergeRequestOnPush.matches("never")),
-                    new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source")),
-                    new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both")));
+        public ListBoxModel doFillTriggerOpenMergeRequestOnPushItems(@QueryParameter String gitLabPluginMode, @QueryParameter String triggerOpenMergeRequestOnPush) {
+            GitLabPluginMode selectedMode = GitLabPluginMode.valueOf(gitLabPluginMode);
+            
+            List<Option> options = new ArrayList<>();
+            
+            options.add(new Option("Never", "never", triggerOpenMergeRequestOnPush.matches("never")));
+            if (selectedMode == GitLabPluginMode.LEGACY) {
+                options.add(new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source")));
+                options.add(new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both")));
+            } else {
+                options.add(new Option("On push to target branch", "target", triggerOpenMergeRequestOnPush.matches("target")));
+            }
+            
+            return new ListBoxModel(options);
         }
 
         public AutoCompletionCandidates doAutoCompleteIncludeBranchesSpec(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
