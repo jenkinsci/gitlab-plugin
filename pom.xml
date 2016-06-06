@@ -37,6 +37,11 @@
       <name>Owen Mehegan</name>
       <email>owen@nerdnetworks.org</email>
     </developer>
+    <developer>
+      <id>omorillo</id>
+      <name>Oscar Salvador Morillo Victoria</name>
+      <email>omorillovictoria@googlemail.com</email>
+    </developer>
   </developers>
 
   <distributionManagement>

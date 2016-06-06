@@ -12,7 +12,7 @@ postgresql:
 gitlab:
   container_name: docker-gitlab
   restart: always
-  image: sameersbn/gitlab:8.7.3
+  image: sameersbn/gitlab:8.8.2
   links:
     - redis:redisio
     - postgresql:postgresql
@@ -73,4 +73,4 @@ jenkins:
     - "8080:8080"
     - "50000:50000"
   volumes:
-    - /srv/docker/jenkins:/var/jenkins
+    - /srv/docker/jenkins:/var/jenkins_home
