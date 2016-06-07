@@ -105,7 +105,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 * In the *Build Triggers* section:
     * Check the ``Build when a change is pushed to GitLab.``
     * Use the check boxes to trigger builds on Push and/or Merge Request events
-    * Optionally enable building open merge requests again after a push to the target branch. (**Note**: Rebuilding open Merge Requests on pushes to the source branch is not supported in Modern Mode).
+    * Optionally enable building open merge requests again after a push to the target branch. (**Note**: Rebuilding open Merge Requests on pushes to the target branch is not currently supported in Modern Mode).
 * Configure any other pre build, build or post build actions as necessary
 * Click *Save* to preserve your changes in Jenkins.
 

@@ -305,11 +305,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             List<Option> options = new ArrayList<>();
             
             options.add(new Option("Never", "never", triggerOpenMergeRequestOnPush.matches("never")));
+            options.add(new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source")));
             if (selectedMode == GitLabPluginMode.LEGACY) {
-                options.add(new Option("On push to source branch", "source", triggerOpenMergeRequestOnPush.matches("source")));
                 options.add(new Option("On push to source or target branch", "both", triggerOpenMergeRequestOnPush.matches("both")));
-            } else {
-                options.add(new Option("On push to target branch", "target", triggerOpenMergeRequestOnPush.matches("target")));
             }
             
             return new ListBoxModel(options);
