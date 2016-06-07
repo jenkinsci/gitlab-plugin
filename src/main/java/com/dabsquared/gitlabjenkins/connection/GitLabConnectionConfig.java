@@ -98,9 +98,29 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiTokenId, @QueryParameter boolean ignoreCertificateErrors) {
+    public FormValidation doCheckConnectionTimeout(@QueryParameter Integer value) {
+        if (value == null) {
+            return FormValidation.error(Messages.connectionTimeout_required());
+        } else {
+            return FormValidation.ok();
+        }
+    }
+
+    public FormValidation doCheckReadTimeout(@QueryParameter Integer value) {
+        if (value == null) {
+            return FormValidation.error(Messages.readTimeout_required());
+        } else {
+            return FormValidation.ok();
+        }
+    }
+
+    public FormValidation doTestConnection(@QueryParameter String url,
+                                           @QueryParameter String apiTokenId,
+                                           @QueryParameter boolean ignoreCertificateErrors,
+                                           @QueryParameter int connectionTimeout,
+                                           @QueryParameter int readTimeout) {
         try {
-            GitLabClientBuilder.buildClient(url, apiTokenId, ignoreCertificateErrors).headCurrentUser();
+            GitLabClientBuilder.buildClient(url, apiTokenId, ignoreCertificateErrors, connectionTimeout, readTimeout).headCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));

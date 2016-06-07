@@ -59,7 +59,7 @@ public class GitLabConnectionConfigTest {
         mockServerClient.when(request).respond(response().withStatusCode(Response.Status.OK.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, false);
+        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, false, 10, 10);
 
         assertThat(formValidation.getMessage(), is(Messages.connection_success()));
         mockServerClient.verify(request);
@@ -71,7 +71,7 @@ public class GitLabConnectionConfigTest {
         mockServerClient.when(request).respond(response().withStatusCode(Response.Status.FORBIDDEN.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, false);
+        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, false, 10, 10);
 
         assertThat(formValidation.getMessage(), is(Messages.connection_error("HTTP 403 Forbidden")));
         mockServerClient.verify(request);

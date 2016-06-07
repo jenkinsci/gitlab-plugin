@@ -106,7 +106,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             gitLabConfig.getConnections().add(new GitLabConnection(oldConfig.gitlabHostUrl,
                     oldConfig.gitlabHostUrl,
                     oldConfig.gitlabApiToken,
-                    oldConfig.ignoreCertificateErrors));
+                    oldConfig.ignoreCertificateErrors,
+                    10,
+                    10));
 
             String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
             for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {

@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials" xmlns:st="jelly:stapler">
   <f:section title="Gitlab">
     <f:entry title="${%GitLab connections}">
       <f:repeatable var="connection" items="${descriptor.connections}" name="connections">
@@ -14,9 +14,18 @@
           <f:entry title="${%API Token}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
             <c:select/>
           </f:entry>
-          <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
-            <f:checkbox checked="${connection.ignoreCertificateErrors}"/>
-          </f:entry>
+          <f:advanced>
+            <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
+              <f:checkbox checked="${connection.ignoreCertificateErrors}"/>
+            </f:entry>
+            <f:entry title="${%Connection timeout} (${%in seconds})" field="connectionTimeout" description="${%The time to wait for establishing the connection}">
+              <f:textbox value="${connection.connectionTimeout}" default="10"/>
+            </f:entry>
+            <f:entry title="${%Read timeout} (${%in seconds})" field="readTimeout" description="${%The time to wait while receiving the response}">
+              <f:textbox value="${connection.readTimeout}" default="10"/>
+            </f:entry>
+            <st:include page="configure-advanced.jelly" optional="true" />
+          </f:advanced>
           <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
                             with="apiTokenId,url,ignoreCertificateErrors"/>
           <f:entry title="">

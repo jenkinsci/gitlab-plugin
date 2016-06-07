@@ -27,13 +27,17 @@ public class GitLabConnection {
     // TODO make final when migration code gets removed
     private String apiTokenId;
     private final boolean ignoreCertificateErrors;
+    private final Integer connectionTimeout;
+    private final Integer readTimeout;
 
     @DataBoundConstructor
-    public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors) {
+    public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this.name = name;
         this.url = url;
         this.apiTokenId = apiTokenId;
         this.ignoreCertificateErrors = ignoreCertificateErrors;
+        this.connectionTimeout = connectionTimeout;
+        this.readTimeout = readTimeout;
     }
 
     public String getName() {
@@ -50,6 +54,21 @@ public class GitLabConnection {
 
     public boolean isIgnoreCertificateErrors() {
         return ignoreCertificateErrors;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout;
+    }
+
+    protected GitLabConnection readResolve() {
+        if (connectionTimeout == null || readTimeout == null) {
+            return new GitLabConnection(name, url, apiTokenId, ignoreCertificateErrors, 10, 10);
+        }
+        return this;
     }
 
     @Initializer(after = InitMilestone.PLUGINS_STARTED)

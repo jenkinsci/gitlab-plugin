@@ -86,7 +86,7 @@ public class GitLabConnectionConfigSSLTest {
     public void doCheckConnection_ignoreCertificateErrors() {
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
 
-        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, true);
+        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, true, 10, 10);
         assertThat(formValidation.getMessage(), is(Messages.connection_success()));
     }
 
@@ -94,7 +94,7 @@ public class GitLabConnectionConfigSSLTest {
     public void doCheckConnection_certificateError() throws IOException {
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
 
-        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, false);
+        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, false, 10, 10);
         assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
     }
 }
