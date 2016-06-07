@@ -6,6 +6,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
+import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -114,6 +115,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 if (trigger != null) {
                     if (trigger.addCiMessage) {
                         project.getPublishersList().add(new GitLabCommitStatusPublisher());
+                    }
+                    if (trigger.addNoteOnMergeRequest) {
+                        project.getPublishersList().add(new GitLabMessagePublisher(false, false, false, null, null, null));
                     }
                     if (trigger.branchFilterType == null) {
                         trigger.branchFilterType = trigger.branchFilterName;
