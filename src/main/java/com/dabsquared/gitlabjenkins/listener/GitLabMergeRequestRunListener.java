@@ -13,6 +13,7 @@ import hudson.model.listeners.RunListener;
 import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.text.MessageFormat;
 
@@ -53,8 +54,8 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
                 } else {
                     client.acceptMergeRequest(projectId, mergeRequestId, "Merge Request accepted by jenkins build success", false);
                 }
-            } catch (WebApplicationException e) {
-                listener.getLogger().println("Failed to accept merge request.");
+            } catch (WebApplicationException | ProcessingException e) {
+                listener.getLogger().printf("Failed to accept merge request: %s", e.getMessage());
             }
         }
     }
@@ -71,8 +72,8 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
                 } else {
                     client.createMergeRequestNote(projectId, mergeRequestId, message);
                 }
-            } catch (WebApplicationException e) {
-                listener.getLogger().println("Failed to add message to merge request.");
+            } catch (WebApplicationException | ProcessingException e) {
+                listener.getLogger().printf("Failed to add message to merge request: %s", e.getMessage());
             }
         }
     }

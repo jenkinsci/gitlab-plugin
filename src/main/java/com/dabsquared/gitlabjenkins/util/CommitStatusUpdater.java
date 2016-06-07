@@ -4,23 +4,21 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-
-import org.apache.commons.lang.StringUtils;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
-
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Robin Müller
@@ -43,7 +41,7 @@ public class CommitStatusUpdater {
                     if (existsCommit(client, gitlabProjectId, commitHash)) {
                         client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
                     }
-                } catch (WebApplicationException e) {
+                } catch (WebApplicationException | ProcessingException e) {
                     printf(listener, "Failed to update Gitlab commit status for project '%s': %s%n", gitlabProjectId, e.getMessage());
                     LOGGER.log(Level.SEVERE, String.format("Failed to update Gitlab commit status for project '%s'", gitlabProjectId), e);
                 }
