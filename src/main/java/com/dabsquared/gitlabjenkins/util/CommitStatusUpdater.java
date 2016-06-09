@@ -7,6 +7,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -33,9 +34,11 @@ public class CommitStatusUpdater {
             println(listener, "No GitLab connection configured");
             return;
         }
-        String commitHash = getBuildRevision(build);
-        String buildUrl = getBuildUrl(build);
+
         try {
+            String commitHash = getBuildRevision(build);
+            String buildUrl = getBuildUrl(build);
+
             for (String gitlabProjectId : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
                     if (existsCommit(client, gitlabProjectId, commitHash)) {
@@ -46,7 +49,7 @@ public class CommitStatusUpdater {
                     LOGGER.log(Level.SEVERE, String.format("Failed to update Gitlab commit status for project '%s'", gitlabProjectId), e);
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | IllegalStateException e) {
             printf(listener, "Failed to update Gitlab commit status: %s%n", e.getMessage());
         }
     }
@@ -69,8 +72,13 @@ public class CommitStatusUpdater {
 
     private static String getBuildRevision(Run<?, ?> build) {
         BuildData action = build.getAction(BuildData.class);
+        Revision lastBuiltRevision = action.getLastBuiltRevision();
 
-        return action.getLastBuild(action.getLastBuiltRevision().getSha1()).getMarked().getSha1String();
+        if (lastBuiltRevision == null) {
+            throw new IllegalStateException("Last build has no associated commit");
+        }
+
+        return action.getLastBuild(lastBuiltRevision.getSha1()).getMarked().getSha1String();
     }
 
     private static boolean existsCommit(GitLabApi client, String gitlabProjectId, String commitHash) {
