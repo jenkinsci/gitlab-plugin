@@ -18,6 +18,7 @@ import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -114,9 +115,17 @@ public class CommitStatusUpdater {
         if (gitLabClient == null) {
             return result;
         }
-        for (String remoteUrl : build.getAction(BuildData.class).getRemoteUrls()) {
+
+        final BuildData buildData = build.getAction(BuildData.class);
+        if (buildData == null) {
+            LOGGER.log(Level.INFO, "Build does not contain build data.");
+            return result;
+        }
+
+        final Set<String> remoteUrls = buildData.getRemoteUrls();
+        for (String remoteUrl : remoteUrls) {
             try {
-                String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
+                final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
                 if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
                     String projectId = projectNameWithNameSpace;
                     if (projectNameWithNameSpace.contains(".")) {
