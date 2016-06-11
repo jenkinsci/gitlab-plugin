@@ -102,7 +102,7 @@ public class CommitStatusUpdater {
     }
 
     private static GitLabApi getClient(Run<?, ?> build) {
-        GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
+        final GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null) {
             return connectionProperty.getClient();
         }
@@ -110,9 +110,13 @@ public class CommitStatusUpdater {
     }
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
+
+        LOGGER.log(Level.INFO, "Retrieving gitlab project ids");
+
         List<String> result = new ArrayList<>();
         GitLabApi gitLabClient = getClient(build);
         if (gitLabClient == null) {
+            LOGGER.log(Level.WARNING, "No gitlab client found.");
             return result;
         }
 
@@ -125,6 +129,7 @@ public class CommitStatusUpdater {
         final Set<String> remoteUrls = buildData.getRemoteUrls();
         for (String remoteUrl : remoteUrls) {
             try {
+                LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url %s", remoteUrl);
                 final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
                 if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
                     String projectId = projectNameWithNameSpace;
