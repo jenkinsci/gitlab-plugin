@@ -12,6 +12,7 @@
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
+- [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
     - [Access GitLab](#access-gitlab)
     - [Access Jenkins](#access-jenkins)
