@@ -141,8 +141,13 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
 * For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
 
     ```
-    gitlabCommitStatus {
-        <script that builds your project>
+    node() {
+        stage 'Checkout'
+        checkout <your-scm-config>
+
+        gitlabCommitStatus {
+           <script that builds, tests, etc. your project>
+        }
     }
     ```
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
