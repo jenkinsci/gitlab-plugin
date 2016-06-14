@@ -2,7 +2,6 @@ package com.dabsquared.gitlabjenkins.connection;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -26,6 +25,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return clients.get(connectionName);
     }
 
-    //TODO: remove if superfluous!
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
         if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.name_required());
@@ -89,7 +88,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    // TODO check why this gets called twice on page load once with the correct id and once with an empty string
     public FormValidation doCheckApiTokenId(@QueryParameter String value) {
         if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.apiToken_required());
@@ -132,15 +130,15 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public ListBoxModel doFillApiTokenIdItems(@QueryParameter String name) {
         if (Jenkins.getInstance().hasPermission(Item.CONFIGURE)) {
             AbstractIdCredentialsListBoxModel<StandardListBoxModel, StandardCredentials> options = new StandardListBoxModel()
-                .withEmptySelection()
-                .withMatching(
-                    new GitLabCredentialMatcher(),
-                    CredentialsProvider.lookupCredentials(
-                        StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, new ArrayList<DomainRequirement>()
-                    )
-                );
+                .includeEmptyValue()
+                .includeMatchingAs(ACL.SYSTEM,
+                                   Jenkins.getActiveInstance(),
+                                   StringCredentials.class,
+                                   Collections.<DomainRequirement>emptyList(),
+                                   new GitLabCredentialMatcher());
             if (name != null && connectionMap.containsKey(name)) {
                 String apiTokenId = connectionMap.get(name).getApiTokenId();
+                options.includeCurrentValue(apiTokenId);
                 for (ListBoxModel.Option option : options) {
                     if (option.value.equals(apiTokenId)) {
                         option.selected = true;
@@ -149,7 +147,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
             }
             return options;
         }
-
         return new StandardListBoxModel();
     }
 
