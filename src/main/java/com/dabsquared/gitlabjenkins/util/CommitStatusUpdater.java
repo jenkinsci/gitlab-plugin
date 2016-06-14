@@ -73,6 +73,9 @@ public class CommitStatusUpdater {
 
     private static String getBuildRevision(Run<?, ?> build) {
         BuildData action = build.getAction(BuildData.class);
+        if (action == null) {
+            throw new IllegalStateException("No (git-plugin) BuildData associated to current build");
+        }
         Revision lastBuiltRevision = action.getLastBuiltRevision();
 
         if (lastBuiltRevision == null) {
