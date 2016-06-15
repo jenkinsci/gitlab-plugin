@@ -1,6 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials" xmlns:st="jelly:stapler">
   <f:section title="Gitlab">
+    <f:entry title="${%Enable authentication for '/project' end-point}" field="useAuthenticatedEndpoint">
+      <f:checkbox/>
+    </f:entry>
     <f:entry title="${%GitLab connections}">
       <f:repeatable var="connection" items="${descriptor.connections}" name="connections">
         <table width="100%">

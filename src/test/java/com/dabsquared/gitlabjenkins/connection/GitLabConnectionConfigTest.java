@@ -5,9 +5,18 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import hudson.model.Item;
+import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,6 +28,9 @@ import org.mockserver.model.HttpRequest;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -75,5 +87,62 @@ public class GitLabConnectionConfigTest {
 
         assertThat(formValidation.getMessage(), is(Messages.connection_error("HTTP 403 Forbidden")));
         mockServerClient.verify(request);
+    }
+
+    @Test
+    public void authenticationEnabled_anonymous_forbidden() throws IOException, URISyntaxException {
+        jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
+        jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        URL jenkinsURL = jenkins.getURL();
+        jenkins.createFreeStyleProject("test");
+
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
+        request.addHeader("X-Gitlab-Event", "Push Hook");
+        request.setEntity(new StringEntity("{}"));
+
+        CloseableHttpResponse response = client.execute(request);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(403));
+    }
+
+    @Test
+    public void authenticationEnabled_registered_success() throws Exception {
+        String username = "test-user";
+        jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
+        jenkins.getInstance().setSecurityRealm(jenkins.createDummySecurityRealm());
+        GlobalMatrixAuthorizationStrategy authorizationStrategy = new GlobalMatrixAuthorizationStrategy();
+        authorizationStrategy.add(Item.BUILD, username);
+        jenkins.getInstance().setAuthorizationStrategy(authorizationStrategy);
+        URL jenkinsURL = jenkins.getURL();
+        jenkins.createFreeStyleProject("test");
+
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
+        request.addHeader("X-Gitlab-Event", "Push Hook");
+        String auth = username + ":" + username;
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")))));
+        request.setEntity(new StringEntity("{}"));
+
+        CloseableHttpResponse response = client.execute(request);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(200));
+    }
+
+    @Test
+    public void authenticationDisabled_anonymous_success() throws IOException, URISyntaxException {
+        jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(false);
+        jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        URL jenkinsURL = jenkins.getURL();
+        jenkins.createFreeStyleProject("test");
+
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
+        request.addHeader("X-Gitlab-Event", "Push Hook");
+        request.setEntity(new StringEntity("{}"));
+
+        CloseableHttpResponse response = client.execute(request);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(200));
     }
 }

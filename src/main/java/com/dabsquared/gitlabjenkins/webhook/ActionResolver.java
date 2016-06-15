@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
@@ -14,6 +15,8 @@ import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.security.ACL;
+import hudson.security.AccessDeniedException2;
+import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
@@ -52,6 +55,7 @@ public class ActionResolver {
     private WebHookAction resolveAction(Job<?, ?> project, String restOfPath, StaplerRequest request) {
         String method = request.getMethod();
         if (method.equals("POST")) {
+            checkPermission(Item.BUILD);
             return onPost(project, request);
         } else if (method.equals("GET")) {
             return onGet(project, restOfPath, request);
@@ -135,6 +139,16 @@ public class ActionResolver {
                 return null;
             }
         });
+    }
+
+    private void checkPermission(Permission permission) {
+        if (((GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class)).isUseAuthenticatedEndpoint()) {
+            try {
+                Jenkins.getInstance().checkPermission(permission);
+            } catch (AccessDeniedException2 e) {
+                throw HttpResponses.error(403, e.getMessage());
+            }
+        }
     }
 
     static class NoopAction implements WebHookAction {

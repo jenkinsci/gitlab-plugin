@@ -36,6 +36,7 @@ import java.util.Map;
 @Extension
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
+    private boolean useAuthenticatedEndpoint;
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
     private transient Map<String, GitLabApi> clients = new HashMap<>();
@@ -48,10 +49,19 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         connections = req.bindJSONToList(GitLabConnection.class, json.get("connections"));
+        useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
         refreshConnectionMap();
         clients.clear();
         save();
         return super.configure(req, json);
+    }
+
+    public boolean isUseAuthenticatedEndpoint() {
+        return useAuthenticatedEndpoint;
+    }
+
+    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
+        this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
     }
 
     public List<GitLabConnection> getConnections() {
