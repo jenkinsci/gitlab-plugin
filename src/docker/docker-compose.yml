@@ -26,7 +26,7 @@ gitlab:
 
     - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
 
-    - GITLAB_HOST=localhost
+    - GITLAB_HOST=172.17.0.1
     - GITLAB_PORT=10080
     - GITLAB_SSH_PORT=10022
     - GITLAB_RELATIVE_URL_ROOT=
