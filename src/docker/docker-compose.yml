@@ -1,7 +1,7 @@
 postgresql:
   container_name: docker-postgresql
   restart: always
-  image: sameersbn/postgresql:9.4-21
+  image: sameersbn/postgresql:9.4-22
   environment:
     - DB_USER=gitlab
     - DB_PASS=password
