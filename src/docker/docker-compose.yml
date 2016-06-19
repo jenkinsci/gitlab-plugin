@@ -12,7 +12,7 @@ postgresql:
 gitlab:
   container_name: docker-gitlab
   restart: always
-  image: sameersbn/gitlab:8.8.3
+  image: sameersbn/gitlab:8.8.5
   links:
     - redis:redisio
     - postgresql:postgresql
