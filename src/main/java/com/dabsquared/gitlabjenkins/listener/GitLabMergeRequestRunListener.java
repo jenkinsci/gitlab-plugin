@@ -16,12 +16,16 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Robin Müller
  */
 @Extension
 public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
+
+    private static final Logger LOGGER = Logger.getLogger(GitLabMergeRequestRunListener.class.getName());
 
     @Override
     public void onCompleted(Run<?, ?> build, @Nonnull TaskListener listener) {
@@ -36,6 +40,7 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
             addNoteOnMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId, build.getParent().getDisplayName(), build.getNumber(),
                 buildUrl, getResultIcon(trigger, buildResult), buildResult.color.getDescription());
             if (buildResult == Result.SUCCESS) {
+
                 acceptMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId);
             }
         }
@@ -46,17 +51,24 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
     }
 
     private void acceptMergeRequestIfNecessary(Run<?, ?> build, GitLabPushTrigger trigger, TaskListener listener, String projectId, Integer mergeRequestId) {
-        if (trigger.getAcceptMergeRequestOnSuccess()) {
+        LOGGER.log(Level.INFO, "Processing merge request with project id " + projectId + " and merge request id " + Integer.toString(mergeRequestId));
+        final GitLabPushTrigger.AcceptMergeRequestBlock acceptMergeRequest = trigger.getAcceptMergeRequestOnSuccess();
+        if (acceptMergeRequest != null) {
             try {
-                GitLabApi client = getClient(build);
+                LOGGER.log(Level.INFO, "Merge Request will be accepted.");
+                final GitLabApi client = getClient(build);
                 if (client == null) {
-                    listener.getLogger().println("No GitLab connection configured");
+                    LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                 } else {
-                    client.acceptMergeRequest(projectId, mergeRequestId, "Merge Request accepted by jenkins build success", false);
+                    final boolean removeSourceBranch = trigger.getAcceptMergeRequestOnSuccess().getRemoveSourceBranchAfterMerge();
+                    LOGGER.log(Level.INFO, "RemoveSourceBranch flag is {0}.", removeSourceBranch ? "enabled" : "disabled");
+                    client.acceptMergeRequest(projectId, mergeRequestId, "Merge Request accepted by Jenkins build success", removeSourceBranch);
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 listener.getLogger().printf("Failed to accept merge request: %s", e.getMessage());
             }
+        } else {
+            LOGGER.log(Level.INFO, "Automatic merge request acceptance feature disabled.");
         }
     }
 

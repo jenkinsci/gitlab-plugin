@@ -82,7 +82,7 @@ public interface GitLabApi {
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/projects/{projectId}/merge_request/{mergeRequestId}/merge")
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/merge")
     void acceptMergeRequest(@PathParam("projectId") String projectId,
                             @PathParam("mergeRequestId") Integer mergeRequestId,
                             @QueryParam("merge_commit_message") String mergeCommitMessage,
