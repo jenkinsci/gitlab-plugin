@@ -28,7 +28,7 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
         GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(build.getParent());
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
 
-        if (trigger != null && cause != null && cause.getData().getActionType() == CauseData.ActionType.MERGE) {
+        if (trigger != null && cause != null && (cause.getData().getActionType() == CauseData.ActionType.MERGE || cause.getData().getActionType() == CauseData.ActionType.NOTE)) {
             String buildUrl = getBuildUrl(build);
             Result buildResult = build.getResult();
             Integer projectId = cause.getData().getProjectId();

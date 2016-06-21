@@ -103,8 +103,9 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 ### Freestyle and Pipeline jobs
 1. In the *Build Triggers* section:
     * Check the ``Build when a change is pushed to GitLab.``
-    * Use the check boxes to trigger builds on Push and/or Merge Request events
+    * Use the check boxes to trigger builds on Push and/or Merge Request events and/or Note Request(Comment in Merge Request)
     * Optionally enable building open merge requests again after a push to the source branch.
+    * If you check *Note Events* then you should set trigger phrase(exact phrase or Java Regular Expression) in Trigger Phrase field.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
 

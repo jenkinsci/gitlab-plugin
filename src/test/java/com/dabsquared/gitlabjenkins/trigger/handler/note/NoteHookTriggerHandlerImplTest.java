@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.trigger.handler.merge;
+package com.dabsquared.gitlabjenkins.trigger.handler.note;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
@@ -22,22 +22,23 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.NoteHookBuilder.noteHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder.mergeRequestObjectAttributes;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.NoteObjectAttributesBuilder.noteObjectAttributes;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author Robin Müller
+ * @author Nikolay Ustinov
  */
-public class MergeRequestHookTriggerHandlerImplTest {
+public class NoteHookTriggerHandlerImplTest {
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -45,15 +46,15 @@ public class MergeRequestHookTriggerHandlerImplTest {
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
 
-    private MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
+    private NoteHookTriggerHandler noteHookTriggerHandler;
 
     @Before
     public void setup() {
-        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened));
+        noteHookTriggerHandler = new NoteHookTriggerHandlerImpl("ci-run");
     }
 
     @Test
-    public void mergeRequest_ciSkip() throws IOException, InterruptedException {
+    public void note_ciSkip() throws IOException, InterruptedException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new TestBuilder() {
@@ -63,9 +64,19 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 return true;
             }
         });
+        Date currentDate = new Date();
         project.setQuietPeriod(0);
-        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
-                .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
+        noteHookTriggerHandler.handle(project, noteHook()
+                .withObjectAttributes(noteObjectAttributes()
+                    .withId(1)
+                    .withNote("ci-run")
+                    .withAuthorId(1)
+                    .withProjectId(1)
+                    .withCreatedAt(currentDate)
+                    .withUpdatedAt(currentDate)
+                    .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
+                    .build())
+                .withMergeRequest(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(10000);
@@ -73,7 +84,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void mergeRequest_build() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+    public void note_build() throws IOException, InterruptedException, GitAPIException, ExecutionException {
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
@@ -92,35 +103,45 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 return true;
             }
         });
+        Date currentDate = new Date();
         project.setQuietPeriod(0);
-        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
-                .withObjectAttributes(mergeRequestObjectAttributes()
-                        .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
-                        .withState(State.opened)
-                        .withIid(1)
-                        .withTitle("test")
-                        .withTargetProjectId(1)
-                        .withSourceProjectId(1)
-                        .withSourceBranch("feature")
-                        .withTargetBranch("master")
-                        .withLastCommit(commit().withAuthor(user().withName("test").build()).build())
-                        .withSource(project()
-                                .withName("test")
-                                .withNamespace("test-namespace")
-                                .withHomepage("https://gitlab.org/test")
-                                .withUrl("git@gitlab.org:test.git")
-                                .withSshUrl("git@gitlab.org:test.git")
-                                .withHttpUrl("https://gitlab.org/test.git")
-                                .build())
-                        .withTarget(project()
-                                .withName("test")
-                                .withNamespace("test-namespace")
-                                .withHomepage("https://gitlab.org/test")
-                                .withUrl("git@gitlab.org:test.git")
-                                .withSshUrl("git@gitlab.org:test.git")
-                                .withHttpUrl("https://gitlab.org/test.git")
-                                .build())
+        noteHookTriggerHandler.handle(project, noteHook()
+                .withObjectAttributes(noteObjectAttributes()
+                    .withId(1)
+                    .withNote("ci-run")
+                    .withAuthorId(1)
+                    .withProjectId(1)
+                    .withCreatedAt(currentDate)
+                    .withUpdatedAt(currentDate)
+                    .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
+                    .build())
+                .withMergeRequest(mergeRequestObjectAttributes()
+                    .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
+                    .withState(State.opened)
+                    .withIid(1)
+                    .withTitle("test")
+                    .withTargetProjectId(1)
+                    .withSourceProjectId(1)
+                    .withSourceBranch("feature")
+                    .withTargetBranch("master")
+                    .withLastCommit(commit().withAuthor(user().withName("test").build()).build())
+                    .withSource(project()
+                        .withName("test")
+                        .withNamespace("test-namespace")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withSshUrl("git@gitlab.org:test.git")
+                        .withHttpUrl("https://gitlab.org/test.git")
                         .build())
+                    .withTarget(project()
+                        .withName("test")
+                        .withNamespace("test-namespace")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withSshUrl("git@gitlab.org:test.git")
+                        .withHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                    .build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(10000);

@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.webhook;
 
 import com.dabsquared.gitlabjenkins.webhook.ActionResolver.NoopAction;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
+import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
@@ -123,6 +124,20 @@ public class ActionResolverTest {
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
+    }
+
+    @Test
+    public void postNote() throws IOException {
+        String projectName = "test";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("Note Hook");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postNote.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(NoteBuildAction.class));
     }
 
     @Test
