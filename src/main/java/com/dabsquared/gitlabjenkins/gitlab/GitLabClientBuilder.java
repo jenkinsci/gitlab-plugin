@@ -49,7 +49,7 @@ public class GitLabClientBuilder {
     private final static Logger LOGGER = Logger.getLogger(GitLabClientBuilder.class.getName());
     private static final String PRIVATE_TOKEN = "PRIVATE-TOKEN";
 
-    public static GitLabApi buildClient(String gitlabHostUrl, final String gitlabApiTokenId, boolean ignoreCertificateErrors) {
+    public static GitLabApi buildClient(String gitlabHostUrl, final String gitlabApiTokenId, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         if (ignoreCertificateErrors) {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
@@ -58,8 +58,8 @@ public class GitLabClientBuilder {
         return builder
             .connectionPoolSize(60)
             .maxPooledPerRoute(30)
-            .establishConnectionTimeout(10, TimeUnit.SECONDS)
-            .socketTimeout(10, TimeUnit.SECONDS)
+            .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
+            .socketTimeout(readTimeout, TimeUnit.SECONDS)
             .register(new JacksonJsonProvider())
             .register(new JacksonConfig())
             .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId))).build().target(gitlabHostUrl)
@@ -70,7 +70,11 @@ public class GitLabClientBuilder {
     }
 
     public static GitLabApi buildClient(GitLabConnection connection) {
-        return buildClient(connection.getUrl(), connection.getApiTokenId(), connection.isIgnoreCertificateErrors());
+        return buildClient(connection.getUrl(),
+                           connection.getApiTokenId(),
+                           connection.isIgnoreCertificateErrors(),
+                           connection.getConnectionTimeout(),
+                           connection.getReadTimeout());
     }
 
     @Initializer(before = InitMilestone.PLUGINS_STARTED)

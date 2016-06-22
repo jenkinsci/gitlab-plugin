@@ -1,7 +1,7 @@
 postgresql:
   container_name: docker-postgresql
   restart: always
-  image: sameersbn/postgresql:9.4-21
+  image: sameersbn/postgresql:9.4-22
   environment:
     - DB_USER=gitlab
     - DB_PASS=password
@@ -12,7 +12,7 @@ postgresql:
 gitlab:
   container_name: docker-gitlab
   restart: always
-  image: sameersbn/gitlab:8.8.3
+  image: sameersbn/gitlab:8.8.5
   links:
     - redis:redisio
     - postgresql:postgresql
@@ -26,7 +26,7 @@ gitlab:
 
     - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
 
-    - GITLAB_HOST=localhost
+    - GITLAB_HOST=172.17.0.1
     - GITLAB_PORT=10080
     - GITLAB_SSH_PORT=10022
     - GITLAB_RELATIVE_URL_ROOT=

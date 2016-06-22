@@ -287,6 +287,13 @@ public class CauseData {
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
                 return "GitLab Merge Request #" + data.getMergeRequestIid() + ": " + forkNamespace + data.getSourceBranch() + " => " + data.getTargetBranch();
             }
+        }, NOTE {
+            @Override
+            String getShortDescription(CauseData data) {
+                String triggeredBy = data.getTriggeredByUser();
+                String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
+                return "Triggered by " + triggeredBy + " GitLab Merge Request #" + data.getMergeRequestIid() + ": " + forkNamespace + data.getSourceBranch() + " => " + data.getTargetBranch();
+            }
         };
 
         abstract String getShortDescription(CauseData data);

@@ -59,7 +59,7 @@ The Plugin supports two operation modes: **Modern** and **Legacy**. The main dif
 # Known bugs/issues
 
 This is not an exhaustive list of issues, but rather a place for us to note significant bugs that may impact your use of the plugin in certain circumstances. For most things, please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section and open a new one if you don't find anything.
-* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition, due to a bug on their side.
+* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition < 8.8.3, due to a bug on their side.
 * Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
 
 # Supported GitLab versions
@@ -150,8 +150,9 @@ You can trigger a build manually from Jenkins. By default, it will fetch from `o
 #### Freestyle and Pipeline jobs
 1. In the *Build Triggers* section:
     * Check the ``Build when a change is pushed to GitLab.``
-    * Use the check boxes to trigger builds on Push and/or Merge Request events
+    * Use the check boxes to trigger builds on Push and/or Merge Request events and/or Note Request(Comment in Merge Request)
     * Optionally enable building open merge requests again after a push to the source branch.
+    * If you check *Note Events* then you should set trigger phrase(exact phrase or Java Regular Expression) in Trigger Phrase field.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
 
@@ -188,8 +189,13 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
 * For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
 
     ```
-    gitlabCommitStatus {
-        <script that builds your project>
+    node() {
+        stage 'Checkout'
+        checkout <your-scm-config>
+
+        gitlabCommitStatus {
+           <script that builds, tests, etc. your project>
+        }
     }
     ```
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
@@ -285,7 +291,7 @@ docker-compose up -d
 
 ## Access GitLab
 
-To access `GitLab`, point your browser to `http://localhost:10080` and set a password for the `root` user account.
+To access `GitLab`, point your browser to `http://172.17.0.1:10080` and set a password for the `root` user account.
 
 For more information on the supported `GitLab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
 

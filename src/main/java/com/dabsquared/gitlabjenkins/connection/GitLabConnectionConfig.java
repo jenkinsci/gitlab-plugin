@@ -2,7 +2,6 @@ package com.dabsquared.gitlabjenkins.connection;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -26,6 +25,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +36,7 @@ import java.util.Map;
 @Extension
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
+    private boolean useAuthenticatedEndpoint;
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
     private transient Map<String, GitLabApi> clients = new HashMap<>();
@@ -48,10 +49,19 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         connections = req.bindJSONToList(GitLabConnection.class, json.get("connections"));
+        useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
         refreshConnectionMap();
         clients.clear();
         save();
         return super.configure(req, json);
+    }
+
+    public boolean isUseAuthenticatedEndpoint() {
+        return useAuthenticatedEndpoint;
+    }
+
+    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
+        this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
     }
 
     public List<GitLabConnection> getConnections() {
@@ -70,7 +80,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return clients.get(connectionName);
     }
 
-    //TODO: remove if superfluous!
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
         if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.name_required());
@@ -89,7 +98,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    // TODO check why this gets called twice on page load once with the correct id and once with an empty string
     public FormValidation doCheckApiTokenId(@QueryParameter String value) {
         if (StringUtils.isEmptyOrNull(value)) {
             return FormValidation.error(Messages.apiToken_required());
@@ -98,9 +106,29 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String apiTokenId, @QueryParameter boolean ignoreCertificateErrors) {
+    public FormValidation doCheckConnectionTimeout(@QueryParameter Integer value) {
+        if (value == null) {
+            return FormValidation.error(Messages.connectionTimeout_required());
+        } else {
+            return FormValidation.ok();
+        }
+    }
+
+    public FormValidation doCheckReadTimeout(@QueryParameter Integer value) {
+        if (value == null) {
+            return FormValidation.error(Messages.readTimeout_required());
+        } else {
+            return FormValidation.ok();
+        }
+    }
+
+    public FormValidation doTestConnection(@QueryParameter String url,
+                                           @QueryParameter String apiTokenId,
+                                           @QueryParameter boolean ignoreCertificateErrors,
+                                           @QueryParameter int connectionTimeout,
+                                           @QueryParameter int readTimeout) {
         try {
-            GitLabClientBuilder.buildClient(url, apiTokenId, ignoreCertificateErrors).headCurrentUser();
+            GitLabClientBuilder.buildClient(url, apiTokenId, ignoreCertificateErrors, connectionTimeout, readTimeout).headCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
@@ -112,15 +140,15 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public ListBoxModel doFillApiTokenIdItems(@QueryParameter String name) {
         if (Jenkins.getInstance().hasPermission(Item.CONFIGURE)) {
             AbstractIdCredentialsListBoxModel<StandardListBoxModel, StandardCredentials> options = new StandardListBoxModel()
-                .withEmptySelection()
-                .withMatching(
-                    new GitLabCredentialMatcher(),
-                    CredentialsProvider.lookupCredentials(
-                        StandardCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, new ArrayList<DomainRequirement>()
-                    )
-                );
+                .includeEmptyValue()
+                .includeMatchingAs(ACL.SYSTEM,
+                                   Jenkins.getActiveInstance(),
+                                   StringCredentials.class,
+                                   Collections.<DomainRequirement>emptyList(),
+                                   new GitLabCredentialMatcher());
             if (name != null && connectionMap.containsKey(name)) {
                 String apiTokenId = connectionMap.get(name).getApiTokenId();
+                options.includeCurrentValue(apiTokenId);
                 for (ListBoxModel.Option option : options) {
                     if (option.value.equals(apiTokenId)) {
                         option.selected = true;
@@ -129,7 +157,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
             }
             return options;
         }
-
         return new StandardListBoxModel();
     }
 
