@@ -20,8 +20,6 @@ import jenkins.model.ParameterizedJobMixIn;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -60,17 +58,9 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         List<MergeRequest> result = new ArrayList<>();
         Integer page = 1;
         do {
-            Response response = null;
-            try {
-                response = client.getMergeRequests(projectId, State.opened, page, 100);
-                List<MergeRequest> mergeRequests = response.readEntity(new GenericType<List<MergeRequest>>() {});
-                result.addAll(mergeRequests);
-                page = mergeRequests.isEmpty() ? null : page + 1;
-            } finally {
-                if (response != null) {
-                    response.close();
-                }
-            }
+            List<MergeRequest> mergeRequests = client.getMergeRequests(projectId, State.opened, page, 100);
+            result.addAll(mergeRequests);
+            page = mergeRequests.isEmpty() ? null : page + 1;
         } while (page != null);
         return result;
     }
