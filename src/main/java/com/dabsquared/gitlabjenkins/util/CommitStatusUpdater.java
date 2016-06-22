@@ -126,7 +126,7 @@ public class CommitStatusUpdater {
         final BuildData buildData = build.getAction(BuildData.class);
         if (buildData == null) {
             LOGGER.log(Level.INFO, "Build does not contain build data.");
-            return result;
+            return new ArrayList(result);
         }
 
         final Set<String> remoteUrls = buildData.getRemoteUrls();

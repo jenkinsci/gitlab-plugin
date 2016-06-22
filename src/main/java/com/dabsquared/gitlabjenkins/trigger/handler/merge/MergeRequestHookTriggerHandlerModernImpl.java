@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.ObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -58,7 +58,7 @@ class MergeRequestHookTriggerHandlerModernImpl extends AbstractMergeRequestHookT
     }
 
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
-        ObjectAttributes objectAttributes = hook.getObjectAttributes();
+        MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
             Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1(project, objectAttributes.getLastCommit().getId(), true);
             if (mergeBuild != null) {
