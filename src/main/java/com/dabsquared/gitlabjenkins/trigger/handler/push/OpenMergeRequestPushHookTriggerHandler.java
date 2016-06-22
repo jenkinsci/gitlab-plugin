@@ -58,14 +58,14 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     private List<MergeRequest> getOpenMergeRequests(GitLabApi client, String projectId) {
         List<MergeRequest> result = new ArrayList<>();
-        Integer page = 0;
+        Integer page = 1;
         do {
             Response response = null;
             try {
                 response = client.getMergeRequests(projectId, State.opened, page, 100);
-                result.addAll(response.readEntity(new GenericType<List<MergeRequest>>() {}));
-                String nextPage = response.getHeaderString("X-Next-Page");
-                page = nextPage.isEmpty() ? null : Integer.valueOf(nextPage);
+                List<MergeRequest> mergeRequests = response.readEntity(new GenericType<List<MergeRequest>>() {});
+                result.addAll(mergeRequests);
+                page = mergeRequests.isEmpty() ? null : page + 1;
             } finally {
                 if (response != null) {
                     response.close();
