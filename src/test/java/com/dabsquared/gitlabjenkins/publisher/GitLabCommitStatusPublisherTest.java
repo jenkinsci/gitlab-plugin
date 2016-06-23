@@ -101,7 +101,7 @@ public class GitLabCommitStatusPublisherTest {
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.prebuild(build, listener);
 
         mockServerClient.verify(requests);
@@ -116,7 +116,7 @@ public class GitLabCommitStatusPublisherTest {
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.test.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.prebuild(build, listener);
 
         mockServerClient.verify(requests);
@@ -130,7 +130,7 @@ public class GitLabCommitStatusPublisherTest {
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.perform(build, null, listener);
 
         mockServerClient.verify(requests);
@@ -144,7 +144,7 @@ public class GitLabCommitStatusPublisherTest {
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.perform(build, null, listener);
 
         mockServerClient.verify(requests);
@@ -158,7 +158,7 @@ public class GitLabCommitStatusPublisherTest {
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.perform(build, null, listener);
 
         mockServerClient.verify(requests);
@@ -174,7 +174,7 @@ public class GitLabCommitStatusPublisherTest {
         };
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project-1.git", "test/project-2.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.prebuild(build, listener);
 
         mockServerClient.verify(requests);
@@ -185,7 +185,7 @@ public class GitLabCommitStatusPublisherTest {
         HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
         AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.prebuild(build, listener);
 
         mockServerClient.verify(updateCommitStatus, VerificationTimes.exactly(0));
@@ -201,7 +201,7 @@ public class GitLabCommitStatusPublisherTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         when(buildListener.getLogger()).thenReturn(new PrintStream(outputStream));
 
-        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins");
         publisher.prebuild(build, buildListener);
 
         assertThat(outputStream.toString(), CoreMatchers.containsString("Failed to update Gitlab commit status for project 'test/project': HTTP 403 Forbidden"));

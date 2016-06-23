@@ -29,7 +29,7 @@ public class CommitStatusUpdater {
 
     private final static Logger LOGGER = Logger.getLogger(CommitStatusUpdater.class.getName());
 
-    public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state) {
+    public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state, String name) {
         GitLabApi client = getClient(build);
         if (client == null) {
             println(listener, "No GitLab connection configured");
@@ -43,7 +43,7 @@ public class CommitStatusUpdater {
             for (String gitlabProjectId : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
                     if (existsCommit(client, gitlabProjectId, commitHash)) {
-                        client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
+                        client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), name, buildUrl, null);
                     }
                 } catch (WebApplicationException | ProcessingException e) {
                     printf(listener, "Failed to update Gitlab commit status for project '%s': %s%n", gitlabProjectId, e.getMessage());

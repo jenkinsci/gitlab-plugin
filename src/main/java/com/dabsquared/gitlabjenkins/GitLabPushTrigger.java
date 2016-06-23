@@ -16,7 +16,6 @@ import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTrigge
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
@@ -36,7 +35,6 @@ import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -46,7 +44,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
-import java.util.regex.Pattern;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
@@ -127,7 +124,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     if (trigger.addCiMessage) {
-                        project.getPublishersList().add(new GitLabCommitStatusPublisher());
+                        project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins"));
                     }
                     if (trigger.branchFilterType == null) {
                         trigger.branchFilterType = trigger.branchFilterName;

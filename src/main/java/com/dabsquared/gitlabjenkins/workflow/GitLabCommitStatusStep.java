@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -16,6 +17,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
@@ -23,8 +25,16 @@ import javax.annotation.Nonnull;
 @ExportedBean
 public class GitLabCommitStatusStep extends AbstractStepImpl {
 
+    private String name;
+
     @DataBoundConstructor
-    public GitLabCommitStatusStep() { }
+    public GitLabCommitStatusStep(String name) {
+        this.name = StringUtils.isEmpty(name) ? null : name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public static class Execution extends AbstractStepExecutionImpl {
         private static final long serialVersionUID = 1;
@@ -32,26 +42,30 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
         @StepContextParameter
         private transient Run<?, ?> run;
 
+        @Inject
+        private transient GitLabCommitStatusStep step;
+
         private BodyExecution body;
 
         @Override
         public boolean start() throws Exception {
+            final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
             body = getContext().newBodyInvoker()
                 .withCallback(new BodyExecutionCallback() {
                     @Override
                     public void onStart(StepContext context) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running);
+                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name);
                     }
 
                     @Override
                     public void onSuccess(StepContext context, Object result) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success);
+                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name);
                         context.onSuccess(result);
                     }
 
                     @Override
                     public void onFailure(StepContext context, Throwable t) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.failed);
+                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.failed, name);
                         context.onFailure(t);
                     }
                 })
@@ -63,7 +77,8 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
         public void stop(@Nonnull Throwable cause) throws Exception {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
-                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled);
+                String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
+                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name);
                 body.cancel(cause);
             }
         }
