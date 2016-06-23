@@ -62,8 +62,9 @@ public class GitLabClientBuilder {
             .socketTimeout(readTimeout, TimeUnit.SECONDS)
             .register(new JacksonJsonProvider())
             .register(new JacksonConfig())
-            .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId))).build().target(gitlabHostUrl)
+            .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId)))
             .register(new LoggingFilter())
+            .build().target(gitlabHostUrl)
             .proxyBuilder(GitLabApi.class)
             .classloader(Jenkins.getInstance().getPluginManager().uberClassLoader)
                 .build();
