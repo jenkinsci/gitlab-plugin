@@ -137,7 +137,11 @@ public class CommitStatusUpdater {
                 if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
                     String projectId = projectNameWithNameSpace;
                     if (projectNameWithNameSpace.contains(".")) {
-                         projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
+                        try {
+                            projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
+                        } catch (WebApplicationException | ProcessingException e) {
+                            LOGGER.log(Level.SEVERE, String.format("Failed to retrieve projectId for project '%s'", projectNameWithNameSpace), e);
+                        }
                     }
                     result.add(projectId);
                 }
