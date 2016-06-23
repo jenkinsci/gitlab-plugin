@@ -6,16 +6,19 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
+import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 
 import javax.ws.rs.ProcessingException;
@@ -45,7 +48,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                     GitLabApi client = property.getClient();
                     for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
-                        handleMergeRequest(job, hook, ciSkip, branchFilter, client, projectId, mergeRequest);
+                        handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
                     }
                 }
             }
@@ -65,7 +68,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         return result;
     }
 
-    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabApi client, Integer projectId, MergeRequest mergeRequest) {
+    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabApi client, MergeRequest mergeRequest) {
         if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
             LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
@@ -78,6 +81,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
             Branch branch = client.getBranch(mergeRequest.getSourceProjectId().toString(), sourceBranch);
             Project project = client.getProject(mergeRequest.getSourceProjectId().toString());
+            String commit = branch.getCommit().getId();
+            setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
             scheduleBuild(job, new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))));
         }
     }
@@ -85,7 +90,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     private CauseData retrieveCauseData(PushHook hook, Project project, MergeRequest mergeRequest, Branch branch) {
         return causeData()
                 .withActionType(CauseData.ActionType.MERGE)
-                .withProjectId(hook.getProjectId())
+                .withSourceProjectId(mergeRequest.getSourceProjectId())
+                .withTargetProjectId(hook.getProjectId())
                 .withBranch(branch.getName())
                 .withSourceBranch(branch.getName())
                 .withUserName(branch.getCommit().getAuthorName())
@@ -107,6 +113,20 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
                 .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
                 .build();
+    }
+
+    private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
+        if (job instanceof AbstractProject && ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class) != null) {
+            GitLabCommitStatusPublisher publisher =
+                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+            GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
+            try {
+                client.changeBuildStatus(projectId, commit, BuildState.pending, ref, publisher.getName(),
+                                         Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber(), null);
+            } catch (WebApplicationException | ProcessingException e) {
+                LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
+            }
+        }
     }
 
     private void scheduleBuild(Job<?, ?> job, Action action) {

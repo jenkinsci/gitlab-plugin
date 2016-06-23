@@ -17,6 +17,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -113,8 +114,12 @@ public class CommitStatusUpdater {
     }
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
-
         LOGGER.log(Level.INFO, "Retrieving gitlab project ids");
+
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        if (cause != null) {
+            return Collections.singletonList(cause.getData().getSourceProjectId().toString());
+        }
 
         List<String> result = new ArrayList<>();
         GitLabApi gitLabClient = getClient(build);

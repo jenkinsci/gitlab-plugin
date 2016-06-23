@@ -54,6 +54,10 @@ public class GitLabCommitStatusPublisher extends Notifier {
         return true;
     }
 
+    public String getName() {
+        return name;
+    }
+
     protected GitLabCommitStatusPublisher readResolve() {
         if (name == null) {
             name = "jenkins";

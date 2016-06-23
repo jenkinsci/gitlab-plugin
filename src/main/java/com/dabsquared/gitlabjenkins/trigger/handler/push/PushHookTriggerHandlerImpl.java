@@ -13,6 +13,7 @@ import org.eclipse.jgit.util.StringUtils;
 import java.util.List;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
 
 /**
  * @author Robin Müller
@@ -41,7 +42,8 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     protected CauseData retrieveCauseData(PushHook hook) {
         return causeData()
                 .withActionType(CauseData.ActionType.PUSH)
-                .withProjectId(hook.getProjectId())
+                .withSourceProjectId(hook.getProjectId())
+                .withTargetProjectId(hook.getProjectId())
                 .withBranch(getTargetBranch(hook))
                 .withSourceBranch(getTargetBranch(hook))
                 .withUserName(hook.getUserName())
@@ -78,6 +80,15 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     @Override
     protected RevisionParameterAction createRevisionParameter(PushHook hook) throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+    }
+
+    @Override
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(PushHook hook) {
+        return buildStatusUpdate()
+            .withProjectId(hook.getProjectId())
+            .withSha(hook.getAfter())
+            .withRef(getTargetBranch(hook))
+            .build();
     }
 
     private String retrievePushedBy(final PushHook hook) {

@@ -2,17 +2,26 @@ package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
+import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
+import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.eclipse.jgit.transport.URIish;
 
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -35,6 +44,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         String targetBranch = getTargetBranch(hook);
         if (branchFilter.isBranchAllowed(targetBranch)) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+            setCommitStatusPendingIfNecessary(job, hook);
             scheduleBuild(job, createActions(job, hook));
         } else {
             LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
@@ -44,6 +54,21 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract String getTriggerType();
 
     protected abstract boolean isCiSkip(H hook);
+
+    private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
+        if (job instanceof AbstractProject && ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class) != null) {
+            GitLabCommitStatusPublisher publisher =
+                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+            GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
+            BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
+            try {
+                client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(), BuildState.pending, buildStatusUpdate.getRef(),
+                                         publisher.getName(), Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber(), null);
+            } catch (WebApplicationException | ProcessingException e) {
+                LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
+            }
+        }
+    }
 
     private Action[] createActions(Job<?, ?> job, H hook) {
         ArrayList<Action> actions = new ArrayList<>();
@@ -62,6 +87,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract String getTargetBranch(H hook);
 
     protected abstract RevisionParameterAction createRevisionParameter(H hook) throws NoRevisionToBuildException;
+
+    protected abstract BuildStatusUpdate retrieveBuildStatusUpdate(H hook);
 
     protected URIish retrieveUrIish(WebHook hook) {
         try {
@@ -93,5 +120,30 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 return job;
             }
         };
+    }
+
+    public static class BuildStatusUpdate {
+        private final Integer projectId;
+        private final String sha;
+        private final String ref;
+
+        @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
+        public BuildStatusUpdate(Integer projectId, String sha, String ref) {
+            this.projectId = projectId;
+            this.sha = sha;
+            this.ref = ref;
+        }
+
+        public Integer getProjectId() {
+            return projectId;
+        }
+
+        public String getSha() {
+            return sha;
+        }
+
+        public String getRef() {
+            return ref;
+        }
     }
 }

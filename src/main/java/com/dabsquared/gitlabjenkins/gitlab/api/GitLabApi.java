@@ -75,6 +75,17 @@ public interface GitLabApi {
                            @QueryParam("target_url") String targetUrl,
                            @QueryParam("description") String description);
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/statuses/{sha}")
+    void changeBuildStatus(@PathParam("projectId") Integer projectId,
+                           @PathParam("sha") String sha,
+                           @QueryParam("state") BuildState state,
+                           @QueryParam("ref") String ref,
+                           @QueryParam("context") String context,
+                           @QueryParam("target_url") String targetUrl,
+                           @QueryParam("description") String description);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/repository/commits/{sha}")
