@@ -99,7 +99,7 @@ public class GitLabCommitStatusPublisherTest {
             prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
             prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -114,7 +114,7 @@ public class GitLabCommitStatusPublisherTest {
             prepareExistsCommitWithSuccessResponse("1", "123abc"),
             prepareUpdateCommitStatusWithSuccessResponse("1", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.test");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.test.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -128,7 +128,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.canceled)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.perform(build, null, listener);
@@ -142,7 +142,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.success)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.perform(build, null, listener);
@@ -156,7 +156,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.failed)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.perform(build, null, listener);
@@ -172,7 +172,7 @@ public class GitLabCommitStatusPublisherTest {
                 prepareExistsCommitWithSuccessResponse("test/project-2", "123abc"),
                 prepareUpdateCommitStatusWithSuccessResponse("test/project-2", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project-1", "test/project-2");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project-1.git", "test/project-2.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -183,7 +183,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_commitNotExists() throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher();
         publisher.prebuild(build, listener);
@@ -196,7 +196,7 @@ public class GitLabCommitStatusPublisherTest {
         prepareExistsCommitWithSuccessResponse("test/project", "123abc");
         HttpRequest updateCommitStatus = prepareUpdateCommitStatus("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(403));
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project");
+        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
         BuildListener buildListener = mock(BuildListener.class);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         when(buildListener.getLogger()).thenReturn(new PrintStream(outputStream));
