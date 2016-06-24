@@ -18,12 +18,16 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
+import hudson.plugins.git.RevisionParameterAction;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
+import org.eclipse.jgit.transport.URIish;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,7 +87,10 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             Project project = client.getProject(mergeRequest.getSourceProjectId().toString());
             String commit = branch.getCommit().getId();
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
-            scheduleBuild(job, new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))));
+
+            List<Action> actions = Arrays.<Action>asList(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
+                                                         new RevisionParameterAction(commit, retrieveUrIish(hook)));
+            scheduleBuild(job, actions.toArray(new Action[actions.size()]));
         }
     }
 
@@ -129,7 +136,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         }
     }
 
-    private void scheduleBuild(Job<?, ?> job, Action action) {
+    private void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob) job;
@@ -137,7 +144,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 projectBuildDelay = abstractProject.getQuietPeriod();
             }
         }
-        retrieveScheduleJob(job).scheduleBuild2(projectBuildDelay, action);
+        retrieveScheduleJob(job).scheduleBuild2(projectBuildDelay, actions);
     }
 
     private ParameterizedJobMixIn retrieveScheduleJob(final Job<?, ?> job) {
@@ -148,5 +155,16 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 return job;
             }
         };
+    }
+
+    private URIish retrieveUrIish(PushHook hook) {
+        try {
+            if (hook.getRepository() != null) {
+                return new URIish(hook.getRepository().getUrl());
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+        }
+        return null;
     }
 }
