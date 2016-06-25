@@ -180,6 +180,7 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>plain-credentials</artifactId>
       <version>1.1</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jgit</groupId>

@@ -5,7 +5,6 @@ import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.dabsquared.gitlabjenkins.gitlab.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
@@ -171,7 +170,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     private static class GitLabCredentialMatcher implements CredentialsMatcher {
         @Override
         public boolean matches(@NonNull Credentials credentials) {
-            return credentials instanceof StringCredentials || credentials instanceof UsernamePasswordCredentials;
+            return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
         }
     }
 }

@@ -2,8 +2,8 @@ package com.dabsquared.gitlabjenkins.gitlab;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
-import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.dabsquared.gitlabjenkins.connection.GitLabApiToken;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
@@ -90,10 +90,11 @@ public class GitLabClientBuilder {
             lookupCredentials(StandardCredentials.class, (Item) null, ACL.SYSTEM, new ArrayList<DomainRequirement>()),
             CredentialsMatchers.withId(apiTokenId));
         if (credentials != null) {
+            if (credentials instanceof GitLabApiToken) {
+                return ((GitLabApiToken) credentials).getApiToken().getPlainText();
+            }
             if (credentials instanceof StringCredentials) {
                 return ((StringCredentials) credentials).getSecret().getPlainText();
-            } else if (credentials instanceof UsernamePasswordCredentials) {
-                return ((UsernamePasswordCredentials) credentials).getPassword().getPlainText();
             }
         }
         throw new IllegalStateException("No credentials found for credentialsId: " + apiTokenId);
