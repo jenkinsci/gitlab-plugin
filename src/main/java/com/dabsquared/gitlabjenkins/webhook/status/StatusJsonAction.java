@@ -18,7 +18,7 @@ public class StatusJsonAction extends BuildStatusAction {
     private String sha1;
 
     public StatusJsonAction(Job<?, ?> project, String sha1) {
-        super(project, BuildUtil.getBuildBySHA1(project, sha1, true));
+        super(project, BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, sha1));
         this.sha1 = sha1;
     }
 
