@@ -38,13 +38,15 @@ public final class CauseData {
     private final String targetRepoSshUrl;
     private final String targetRepoHttpUrl;
     private final String triggeredByUser;
+    private final String before;
+    private final String after;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
               String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
               Integer mergeRequestIid, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
-              String targetRepoHttpUrl, String triggeredByUser) {
+              String targetRepoHttpUrl, String triggeredByUser, String before, String after) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
         this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
@@ -68,6 +70,8 @@ public final class CauseData {
         this.targetRepoSshUrl = checkNotNull(targetRepoSshUrl, "targetRepoSshUrl must not be null.");
         this.targetRepoHttpUrl = checkNotNull(targetRepoHttpUrl, "targetRepoHttpUrl must not be null.");
         this.triggeredByUser = checkNotNull(triggeredByUser, "triggeredByUser must not be null.");
+        this.before = before == null ? "" : before;
+        this.after = after == null ? "" : after;
     }
 
     public Map<String, String> getBuildVariables() {
@@ -92,6 +96,8 @@ public final class CauseData {
         variables.put("gitlabTargetNamespace", targetNamespace);
         variables.put("gitlabTargetRepoSshUrl", targetRepoSshUrl);
         variables.put("gitlabTargetRepoHttpUrl", targetRepoHttpUrl);
+        variables.put("gitlabBefore", before);
+        variables.put("gitlabAfter", after);
         return variables;
     }
 
@@ -187,6 +193,14 @@ public final class CauseData {
         return triggeredByUser;
     }
 
+    public String getBefore() {
+        return before;
+    }
+
+    public String getAfter() {
+        return after;
+    }
+
     String getShortDescription() {
         return actionType.getShortDescription(this);
     }
@@ -224,6 +238,8 @@ public final class CauseData {
             .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
             .append(targetRepoHttpUrl, causeData.targetRepoHttpUrl)
             .append(triggeredByUser, causeData.triggeredByUser)
+            .append(before, causeData.before)
+            .append(after, causeData.after)
             .isEquals();
     }
 
@@ -253,6 +269,8 @@ public final class CauseData {
             .append(targetRepoSshUrl)
             .append(targetRepoHttpUrl)
             .append(triggeredByUser)
+            .append(before)
+            .append(after)
             .toHashCode();
     }
 
@@ -282,6 +300,8 @@ public final class CauseData {
             .append("targetRepoSshUrl", targetRepoSshUrl)
             .append("targetRepoHttpUrl", targetRepoHttpUrl)
             .append("triggeredByUser", triggeredByUser)
+            .append("before", before)
+            .append("after", after)
             .toString();
     }
 
