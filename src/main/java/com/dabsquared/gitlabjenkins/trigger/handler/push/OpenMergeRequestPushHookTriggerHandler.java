@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 /**
  * @author Robin Müller
@@ -40,6 +41,12 @@ import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     private final static Logger LOGGER = Logger.getLogger(OpenMergeRequestPushHookTriggerHandler.class.getName());
+
+    private final boolean skipWorkInProgressMergeRequest;
+
+    public OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest) {
+        this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+    }
 
     @Override
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter) {
@@ -77,6 +84,13 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
         }
+
+        Boolean workInProgress = mergeRequest.getWorkInProgress();
+        if (skipWorkInProgressMergeRequest && workInProgress != null && workInProgress) {
+            LOGGER.log(Level.INFO, "Skip WIP Merge Request #{0} ({1})", toArray(mergeRequest.getIid(), mergeRequest.getTitle()));
+            return;
+        }
+
         String targetBranch = mergeRequest.getTargetBranch();
         String sourceBranch = mergeRequest.getSourceBranch();
         if (targetBranch != null && branchFilter.isBranchAllowed(targetBranch) && hook.getRef().endsWith(targetBranch) && sourceBranch != null) {

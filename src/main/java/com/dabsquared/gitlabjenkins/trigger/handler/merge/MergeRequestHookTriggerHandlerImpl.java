@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 /**
  * @author Robin Müller
@@ -29,14 +30,19 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerImpl.class.getName());
 
     private final List<State> allowedStates;
+    private final boolean skipWorkInProgressMergeRequest;
 
-    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates) {
+    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest) {
         this.allowedStates = allowedStates;
+        this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
     }
 
     @Override
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter) {
-        if (allowedStates.contains(hook.getObjectAttributes().getState()) && isLastCommitNotYetBuild(job, hook)) {
+        MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
+        if (allowedStates.contains(objectAttributes.getState())
+            && isLastCommitNotYetBuild(job, hook)
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
             super.handle(job, hook, ciSkip, branchFilter);
         }
     }
@@ -127,5 +133,14 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private String getTargetBranchFromBuild(Run<?, ?> mergeBuild) {
         GitLabWebHookCause cause = mergeBuild.getCause(GitLabWebHookCause.class);
         return cause == null ? null : cause.getData().getTargetBranch();
+    }
+
+    private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {
+        Boolean workInProgress = objectAttributes.getWorkInProgress();
+        if (skipWorkInProgressMergeRequest && workInProgress != null && workInProgress) {
+            LOGGER.log(Level.INFO, "Skip WIP Merge Request #{0} ({1})", toArray(objectAttributes.getIid(), objectAttributes.getTitle()));
+            return false;
+        }
+        return true;
     }
 }

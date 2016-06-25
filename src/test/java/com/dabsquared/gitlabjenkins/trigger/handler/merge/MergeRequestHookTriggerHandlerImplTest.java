@@ -49,7 +49,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Before
     public void setup() {
-        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened));
+        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false);
     }
 
     @Test

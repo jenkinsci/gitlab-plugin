@@ -13,9 +13,12 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
     private MergeRequestHookTriggerHandlerFactory() {}
 
-    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequest) {
+    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(boolean triggerOnMergeRequest,
+                                                                                   TriggerOpenMergeRequest triggerOpenMergeRequest,
+                                                                                   boolean skipWorkInProgressMergeRequest) {
         if (triggerOnMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
-            return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest));
+            return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
+                                                          skipWorkInProgressMergeRequest);
         } else {
             return new NopMergeRequestHookTriggerHandler();
         }
