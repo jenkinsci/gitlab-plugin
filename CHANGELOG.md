@@ -1,6 +1,27 @@
 ChangeLog
 =====================
 
+1.2.4
+=====================
+* #332: Find better fitting labels for the supported kind of GitLab credentials in global configuration
+* #261: Support [WIP] tag to prevent builds from triggering
+* #317: Retried builds are not marked immediately with Gitlab 8.1
+* #306: GitLab [ci-skip] is ignored
+* #362: Allow to change build name submitted to GitLab
+* Catch client exceptions while retrieving the projectId from GitLab
+* #358: Null pointer exception when using 'rebuild open MRs' and GitLab 7.14
+* #364: gitlabCommitStatus: Gitlab in non-root location
+* #213: Trigger build by phrase in merge request note
+* #282: Authentication not required for /project end-point
+* #359: Git repositories in dockerized GitLab cannot be reached from Jenkins when using plugin-provided url parameters
+* JENKINS-35538: Update credentials-plugin to version 2.1.0
+* #357: gitlabCommitStatus usage not clear
+* #349: Fix NPE when updating commit status
+* #342: Timeout when "Add note with build status on merge requests" runs
+* Catch also ProcessingExceptions while using the GitLab client
+* Change order of steps add note and accept MR
+* #335: More tests and refactoring of ActionResolver.onPost
+
 1.2.3
 =====================
 * #294 Fix: Do not trigger a build for remove branch push event
