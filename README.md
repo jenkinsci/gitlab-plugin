@@ -8,7 +8,6 @@
     - [Jenkins Job Configuration](#jenkins-job-configuration)
     - [Gitlab Configuration (7.14.x)](#gitlab-configuration-714x)
     - [Gitlab Configuration (>= 8.1)](#gitlab-configuration--81)
-    - [Forked repositories](#forked-repositories)
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
@@ -123,20 +122,22 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
     * Click on *Web Hooks*
         * Add a Web Hook for *Merge Request Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
         **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
+* If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
+    * Go to the Settings page in each developer's fork
+    * Click on *Services*
+    * Click on *GitLab CI*
+        * Check the *Active* checkbox 
+        * For *Token* put any random string (This is not yet functioning)
+        * For *Project URL* put ``http://JENKINS_URL/project/PROJECT_NAME``
+        * Click *Save*
 
 ## Gitlab Configuration (>= 8.1)
 
 GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
 
-* In GitLab go to you primary repository's project *Settings*
+* In GitLab go to you repository's project *Settings*
     * Click on *Web Hooks*
     * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-* If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
-    * Go to the Settings page in each developer's fork
-    * Click on *Services*
-    * Click on *Web Hooks*
-    * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-        **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
 
 * Add a post-build step ``Publish build status to GitLab commit (GitLab 8.1+ required)`` to the job.
 * For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
@@ -152,22 +153,6 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
     }
     ```
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
-
-## Forked repositories
-If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
-* Go to the Settings page in each developer's fork
-* Click on *Services*
-   * Click on *GitLab CI*
-      * Check the *Active* checkbox 
-      * For *Token* put any random string (This is not yet functioning)
-      * For *Project URL* put ``http://JENKINS_URL/project/PROJECT_NAME``
-      * Click *Save* <br />
-      **Note:** You do not need to select any "Trigger Events" as the Web Hook for Merge Request Events will alert Jenkins.
-
-In addition, you will need to make sure that the Git plugin has an appropriate setting for user.name and user.email in the global Jenkins configuration. This is good practice generally, but is required for forked repos to work.
-
-1. Click on Manage Jenkins, then Configure System
-2. Under the Git Plugin section, set something for 'Global Config user.name Value' and 'Global Config user.email Value'
 
 # Branch filtering
 
