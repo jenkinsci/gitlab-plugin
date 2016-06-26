@@ -1,6 +1,11 @@
 ChangeLog
 =====================
 
+1.2.5
+=====================
+* #361: Avoid rebuild merge request if assignee changes
+* #366: Jenkins can't install plugin
+
 1.2.4
 =====================
 * #332: Find better fitting labels for the supported kind of GitLab credentials in global configuration
