@@ -74,7 +74,7 @@ public class GitLabConnection {
     public static void migrate() throws IOException {
         GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
         for (GitLabConnection connection : descriptor.getConnections()) {
-            if (connection.apiTokenId == null) {
+            if (connection.apiTokenId == null && connection.apiToken != null) {
                 for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
                     if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                         List<Domain> domains = credentialsStore.getDomains();
