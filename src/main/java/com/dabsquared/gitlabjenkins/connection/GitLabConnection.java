@@ -9,7 +9,6 @@ import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -81,7 +80,7 @@ public class GitLabConnection {
                         List<Domain> domains = credentialsStore.getDomains();
                         connection.apiTokenId = UUID.randomUUID().toString();
                         credentialsStore.addCredentials(domains.get(0),
-                            new StringCredentialsImpl(CredentialsScope.SYSTEM, connection.apiTokenId, "GitLab API Token", Secret.fromString(connection.apiToken)));
+                            new GitLabApiTokenImpl(CredentialsScope.SYSTEM, connection.apiTokenId, "GitLab API Token", Secret.fromString(connection.apiToken)));
                     }
                 }
             }
