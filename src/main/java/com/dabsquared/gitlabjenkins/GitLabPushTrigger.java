@@ -16,7 +16,6 @@ import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTrigge
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
@@ -36,7 +35,6 @@ import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -46,7 +44,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
-import java.util.regex.Pattern;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
@@ -69,6 +66,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean triggerOnNoteRequest = true;
     private final String noteRegex;
     private boolean ciSkip = true;
+    private boolean skipWorkInProgressMergeRequest;
     private boolean setBuildDescription = true;
     private boolean addNoteOnMergeRequest = true;
     private boolean addCiMessage = false;
@@ -89,8 +87,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     @DataBoundConstructor
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
     public GitLabPushTrigger(GitLabPluginMode gitLabPluginMode, boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
-                             boolean triggerOnNoteRequest, String noteRegex, boolean ciSkip, boolean setBuildDescription,
-                             boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
+                             boolean triggerOnNoteRequest, String noteRegex, boolean skipWorkInProgressMergeRequest, boolean ciSkip,
+                             boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.gitLabPluginMode = gitLabPluginMode;
@@ -100,6 +98,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.noteRegex = noteRegex;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
         this.ciSkip = ciSkip;
+        this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
         this.setBuildDescription = setBuildDescription;
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
         this.addCiMessage = addCiMessage;
@@ -131,7 +130,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     if (trigger.addCiMessage) {
-                        project.getPublishersList().add(new GitLabCommitStatusPublisher());
+                        project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins"));
                     }
                     if (trigger.branchFilterType == null) {
                         trigger.branchFilterType = trigger.branchFilterName;
@@ -190,6 +189,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return ciSkip;
     }
 
+    public boolean isSkipWorkInProgressMergeRequest() {
+        return skipWorkInProgressMergeRequest;
+    }
+
     public BranchFilterType getBranchFilterType() {
         return branchFilterType;
     }
@@ -222,9 +225,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     private void initializeTriggerHandler() {
-        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(gitLabPluginMode, triggerOnMergeRequest, triggerOpenMergeRequestOnPush);
+        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(gitLabPluginMode, triggerOnMergeRequest, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
-        pushHookTriggerHandler = newPushHookTriggerHandler(gitLabPluginMode, triggerOnPush, triggerOpenMergeRequestOnPush);
+        pushHookTriggerHandler = newPushHookTriggerHandler(gitLabPluginMode, triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
     }
 
     private void initializeBranchFilter() {

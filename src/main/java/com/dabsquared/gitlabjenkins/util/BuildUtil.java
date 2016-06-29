@@ -25,14 +25,25 @@ public class BuildUtil {
         return null;
     }
 
-    public static Run<?, ?> getBuildBySHA1(Job<?, ?> project, String sha1, boolean includeMergeBuilds) {
+    public static Run<?, ?> getBuildBySHA1WithoutMergeBuilds(Job<?, ?> project, String sha1) {
         for (Run<?, ?> build : project.getBuilds()) {
             BuildData data = build.getAction(BuildData.class);
             MergeRecord merge = build.getAction(MergeRecord.class);
-            if (hasLastBuild(data) && (isNoMergeBuild(data, merge) || includeMergeBuilds)) {
-                if (data.lastBuild.isFor(sha1)) {
-                    return build;
-                }
+            if (hasLastBuild(data) && isNoMergeBuild(data, merge) && data.lastBuild.isFor(sha1)) {
+                return build;
+            }
+        }
+        return null;
+    }
+
+    public static Run<?, ?> getBuildBySHA1IncludingMergeBuilds(Job<?, ?> project, String sha1) {
+        for (Run<?, ?> build : project.getBuilds()) {
+            BuildData data = build.getAction(BuildData.class);
+            if (data != null
+                && data.lastBuild != null
+                && data.lastBuild.getMarked() != null
+                && data.lastBuild.getMarked().getSha1String().equals(sha1)) {
+                return build;
             }
         }
         return null;

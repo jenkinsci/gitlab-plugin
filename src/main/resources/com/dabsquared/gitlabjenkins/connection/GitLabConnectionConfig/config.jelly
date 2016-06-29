@@ -14,7 +14,7 @@
           <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%i.e. http://gitlab.org})">
             <f:textbox value="${connection.url}"/>
           </f:entry>
-          <f:entry title="${%API Token}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
+          <f:entry title="${%Credentials}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
             <c:select/>
           </f:entry>
           <f:advanced>

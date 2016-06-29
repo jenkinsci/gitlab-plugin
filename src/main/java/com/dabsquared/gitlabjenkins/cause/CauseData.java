@@ -16,7 +16,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CauseData {
     private final ActionType actionType;
-    private final Integer projectId;
+    private final Integer sourceProjectId;
+    private final Integer targetProjectId;
     private final String branch;
     private final String sourceBranch;
     private final String userName;
@@ -37,15 +38,18 @@ public class CauseData {
     private final String targetRepoSshUrl;
     private final String targetRepoHttpUrl;
     private final String triggeredByUser;
+    private final String before;
+    private final String after;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
-    CauseData(ActionType actionType, Integer projectId, String branch, String sourceBranch, String userName, String userEmail,
-              String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl, String sourceRepoSshUrl,
-              String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId, Integer mergeRequestIid,
-              String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl, String targetRepoHttpUrl,
-              String triggeredByUser) {
+    CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
+              String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
+              String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
+              Integer mergeRequestIid, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
+              String targetRepoHttpUrl, String triggeredByUser, String before, String after) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
-        this.projectId = checkNotNull(projectId, "projectId must not be null.");
+        this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
+        this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
         this.branch = checkNotNull(branch, "branch must not be null.");
         this.sourceBranch = checkNotNull(sourceBranch, "sourceBranch must not be null.");
         this.userName = checkNotNull(userName, "userName must not be null.");
@@ -66,6 +70,8 @@ public class CauseData {
         this.targetRepoSshUrl = checkNotNull(targetRepoSshUrl, "targetRepoSshUrl must not be null.");
         this.targetRepoHttpUrl = checkNotNull(targetRepoHttpUrl, "targetRepoHttpUrl must not be null.");
         this.triggeredByUser = checkNotNull(triggeredByUser, "triggeredByUser must not be null.");
+        this.before = before == null ? "" : before;
+        this.after = after == null ? "" : after;
     }
 
     public Map<String, String> getBuildVariables() {
@@ -90,11 +96,17 @@ public class CauseData {
         variables.put("gitlabTargetNamespace", targetNamespace);
         variables.put("gitlabTargetRepoSshUrl", targetRepoSshUrl);
         variables.put("gitlabTargetRepoHttpUrl", targetRepoHttpUrl);
+        variables.put("gitlabBefore", before);
+        variables.put("gitlabAfter", after);
         return variables;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Integer getSourceProjectId() {
+        return sourceProjectId;
+    }
+
+    public Integer getTargetProjectId() {
+        return targetProjectId;
     }
 
     public String getBranch() {
@@ -181,6 +193,14 @@ public class CauseData {
         return triggeredByUser;
     }
 
+    public String getBefore() {
+        return before;
+    }
+
+    public String getAfter() {
+        return after;
+    }
+
     String getShortDescription() {
         return actionType.getShortDescription(this);
     }
@@ -195,79 +215,94 @@ public class CauseData {
         }
         CauseData causeData = (CauseData) o;
         return new EqualsBuilder()
-                .append(projectId, causeData.projectId)
-                .append(branch, causeData.branch)
-                .append(sourceBranch, causeData.sourceBranch)
-                .append(actionType, causeData.actionType)
-                .append(userName, causeData.userName)
-                .append(userEmail, causeData.userEmail)
-                .append(sourceRepoHomepage, causeData.sourceRepoHomepage)
-                .append(sourceRepoName, causeData.sourceRepoName)
-                .append(sourceRepoUrl, causeData.sourceRepoUrl)
-                .append(sourceRepoSshUrl, causeData.sourceRepoSshUrl)
-                .append(sourceRepoHttpUrl, causeData.sourceRepoHttpUrl)
-                .append(mergeRequestTitle, causeData.mergeRequestTitle)
-                .append(mergeRequestDescription, causeData.mergeRequestDescription)
-                .append(mergeRequestId, causeData.mergeRequestId)
-                .append(mergeRequestIid, causeData.mergeRequestIid)
-                .append(targetBranch, causeData.targetBranch)
-                .append(targetRepoName, causeData.targetRepoName)
-                .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
-                .append(targetRepoHttpUrl, causeData.targetRepoHttpUrl)
-                .append(triggeredByUser, causeData.triggeredByUser)
-                .isEquals();
+            .append(actionType, causeData.actionType)
+            .append(sourceProjectId, causeData.sourceProjectId)
+            .append(targetProjectId, causeData.targetProjectId)
+            .append(branch, causeData.branch)
+            .append(sourceBranch, causeData.sourceBranch)
+            .append(userName, causeData.userName)
+            .append(userEmail, causeData.userEmail)
+            .append(sourceRepoHomepage, causeData.sourceRepoHomepage)
+            .append(sourceRepoName, causeData.sourceRepoName)
+            .append(sourceNamespace, causeData.sourceNamespace)
+            .append(sourceRepoUrl, causeData.sourceRepoUrl)
+            .append(sourceRepoSshUrl, causeData.sourceRepoSshUrl)
+            .append(sourceRepoHttpUrl, causeData.sourceRepoHttpUrl)
+            .append(mergeRequestTitle, causeData.mergeRequestTitle)
+            .append(mergeRequestDescription, causeData.mergeRequestDescription)
+            .append(mergeRequestId, causeData.mergeRequestId)
+            .append(mergeRequestIid, causeData.mergeRequestIid)
+            .append(targetBranch, causeData.targetBranch)
+            .append(targetRepoName, causeData.targetRepoName)
+            .append(targetNamespace, causeData.targetNamespace)
+            .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
+            .append(targetRepoHttpUrl, causeData.targetRepoHttpUrl)
+            .append(triggeredByUser, causeData.triggeredByUser)
+            .append(before, causeData.before)
+            .append(after, causeData.after)
+            .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(projectId)
-                .append(branch)
-                .append(sourceBranch)
-                .append(actionType)
-                .append(userName)
-                .append(userEmail)
-                .append(sourceRepoHomepage)
-                .append(sourceRepoName)
-                .append(sourceRepoUrl)
-                .append(sourceRepoSshUrl)
-                .append(sourceRepoHttpUrl)
-                .append(mergeRequestTitle)
-                .append(mergeRequestDescription)
-                .append(mergeRequestId)
-                .append(mergeRequestIid)
-                .append(targetBranch)
-                .append(targetRepoName)
-                .append(targetRepoSshUrl)
-                .append(targetRepoHttpUrl)
-                .append(triggeredByUser)
-                .toHashCode();
+            .append(actionType)
+            .append(sourceProjectId)
+            .append(targetProjectId)
+            .append(branch)
+            .append(sourceBranch)
+            .append(userName)
+            .append(userEmail)
+            .append(sourceRepoHomepage)
+            .append(sourceRepoName)
+            .append(sourceNamespace)
+            .append(sourceRepoUrl)
+            .append(sourceRepoSshUrl)
+            .append(sourceRepoHttpUrl)
+            .append(mergeRequestTitle)
+            .append(mergeRequestDescription)
+            .append(mergeRequestId)
+            .append(mergeRequestIid)
+            .append(targetBranch)
+            .append(targetRepoName)
+            .append(targetNamespace)
+            .append(targetRepoSshUrl)
+            .append(targetRepoHttpUrl)
+            .append(triggeredByUser)
+            .append(before)
+            .append(after)
+            .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("projectId", projectId)
-                .append("branch", branch)
-                .append("sourceBranch", sourceBranch)
-                .append("actionType", actionType)
-                .append("userName", userName)
-                .append("userEmail", userEmail)
-                .append("sourceRepoHomepage", sourceRepoHomepage)
-                .append("sourceRepoName", sourceRepoName)
-                .append("sourceRepoUrl", sourceRepoUrl)
-                .append("sourceRepoSshUrl", sourceRepoSshUrl)
-                .append("sourceRepoHttpUrl", sourceRepoHttpUrl)
-                .append("mergeRequestTitle", mergeRequestTitle)
-                .append("mergeRequestDescription", mergeRequestDescription)
-                .append("mergeRequestId", mergeRequestId)
-                .append("mergeRequestIid", mergeRequestIid)
-                .append("targetBranch", targetBranch)
-                .append("targetRepoName", targetRepoName)
-                .append("targetRepoSshUrl", targetRepoSshUrl)
-                .append("targetRepoHttpUrl", targetRepoHttpUrl)
-                .append("triggeredByUser", triggeredByUser)
-                .toString();
+            .append("actionType", actionType)
+            .append("sourceProjectId", sourceProjectId)
+            .append("targetProjectId", targetProjectId)
+            .append("branch", branch)
+            .append("sourceBranch", sourceBranch)
+            .append("userName", userName)
+            .append("userEmail", userEmail)
+            .append("sourceRepoHomepage", sourceRepoHomepage)
+            .append("sourceRepoName", sourceRepoName)
+            .append("sourceNamespace", sourceNamespace)
+            .append("sourceRepoUrl", sourceRepoUrl)
+            .append("sourceRepoSshUrl", sourceRepoSshUrl)
+            .append("sourceRepoHttpUrl", sourceRepoHttpUrl)
+            .append("mergeRequestTitle", mergeRequestTitle)
+            .append("mergeRequestDescription", mergeRequestDescription)
+            .append("mergeRequestId", mergeRequestId)
+            .append("mergeRequestIid", mergeRequestIid)
+            .append("targetBranch", targetBranch)
+            .append("targetRepoName", targetRepoName)
+            .append("targetNamespace", targetNamespace)
+            .append("targetRepoSshUrl", targetRepoSshUrl)
+            .append("targetRepoHttpUrl", targetRepoHttpUrl)
+            .append("triggeredByUser", triggeredByUser)
+            .append("before", before)
+            .append("after", after)
+            .toString();
     }
 
     public enum ActionType {

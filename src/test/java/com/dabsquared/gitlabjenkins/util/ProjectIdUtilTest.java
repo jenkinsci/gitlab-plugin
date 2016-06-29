@@ -17,9 +17,9 @@ public class ProjectIdUtilTest {
 
     @DataPoints
     public static TestData[] testData = {
-        forRemoteUrl("git@gitlab.com:test/project").expectProjectId("test/project"),
-        forRemoteUrl("https://gitlab.com/test/project").expectProjectId("test/project"),
-        forRemoteUrl("https://myurl.com/gitlab/group/project").expectProjectId("group/project")
+        forRemoteUrl("git@gitlab.com:test/project.git").expectProjectId("test/project"),
+        forRemoteUrl("https://gitlab.com/test/project.git").expectProjectId("test/project"),
+        forRemoteUrl("https://myurl.com/gitlab/group/project.git").expectProjectId("group/project")
     };
 
     @Theory

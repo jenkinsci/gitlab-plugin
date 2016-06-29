@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttribut
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -23,9 +24,11 @@ class MergeRequestHookTriggerHandlerModernImpl extends AbstractMergeRequestHookT
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerModernImpl.class.getName());
 
     private final List<State> allowedStates;
+    private final boolean skipWorkInProgressMergeRequest;
 
-    MergeRequestHookTriggerHandlerModernImpl(List<State> allowedStates) {
+    MergeRequestHookTriggerHandlerModernImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest) {
         this.allowedStates = allowedStates;
+        this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
     }
 
     @Override
@@ -60,12 +63,21 @@ class MergeRequestHookTriggerHandlerModernImpl extends AbstractMergeRequestHookT
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
-            Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1(project, objectAttributes.getLastCommit().getId(), true);
+            Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getLastCommit().getId());
             if (mergeBuild != null) {
                 LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
                 return false;
             }
         }
         return true;
+    }
+
+    @Override
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(MergeRequestHook hook) {
+        return buildStatusUpdate()
+            .withProjectId(hook.getObjectAttributes().getSourceProjectId())
+            .withSha(hook.getObjectAttributes().getLastCommit().getId())
+            .withRef(hook.getObjectAttributes().getSourceBranch())
+            .build();
     }
 }

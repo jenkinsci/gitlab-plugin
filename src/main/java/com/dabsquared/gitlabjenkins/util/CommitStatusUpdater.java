@@ -18,6 +18,7 @@ import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -30,7 +31,7 @@ public class CommitStatusUpdater {
 
     private final static Logger LOGGER = Logger.getLogger(CommitStatusUpdater.class.getName());
 
-    public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state) {
+    public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state, String name) {
         GitLabApi client = getClient(build);
         if (client == null) {
             println(listener, "No GitLab connection configured");
@@ -44,7 +45,7 @@ public class CommitStatusUpdater {
             for (String gitlabProjectId : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
                     if (existsCommit(client, gitlabProjectId, commitHash)) {
-                        client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), "jenkins", buildUrl, null);
+                        client.changeBuildStatus(gitlabProjectId, commitHash, state, getBuildBranch(build), name, buildUrl, null);
                     }
                 } catch (WebApplicationException | ProcessingException e) {
                     printf(listener, "Failed to update Gitlab commit status for project '%s': %s%n", gitlabProjectId, e.getMessage());
@@ -114,8 +115,13 @@ public class CommitStatusUpdater {
     }
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
-
         LOGGER.log(Level.INFO, "Retrieving gitlab project ids");
+
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        if (cause != null) {
+            return Collections.singletonList(cause.getData().getSourceProjectId().toString());
+        }
+
         Set<String> result = new HashSet<>();
         GitLabApi gitLabClient = getClient(build);
         if (gitLabClient == null) {
@@ -129,24 +135,6 @@ public class CommitStatusUpdater {
             return new ArrayList(result);
         }
 
-        final Set<String> remoteUrls = buildData.getRemoteUrls();
-        for (String remoteUrl : remoteUrls) {
-            try {
-                LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url %s", remoteUrl);
-                final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
-                if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
-                    String projectId = projectNameWithNameSpace;
-                    if (projectNameWithNameSpace.contains(".")) {
-                         projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
-                    }
-                    result.add(projectId);
-                }
-            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
-                // nothing to do
-            }
-        }
-        
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
         if (cause != null) {
             String sourceRepoSshUrl = cause.getData().getSourceRepoSshUrl();
             String targetRepoSshUrl = cause.getData().getTargetRepoSshUrl();

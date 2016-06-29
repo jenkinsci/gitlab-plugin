@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 /**
  * @author Robin Müller
@@ -27,14 +30,19 @@ class MergeRequestHookTriggerHandlerLegacyImpl extends AbstractMergeRequestHookT
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerLegacyImpl.class.getName());
 
     private final List<State> allowedStates;
+    private final boolean skipWorkInProgressMergeRequest;
 
-    MergeRequestHookTriggerHandlerLegacyImpl(List<State> allowedStates) {
+    MergeRequestHookTriggerHandlerLegacyImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest) {
         this.allowedStates = allowedStates;
+        this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
     }
 
     @Override
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter) {
-        if (allowedStates.contains(hook.getObjectAttributes().getState()) && isLastCommitNotYetBuild(job, hook)) {
+        MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
+        if (allowedStates.contains(objectAttributes.getState())
+            && isLastCommitNotYetBuild(job, hook)
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
             super.handle(job, hook, ciSkip, branchFilter);
         }
     }
@@ -61,6 +69,15 @@ class MergeRequestHookTriggerHandlerLegacyImpl extends AbstractMergeRequestHookT
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }
 
+    @Override
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(MergeRequestHook hook) {
+        return buildStatusUpdate()
+            .withProjectId(hook.getObjectAttributes().getSourceProjectId())
+            .withSha(hook.getObjectAttributes().getLastCommit().getId())
+            .withRef(hook.getObjectAttributes().getSourceBranch())
+            .build();
+    }
+
     private String retrieveRevisionToBuild(MergeRequestHook hook) throws NoRevisionToBuildException {
         if (hook.getObjectAttributes() != null
                 && hook.getObjectAttributes().getLastCommit() != null
@@ -75,7 +92,7 @@ class MergeRequestHookTriggerHandlerLegacyImpl extends AbstractMergeRequestHookT
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
-            Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1(project, objectAttributes.getLastCommit().getId(), true);
+            Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getLastCommit().getId());
             if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
                 LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
                 return false;
@@ -87,5 +104,14 @@ class MergeRequestHookTriggerHandlerLegacyImpl extends AbstractMergeRequestHookT
     private String getTargetBranchFromBuild(Run<?, ?> mergeBuild) {
         GitLabWebHookCause cause = mergeBuild.getCause(GitLabWebHookCause.class);
         return cause == null ? null : cause.getData().getTargetBranch();
+    }
+
+    private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {
+        Boolean workInProgress = objectAttributes.getWorkInProgress();
+        if (skipWorkInProgressMergeRequest && workInProgress != null && workInProgress) {
+            LOGGER.log(Level.INFO, "Skip WIP Merge Request #{0} ({1})", toArray(objectAttributes.getIid(), objectAttributes.getTitle()));
+            return false;
+        }
+        return true;
     }
 }

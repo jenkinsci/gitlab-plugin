@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
 
 /**
  * @author Nikolay Ustinov
@@ -55,7 +56,8 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     protected CauseData retrieveCauseData(NoteHook hook) {
         return causeData()
                 .withActionType(CauseData.ActionType.NOTE)
-                .withProjectId(hook.getMergeRequest().getTargetProjectId())
+                .withSourceProjectId(hook.getMergeRequest().getSourceProjectId())
+                .withTargetProjectId(hook.getMergeRequest().getTargetProjectId())
                 .withBranch(hook.getMergeRequest().getSourceBranch())
                 .withSourceBranch(hook.getMergeRequest().getSourceBranch())
                 .withUserName(hook.getMergeRequest().getLastCommit().getAuthor().getName())
@@ -82,6 +84,15 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     @Override
     protected RevisionParameterAction createRevisionParameter(NoteHook hook) throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+    }
+
+    @Override
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(NoteHook hook) {
+        return buildStatusUpdate()
+            .withProjectId(hook.getMergeRequest().getSourceProjectId())
+            .withSha(hook.getMergeRequest().getLastCommit().getId())
+            .withRef(hook.getMergeRequest().getSourceBranch())
+            .build();
     }
 
     private String retrieveRevisionToBuild(NoteHook hook) throws NoRevisionToBuildException {

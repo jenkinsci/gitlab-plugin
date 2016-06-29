@@ -15,7 +15,8 @@ public abstract class AbstractMergeRequestHookTriggerHandler extends AbstractWeb
     protected CauseData retrieveCauseData(MergeRequestHook hook) {
         return causeData()
                 .withActionType(CauseData.ActionType.MERGE)
-                .withProjectId(hook.getObjectAttributes().getTargetProjectId())
+                .withSourceProjectId(hook.getObjectAttributes().getSourceProjectId())
+                .withTargetProjectId(hook.getObjectAttributes().getTargetProjectId())
                 .withBranch(hook.getObjectAttributes().getSourceBranch())
                 .withSourceBranch(hook.getObjectAttributes().getSourceBranch())
                 .withUserName(hook.getObjectAttributes().getLastCommit().getAuthor().getName())

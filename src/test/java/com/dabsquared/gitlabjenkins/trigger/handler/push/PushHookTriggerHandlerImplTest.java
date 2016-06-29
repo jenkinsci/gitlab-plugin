@@ -20,7 +20,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
@@ -63,7 +63,8 @@ public class PushHookTriggerHandlerImplTest {
         });
         project.setQuietPeriod(0);
         pushHookTriggerHandler.handle(project, pushHook()
-                .withCommits(Collections.singletonList(commit().withMessage("[ci-skip]").build()))
+                .withCommits(Arrays.asList(commit().withMessage("some message").build(),
+                                           commit().withMessage("[ci-skip]").build()))
                 .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(10000);

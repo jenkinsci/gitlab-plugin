@@ -143,7 +143,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
                 .includeEmptyValue()
                 .includeMatchingAs(ACL.SYSTEM,
                                    Jenkins.getActiveInstance(),
-                                   StringCredentials.class,
+                                   StandardCredentials.class,
                                    Collections.<DomainRequirement>emptyList(),
                                    new GitLabCredentialMatcher());
             if (name != null && connectionMap.containsKey(name)) {
@@ -170,7 +170,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     private static class GitLabCredentialMatcher implements CredentialsMatcher {
         @Override
         public boolean matches(@NonNull Credentials credentials) {
-            return credentials instanceof StringCredentials;
+            return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
         }
     }
 }

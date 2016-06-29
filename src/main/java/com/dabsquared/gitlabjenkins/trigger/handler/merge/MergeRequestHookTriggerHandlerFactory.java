@@ -14,12 +14,17 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
     private MergeRequestHookTriggerHandlerFactory() {}
 
-    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(GitLabPluginMode gitLabPluginMode, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequest) {
+    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(GitLabPluginMode gitLabPluginMode,
+                                                                                   boolean triggerOnMergeRequest,
+                                                                                   TriggerOpenMergeRequest triggerOpenMergeRequest,
+                                                                                   boolean skipWorkInProgressMergeRequest) {
         if (triggerOnMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
             if (gitLabPluginMode == GitLabPluginMode.LEGACY) {
-                return new MergeRequestHookTriggerHandlerLegacyImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest));
+                return new MergeRequestHookTriggerHandlerLegacyImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
+                                                                    skipWorkInProgressMergeRequest);
             } else {
-                return new MergeRequestHookTriggerHandlerModernImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest));
+                return new MergeRequestHookTriggerHandlerModernImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
+                                                                    skipWorkInProgressMergeRequest);
             }
         } else {
             return new NopMergeRequestHookTriggerHandler();

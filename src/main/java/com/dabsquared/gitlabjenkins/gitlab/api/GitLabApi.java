@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
@@ -16,7 +17,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
@@ -75,6 +75,17 @@ public interface GitLabApi {
                            @QueryParam("target_url") String targetUrl,
                            @QueryParam("description") String description);
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/statuses/{sha}")
+    void changeBuildStatus(@PathParam("projectId") Integer projectId,
+                           @PathParam("sha") String sha,
+                           @QueryParam("state") BuildState state,
+                           @QueryParam("ref") String ref,
+                           @QueryParam("context") String context,
+                           @QueryParam("target_url") String targetUrl,
+                           @QueryParam("description") String description);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/repository/commits/{sha}")
@@ -99,10 +110,10 @@ public interface GitLabApi {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/merge_requests")
-    Response getMergeRequests(@PathParam("projectId") String projectId,
-                              @QueryParam("state") State state,
-                              @QueryParam("page") int page,
-                              @QueryParam("per_page") int perPage);
+    List<MergeRequest> getMergeRequests(@PathParam("projectId") String projectId,
+                                        @QueryParam("state") State state,
+                                        @QueryParam("page") int page,
+                                        @QueryParam("per_page") int perPage);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

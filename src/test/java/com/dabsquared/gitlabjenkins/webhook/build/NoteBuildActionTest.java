@@ -99,7 +99,8 @@ public class NoteBuildActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabWebHookCause(causeData()
                 .withActionType(CauseData.ActionType.NOTE)
-                .withProjectId(1)
+                .withSourceProjectId(1)
+                .withTargetProjectId(1)
                 .withBranch("feature")
                 .withSourceBranch("feature")
                 .withUserName("")
