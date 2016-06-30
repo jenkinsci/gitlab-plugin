@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
+import com.dabsquared.gitlabjenkins.GitLabPluginMode;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 
@@ -13,12 +14,18 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
     private MergeRequestHookTriggerHandlerFactory() {}
 
-    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(boolean triggerOnMergeRequest,
+    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(GitLabPluginMode gitLabPluginMode,
+                                                                                   boolean triggerOnMergeRequest,
                                                                                    TriggerOpenMergeRequest triggerOpenMergeRequest,
                                                                                    boolean skipWorkInProgressMergeRequest) {
         if (triggerOnMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
-            return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
-                                                          skipWorkInProgressMergeRequest);
+            if (gitLabPluginMode == GitLabPluginMode.LEGACY) {
+                return new MergeRequestHookTriggerHandlerLegacyImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
+                                                                    skipWorkInProgressMergeRequest);
+            } else {
+                return new MergeRequestHookTriggerHandlerModernImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
+                                                                    skipWorkInProgressMergeRequest);
+            }
         } else {
             return new NopMergeRequestHookTriggerHandler();
         }

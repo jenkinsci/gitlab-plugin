@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
@@ -252,13 +254,24 @@ public class GitLabCommitStatusPublisherTest {
         return request;
     }
 
-    private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String... remoteUrls) {
+    private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String sourceRepoUrl) {
+        return mockBuild(sha, buildUrl, gitLabConnection, result, sourceRepoUrl, null);
+    }
+    
+    private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String sourceRepoUrl, String targetRepoUrl) {
         AbstractBuild build = mock(AbstractBuild.class);
         BuildData buildData = mock(BuildData.class);
         Revision revision = mock(Revision.class);
+        GitLabWebHookCause cause = mock(GitLabWebHookCause.class);
+        CauseData causeData = mock(CauseData.class);
+        when(cause.getData()).thenReturn(causeData);
+        when(causeData.getSourceRepoSshUrl()).thenReturn(sourceRepoUrl);
+        when(causeData.getTargetRepoSshUrl()).thenReturn(targetRepoUrl);
         when(revision.getSha1String()).thenReturn(sha);
         when(buildData.getLastBuiltRevision()).thenReturn(revision);
-        when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
+        when(build.getCause(GitLabWebHookCause.class)).thenReturn(cause);
+        when(cause.getData()).thenReturn(causeData);
+        when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(sourceRepoUrl, targetRepoUrl)));
         Build gitBuild = mock(Build.class);
         when(gitBuild.getMarked()).thenReturn(revision);
         when(buildData.getLastBuild(any(ObjectId.class))).thenReturn(gitBuild);

@@ -14,7 +14,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Robin Müller
  */
-public final class CauseData {
+public class CauseData {
     private final ActionType actionType;
     private final Integer sourceProjectId;
     private final Integer targetProjectId;

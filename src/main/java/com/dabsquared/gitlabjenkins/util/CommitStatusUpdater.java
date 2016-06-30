@@ -17,6 +17,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -121,40 +122,38 @@ public class CommitStatusUpdater {
             return Collections.singletonList(cause.getData().getSourceProjectId().toString());
         }
 
-        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
         GitLabApi gitLabClient = getClient(build);
         if (gitLabClient == null) {
             LOGGER.log(Level.WARNING, "No gitlab client found.");
-            return result;
+            return new ArrayList(result);
         }
 
         final BuildData buildData = build.getAction(BuildData.class);
         if (buildData == null) {
             LOGGER.log(Level.INFO, "Build does not contain build data.");
-            return result;
+            return new ArrayList(result);
         }
 
-        final Set<String> remoteUrls = buildData.getRemoteUrls();
-        for (String remoteUrl : remoteUrls) {
-            try {
-                LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
-                final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
-                if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
-                    String projectId = projectNameWithNameSpace;
-                    if (projectNameWithNameSpace.contains(".")) {
-                        try {
-                            projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
-                        } catch (WebApplicationException | ProcessingException e) {
-                            LOGGER.log(Level.SEVERE, String.format("Failed to retrieve projectId for project '%s'", projectNameWithNameSpace), e);
-                        }
-                    }
-                    result.add(projectId);
+        if (cause != null) {
+            String sourceRepoSshUrl = cause.getData().getSourceRepoSshUrl();
+            String targetRepoSshUrl = cause.getData().getTargetRepoSshUrl();
+            if (sourceRepoSshUrl != null) {
+                try {
+                    result.add(ProjectIdUtil.retrieveProjectId(sourceRepoSshUrl));
+                } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+                    // nothing to do
                 }
-            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
-                // nothing to do
+            }
+            if (targetRepoSshUrl != null) {
+                try {
+                    result.add(ProjectIdUtil.retrieveProjectId(targetRepoSshUrl));
+                } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+                    // nothing to do
+                }
             }
         }
-        return result;
+        return new ArrayList(result);
     }
 
 }
