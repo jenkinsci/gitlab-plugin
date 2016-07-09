@@ -20,6 +20,7 @@ import hudson.security.AccessDeniedException2;
 import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
+import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -46,20 +47,25 @@ public class ActionResolver {
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
         Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(request.getRestOfPath()).iterator();
-        Job<?, ?> project = resolveProject(projectName, restOfPathParts);
+        Item project = resolveProject(projectName, restOfPathParts);
         if (project == null) {
             throw HttpResponses.notFound();
         }
         return resolveAction(project, Joiner.on('/').join(restOfPathParts), request);
     }
 
-    private WebHookAction resolveAction(Job<?, ?> project, String restOfPath, StaplerRequest request) {
+    private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
         String method = request.getMethod();
         if (method.equals("POST")) {
             checkPermission(Item.BUILD);
             return onPost(project, request);
         } else if (method.equals("GET")) {
-            return onGet(project, restOfPath, request);
+            if (project instanceof Job<?, ?>) {
+                return onGet((Job<?, ?>) project, restOfPath, request);
+            } else {
+                LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
+                return new NoopAction();
+            }
         }
         LOGGER.log(Level.FINE, "Unsupported HTTP method: {0}", method);
         return new NoopAction();
@@ -94,7 +100,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onPost(Job<?, ?> project, StaplerRequest request) {
+    private WebHookAction onPost(Item project, StaplerRequest request) {
         String eventHeader = request.getHeader("X-Gitlab-Event");
         if (eventHeader == null) {
             LOGGER.log(Level.FINE, "Missing X-Gitlab-Event header");
@@ -107,7 +113,7 @@ public class ActionResolver {
             case "Tag Push Hook":
                 return new PushBuildAction(project, getRequestBody(request));
             case "Note Hook":
-                return new NoteBuildAction(project, getRequestBody(request));
+                    return new NoteBuildAction(project, getRequestBody(request));
             default:
                 LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
                 return new NoopAction();
@@ -125,17 +131,17 @@ public class ActionResolver {
         return requestBody;
     }
 
-    private Job<?, ?> resolveProject(final String projectName, final Iterator<String> restOfPathParts) {
-        return ACLUtil.impersonate(ACL.SYSTEM, new ACLUtil.Function<Job<?, ?>>() {
-            public Job<?, ?> invoke() {
+    private Item resolveProject(final String projectName, final Iterator<String> restOfPathParts) {
+        return ACLUtil.impersonate(ACL.SYSTEM, new ACLUtil.Function<Item>() {
+            public Item invoke() {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
                     Item item = jenkins.getItemByFullName(projectName);
-                    while (item instanceof ItemGroup<?> && !(item instanceof Job<?, ?>) && restOfPathParts.hasNext()) {
+                    while (item instanceof ItemGroup<?> && !(item instanceof Job<?, ?> || item instanceof SCMSourceOwner) && restOfPathParts.hasNext()) {
                         item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
                     }
-                    if (item instanceof Job<?, ?>) {
-                        return (Job<?, ?>) item;
+                    if (item instanceof Job<?, ?> || item instanceof SCMSourceOwner) {
+                        return item;
                     }
                 }
                 LOGGER.log(Level.FINE, "No project found: {0}, {1}", toArray(projectName, Joiner.on('/').join(restOfPathParts)));
@@ -149,7 +155,7 @@ public class ActionResolver {
             try {
                 Jenkins.getInstance().checkPermission(permission);
             } catch (AccessDeniedException2 e) {
-                throw HttpResponses.error(403, e.getMessage());
+                throw HttpResponses.errorWithoutStack(403, e.getMessage());
             }
         }
     }

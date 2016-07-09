@@ -4,6 +4,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
@@ -20,19 +21,22 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 public class NoteBuildAction implements WebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(NoteBuildAction.class.getName());
-    private Job<?, ?> project;
+    private Item project;
     private NoteHook noteHook;
 
-    public NoteBuildAction(Job<?, ?> project, String json) {
+    public NoteBuildAction(Item project, String json) {
         LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
         this.project = project;
         this.noteHook = JsonUtil.read(json, NoteHook.class);
     }
 
     public void execute(StaplerResponse response) {
+        if (!(project instanceof Job<?, ?>)) {
+            throw HttpResponses.errorWithoutStack(409, "Note Hook is not supported for this project");
+        }
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             public void run() {
-                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
+                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
                 if (trigger != null) {
                     trigger.onPost(noteHook);
                 }

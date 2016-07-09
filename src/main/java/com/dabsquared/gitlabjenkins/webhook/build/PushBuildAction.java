@@ -4,19 +4,24 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
-import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
+import jenkins.plugins.git.GitSCMSource;
+import jenkins.scm.api.SCMSource;
+import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.StaplerResponse;
+import org.eclipse.jgit.transport.URIish;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 /**
  * @author Robin Müller
@@ -24,11 +29,11 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 public class PushBuildAction extends BuildWebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(PushBuildAction.class.getName());
-    private final Job<?, ?> project;
+    private final Item project;
 
     private PushHook pushHook;
 
-    public PushBuildAction(Job<?, ?> project, String json) {
+    public PushBuildAction(Item project, String json) {
         LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
         this.pushHook = JsonUtil.read(json, PushHook.class);
@@ -58,14 +63,45 @@ public class PushBuildAction extends BuildWebHookAction {
             return;
         }
 
-        ACL.impersonate(ACL.SYSTEM, new Runnable() {
-            public void run() {
-                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
-                if (trigger != null) {
-                    trigger.onPost(pushHook);
+        if (project instanceof Job<?, ?>) {
+            ACL.impersonate(ACL.SYSTEM, new Runnable() {
+                public void run() {
+                    GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
+                    if (trigger != null) {
+                        trigger.onPost(pushHook);
+                    }
+                }
+            });
+            throw HttpResponses.ok();
+        }
+        if (project instanceof SCMSourceOwner) {
+            ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
+            throw HttpResponses.ok();
+        }
+        throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");
+    }
+
+    private class SCMSourceOwnerNotifier implements Runnable {
+        public void run() {
+            for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
+                if (scmSource instanceof GitSCMSource) {
+                    GitSCMSource gitSCMSource = (GitSCMSource) scmSource;
+                    try {
+                        if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
+                            if (!gitSCMSource.isIgnoreOnPushNotifications()) {
+                                LOGGER.log(Level.FINE, "Notify scmSourceOwner {0} about changes for {1}",
+                                           toArray(project.getName(), gitSCMSource.getRemote()));
+                                ((SCMSourceOwner) project).onSCMSourceUpdated(scmSource);
+                            } else {
+                                LOGGER.log(Level.FINE, "Ignore on push notification for scmSourceOwner {0} about changes for {1}",
+                                           toArray(project.getName(), gitSCMSource.getRemote()));
+                            }
+                        }
+                    } catch (URISyntaxException e) {
+                        // nothing to do
+                    }
                 }
             }
-        });
-        throw HttpResponses.ok();
+        }
     }
 }
