@@ -1,6 +1,12 @@
 ChangeLog
 =====================
 
+1.3.0
+=====================
+* Drop official support for GitLab 7.14 -> no guarantee that new features will work for this version
+* #298: Pipeline Multibranch builds are not supported
+* #374/JENKINS-36347: Status publisher not updating status when "Merge before build" (git) fails
+
 1.2.5
 =====================
 * #361: Avoid rebuild merge request if assignee changes
