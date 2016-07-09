@@ -44,7 +44,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     private final boolean skipWorkInProgressMergeRequest;
 
-    public OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest) {
+    OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest) {
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
     }
 
@@ -133,6 +133,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withTargetRepoSshUrl(hook.getRepository().getGitSshUrl())
                 .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
                 .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
+                .withLastCommit(branch.getCommit().getId())
                 .build();
     }
 

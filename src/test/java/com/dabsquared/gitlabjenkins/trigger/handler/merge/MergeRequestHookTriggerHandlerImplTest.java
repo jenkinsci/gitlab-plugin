@@ -103,7 +103,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                         .withSourceProjectId(1)
                         .withSourceBranch("feature")
                         .withTargetBranch("master")
-                        .withLastCommit(commit().withAuthor(user().withName("test").build()).build())
+                        .withLastCommit(commit().withAuthor(user().withName("test").build()).withId(commit.getName()).build())
                         .withSource(project()
                                 .withName("test")
                                 .withNamespace("test-namespace")
