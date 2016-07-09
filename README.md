@@ -6,8 +6,7 @@
 - [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
-    - [Gitlab Configuration (7.14.x)](#gitlab-configuration-714x)
-    - [Gitlab Configuration (>= 8.1)](#gitlab-configuration--81)
+    - [Gitlab Configuration (>= 8.1)](#gitlab-configuration)
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
@@ -48,20 +47,7 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 
 # Supported GitLab versions
 
-* 7.14.x where it emulates Jenkins as a GitLabCI Web Service
 * 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
-
-**Note:** GitLab version **8.0.x** is **not** supported! In this version, GitLab folded the GitLabCI functionality into core GitLab, and in doing so broke the ability for the plugin to give build status to GitLab. Jenkins build status will never work with GitLab 8.0.x!
-
-# Supported GitLabCI Functions
-
-* `/project/PROJECT_NAME/builds/COMMIT_SHA1/status.json` (used for Merge Request pages) returns build result for Merge Request build with `COMMIT_SHA1` as last commit
-* `/project/PROJECT_NAME/builds/status.png?ref=BRANCH_NAME` returns build status icon for latest build for `BRANCH_NAME`
-* `/project/PROJECT_NAME/builds/status.png?sha1=COMMIT_SHA1` returns build status icon for latest build for `COMMIT_SHA1` as last commit
-* `/project/PROJECT_NAME/builds/COMMIT_SHA1` redirects to build page of the last build containing `COMMIT_SHA1` as last commit
-* `/project/PROJECT_NAME/commits/COMMIT_SHA1` redirects to build page of the last build containing `COMMIT_SHA1` as last commit
-* `/project/PROJECT_NAME?ref=BRANCH_NAME` redirects to build page of the last build for `BRANCH_NAME`
-* `/project/PROJECT_NAME` triggers a build, type (Merge Request or Push) depending on payload
 
 # Configuring access to GitLab
 
@@ -138,27 +124,7 @@ node {
 ### Matrix/Multi-configuration jobs
 **The Jenkins Matrix/Multi-configuration job type is not supported.**
 
-## Gitlab Configuration (7.14.x)
-* In GitLab go to your repository's project *Settings*
-    * Click on *Services*
-    * Click on *GitLab CI*
-        * Check the *Active* checkbox 
-        * For *Token* put any random string (This is not yet functioning)
-        * For *Project URL* put ``http://JENKINS_URL/project/PROJECT_NAME``
-        * Click *Save*
-    * Click on *Web Hooks*
-        * Add a Web Hook for *Merge Request Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
-        **Note:** GitLab for some reason does not send a merge request event with the GitLab Service.
-* If you plan to use forked repositories, you will need to enable the GitLab CI integration on **each fork**.
-    * Go to the Settings page in each developer's fork
-    * Click on *Services*
-    * Click on *GitLab CI*
-        * Check the *Active* checkbox 
-        * For *Token* put any random string (This is not yet functioning)
-        * For *Project URL* put ``http://JENKINS_URL/project/PROJECT_NAME``
-        * Click *Save*
-
-## Gitlab Configuration (>= 8.1)
+## Gitlab Configuration
 
 GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
 
