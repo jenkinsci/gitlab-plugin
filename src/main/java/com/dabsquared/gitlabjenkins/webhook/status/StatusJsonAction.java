@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -24,13 +25,20 @@ public class StatusJsonAction extends BuildStatusAction {
 
     @Override
     protected void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status) {
+        GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(build.getParent());
+        String statusValue = status.getValue();
+
+        if (status == BuildStatus.UNSTABLE && trigger.getMarkBuildUnstableAsSuccess()) {
+            statusValue = BuildStatus.SUCCESS.getValue();
+        }
+
         try {
             JSONObject object = new JSONObject();
             object.put("sha", sha1);
             if (build != null) {
                 object.put("id", build.getNumber());
             }
-            object.put("status", status.getValue());
+            object.put("status", statusValue);
             writeBody(response, object);
         } catch (IOException e) {
             throw HttpResponses.error(500, "Failed to generate response");

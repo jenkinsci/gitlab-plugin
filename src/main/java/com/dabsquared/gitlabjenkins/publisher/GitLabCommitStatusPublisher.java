@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import hudson.Extension;
@@ -44,7 +45,10 @@ public class GitLabCommitStatusPublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         Result buildResult = build.getResult();
-        if (buildResult == Result.SUCCESS) {
+        GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(build.getParent());
+
+        if (buildResult == Result.SUCCESS
+                || (buildResult == Result.UNSTABLE && trigger.getMarkBuildUnstableAsSuccess())) {
             CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, name);
         } else if (buildResult == Result.ABORTED) {
             CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.canceled, name);

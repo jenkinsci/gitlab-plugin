@@ -35,7 +35,8 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
             Integer mergeRequestId = cause.getData().getMergeRequestId();
             addNoteOnMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId, build.getParent().getDisplayName(), build.getNumber(),
                 buildUrl, getResultIcon(trigger, buildResult), buildResult.color.getDescription());
-            if (buildResult == Result.SUCCESS) {
+            if (buildResult == Result.SUCCESS
+                    || (buildResult == Result.UNSTABLE && trigger.getMarkBuildUnstableAsSuccess())) {
                 acceptMergeRequestIfNecessary(build, trigger, listener, projectId.toString(), mergeRequestId);
             }
         }
@@ -79,7 +80,8 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
     }
 
     private String getResultIcon(GitLabPushTrigger trigger, Result result) {
-        if (result == Result.SUCCESS) {
+        if (result == Result.SUCCESS
+                || (result == Result.UNSTABLE && trigger.getMarkBuildUnstableAsSuccess())) {
             return trigger.getAddVoteOnMergeRequest() ? ":+1:" : ":white_check_mark:";
         } else {
             return trigger.getAddVoteOnMergeRequest() ? ":-1:" : ":anguished:";
