@@ -25,10 +25,14 @@ public class StatusJsonAction extends BuildStatusAction {
 
     @Override
     protected void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status) {
-        GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(build.getParent());
+        GitLabPushTrigger trigger = null;
         String statusValue = status.getValue();
 
-        if (status == BuildStatus.UNSTABLE && trigger.getMarkBuildUnstableAsSuccess()) {
+        if (build != null) {
+            trigger = GitLabPushTrigger.getFromJob(build.getParent());
+        }
+
+        if (status == BuildStatus.UNSTABLE && trigger != null && trigger.getMarkBuildUnstableAsSuccess()) {
             statusValue = BuildStatus.SUCCESS.getValue();
         }
 
