@@ -90,6 +90,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withTargetRepoSshUrl(hook.getObjectAttributes().getTarget().getSshUrl())
                 .withTargetRepoHttpUrl(hook.getObjectAttributes().getTarget().getHttpUrl())
                 .withTriggeredByUser(hook.getObjectAttributes().getLastCommit().getAuthor().getName())
+                .withLastCommit(hook.getObjectAttributes().getLastCommit().getId())
                 .build();
     }
 

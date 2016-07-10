@@ -40,13 +40,14 @@ public final class CauseData {
     private final String triggeredByUser;
     private final String before;
     private final String after;
+    private final String lastCommit;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
               String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
               Integer mergeRequestIid, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
-              String targetRepoHttpUrl, String triggeredByUser, String before, String after) {
+              String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
         this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
@@ -72,6 +73,7 @@ public final class CauseData {
         this.triggeredByUser = checkNotNull(triggeredByUser, "triggeredByUser must not be null.");
         this.before = before == null ? "" : before;
         this.after = after == null ? "" : after;
+        this.lastCommit = checkNotNull(lastCommit, "lastCommit must not be null");
     }
 
     public Map<String, String> getBuildVariables() {
@@ -199,6 +201,10 @@ public final class CauseData {
 
     public String getAfter() {
         return after;
+    }
+
+    public String getLastCommit() {
+        return lastCommit;
     }
 
     String getShortDescription() {

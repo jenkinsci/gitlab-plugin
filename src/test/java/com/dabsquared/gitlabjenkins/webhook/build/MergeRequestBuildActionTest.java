@@ -131,6 +131,7 @@ public class MergeRequestBuildActionTest {
                 .withTargetRepoSshUrl("git@gitlab.org:test.git")
                 .withTargetRepoHttpUrl("https://gitlab.org/test.git")
                 .withTriggeredByUser("test")
+                .withLastCommit("123")
                 .build()));
         future.get();
 

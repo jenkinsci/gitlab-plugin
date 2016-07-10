@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
@@ -20,10 +21,10 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 public class MergeRequestBuildAction extends BuildWebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
-    private Job<?, ?> project;
+    private Item project;
     private MergeRequestHook mergeRequestHook;
 
-    public MergeRequestBuildAction(Job<?, ?> project, String json) {
+    public MergeRequestBuildAction(Item project, String json) {
         LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
         this.project = project;
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
@@ -46,9 +47,12 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
     }
 
     public void execute() {
+        if (!(project instanceof Job<?, ?>)) {
+            throw HttpResponses.errorWithoutStack(409, "Merge Request Hook is not supported for this project");
+        }
         ACL.impersonate(ACL.SYSTEM, new Runnable() {
             public void run() {
-                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(project);
+                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
                 if (trigger != null) {
                     trigger.onPost(mergeRequestHook);
                 }
