@@ -5,7 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -25,7 +25,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,14 +136,14 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public ListBoxModel doFillApiTokenIdItems(@QueryParameter String name) {
+    public ListBoxModel doFillApiTokenIdItems(@QueryParameter String name, @QueryParameter String url) {
         if (Jenkins.getInstance().hasPermission(Item.CONFIGURE)) {
             AbstractIdCredentialsListBoxModel<StandardListBoxModel, StandardCredentials> options = new StandardListBoxModel()
                 .includeEmptyValue()
                 .includeMatchingAs(ACL.SYSTEM,
                                    Jenkins.getActiveInstance(),
                                    StandardCredentials.class,
-                                   Collections.<DomainRequirement>emptyList(),
+                                   URIRequirementBuilder.fromUri(url).build(),
                                    new GitLabCredentialMatcher());
             if (name != null && connectionMap.containsKey(name)) {
                 String apiTokenId = connectionMap.get(name).getApiTokenId();
