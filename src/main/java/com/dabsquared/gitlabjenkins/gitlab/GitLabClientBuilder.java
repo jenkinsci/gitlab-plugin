@@ -34,6 +34,10 @@ import javax.ws.rs.ext.RuntimeDelegate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +61,12 @@ public class GitLabClientBuilder {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
             builder.disableTrustManager();
         }
+        Proxy proxy = Jenkins.getActiveInstance().proxy.createProxy(getHost(gitlabHostUrl));
+        if (!proxy.equals(Proxy.NO_PROXY)) {
+            InetSocketAddress address = (InetSocketAddress) proxy.address();
+            builder.defaultProxy(address.getHostName().replaceFirst("^.*://", ""), address.getPort(), address.getHostName().startsWith("https") ? "https" : "http");
+        }
+
         return builder
             .connectionPoolSize(60)
             .maxPooledPerRoute(30)
@@ -83,6 +93,14 @@ public class GitLabClientBuilder {
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
     public static void setRuntimeDelegate() {
         RuntimeDelegate.setInstance(new ResteasyProviderFactory());
+    }
+
+    private static String getHost(String gitlabUrl) {
+        try {
+            return new URL(gitlabUrl).getHost();
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     private static String getApiToken(String apiTokenId) {
