@@ -35,6 +35,7 @@ import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -69,7 +70,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean addCiMessage = false;
     private boolean addVoteOnMergeRequest = true;
     private transient boolean allowAllBranches = false;
-    private transient BranchFilterType branchFilterName;
+    private transient String branchFilterName;
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
     private String excludeBranchesSpec;
@@ -127,9 +128,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 if (trigger != null) {
                     if (trigger.addCiMessage) {
                         project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins"));
-                    }
-                    if (trigger.branchFilterType == null) {
-                        trigger.branchFilterType = trigger.branchFilterName;
                     }
                     project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
                     project.save();
@@ -232,6 +230,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     @Override
     protected Object readResolve() throws ObjectStreamException {
+        if (branchFilterType == null) {
+            branchFilterType = StringUtils.isNotBlank(branchFilterName) ? BranchFilterType.valueOf(branchFilterName) : BranchFilterType.All;
+        }
         initializeTriggerHandler();
         initializeBranchFilter();
         return super.readResolve();
