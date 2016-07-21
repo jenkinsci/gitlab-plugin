@@ -12,6 +12,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
+import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Item;
@@ -61,7 +62,8 @@ public class GitLabClientBuilder {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
             builder.disableTrustManager();
         }
-        Proxy proxy = Jenkins.getActiveInstance().proxy.createProxy(getHost(gitlabHostUrl));
+        ProxyConfiguration proxyConfiguration = Jenkins.getActiveInstance().proxy;
+        Proxy proxy = proxyConfiguration ==  null ? Proxy.NO_PROXY : proxyConfiguration.createProxy(getHost(gitlabHostUrl));
         if (!proxy.equals(Proxy.NO_PROXY)) {
             InetSocketAddress address = (InetSocketAddress) proxy.address();
             builder.defaultProxy(address.getHostName().replaceFirst("^.*://", ""), address.getPort(), address.getHostName().startsWith("https") ? "https" : "http");
