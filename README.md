@@ -155,6 +155,26 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
         updateGitlabCommitStatus name: 'build', state: 'pending'
     }
     ```
+* To mark several build stages as pending in GitLab you can use the gitlabBuilds step:
+
+    ```
+    node() {
+        stage 'Checkout'
+        checkout <your-scm-config>
+
+        gitlabBuilds(builds: ["build", "test"]) {
+            stage "build"
+            gitlabCommitStatus("build") {
+                // your build steps
+            }
+
+            stage "test"
+            gitlabCommitStatus("test") {
+                // your test steps
+            }
+        }
+    }
+    ```
 * Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
 
 # Branch filtering

@@ -52,6 +52,10 @@ public class UpdateGitLabCommitStatusStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
             CommitStatusUpdater.updateCommitStatus(run, null, step.state, name);
+            PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
+            if (action != null) {
+                action.startBuild(name);
+            }
             return null;
         }
     }
