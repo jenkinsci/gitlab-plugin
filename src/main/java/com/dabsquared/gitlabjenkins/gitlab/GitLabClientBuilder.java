@@ -20,7 +20,13 @@ import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -66,7 +72,11 @@ public class GitLabClientBuilder {
         Proxy proxy = proxyConfiguration ==  null ? Proxy.NO_PROXY : proxyConfiguration.createProxy(getHost(gitlabHostUrl));
         if (!proxy.equals(Proxy.NO_PROXY)) {
             InetSocketAddress address = (InetSocketAddress) proxy.address();
-            builder.defaultProxy(address.getHostName().replaceFirst("^.*://", ""), address.getPort(), address.getHostName().startsWith("https") ? "https" : "http");
+            builder.defaultProxy(address.getHostName().replaceFirst("^.*://", ""),
+                                 address.getPort(),
+                                 address.getHostName().startsWith("https") ? "https" : "http",
+                                 proxyConfiguration.getUserName(),
+                                 proxyConfiguration.getPassword());
         }
 
         return builder
@@ -200,6 +210,29 @@ public class GitLabClientBuilder {
             public String apply(@Nullable Map.Entry<String, List<String>> input) {
                 return input == null ? null : input.getKey() + " = [" + Joiner.on(", ").join(input.getValue()) + "]";
             }
+        }
+    }
+
+    private static class ResteasyClientBuilder extends org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder {
+
+        private CredentialsProvider proxyCredentials;
+
+        ResteasyClientBuilder defaultProxy(String hostname, int port, final String scheme, String username, String password) {
+            super.defaultProxy(hostname, port, scheme);
+            if (username != null && password != null) {
+                proxyCredentials = new BasicCredentialsProvider();
+                proxyCredentials.setCredentials(new AuthScope(hostname, port), new UsernamePasswordCredentials(username, password));
+            }
+            return this;
+        }
+
+        @Override
+        protected ClientHttpEngine initDefaultEngine() {
+            ApacheHttpClient4Engine httpEngine = (ApacheHttpClient4Engine) super.initDefaultEngine();
+            if (proxyCredentials != null) {
+                ((DefaultHttpClient) httpEngine.getHttpClient()).setCredentialsProvider(proxyCredentials);
+            }
+            return httpEngine;
         }
     }
 }
