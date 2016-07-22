@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import hudson.markup.EscapedMarkupFormatter;
+import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -41,13 +43,14 @@ public final class CauseData {
     private final String before;
     private final String after;
     private final String lastCommit;
+    private final String targetProjectUrl;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
               String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
               Integer mergeRequestIid, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
-              String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit) {
+              String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
         this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
@@ -74,6 +77,7 @@ public final class CauseData {
         this.before = before == null ? "" : before;
         this.after = after == null ? "" : after;
         this.lastCommit = checkNotNull(lastCommit, "lastCommit must not be null");
+        this.targetProjectUrl = checkNotNull(targetProjectUrl, "targetProjectUrl must not be null");
     }
 
     public Map<String, String> getBuildVariables() {
@@ -207,6 +211,10 @@ public final class CauseData {
         return lastCommit;
     }
 
+    public String getTargetProjectUrl() {
+        return targetProjectUrl;
+    }
+
     String getShortDescription() {
         return actionType.getShortDescription(this);
     }
@@ -246,6 +254,8 @@ public final class CauseData {
             .append(triggeredByUser, causeData.triggeredByUser)
             .append(before, causeData.before)
             .append(after, causeData.after)
+            .append(lastCommit, causeData.lastCommit)
+            .append(targetProjectUrl, causeData.targetProjectUrl)
             .isEquals();
     }
 
@@ -277,6 +287,8 @@ public final class CauseData {
             .append(triggeredByUser)
             .append(before)
             .append(after)
+            .append(lastCommit)
+            .append(targetProjectUrl)
             .toHashCode();
     }
 
@@ -308,6 +320,8 @@ public final class CauseData {
             .append("triggeredByUser", triggeredByUser)
             .append("before", before)
             .append("after", after)
+            .append("lastCommit", lastCommit)
+            .append("targetProjectUrl", targetProjectUrl)
             .toString();
     }
 
@@ -317,23 +331,43 @@ public final class CauseData {
             String getShortDescription(CauseData data) {
                 String pushedBy = data.getTriggeredByUser();
                 if (pushedBy == null) {
-                    return "Started by GitLab push";
+                    return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
                 } else {
-                    return String.format("Started by GitLab push by %s", pushedBy);
+                    return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
                 }
             }
         }, MERGE {
             @Override
             String getShortDescription(CauseData data) {
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
-                return "GitLab Merge Request #" + data.getMergeRequestIid() + ": " + forkNamespace + data.getSourceBranch() + " => " + data.getTargetBranch();
+                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter) {
+                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_plain(data.getMergeRequestIid(),
+                                                                                               forkNamespace + data.getSourceBranch(),
+                                                                                               data.getTargetBranch());
+                } else {
+                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_html(data.getMergeRequestIid(),
+                                                                                              forkNamespace + data.getSourceBranch(),
+                                                                                              data.getTargetBranch(),
+                                                                                              data.getTargetProjectUrl());
+                }
             }
         }, NOTE {
             @Override
             String getShortDescription(CauseData data) {
                 String triggeredBy = data.getTriggeredByUser();
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
-                return "Triggered by " + triggeredBy + " GitLab Merge Request #" + data.getMergeRequestIid() + ": " + forkNamespace + data.getSourceBranch() + " => " + data.getTargetBranch();
+                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter) {
+                    return Messages.GitLabWebHookCause_ShortDescription_NoteHook_plain(triggeredBy,
+                                                                                       data.getMergeRequestIid(),
+                                                                                       forkNamespace + data.getSourceBranch(),
+                                                                                       data.getTargetBranch());
+                } else {
+                    return Messages.GitLabWebHookCause_ShortDescription_NoteHook_html(triggeredBy,
+                                                                                      data.getMergeRequestIid(),
+                                                                                      forkNamespace + data.getSourceBranch(),
+                                                                                      data.getTargetBranch(),
+                                                                                      data.getTargetProjectUrl());
+                }
             }
         };
 

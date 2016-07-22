@@ -79,6 +79,7 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
                 .withTargetRepoHttpUrl(hook.getMergeRequest().getTarget().getHttpUrl())
                 .withTriggeredByUser(hook.getMergeRequest().getLastCommit().getAuthor().getName())
                 .withLastCommit(hook.getMergeRequest().getLastCommit().getId())
+                .withTargetProjectUrl(hook.getMergeRequest().getTarget().getWebUrl())
                 .build();
     }
 

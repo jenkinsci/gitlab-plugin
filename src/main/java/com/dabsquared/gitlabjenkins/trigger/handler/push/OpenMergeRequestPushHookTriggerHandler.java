@@ -134,6 +134,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
                 .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
                 .withLastCommit(branch.getCommit().getId())
+                .withTargetProjectUrl(project.getWebUrl())
                 .build();
     }
 

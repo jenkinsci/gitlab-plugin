@@ -120,6 +120,7 @@ public class NoteBuildActionTest {
                 .withTargetRepoHttpUrl("https://gitlab.org/test.git")
                 .withTriggeredByUser("test")
                 .withLastCommit("123")
+                .withTargetProjectUrl("https://gitlab.org/test")
                 .build()));
         future.get();
 
