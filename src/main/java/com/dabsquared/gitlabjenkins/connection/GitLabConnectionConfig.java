@@ -169,7 +169,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     private static class GitLabCredentialMatcher implements CredentialsMatcher {
         @Override
         public boolean matches(@NonNull Credentials credentials) {
-            return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
+            try {
+                return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
+            } catch (Exception e) {
+                return false;
+            }
         }
     }
 }
