@@ -97,6 +97,7 @@ public final class CauseData {
         variables.put("gitlabMergeRequestDescription", mergeRequestDescription);
         variables.put("gitlabMergeRequestId", mergeRequestId == null ? "" : mergeRequestId.toString());
         variables.put("gitlabMergeRequestIid", mergeRequestIid == null ? "" : mergeRequestIid.toString());
+        variables.put("gitlabMergeRequestLastCommit", lastCommit);
         variables.put("gitlabTargetBranch", targetBranch);
         variables.put("gitlabTargetRepoName", targetRepoName);
         variables.put("gitlabTargetNamespace", targetNamespace);
