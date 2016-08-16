@@ -121,6 +121,10 @@ public class MergeRequestHookTriggerHandlerImplTest {
                                 .withHttpUrl("https://gitlab.org/test.git")
                                 .build())
                         .build())
+                .withProject(project()
+                    .withWebUrl("https://gitlab.org/test.git")
+                    .build()
+                )
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(10000);

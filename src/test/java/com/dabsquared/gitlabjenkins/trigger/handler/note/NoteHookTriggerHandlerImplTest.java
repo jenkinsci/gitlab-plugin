@@ -140,6 +140,7 @@ public class NoteHookTriggerHandlerImplTest {
                         .withUrl("git@gitlab.org:test.git")
                         .withSshUrl("git@gitlab.org:test.git")
                         .withHttpUrl("https://gitlab.org/test.git")
+                        .withWebUrl("https://gitlab.org/test.git")
                         .build())
                     .build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
