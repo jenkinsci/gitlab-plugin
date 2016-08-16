@@ -15,6 +15,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -121,6 +122,10 @@ public class MergeRequestHookTriggerHandlerImplTest {
                                 .withHttpUrl("https://gitlab.org/test.git")
                                 .build())
                         .build())
+                .withProject(project()
+                    .withWebUrl("https://gitlab.org/test.git")
+                    .build()
+                )
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
         buildTriggered.block(10000);

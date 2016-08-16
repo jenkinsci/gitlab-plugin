@@ -105,6 +105,7 @@ public class PushHookTriggerHandlerImplTest {
                         .build())
                 .withProject(project()
                         .withNamespace("test-namespace")
+                        .withWebUrl("https://gitlab.org/test")
                         .build())
                 .withAfter(commit.name())
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
