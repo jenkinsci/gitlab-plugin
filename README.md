@@ -211,6 +211,7 @@ These include:
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
 * gitlabMergeRequestIid
+* gitlabMergeRequestLastCommit
 * gitlabTargetBranch
 * gitlabTargetRepoName
 * gitlabTargetNamespace
