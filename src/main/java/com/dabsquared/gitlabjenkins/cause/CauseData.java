@@ -111,6 +111,7 @@ public final class CauseData {
         variables.put("gitlabBefore", before);
         variables.put("gitlabAfter", after);
         variables.pufIfNotNull("gitlabTriggerPhrase", triggerPhrase);
+        variables.put("gitlabLastCommitId", lastCommit);
         return variables;
     }
 
