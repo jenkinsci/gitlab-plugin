@@ -69,7 +69,7 @@ public class GitLabBuildsStep extends AbstractStepImpl {
                     @Override
                     public void onStart(StepContext context) {
                         for (String name : step.builds) {
-                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name);
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.pending, name);
                         }
                         run.addAction(new PendingBuildsAction(new ArrayList<>(step.builds)));
                     }
