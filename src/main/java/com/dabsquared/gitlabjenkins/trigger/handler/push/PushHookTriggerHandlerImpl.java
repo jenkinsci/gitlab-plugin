@@ -104,7 +104,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
 
         final List<Commit> commits = hook.getCommits();
         if (commits != null && !commits.isEmpty()) {
-            return commits.get(0).getAuthor().getName();
+            return commits.get(commits.size() - 1).getAuthor().getName();
         }
 
         return null;

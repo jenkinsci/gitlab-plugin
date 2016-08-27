@@ -10,6 +10,7 @@ ChangeLog
 * #69: Link to gitlab merge request url in getShortDescription posted to jenkins
 * #396: Jenkins job stuck publishing build status
 * #400: Fix gitlabBuilds step to actually use 'pending'
+* JENKINS-35258: ci-skip and author should use the latest commit, not the first one from the push event
 
 1.3.0
 =====================
