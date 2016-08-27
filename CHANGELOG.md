@@ -1,6 +1,16 @@
 ChangeLog
 =====================
 
+1.3.1
+=====================
+* JENKINS-36863: Credentials drop-down doesn't show API token credential!
+* #299: Upgrading the plugin sometimes causes loss of configuration
+* #382: Outgoing HTTP Proxy support in gitlab-plugin
+* #383: Pipeline - "Pending" Jobs for all stages
+* #69: Link to gitlab merge request url in getShortDescription posted to jenkins
+* #396: Jenkins job stuck publishing build status
+* #400: Fix gitlabBuilds step to actually use 'pending'
+
 1.3.0
 =====================
 * Drop official support for GitLab 7.14 -> no guarantee that new features will work for this version
