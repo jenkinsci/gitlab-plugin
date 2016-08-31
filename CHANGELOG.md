@@ -5,6 +5,7 @@ ChangeLog
 =====================
 * JENKINS-36863: Credentials drop-down doesn't show API token credential! (finally fixed it)
 * #402: Web hooks not triggering build in v1.3.1, Jenkins 2.20
+* #404: NullPointerException with gitlab ce 8.11
 
 1.3.1
 =====================
