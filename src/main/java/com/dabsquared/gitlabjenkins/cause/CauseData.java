@@ -77,7 +77,7 @@ public final class CauseData {
         this.before = before == null ? "" : before;
         this.after = after == null ? "" : after;
         this.lastCommit = checkNotNull(lastCommit, "lastCommit must not be null");
-        this.targetProjectUrl = checkNotNull(targetProjectUrl, "targetProjectUrl must not be null");
+        this.targetProjectUrl = targetProjectUrl;
     }
 
     public Map<String, String> getBuildVariables() {
@@ -341,7 +341,7 @@ public final class CauseData {
             @Override
             String getShortDescription(CauseData data) {
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
-                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter) {
+                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter || data.getTargetProjectUrl() == null) {
                     return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_plain(data.getMergeRequestIid(),
                                                                                                forkNamespace + data.getSourceBranch(),
                                                                                                data.getTargetBranch());
@@ -357,7 +357,7 @@ public final class CauseData {
             String getShortDescription(CauseData data) {
                 String triggeredBy = data.getTriggeredByUser();
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
-                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter) {
+                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter || data.getTargetProjectUrl() == null) {
                     return Messages.GitLabWebHookCause_ShortDescription_NoteHook_plain(triggeredBy,
                                                                                        data.getMergeRequestIid(),
                                                                                        forkNamespace + data.getSourceBranch(),
