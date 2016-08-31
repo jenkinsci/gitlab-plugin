@@ -47,7 +47,8 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 
 # Supported GitLab versions
 
-* 8.1.x and newer via the new commit status API that supports with external CI services like Jenkins
+* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab commit status API which supports with external CI services like Jenkins
+* Versions older than 8.1.x may work but are no longer officially supported
 
 # Configuring access to GitLab
 
