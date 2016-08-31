@@ -171,7 +171,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         public boolean matches(@NonNull Credentials credentials) {
             try {
                 return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return false;
             }
         }
