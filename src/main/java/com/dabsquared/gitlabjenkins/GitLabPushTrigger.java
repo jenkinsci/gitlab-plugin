@@ -80,6 +80,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
     private boolean acceptMergeRequestOnSuccess = false;
+    private boolean markBuildUnstableAsSuccess = false;
 
 
     @DataBoundConstructor
@@ -87,7 +88,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
                              boolean triggerOnNoteRequest, String noteRegex, boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
-                             boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
+                             boolean acceptMergeRequestOnSuccess, boolean markBuildUnstableAsSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -105,6 +106,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.excludeBranchesSpec = excludeBranchesSpec;
         this.targetBranchRegex = targetBranchRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
+        this.markBuildUnstableAsSuccess = markBuildUnstableAsSuccess;
 
         initializeTriggerHandler();
         initializeBranchFilter();
@@ -173,6 +175,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     public boolean getAcceptMergeRequestOnSuccess() {
         return acceptMergeRequestOnSuccess;
+    }
+
+    public boolean getMarkBuildUnstableAsSuccess() {
+        return markBuildUnstableAsSuccess;
     }
 
     public boolean getCiSkip() {
