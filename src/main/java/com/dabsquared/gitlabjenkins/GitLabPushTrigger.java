@@ -8,6 +8,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
+import com.dabsquared.gitlabjenkins.publisher.GitLabVotePublisher;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -69,7 +70,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean setBuildDescription = true;
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
-    private boolean addVoteOnMergeRequest = true;
+    private transient boolean addVoteOnMergeRequest;
     private transient boolean allowAllBranches = false;
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
@@ -145,6 +146,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     if (trigger.addNoteOnMergeRequest) {
                         project.getPublishersList().add(new GitLabMessagePublisher());
                     }
+                    if (trigger.addVoteOnMergeRequest) {
+                        project.getPublishersList().add(new GitLabVotePublisher());
+                    }
                     project.save();
                 }
             }
@@ -175,10 +179,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     public boolean getSetBuildDescription() {
         return setBuildDescription;
-    }
-
-    public boolean getAddVoteOnMergeRequest() {
-        return addVoteOnMergeRequest;
     }
 
     public boolean getAcceptMergeRequestOnSuccess() {
