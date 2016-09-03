@@ -1,20 +1,20 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form">
+  <f:entry title="Build on Push Events" field="triggerOnPush">
+    <f:checkbox default="true"/>
+  </f:entry>
   <f:entry title="Build on Merge Request Events" field="triggerOnMergeRequest">
     <f:checkbox default="true"/>
+  </f:entry>
+  <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
+    <f:select/>
   </f:entry>
   <f:entry title="Build on Note Events" field="triggerOnNoteRequest">
     <f:checkbox default="true"/>
   </f:entry>
   <f:entry title="Trigger phrase for build on Note Events" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
     <f:textbox field="noteRegex" default="Jenkins please retry a build"/>
-  </f:entry>
-  <f:entry title="Build on Push Events" field="triggerOnPush">
-    <f:checkbox default="true"/>
-  </f:entry>
-  <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
-    <f:select/>
   </f:entry>
   <f:entry title="Enable [ci-skip]" field="ciSkip">
     <f:checkbox default="true"/>
