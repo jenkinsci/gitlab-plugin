@@ -25,10 +25,12 @@ import java.io.IOException;
 public class GitLabCommitStatusPublisher extends Notifier {
 
     private String name;
+    private boolean markUnstableAsSuccess;
 
     @DataBoundConstructor
-    public GitLabCommitStatusPublisher(String name) {
+    public GitLabCommitStatusPublisher(String name, boolean markUnstableAsSuccess) {
         this.name = name;
+        this.markUnstableAsSuccess = markUnstableAsSuccess;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -44,7 +46,7 @@ public class GitLabCommitStatusPublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         Result buildResult = build.getResult();
-        if (buildResult == Result.SUCCESS) {
+        if (buildResult == Result.SUCCESS || (buildResult == Result.UNSTABLE && markUnstableAsSuccess)) {
             CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, name);
         } else if (buildResult == Result.ABORTED) {
             CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.canceled, name);
@@ -56,6 +58,10 @@ public class GitLabCommitStatusPublisher extends Notifier {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isMarkUnstableAsSuccess() {
+        return markUnstableAsSuccess;
     }
 
     protected GitLabCommitStatusPublisher readResolve() {

@@ -129,7 +129,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     if (trigger.addCiMessage) {
-                        project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins"));
+                        project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins", false));
                     }
                     project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
                     project.save();
