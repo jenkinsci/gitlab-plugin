@@ -3,7 +3,6 @@ package com.dabsquared.gitlabjenkins.listener;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
 import hudson.model.Result;
@@ -15,6 +14,8 @@ import jenkins.model.Jenkins;
 import javax.annotation.Nonnull;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author Robin Müller
@@ -54,13 +55,5 @@ public class GitLabMergeRequestRunListener extends RunListener<Run<?, ?>> {
                 listener.getLogger().printf("Failed to accept merge request: %s", e.getMessage());
             }
         }
-    }
-
-    private GitLabApi getClient(Run<?, ?> run) {
-        GitLabConnectionProperty connectionProperty = run.getParent().getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null) {
-            return connectionProperty.getClient();
-        }
-        return null;
     }
 }

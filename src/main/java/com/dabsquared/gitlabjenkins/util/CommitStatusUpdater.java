@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.util;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.EnvVars;
@@ -22,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author Robin Müller
@@ -108,14 +109,6 @@ public class CommitStatusUpdater {
 
     private static String getBuildUrl(Run<?, ?> build) {
         return Jenkins.getInstance().getRootUrl() + build.getUrl();
-    }
-
-    private static GitLabApi getClient(Run<?, ?> build) {
-        final GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null) {
-            return connectionProperty.getClient();
-        }
-        return null;
     }
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {

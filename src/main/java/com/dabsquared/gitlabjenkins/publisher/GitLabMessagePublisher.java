@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
 import hudson.Launcher;
@@ -27,6 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author Nikolay Ustinov
@@ -142,14 +143,6 @@ public class GitLabMessagePublisher extends Notifier {
         } else {
             return ":negative_squared_cross_mark:";
         }
-    }
-
-    private static GitLabApi getClient(Run<?, ?> build) {
-        GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null) {
-            return connectionProperty.getClient();
-        }
-        return null;
     }
 
     private static String replaceMacros(Run<?, ?> build, TaskListener listener, String inputString) {

@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.Run;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -32,6 +33,14 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
             return connectionConfig != null ? connectionConfig.getClient(gitLabConnection) : null;
+        }
+        return null;
+    }
+
+    public static GitLabApi getClient(Run<?, ?> build) {
+        final GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
+        if (connectionProperty != null) {
+            return connectionProperty.getClient();
         }
         return null;
     }
