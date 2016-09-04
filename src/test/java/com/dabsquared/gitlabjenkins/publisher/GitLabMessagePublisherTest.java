@@ -33,7 +33,6 @@ import org.mockserver.model.HttpRequest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -94,15 +93,15 @@ public class GitLabMessagePublisherTest {
     @Test
     public void canceled() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.ABORTED, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.ABORTED, buildNumber);
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
         String defaultNote = MessageFormat.format(":point_up: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})",
             Result.ABORTED, build.getParent().getDisplayName(), buildNumber, buildUrl);
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, null, null, null));
@@ -116,15 +115,15 @@ public class GitLabMessagePublisherTest {
     @Test
     public void success() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber);
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
         String defaultNote = MessageFormat.format(":white_check_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})",
             Result.SUCCESS, build.getParent().getDisplayName(), buildNumber, buildUrl);
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, null, null, null));
@@ -138,15 +137,15 @@ public class GitLabMessagePublisherTest {
     @Test
     public void failed() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.FAILURE, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.FAILURE, buildNumber);
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
         String defaultNote = MessageFormat.format(":negative_squared_cross_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})",
             Result.FAILURE, build.getParent().getDisplayName(), buildNumber, buildUrl);
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, null, null, null));
@@ -160,13 +159,13 @@ public class GitLabMessagePublisherTest {
     @Test
     public void canceledWithCustomNote() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.ABORTED, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.ABORTED, buildNumber);
         String defaultNote = "abort";
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, true, null, null, defaultNote));
@@ -180,13 +179,13 @@ public class GitLabMessagePublisherTest {
     @Test
     public void successWithCustomNote() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber);
         String defaultNote = "success";
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(true, false, false, defaultNote, null, null));
@@ -200,13 +199,13 @@ public class GitLabMessagePublisherTest {
     @Test
     public void failedWithCustomNote() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.FAILURE, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.FAILURE, buildNumber);
         String defaultNote = "failure";
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, true, false, null, defaultNote, null));
@@ -217,15 +216,15 @@ public class GitLabMessagePublisherTest {
         mockServerClient.verify(requests);
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(String projectId, String mergeRequestId, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageWithSuccessResponse(Integer projectId, Integer mergeRequestId, String body) throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(projectId, mergeRequestId, body);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(String projectId, String mergeRequestId, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(Integer projectId, Integer mergeRequestId, String body) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/merge_requests/" + URLEncoder.encode(mergeRequestId, "UTF-8") + "/notes")
+                .withPath("/gitlab/api/v3/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withQueryStringParameter("body", body);

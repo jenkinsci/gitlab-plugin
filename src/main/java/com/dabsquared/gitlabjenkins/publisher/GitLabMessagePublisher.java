@@ -1,38 +1,29 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Extension;
-import hudson.Launcher;
 import hudson.Util;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
-
 /**
  * @author Nikolay Ustinov
  */
-public class GitLabMessagePublisher extends Notifier {
+public class GitLabMessagePublisher extends MergeRequestNotifier {
     private static final Logger LOGGER = Logger.getLogger(GitLabMessagePublisher.class.getName());
     private boolean replaceSuccessNote = false;
     private boolean replaceFailureNote = false;
@@ -78,16 +69,6 @@ public class GitLabMessagePublisher extends Notifier {
         return this.abortNoteText == null ? "" : this.abortNoteText;
     }
 
-    public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.NONE;
-    }
-
-    @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        addNoteOnMergeRequest(build, listener);
-        return true;
-    }
-
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -107,32 +88,14 @@ public class GitLabMessagePublisher extends Notifier {
         }
     }
 
-    private void addNoteOnMergeRequest(Run<?, ?> build, TaskListener listener) {
-        String projectId = getProjectId(build);
-        Integer mergeRequestId = getMergeRequestId(build);
-        if (projectId != null && mergeRequestId != null) {
-            try {
-                GitLabApi client = getClient(build);
-                if (client == null) {
-                    listener.getLogger().println("No GitLab connection configured");
-                } else {
-                    client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));
-                }
-            } catch (WebApplicationException | ProcessingException e) {
-                listener.getLogger().printf("Failed to add comment on Merge Request for project '%s': %s%n", projectId, e.getMessage());
-                LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", projectId), e);
-            }
+    @Override
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId) {
+        try {
+            client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));
+        } catch (WebApplicationException | ProcessingException e) {
+            listener.getLogger().printf("Failed to add comment on Merge Request for project '%s': %s%n", projectId, e.getMessage());
+            LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", projectId), e);
         }
-    }
-
-    String getProjectId(Run<?, ?> build) {
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getData().getTargetProjectId().toString();
-    }
-
-    Integer getMergeRequestId(Run<?, ?> build) {
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getData().getMergeRequestId();
     }
 
     private String getResultIcon(Result result) {

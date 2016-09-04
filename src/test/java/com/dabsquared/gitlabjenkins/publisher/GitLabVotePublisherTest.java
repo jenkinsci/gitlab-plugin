@@ -29,7 +29,6 @@ import org.mockserver.model.HttpRequest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -88,15 +87,15 @@ public class GitLabVotePublisherTest {
     @Test
     public void success() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber);
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
         String defaultNote = MessageFormat.format(":+1:",
             Result.SUCCESS, build.getParent().getDisplayName(), buildNumber, buildUrl);
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabVotePublisher publisher = spy(new GitLabVotePublisher());
@@ -110,15 +109,15 @@ public class GitLabVotePublisherTest {
     @Test
     public void failed() throws IOException, InterruptedException {
         Integer buildNumber = 1;
-        String projectId = "3";
+        Integer projectId = 3;
         Integer mergeRequestId = 1;
-        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.FAILURE, buildNumber, projectId);
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.FAILURE, buildNumber);
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
         String defaultNote = MessageFormat.format(":-1:",
             Result.FAILURE, build.getParent().getDisplayName(), buildNumber, buildUrl);
 
         HttpRequest[] requests = new HttpRequest[] {
-            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId.toString(), defaultNote)
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
         GitLabVotePublisher publisher = spy(new GitLabVotePublisher());
@@ -129,15 +128,15 @@ public class GitLabVotePublisherTest {
         mockServerClient.verify(requests);
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(String projectId, String mergeRequestId, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageWithSuccessResponse(Integer projectId, Integer mergeRequestId, String body) throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(projectId, mergeRequestId, body);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(String projectId, String mergeRequestId, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(Integer projectId, Integer mergeRequestId, String body) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/merge_requests/" + URLEncoder.encode(mergeRequestId, "UTF-8") + "/notes")
+                .withPath("/gitlab/api/v3/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withQueryStringParameter("body", body);
