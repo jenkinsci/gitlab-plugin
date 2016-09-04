@@ -103,6 +103,13 @@ public interface GitLabApi {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
+    void createMergeRequestNote(@PathParam("projectId") Integer projectId,
+                                @PathParam("mergeRequestId") Integer mergeRequestId,
+                                @QueryParam("body") String body);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
     void createMergeRequestNote(@PathParam("projectId") String projectId,
                                 @PathParam("mergeRequestId") Integer mergeRequestId,
                                 @QueryParam("body") String body);
