@@ -25,6 +25,7 @@ import java.util.logging.Logger;
  */
 public class GitLabMessagePublisher extends MergeRequestNotifier {
     private static final Logger LOGGER = Logger.getLogger(GitLabMessagePublisher.class.getName());
+    private boolean onlyForFailure = false;
     private boolean replaceSuccessNote = false;
     private boolean replaceFailureNote = false;
     private boolean replaceAbortNote = false;
@@ -33,8 +34,9 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     private String abortNoteText;
 
     @DataBoundConstructor
-    public GitLabMessagePublisher(boolean replaceSuccessNote, boolean replaceFailureNote, boolean replaceAbortNote,
+    public GitLabMessagePublisher(boolean onlyForFailure, boolean replaceSuccessNote, boolean replaceFailureNote, boolean replaceAbortNote,
                                   String successNoteText, String failureNoteText, String abortNoteText) {
+        this.onlyForFailure = onlyForFailure;
         this.replaceSuccessNote = replaceSuccessNote;
         this.replaceFailureNote = replaceFailureNote;
         this.replaceAbortNote = replaceAbortNote;
@@ -45,15 +47,19 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
 
     public GitLabMessagePublisher() { }
 
-    public boolean getReplaceSuccessNote() {
+    public boolean isOnlyForFailure() {
+        return onlyForFailure;
+    }
+
+    public boolean isReplaceSuccessNote() {
         return replaceSuccessNote;
     }
 
-    public boolean getReplaceFailureNote() {
+    public boolean isReplaceFailureNote() {
         return replaceFailureNote;
     }
 
-    public boolean getReplaceAbortNote() {
+    public boolean isReplaceAbortNote() {
         return replaceAbortNote;
     }
 
@@ -91,7 +97,9 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     @Override
     protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId) {
         try {
-            client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));
+            if (!onlyForFailure || build.getResult() == Result.FAILURE) {
+                client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));
+            }
         } catch (WebApplicationException | ProcessingException e) {
             listener.getLogger().printf("Failed to add comment on Merge Request for project '%s': %s%n", projectId, e.getMessage());
             LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", projectId), e);
@@ -139,11 +147,11 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
 
     private String getNote(Run<?, ?> build, TaskListener listener) {
         String message;
-        if (this.getReplaceSuccessNote() && build.getResult() == Result.SUCCESS) {
+        if (this.replaceSuccessNote && build.getResult() == Result.SUCCESS) {
             message = replaceMacros(build, listener, this.getSuccessNoteText());
-        } else if (this.getReplaceAbortNote() && build.getResult() == Result.ABORTED) {
+        } else if (this.replaceAbortNote && build.getResult() == Result.ABORTED) {
             message = replaceMacros(build, listener, this.getAbortNoteText());
-        } else if (this.getReplaceFailureNote() && build.getResult() == Result.FAILURE) {
+        } else if (this.replaceFailureNote && build.getResult() == Result.FAILURE) {
             message = replaceMacros(build, listener, this.getFailureNoteText());
         } else {
             String icon = getResultIcon(build.getResult());
