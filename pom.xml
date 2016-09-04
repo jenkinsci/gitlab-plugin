@@ -134,22 +134,22 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.5.1</version>
         </plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-surefire-plugin</artifactId>
-	  <version>2.18.1</version>
-	  <configuration>
-	    <argLine>${argLine} -Xmx1024m -XX:MaxPermSize=512m</argLine>
-	  </configuration>
-	</plugin>
-	<plugin>
-	  <groupId>org.jenkins-ci.tools</groupId>
-	  <artifactId>maven-hpi-plugin</artifactId>
-	  <extensions>true</extensions>
-	  <configuration>
-	    <compatibleSinceVersion>1.2.0</compatibleSinceVersion>
-	  </configuration>
-	</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18.1</version>
+          <configuration>
+            <argLine>${argLine} -Xmx1024m -XX:MaxPermSize=512m</argLine>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jenkins-ci.tools</groupId>
+          <artifactId>maven-hpi-plugin</artifactId>
+          <extensions>true</extensions>
+          <configuration>
+            <compatibleSinceVersion>1.2.0</compatibleSinceVersion>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
