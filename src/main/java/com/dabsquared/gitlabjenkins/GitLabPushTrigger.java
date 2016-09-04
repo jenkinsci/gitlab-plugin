@@ -6,6 +6,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import com.dabsquared.gitlabjenkins.publisher.GitLabAcceptMergeRequestPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabVotePublisher;
@@ -81,7 +82,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
-    private boolean acceptMergeRequestOnSuccess = false;
+    private transient boolean acceptMergeRequestOnSuccess;
 
 
     @DataBoundConstructor
@@ -148,6 +149,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                     }
                     if (trigger.addVoteOnMergeRequest) {
                         project.getPublishersList().add(new GitLabVotePublisher());
+                    }
+                    if (trigger.acceptMergeRequestOnSuccess) {
+                        project.getPublishersList().add(new GitLabAcceptMergeRequestPublisher());
                     }
                     project.save();
                 }

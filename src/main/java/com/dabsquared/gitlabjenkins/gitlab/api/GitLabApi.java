@@ -94,8 +94,8 @@ public interface GitLabApi {
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/projects/{projectId}/merge_request/{mergeRequestId}/merge")
-    void acceptMergeRequest(@PathParam("projectId") String projectId,
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/merge")
+    void acceptMergeRequest(@PathParam("projectId") Integer projectId,
                             @PathParam("mergeRequestId") Integer mergeRequestId,
                             @QueryParam("merge_commit_message") String mergeCommitMessage,
                             @QueryParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
@@ -104,13 +104,6 @@ public interface GitLabApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
     void createMergeRequestNote(@PathParam("projectId") Integer projectId,
-                                @PathParam("mergeRequestId") Integer mergeRequestId,
-                                @QueryParam("body") String body);
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
-    void createMergeRequestNote(@PathParam("projectId") String projectId,
                                 @PathParam("mergeRequestId") Integer mergeRequestId,
                                 @QueryParam("body") String body);
 
