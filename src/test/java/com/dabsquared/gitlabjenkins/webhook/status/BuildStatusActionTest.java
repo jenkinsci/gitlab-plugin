@@ -11,6 +11,7 @@ import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -36,8 +37,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BuildStatusActionTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -63,7 +64,7 @@ public abstract class BuildStatusActionTest {
 
     @Test
     public void successfulBuild() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         FreeStyleBuild build = testProject.scheduleBuild2(0).get();
 
@@ -76,7 +77,7 @@ public abstract class BuildStatusActionTest {
 
     @Test
     public void failedBuild() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
@@ -98,7 +99,7 @@ public abstract class BuildStatusActionTest {
     public void runningBuild() throws IOException, ExecutionException, InterruptedException {
         final OneShotEvent buildStarted = new OneShotEvent();
         final OneShotEvent keepRunning = new OneShotEvent();
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
@@ -121,7 +122,7 @@ public abstract class BuildStatusActionTest {
 
     @Test
     public void canceledBuild() throws IOException, ExecutionException, InterruptedException, ServletException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
@@ -145,7 +146,7 @@ public abstract class BuildStatusActionTest {
 
     @Test
     public void unstableBuild() throws IOException, ExecutionException, InterruptedException, ServletException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
@@ -165,7 +166,7 @@ public abstract class BuildStatusActionTest {
 
     @Test
     public void notFoundBuild() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
 
 

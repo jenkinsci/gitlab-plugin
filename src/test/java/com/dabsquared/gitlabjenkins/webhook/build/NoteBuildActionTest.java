@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,8 +38,8 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class NoteBuildActionTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -69,7 +70,7 @@ public class NoteBuildActionTest {
 
     @Test
     public void build() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
 
         exception.expect(HttpResponses.HttpResponseException.class);
@@ -80,7 +81,7 @@ public class NoteBuildActionTest {
 
     @Test
     public void build_alreadyBuiltMR_alreadyBuiltMR() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
@@ -94,7 +95,7 @@ public class NoteBuildActionTest {
 
     @Test
     public void build_alreadyBuiltMR_differentTargetBranch() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabWebHookCause(causeData()

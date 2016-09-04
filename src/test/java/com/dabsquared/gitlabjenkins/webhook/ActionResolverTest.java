@@ -9,7 +9,7 @@ import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -31,15 +31,15 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ActionResolverTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @Mock
     private StaplerRequest request;
 
     @Test
     public void getBranchBuildPageRedirect() throws IOException {
-        String projectName = "test";
+        String projectName = "getBranchBuildPageRedirect";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.hasParameter("ref")).thenReturn(true);
@@ -52,7 +52,7 @@ public class ActionResolverTest {
 
     @Test
     public void getCommitStatus() throws IOException {
-        String projectName = "test";
+        String projectName = "getCommitStatus";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/1234abcd/status.json");
         when(request.getMethod()).thenReturn("GET");
@@ -64,7 +64,7 @@ public class ActionResolverTest {
 
     @Test
     public void getCommitBuildPageRedirect_builds() throws IOException {
-        String projectName = "test";
+        String projectName = "getCommitBuildPageRedirect_builds";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/1234abcd");
         when(request.getMethod()).thenReturn("GET");
@@ -76,7 +76,7 @@ public class ActionResolverTest {
 
     @Test
     public void getCommitBuildPageRedirect_commits() throws IOException {
-        String projectName = "test";
+        String projectName = "getCommitBuildPageRedirect_commits";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("commits/7890efab");
         when(request.getMethod()).thenReturn("GET");
@@ -88,7 +88,7 @@ public class ActionResolverTest {
 
     @Test
     public void getBranchStatusPng() throws IOException {
-        String projectName = "test";
+        String projectName = "getBranchStatusPng";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/status.png");
         when(request.hasParameter("ref")).thenReturn(true);
@@ -101,7 +101,7 @@ public class ActionResolverTest {
 
     @Test
     public void getCommitStatusPng() throws IOException {
-        String projectName = "test";
+        String projectName = "getCommitStatusPng";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/status.png");
         when(request.hasParameter("ref")).thenReturn(false);
@@ -114,7 +114,7 @@ public class ActionResolverTest {
 
     @Test
     public void postMergeRequest() throws IOException {
-        String projectName = "test";
+        String projectName = "postMergeRequest";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
@@ -128,7 +128,7 @@ public class ActionResolverTest {
 
     @Test
     public void postNote() throws IOException {
-        String projectName = "test";
+        String projectName = "postNote";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
@@ -142,7 +142,7 @@ public class ActionResolverTest {
 
     @Test
     public void postPush() throws IOException {
-        String projectName = "test";
+        String projectName = "postPush";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
@@ -156,7 +156,7 @@ public class ActionResolverTest {
 
     @Test
     public void postPushTag() throws IOException {
-        String projectName = "test";
+        String projectName = "postPushTag";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
@@ -170,7 +170,7 @@ public class ActionResolverTest {
 
     @Test
     public void postPushMissingEventHeader() throws IOException {
-        String projectName = "test";
+        String projectName = "postPushMissingEventHeader";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
@@ -184,7 +184,7 @@ public class ActionResolverTest {
 
     @Test
     public void postPushUnsupportedEventHeader() throws IOException {
-        String projectName = "test";
+        String projectName = "postPushUnsupportedEventHeader";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");

@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import hudson.model.FreeStyleProject;
 import org.apache.commons.io.IOUtils;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,8 +29,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class PushBuildActionTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -42,7 +43,7 @@ public class PushBuildActionTest {
 
     @Test
     public void skip_missingRepositoryUrl() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
 
         new PushBuildAction(testProject, getJson("PushEvent_missingRepositoryUrl.json")).execute(response);
@@ -52,7 +53,7 @@ public class PushBuildActionTest {
 
     @Test
     public void build() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
         testProject.addTrigger(trigger);
 

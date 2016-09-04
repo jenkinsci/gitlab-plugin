@@ -7,6 +7,7 @@ import hudson.plugins.git.GitSCM;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,8 +31,8 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BuildPageRedirectActionTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -54,7 +55,7 @@ public abstract class BuildPageRedirectActionTest {
 
     @Test
     public void redirectToBuildUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);
         QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
@@ -67,7 +68,7 @@ public abstract class BuildPageRedirectActionTest {
 
     @Test
     public void redirectToBuildStatusUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);
         QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);

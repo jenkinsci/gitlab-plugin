@@ -27,7 +27,8 @@ import org.hamcrest.CoreMatchers;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.invocation.InvocationOnMock;
@@ -64,28 +65,33 @@ public class GitLabCommitStatusPublisherTest {
     private static final String GIT_LAB_CONNECTION = "GitLab";
     private static final String API_TOKEN = "secret";
 
-    @Rule
-    public MockServerRule mockServer = new MockServerRule(this);
+    @ClassRule
+    public static MockServerRule mockServer = new MockServerRule(new Object());
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     private MockServerClient mockServerClient;
     private BuildListener listener;
 
-    @Before
-    public void setup() throws IOException {
-        listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
+    @BeforeClass
+    public static void setupConnection() throws IOException {
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
         String apiTokenId = "apiTokenId";
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
                 credentialsStore.addCredentials(domains.get(0),
-                    new StringCredentialsImpl(CredentialsScope.SYSTEM, apiTokenId, "GitLab API Token", Secret.fromString(API_TOKEN)));
+                                                new StringCredentialsImpl(CredentialsScope.SYSTEM, apiTokenId, "GitLab API Token", Secret.fromString(API_TOKEN)));
             }
         }
         connectionConfig.addConnection(new GitLabConnection(GIT_LAB_CONNECTION, "http://localhost:" + mockServer.getPort() + "/gitlab", apiTokenId, false, 10, 10));
+    }
+
+    @Before
+    public void setup() {
+        listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
+        mockServerClient = new MockServerClient("localhost", mockServer.getPort());
     }
 
     @After

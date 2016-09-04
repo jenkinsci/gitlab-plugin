@@ -12,7 +12,7 @@ import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.socket.PortFactory;
@@ -44,8 +44,9 @@ public class GitLabConnectionConfigSSLTest {
     private static int port;
 
     private static Server server;
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+
+    @ClassRule
+    public static JenkinsRule jenkins = new JenkinsRule();
 
     @BeforeClass
     public static void startJetty() throws Exception {
