@@ -185,10 +185,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return setBuildDescription;
     }
 
-    public boolean getAcceptMergeRequestOnSuccess() {
-        return acceptMergeRequestOnSuccess;
-    }
-
     public boolean getCiSkip() {
         return ciSkip;
     }
