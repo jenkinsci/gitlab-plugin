@@ -1,5 +1,12 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
+import com.dabsquared.gitlabjenkins.testhelpers.HookTrigger;
+import com.dabsquared.gitlabjenkins.testhelpers.JenkinsProjectTestFactory;
+import com.dabsquared.gitlabjenkins.testhelpers.ProjectSetupResult;
+import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
+import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory;
+import com.google.common.base.Predicate;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -9,6 +16,9 @@ import hudson.model.Result;
 import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -22,6 +32,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,58 +60,59 @@ public abstract class BuildStatusActionTest {
     @Mock
     private StaplerResponse response;
 
-    private String gitRepoUrl;
+    private ProjectSetupResult result;
+    private Git git;
+    private RevCommit commit;
 
     @Before
     public void setup() throws Exception {
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+        git = Git.open(tmp.getRoot());
         git.add().addFilepattern("test");
-        RevCommit commit = git.commit().setMessage("test").call();
+        commit = git.commit().setMessage("test").call();
         commitSha1 = commit.getId().getName();
-        gitRepoUrl = tmp.getRoot().toURI().toString();
+        String gitRepoUrl = tmp.getRoot().toURI().toString();
+
+        result = new JenkinsProjectTestFactory().createProject(jenkins, gitRepoUrl);
+
     }
 
     @Test
-    public void successfulBuild() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.setScm(new GitSCM(gitRepoUrl));
-        FreeStyleBuild build = testProject.scheduleBuild2(0).get();
+    public void successfulBuild() throws IOException, ExecutionException, InterruptedException, GitAPIException {
+        HookTrigger.triggerHookSynchronously(result, git, commit);
+        FreeStyleBuild build = (FreeStyleBuild) result.getBuildNotifier().getLastTriggeredBuild();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         mockResponse(out);
-        getBuildStatusAction(testProject).execute(response);
+        getBuildStatusAction(result.getTestProject()).execute(response);
 
         assertSuccessfulBuild(build, out, response);
     }
 
     @Test
-    public void failedBuild() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.setScm(new GitSCM(gitRepoUrl));
-        testProject.getBuildersList().add(new TestBuilder() {
+    public void failedBuild() throws IOException, ExecutionException, InterruptedException, GitAPIException {
+        result.getTestProject().getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
                 build.setResult(Result.FAILURE);
                 return true;
             }
         });
-        FreeStyleBuild build = testProject.scheduleBuild2(0).get();
+        HookTrigger.triggerHookSynchronously(result, git, commit);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         mockResponse(out);
-        getBuildStatusAction(testProject).execute(response);
+        getBuildStatusAction(result.getTestProject()).execute(response);
 
-        assertFailedBuild(build, out, response);
+        assertFailedBuild(result.getBuildNotifier().getLastTriggeredBuild(), out, response);
     }
 
     @Test
-    public void runningBuild() throws IOException, ExecutionException, InterruptedException {
+    public void runningBuild() throws IOException, ExecutionException, InterruptedException, GitAPIException {
         final OneShotEvent buildStarted = new OneShotEvent();
         final OneShotEvent keepRunning = new OneShotEvent();
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.setScm(new GitSCM(gitRepoUrl));
+        final FreeStyleProject testProject = result.getTestProject();
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -109,7 +121,7 @@ public abstract class BuildStatusActionTest {
                 return true;
             }
         });
-        FreeStyleBuild build = testProject.scheduleBuild2(0).waitForStart();
+        HookTrigger.triggerHookWithoutWaitingForResult(result, git, commit);
         buildStarted.block();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -117,13 +129,12 @@ public abstract class BuildStatusActionTest {
         getBuildStatusAction(testProject).execute(response);
         keepRunning.signal();
 
-        assertRunningBuild(build, out, response);
+        assertRunningBuild(result.getBuildNotifier().getLastTriggeredBuild(), out, response);
     }
 
     @Test
-    public void canceledBuild() throws IOException, ExecutionException, InterruptedException, ServletException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.setScm(new GitSCM(gitRepoUrl));
+    public void canceledBuild() throws IOException, ExecutionException, InterruptedException, ServletException, GitAPIException {
+        final FreeStyleProject testProject = result.getTestProject();
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -135,19 +146,18 @@ public abstract class BuildStatusActionTest {
                 return true;
             }
         });
-        FreeStyleBuild build = testProject.scheduleBuild2(0).get();
+        HookTrigger.triggerHookSynchronously(result, git, commit);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         mockResponse(out);
         getBuildStatusAction(testProject).execute(response);
 
-        assertCanceledBuild(build, out, response);
+        assertCanceledBuild(result.getBuildNotifier().getLastTriggeredBuild(), out, response);
     }
 
     @Test
-    public void unstableBuild() throws IOException, ExecutionException, InterruptedException, ServletException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.setScm(new GitSCM(gitRepoUrl));
+    public void unstableBuild() throws IOException, ExecutionException, InterruptedException, ServletException, GitAPIException {
+        final FreeStyleProject testProject = result.getTestProject();
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -155,39 +165,36 @@ public abstract class BuildStatusActionTest {
                 return true;
             }
         });
-        FreeStyleBuild build = testProject.scheduleBuild2(0).get();
+
+        HookTrigger.triggerHookSynchronously(result, git, commit);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         mockResponse(out);
         getBuildStatusAction(testProject).execute(response);
 
-        assertUnstableBuild(build, out, response);
+        assertUnstableBuild(result.getBuildNotifier().getLastTriggeredBuild(), out, response);
     }
 
     @Test
     public void notFoundBuild() throws IOException, ExecutionException, InterruptedException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.setScm(new GitSCM(gitRepoUrl));
-
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
         mockResponse(out);
-        getBuildStatusAction(testProject).execute(response);
+        getBuildStatusAction(result.getTestProject()).execute(response);
 
         assertNotFoundBuild(out, response);
     }
 
     protected abstract BuildStatusAction getBuildStatusAction(FreeStyleProject project);
 
-    protected abstract void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertSuccessfulBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertFailedBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertRunningBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertCanceledBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertUnstableBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
     protected abstract void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 

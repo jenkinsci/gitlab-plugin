@@ -1,14 +1,13 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.testhelpers.BuildNotifier;
+import com.dabsquared.gitlabjenkins.testhelpers.JenkinsProjectTestFactory;
+import com.dabsquared.gitlabjenkins.testhelpers.ProjectSetupResult;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.plugins.git.GitSCM;
+import hudson.model.*;
 import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -71,7 +70,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
         });
         project.setQuietPeriod(0);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
-                .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
+            .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                               newMergeRequestLabelFilter(null));
 
@@ -148,8 +147,10 @@ public class MergeRequestHookTriggerHandlerImplTest {
         RevCommit commit = git.commit().setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
 
-        final FreeStyleProject project = jenkins.createFreeStyleProject();
-        final BuildNotifier buildNotifier = setupProjectWithNoGitScm(project);
+        final ProjectSetupResult result = new JenkinsProjectTestFactory().createProject(jenkins, tmp.getRoot().toURI().toString());
+        final Project project = result.getTestProject();
+        final BuildNotifier buildNotifier = result.getBuildNotifier();
+
         assertThat(project.getLastBuild(), nullValue());
 
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
@@ -182,7 +183,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 .build())
             .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
-        final FreeStyleBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
+        final AbstractBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
 
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
             .withObjectAttributes(mergeRequestObjectAttributes()
@@ -227,10 +228,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
         RevCommit commit = git.commit().setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
 
-        final FreeStyleProject project = jenkins.createFreeStyleProject();
-        assertThat(project.getLastBuild(), nullValue());
 
-        final BuildNotifier buildNotifier = setupProjectWithNoGitScm(project);
+        final ProjectSetupResult result = new JenkinsProjectTestFactory().createProject(jenkins, tmp.getRoot().toURI().toString());
+        final Project project = result.getTestProject();
+        final BuildNotifier buildNotifier = result.getBuildNotifier();
+        assertThat(project.getLastBuild(), nullValue());
 
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
             .withObjectAttributes(mergeRequestObjectAttributes()
@@ -262,7 +264,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 .build())
             .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
 
-        final FreeStyleBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
+        final AbstractBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
 
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
             .withObjectAttributes(mergeRequestObjectAttributes()
@@ -298,46 +300,10 @@ public class MergeRequestHookTriggerHandlerImplTest {
         assertThat(project.getLastBuild(), not(is(lastBuild)));
     }
 
-    private BuildNotifier setupProjectWithNoGitScm(final FreeStyleProject project) throws IOException {
-        final BuildNotifier buildNotifier = new BuildNotifier(0, new LockWrapper());
-        project.getBuildersList().add(new TestBuilder() {
-            @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                buildNotifier.addBuild();
-                buildNotifier.getLock().signal();
-                return true;
-            }
-        });
-        project.setQuietPeriod(0);
-        return buildNotifier;
-    }
-
-    private class BuildNotifier {
-        private int buildsTriggered;
-        private final LockWrapper lock;
-
-        public BuildNotifier(final int buildsTriggered, final LockWrapper lock) {
-            this.buildsTriggered = buildsTriggered;
-            this.lock = lock;
-        }
-
-        public int getBuildsTriggered() {
-            return buildsTriggered;
-        }
-
-        public LockWrapper getLock() {
-            return lock;
-        }
-
-        public void addBuild() {
-            buildsTriggered++;
-        }
-    }
-	
-	 private FreeStyleBuild assertFirstBuildTriggered(final FreeStyleProject project, final BuildNotifier buildNotifier) throws InterruptedException {
+	 private AbstractBuild assertFirstBuildTriggered(final Project project, final BuildNotifier buildNotifier) throws InterruptedException {
         buildNotifier.getLock().block(10000);
-        assertThat(buildNotifier.getBuildsTriggered(), is(1));
-        final FreeStyleBuild lastBuild = project.getLastBuild();
+        assertThat(buildNotifier.getNumberOfBuildsTriggered(), is(1));
+        final AbstractBuild lastBuild = project.getLastBuild();
         assertThat(lastBuild, notNullValue());
         return lastBuild;
     }

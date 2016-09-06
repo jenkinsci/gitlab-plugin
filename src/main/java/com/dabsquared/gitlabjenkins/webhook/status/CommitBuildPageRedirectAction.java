@@ -8,6 +8,6 @@ import hudson.model.Job;
  */
 public class CommitBuildPageRedirectAction extends BuildPageRedirectAction {
     public CommitBuildPageRedirectAction(Job<?, ?> project, String sha1) {
-        super(BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, sha1));
+        super(BuildUtil.getBuildBySHA1(project, sha1));
     }
 }

@@ -1,6 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
-import hudson.model.FreeStyleBuild;
+import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleProject;
 import net.sf.json.JSONObject;
 import org.junit.runner.RunWith;
@@ -25,7 +25,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertSuccessfulBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -33,7 +33,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertFailedBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -41,7 +41,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertRunningBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -49,7 +49,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertCanceledBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -57,7 +57,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertUnstableBuild(AbstractBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
