@@ -1,9 +1,10 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
-import hudson.model.FreeStyleBuild;
+import com.dabsquared.gitlabjenkins.testhelpers.BuildNotifier;
+import com.dabsquared.gitlabjenkins.testhelpers.HookTrigger;
+import com.dabsquared.gitlabjenkins.testhelpers.JenkinsProjectTestFactory;
+import com.dabsquared.gitlabjenkins.testhelpers.ProjectSetupResult;
 import hudson.model.FreeStyleProject;
-import hudson.model.queue.QueueTaskFuture;
-import hudson.plugins.git.GitSCM;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -18,7 +19,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Mockito.doThrow;
@@ -39,45 +39,42 @@ public abstract class BuildPageRedirectActionTest {
     protected String branch = "master";
     @Mock
     private StaplerResponse response;
-    private String gitRepoUrl;
+    private FreeStyleProject testProject;
+    private BuildNotifier buildNotifier;
 
     @Before
     public void setup() throws Exception {
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+        final Git git = Git.open(tmp.getRoot());
         git.add().addFilepattern("test");
-        RevCommit commit = git.commit().setMessage("test").call();
+        final RevCommit commit = git.commit().setMessage("test").call();
         commitSha1 = commit.getId().getName();
-        gitRepoUrl = tmp.getRoot().toURI().toString();
+        final String gitRepoUrl = tmp.getRoot().toURI().toString();
+
+        ProjectSetupResult project = new JenkinsProjectTestFactory().createProject(jenkins, gitRepoUrl);
+        buildNotifier = project.getBuildNotifier();
+        testProject = project.getTestProject();
+
+        HookTrigger.triggerHookSynchronously(project, git, commit);
     }
+
 
     @Test
     public void redirectToBuildUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
-        testProject.setScm(new GitSCM(gitRepoUrl));
-        testProject.setQuietPeriod(0);
-        QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
-        FreeStyleBuild build = future.get(5, TimeUnit.SECONDS);
-
         getBuildPageRedirectAction(testProject).execute(response);
 
-        verify(response).sendRedirect2(jenkins.getInstance().getRootUrl() + build.getUrl());
+        verify(response).sendRedirect2(jenkins.getInstance().getRootUrl() + buildNotifier.getLastTriggeredBuild().getUrl());
     }
 
     @Test
     public void redirectToBuildStatusUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
-        testProject.setScm(new GitSCM(gitRepoUrl));
-        testProject.setQuietPeriod(0);
-        QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
-        FreeStyleBuild build = future.get(5, TimeUnit.SECONDS);
-
-        doThrow(IOException.class).when(response).sendRedirect2(jenkins.getInstance().getRootUrl() + build.getUrl());
+        doThrow(IOException.class).when(response).sendRedirect2(jenkins.getInstance().getRootUrl() + buildNotifier.getLastTriggeredBuild().getUrl());
         getBuildPageRedirectAction(testProject).execute(response);
 
-        verify(response).sendRedirect2(jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
+        verify(response).sendRedirect2(jenkins.getInstance().getRootUrl() + buildNotifier.getLastTriggeredBuild().getBuildStatusUrl());
     }
 
     protected abstract BuildPageRedirectAction getBuildPageRedirectAction(FreeStyleProject project);
+
 }
