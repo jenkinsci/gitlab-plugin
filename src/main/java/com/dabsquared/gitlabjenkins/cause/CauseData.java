@@ -105,6 +105,7 @@ public final class CauseData {
         variables.put("gitlabTargetRepoHttpUrl", targetRepoHttpUrl);
         variables.put("gitlabBefore", before);
         variables.put("gitlabAfter", after);
+        variables.put("gitlabLastCommitId", lastCommit);
         return variables;
     }
 
