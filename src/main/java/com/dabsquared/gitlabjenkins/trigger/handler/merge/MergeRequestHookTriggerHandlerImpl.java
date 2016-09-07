@@ -103,7 +103,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(MergeRequestHook hook) {
         return buildStatusUpdate()
-            .withProjectId(hook.getObjectAttributes().getSourceProjectId())
+            .withProjectId(hook.getObjectAttributes().getTargetProjectId())
             .withSha(hook.getObjectAttributes().getLastCommit().getId())
             .withRef(hook.getObjectAttributes().getSourceBranch())
             .build();

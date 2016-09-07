@@ -116,7 +116,7 @@ public class CommitStatusUpdater {
 
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
         if (cause != null) {
-            return Collections.singletonList(cause.getData().getSourceProjectId().toString());
+            return Collections.singletonList(cause.getData().getTargetProjectId().toString());
         }
 
         List<String> result = new ArrayList<>();
