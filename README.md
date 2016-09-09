@@ -95,7 +95,7 @@ Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeli
 
 Example `Jenkinsfile` for multibranch pipeline jobs
 ```
-properties properties: [[$class: 'GitLabConnectionProperty', gitLabConnection: '<your-gitlab-connection-name>']]
+properties: [[$class: 'GitLabConnectionProperty', gitLabConnection: '<your-gitlab-connection-name>']]
 
 node {
     stage "checkout"
