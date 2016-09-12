@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import javax.inject.Inject;
@@ -35,8 +36,18 @@ public class UpdateGitLabCommitStatusStep extends AbstractStepImpl {
         return name;
     }
 
+    @DataBoundSetter
+    public void setName(String name) {
+        this.name = StringUtils.isEmpty(name) ? null : name;
+    }
+
     public BuildState getState() {
         return state;
+    }
+
+    @DataBoundSetter
+    public void setState(BuildState state) {
+        this.state = state;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {

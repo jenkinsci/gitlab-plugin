@@ -12,6 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import javax.inject.Inject;
@@ -39,6 +40,11 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
 
     public String getMergeCommitMessage() {
         return mergeCommitMessage;
+    }
+
+    @DataBoundSetter
+    public void setMergeCommitMessage(String mergeCommitMessage) {
+        this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {

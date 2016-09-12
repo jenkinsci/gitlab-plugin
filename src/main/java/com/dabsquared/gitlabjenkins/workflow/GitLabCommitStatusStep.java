@@ -15,6 +15,7 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import javax.annotation.Nonnull;
@@ -35,6 +36,11 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
 
     public String getName() {
         return name;
+    }
+
+    @DataBoundSetter
+    public void setName(String name) {
+        this.name = StringUtils.isEmpty(name) ? null : name;
     }
 
     public static class Execution extends AbstractStepExecutionImpl {
