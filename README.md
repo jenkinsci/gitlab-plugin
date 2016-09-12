@@ -131,7 +131,7 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
 
 * In GitLab go to you repository's project *Settings*
     * Click on *Web Hooks*
-    * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+    * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME``.  Note that ``PROJECT_NAME`` is the name of the Jenkins job you want to trigger, not the GitLab project name.
 
 * Add a post-build step ``Publish build status to GitLab commit (GitLab 8.1+ required)`` to the job.
 * For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
