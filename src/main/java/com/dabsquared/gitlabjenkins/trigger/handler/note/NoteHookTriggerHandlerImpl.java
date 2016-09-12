@@ -91,7 +91,7 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(NoteHook hook) {
         return buildStatusUpdate()
-            .withProjectId(hook.getMergeRequest().getTargetProjectId())
+            .withProjectId(hook.getMergeRequest().getSourceProjectId())
             .withSha(hook.getMergeRequest().getLastCommit().getId())
             .withRef(hook.getMergeRequest().getSourceBranch())
             .build();
