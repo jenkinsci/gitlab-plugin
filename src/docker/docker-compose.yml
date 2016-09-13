@@ -68,7 +68,7 @@ redis:
 jenkins:
   container_name: docker-jenkins
   restart: always
-  image: jenkins:2.3
+  image: jenkins:2.7.3
   ports:
     - "8080:8080"
     - "50000:50000"
