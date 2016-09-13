@@ -87,11 +87,12 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 
 ### Git configuration for Multibranch Pipeline/Workflow jobs
 **Note:** none of the GitLab environment variables are available for mulitbranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
-Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs.
+Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; Merge Request hooks are ignored.
 
 1. Click **Add source**
 2. Select **Git**
 3. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
+4. Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to ``http://JENKINS_URL/project/PROJECT_NAME``
 
 Example `Jenkinsfile` for multibranch pipeline jobs
 ```
