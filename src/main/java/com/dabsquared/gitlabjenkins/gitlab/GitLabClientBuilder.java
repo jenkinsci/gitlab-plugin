@@ -31,6 +31,8 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import javax.annotation.Nullable;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
@@ -90,8 +92,8 @@ public class GitLabClientBuilder {
             .register(new LoggingFilter())
             .build().target(gitlabHostUrl)
             .proxyBuilder(GitLabApi.class)
-            .classloader(Jenkins.getInstance().getPluginManager().uberClassLoader)
-                .build();
+            .classloader(GitLabApi.class.getClassLoader())
+            .build();
     }
 
     public static GitLabApi buildClient(GitLabConnection connection) {
@@ -130,6 +132,7 @@ public class GitLabClientBuilder {
         throw new IllegalStateException("No credentials found for credentialsId: " + apiTokenId);
     }
 
+    @Priority(Priorities.HEADER_DECORATOR)
     private static class ApiHeaderTokenFilter implements ClientRequestFilter {
         private final String gitlabApiToken;
 
@@ -142,6 +145,7 @@ public class GitLabClientBuilder {
         }
     }
 
+    @Priority(Priorities.USER)
     private static class LoggingFilter implements ClientRequestFilter, ClientResponseFilter {
         @Override
         public void filter(ClientRequestContext context) throws IOException {
