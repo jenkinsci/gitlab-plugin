@@ -1,8 +1,9 @@
-package com.dabsquared.gitlabjenkins.trigger.branch;
+package com.dabsquared.gitlabjenkins.trigger.label;
 
 import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.service.GitLabProjectBranchesService;
+import com.dabsquared.gitlabjenkins.service.GitLabProjectLabelsService;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import hudson.model.AutoCompletionCandidates;
@@ -29,36 +30,36 @@ import java.util.logging.Logger;
 /**
  * @author Robin Müller
  */
-public final class ProjectBranchesProvider {
+public final class ProjectLabelsProvider {
 
-    private static final Logger LOGGER = Logger.getLogger(ProjectBranchesProvider.class.getName());
-    private static final ProjectBranchesProvider INSTANCE = new ProjectBranchesProvider();
+    private static final Logger LOGGER = Logger.getLogger(ProjectLabelsProvider.class.getName());
+    private static final ProjectLabelsProvider INSTANCE = new ProjectLabelsProvider();
 
-    private ProjectBranchesProvider() {
+    private ProjectLabelsProvider() {
     }
 
-    public static ProjectBranchesProvider instance() {
+    public static ProjectLabelsProvider instance() {
         return INSTANCE;
     }
 
-    private List<String> getProjectBranches(Job<?, ?> project) {
+    private List<String> getProjectLabels(Job<?, ?> project) {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
-            return GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
+            return GitLabProjectLabelsService.instance().getLabels(connectionProperty.getClient(), sourceRepository.toString());
         } else {
-            LOGGER.log(Level.WARNING, "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
+            LOGGER.log(Level.WARNING, "getProjectLabels: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
             return Collections.emptyList();
         }
     }
 
-    public AutoCompletionCandidates doAutoCompleteBranchesSpec(Job<?, ?> job, String query) {
+    public AutoCompletionCandidates doAutoCompleteLabels(Job<?, ?> job, String query) {
         AutoCompletionCandidates result = new AutoCompletionCandidates();
         // show all suggestions for short strings
         if (query.length() < 2) {
-            result.add(getProjectBranchesAsArray(job));
+            result.add(getProjectLabelsAsArray(job));
         } else {
-            for (String branch : getProjectBranchesAsArray(job)) {
+            for (String branch : getProjectLabelsAsArray(job)) {
                 if (branch.toLowerCase().contains(query.toLowerCase())) {
                     result.add(branch);
                 }
@@ -67,48 +68,45 @@ public final class ProjectBranchesProvider {
         return result;
     }
 
-    public FormValidation doCheckBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
-        if (!project.hasPermission(Item.CONFIGURE) || containsNoBranches(value)) {
+    public FormValidation doCheckLabels(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
+        if (!project.hasPermission(Item.CONFIGURE) || containsNoLabel(value)) {
             return FormValidation.ok();
         }
 
         try {
-            return checkMatchingBranches(value, getProjectBranches(project));
+            return checkMatchingLabels(value, getProjectLabels(project));
         } catch (GitLabProjectBranchesService.BranchLoadingException e) {
             return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? e : null, Messages.GitLabPushTrigger_CannotCheckBranches());
         }
     }
 
-    private FormValidation checkMatchingBranches(@QueryParameter String value, List<String> projectBranches) {
-        Set<String> matchingSpecs = new HashSet<>();
-        Set<String> unknownSpecs = new HashSet<>();
-        AntPathMatcherSet projectBranchesMatcherSet = new AntPathMatcherSet(projectBranches);
-        for (String branchSpec : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
-            if (projectBranchesMatcherSet.contains(branchSpec)) {
-                matchingSpecs.add(branchSpec);
+    private FormValidation checkMatchingLabels(@QueryParameter String value, List<String> labels) {
+        Set<String> matchingLabels = new HashSet<>();
+        Set<String> unknownLabels = new HashSet<>();
+        for (String label : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
+            if (labels.contains(label)) {
+                matchingLabels.add(label);
             } else {
-                unknownSpecs.add(branchSpec);
+                unknownLabels.add(label);
             }
         }
-
-        if (unknownSpecs.isEmpty()) {
-            return FormValidation.ok(Messages.GitLabPushTrigger_BranchesMatched(matchingSpecs.size()));
+        if (unknownLabels.isEmpty()) {
+            return FormValidation.ok(Messages.GitLabPushTrigger_LabelsMatched(matchingLabels.size()));
         } else {
-            return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(Joiner.on(", ").join(unknownSpecs)));
+            return FormValidation.warning(Messages.GitLabPushTrigger_LabelsNotFound(Joiner.on(", ").join(unknownLabels)));
         }
     }
 
-    private boolean containsNoBranches(@QueryParameter String value) {
+    private boolean containsNoLabel(@QueryParameter String value) {
         return StringUtils.isEmpty(value) || StringUtils.containsOnly(value, new char[]{',', ' '});
     }
 
-
-    private String[] getProjectBranchesAsArray(Job<?, ?> job) {
+    private String[] getProjectLabelsAsArray(Job<?, ?> job) {
         try {
-            List<String> branches = getProjectBranches(job);
-            return branches.toArray(new String[branches.size()]);
-        } catch (GitLabProjectBranchesService.BranchLoadingException e) {
-            LOGGER.log(Level.FINEST, "Failed to load branch names from GitLab. Please check the logs and your configuration.", e);
+            List<String> labels = getProjectLabels(job);
+            return labels.toArray(new String[labels.size()]);
+        } catch (GitLabProjectLabelsService.LabelLoadingException e) {
+            LOGGER.log(Level.FINEST, "Failed to load labels from GitLab. Please check the logs and your configuration.", e);
         }
         return new String[0];
     }

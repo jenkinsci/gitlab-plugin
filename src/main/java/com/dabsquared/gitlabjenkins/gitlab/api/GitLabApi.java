@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
@@ -152,4 +153,9 @@ public interface GitLabApi {
                     @QueryParam("username") String username,
                     @QueryParam("name") String name,
                     @QueryParam("password") String password);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/labels")
+    List<Label> getLabels(@PathParam("projectId") String projectId);
 }

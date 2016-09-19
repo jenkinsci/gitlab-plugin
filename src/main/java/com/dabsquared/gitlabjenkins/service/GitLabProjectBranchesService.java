@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins;
+package com.dabsquared.gitlabjenkins.service;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;

@@ -21,6 +21,7 @@ import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactor
 import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
 import hudson.Extension;
 import hudson.Util;
@@ -365,6 +366,22 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         public FormValidation doCheckExcludeBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
             return ProjectBranchesProvider.instance().doCheckBranchesSpec(project, value);
+        }
+
+        public AutoCompletionCandidates doAutoCompleteIncludeMergeRequestLabels(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
+            return ProjectLabelsProvider.instance().doAutoCompleteLabels(job, value);
+        }
+
+        public AutoCompletionCandidates doAutoCompleteExcludeMergeRequestLabels(@AncestorInPath final Job<?, ?> job, @QueryParameter final String value) {
+            return ProjectLabelsProvider.instance().doAutoCompleteLabels(job, value);
+        }
+
+        public FormValidation doCheckIncludeMergeRequestLabels(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
+            return ProjectLabelsProvider.instance().doCheckLabels(project, value);
+        }
+
+        public FormValidation doCheckExcludeMergeRequestLabels(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
+            return ProjectLabelsProvider.instance().doCheckLabels(project, value);
         }
     }
 }
