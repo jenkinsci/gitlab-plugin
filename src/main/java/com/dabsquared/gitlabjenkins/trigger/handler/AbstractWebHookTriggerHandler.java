@@ -9,6 +9,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -35,7 +36,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
 
     @Override
-    public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter) {
+    public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (ciSkip && isCiSkip(hook)) {
             LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
             return;

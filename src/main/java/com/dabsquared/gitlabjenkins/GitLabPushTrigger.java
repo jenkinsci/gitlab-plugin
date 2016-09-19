@@ -15,6 +15,9 @@ import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterConfig;
+import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
@@ -78,11 +81,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private String includeBranchesSpec;
     private String excludeBranchesSpec;
     private String targetBranchRegex;
+    private final MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
+
     private transient BranchFilter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
     private transient boolean acceptMergeRequestOnSuccess;
+    private transient MergeRequestLabelFilter mergeRequestLabelFilter;
 
 
     @DataBoundConstructor
@@ -91,7 +97,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                              boolean triggerOnNoteRequest, String noteRegex, boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
-                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex) {
+                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex,
+                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOnNoteRequest = triggerOnNoteRequest;
@@ -108,9 +115,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.excludeBranchesSpec = excludeBranchesSpec;
         this.targetBranchRegex = targetBranchRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
+        this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
 
         initializeTriggerHandler();
         initializeBranchFilter();
+        initializeMergeRequestLabelFilter();
     }
 
     @Initializer(after = InitMilestone.JOB_LOADED)
@@ -209,19 +218,23 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return targetBranchRegex;
     }
 
+    public MergeRequestLabelFilterConfig getMergeRequestLabelFilterConfig() {
+        return mergeRequestLabelFilterConfig;
+    }
+
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
-        pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter);
+        pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a merge request
     public void onPost(final MergeRequestHook hook) {
-        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter);
+        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a note request
     public void onPost(final NoteHook hook) {
-        noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter);
+        noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     private void initializeTriggerHandler() {
@@ -238,6 +251,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                 .build(branchFilterType));
     }
 
+    private void initializeMergeRequestLabelFilter() {
+        mergeRequestLabelFilter = MergeRequestLabelFilterFactory.newMergeRequestLabelFilter(mergeRequestLabelFilterConfig);
+    }
+
     @Override
     protected Object readResolve() throws ObjectStreamException {
         if (branchFilterType == null) {
@@ -245,6 +262,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
         initializeTriggerHandler();
         initializeBranchFilter();
+        initializeMergeRequestLabelFilter();
         return super.readResolve();
     }
 

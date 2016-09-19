@@ -56,6 +56,17 @@
           </f:entry>
         </f:radioBlock>
         <!--</f:section> -->
+        <f:optionalBlock title="${%Filter merge request by label}" field="mergeRequestLabelFilterConfig"
+                         checked="${instance.mergeRequestLabelFilterConfig != null}">
+          <f:entry title="${%Include}">
+            <f:textbox field="includeMergeRequestLabels" name="include" value="${instance.mergeRequestLabelFilterConfig.include}"
+                       autoCompleteDelimChar=","/>
+          </f:entry>
+          <f:entry title="${%Exclude}">
+            <f:textbox field="excludeMergeRequestLabels" name="exclude" value="${instance.mergeRequestLabelFilterConfig.exclude}"
+                       autoCompleteDelimChar=","/>
+          </f:entry>
+        </f:optionalBlock>
       </table>
     </f:entry>
   </f:advanced>

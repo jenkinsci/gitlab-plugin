@@ -7,6 +7,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttribut
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.Job;
@@ -38,12 +39,13 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     @Override
-    public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter) {
+    public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (allowedStates.contains(objectAttributes.getState())
             && isLastCommitNotYetBuild(job, hook)
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
-            super.handle(job, hook, ciSkip, branchFilter);
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
+            && mergeRequestLabelFilter.isMergeRequestAllowed(hook.getObjectAttributes().getLabels())) {
+            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
 

@@ -13,6 +13,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -49,7 +50,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter) {
+    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         try {
             if (job instanceof AbstractProject<?, ?>) {
                 AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
@@ -59,7 +60,9 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                     GitLabApi client = property.getClient();
                     for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
-                        handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                        if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
+                            handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                        }
                     }
                 }
             }
