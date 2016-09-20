@@ -46,7 +46,7 @@ public class PushBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
 
-        new PushBuildAction(testProject, getJson("PushEvent_missingRepositoryUrl.json")).execute(response);
+        new PushBuildAction(testProject, getJson("PushEvent_missingRepositoryUrl.json"), null).execute(response);
 
         verify(trigger, never()).onPost(any(PushHook.class));
     }
@@ -58,9 +58,22 @@ public class PushBuildActionTest {
         testProject.addTrigger(trigger);
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new PushBuildAction(testProject, getJson("PushEvent.json")).execute(response);
+        new PushBuildAction(testProject, getJson("PushEvent.json"), null).execute(response);
 
         verify(trigger).onPost(any(PushHook.class));
+    }
+
+    @Test
+    public void invalidToken() throws IOException {
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
+        when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
+        when(trigger.isWebHookAuthorized("test")).thenReturn(false);
+        testProject.addTrigger(trigger);
+
+        exception.expect(HttpResponses.HttpResponseException.class);
+        new PushBuildAction(testProject, getJson("PushEvent.json"), "test").execute(response);
+
+        verify(trigger, never()).onPost(any(PushHook.class));
     }
 
     private String getJson(String name) throws IOException {

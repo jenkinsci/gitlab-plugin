@@ -36,6 +36,7 @@ import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
+import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
@@ -49,9 +50,11 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
+import java.security.SecureRandom;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
@@ -65,7 +68,10 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerH
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
-	private boolean triggerOnPush = true;
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
     private final TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean triggerOnNoteRequest = true;
@@ -83,6 +89,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private String excludeBranchesSpec;
     private String targetBranchRegex;
     private final MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
+    private volatile Secret secretToken;
 
     private transient BranchFilter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
@@ -99,7 +106,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex,
-                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig) {
+                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOnNoteRequest = triggerOnNoteRequest;
@@ -117,6 +124,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.targetBranchRegex = targetBranchRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
         this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
+        this.secretToken = Secret.fromString(secretToken);
 
         initializeTriggerHandler();
         initializeBranchFilter();
@@ -223,6 +231,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return mergeRequestLabelFilterConfig;
     }
 
+    public String getSecretToken() {
+        return secretToken == null ? null : secretToken.getPlainText();
+    }
+
+    public boolean isWebHookAuthorized(String secretToken) {
+        String plainText = this.secretToken.getPlainText();
+        return StringUtils.isEmpty(plainText) || StringUtils.equals(plainText, secretToken);
+    }
+
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
         pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
@@ -236,6 +253,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     // executes when the Trigger receives a note request
     public void onPost(final NoteHook hook) {
         noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+    }
+
+    private void generateSecretToken() {
+        byte[] random = new byte[16];   // 16x8=128bit worth of randomness, since we use md5 digest as the API token
+        RANDOM.nextBytes(random);
+        secretToken = Secret.fromString(Util.toHexString(random));
     }
 
     private void initializeTriggerHandler() {
@@ -382,6 +405,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
         public FormValidation doCheckExcludeMergeRequestLabels(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
             return ProjectLabelsProvider.instance().doCheckLabels(project, value);
+        }
+
+        public void doGenerateSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse response) {
+            GitLabPushTrigger trigger = getFromJob(project);
+            trigger.generateSecretToken();
+            response.setHeader("script", "document.getElementById('secretToken').value='" + trigger.getSecretToken() + "'");
         }
     }
 }

@@ -75,7 +75,7 @@ public class MergeRequestBuildActionTest {
         testProject.addTrigger(trigger);
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent.json")).execute(response);
+        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent.json"), null).execute(response);
 
         verify(trigger).onPost(any(MergeRequestHook.class));
     }
@@ -86,7 +86,7 @@ public class MergeRequestBuildActionTest {
         testProject.addTrigger(trigger);
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_closedMR.json")).execute(response);
+        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_closedMR.json"), null).execute(response);
 
         verify(trigger, never()).onPost(any(MergeRequestHook.class));
     }
@@ -100,7 +100,7 @@ public class MergeRequestBuildActionTest {
         future.get();
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json")).execute(response);
+        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json"), null).execute(response);
 
         verify(trigger, never()).onPost(any(MergeRequestHook.class));
     }
@@ -138,7 +138,7 @@ public class MergeRequestBuildActionTest {
         future.get();
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json")).execute(response);
+        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json"), null).execute(response);
 
         verify(trigger).onPost(any(MergeRequestHook.class));
     }

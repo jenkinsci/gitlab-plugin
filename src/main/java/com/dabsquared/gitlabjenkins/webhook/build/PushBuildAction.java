@@ -30,13 +30,14 @@ public class PushBuildAction extends BuildWebHookAction {
 
     private final static Logger LOGGER = Logger.getLogger(PushBuildAction.class.getName());
     private final Item project;
-
     private PushHook pushHook;
+    private final String secretToken;
 
-    public PushBuildAction(Item project, String json) {
+    public PushBuildAction(Item project, String json, String secretToken) {
         LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
         this.pushHook = JsonUtil.read(json, PushHook.class);
+        this.secretToken = secretToken;
     }
 
     void processForCompatibility() {
@@ -64,12 +65,10 @@ public class PushBuildAction extends BuildWebHookAction {
         }
 
         if (project instanceof Job<?, ?>) {
-            ACL.impersonate(ACL.SYSTEM, new Runnable() {
-                public void run() {
-                    GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
-                    if (trigger != null) {
-                        trigger.onPost(pushHook);
-                    }
+            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken) {
+                @Override
+                protected void performOnPost(GitLabPushTrigger trigger) {
+                    trigger.onPost(pushHook);
                 }
             });
             throw HttpResponses.ok();
@@ -104,4 +103,5 @@ public class PushBuildAction extends BuildWebHookAction {
             }
         }
     }
+
 }

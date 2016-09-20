@@ -23,23 +23,23 @@ public class NoteBuildAction implements WebHookAction {
     private final static Logger LOGGER = Logger.getLogger(NoteBuildAction.class.getName());
     private Item project;
     private NoteHook noteHook;
+    private final String secretToken;
 
-    public NoteBuildAction(Item project, String json) {
+    public NoteBuildAction(Item project, String json, String secretToken) {
         LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
         this.project = project;
         this.noteHook = JsonUtil.read(json, NoteHook.class);
+        this.secretToken = secretToken;
     }
 
     public void execute(StaplerResponse response) {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Note Hook is not supported for this project");
         }
-        ACL.impersonate(ACL.SYSTEM, new Runnable() {
-            public void run() {
-                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
-                if (trigger != null) {
-                    trigger.onPost(noteHook);
-                }
+        ACL.impersonate(ACL.SYSTEM, new BuildWebHookAction.TriggerNotifier(project, secretToken) {
+            @Override
+            protected void performOnPost(GitLabPushTrigger trigger) {
+                trigger.onPost(noteHook);
             }
         });
         throw HttpResponses.ok();

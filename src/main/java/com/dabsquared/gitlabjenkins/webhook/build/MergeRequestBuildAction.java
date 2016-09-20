@@ -23,11 +23,13 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
     private final static Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
     private Item project;
     private MergeRequestHook mergeRequestHook;
+    private final String secretToken;
 
-    public MergeRequestBuildAction(Item project, String json) {
+    public MergeRequestBuildAction(Item project, String json, String secretToken) {
         LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
         this.project = project;
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
+        this.secretToken = secretToken;
     }
 
     void processForCompatibility() {
@@ -50,12 +52,10 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Merge Request Hook is not supported for this project");
         }
-        ACL.impersonate(ACL.SYSTEM, new Runnable() {
-            public void run() {
-                GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
-                if (trigger != null) {
-                    trigger.onPost(mergeRequestHook);
-                }
+        ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken) {
+            @Override
+            protected void performOnPost(GitLabPushTrigger trigger) {
+                trigger.onPost(mergeRequestHook);
             }
         });
         throw HttpResponses.ok();

@@ -69,5 +69,11 @@
         </f:optionalBlock>
       </table>
     </f:entry>
+    <f:entry title="${%Secret token}" help="/plugin/gitlab-plugin/help/help-secretToken.html">
+      <table>
+        <f:readOnlyTextbox field="secretToken" id="secretToken"/>
+        <f:validateButton title="${%Generate}" method="generateSecretToken"/>
+      </table>
+    </f:entry>
   </f:advanced>
 </j:jelly>

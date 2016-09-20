@@ -74,7 +74,7 @@ public class NoteBuildActionTest {
         testProject.addTrigger(trigger);
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new NoteBuildAction(testProject, getJson("NoteEvent.json")).execute(response);
+        new NoteBuildAction(testProject, getJson("NoteEvent.json"), null).execute(response);
 
         verify(trigger).onPost(any(NoteHook.class));
     }
@@ -88,7 +88,7 @@ public class NoteBuildActionTest {
         future.get();
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json")).execute(response);
+        new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null).execute(response);
 
         verify(trigger).onPost(any(NoteHook.class));
     }
@@ -126,7 +126,7 @@ public class NoteBuildActionTest {
         future.get();
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json")).execute(response);
+        new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null).execute(response);
 
         verify(trigger).onPost(any(NoteHook.class));
     }
