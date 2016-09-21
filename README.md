@@ -142,7 +142,9 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
       [Jenkins folders](https://wiki.jenkins-ci.org/display/JENKINS/CloudBees+Folders+Plugin).
     * Select *Merge Request Events* and *Push Events*
     * Click *Add Webhook*
-    * Click *Test Hook* to test your new web hook.  In addition to success in GitLab, in Jenkins project ``JENKINS_PROJECT_NAME`` should start.
+    * Click *Test Hook* to test your new web hook.  You should see two results:
+        * GitLab should display "Hook successfully executed"
+        * Jenkins project ``JENKINS_PROJECT_NAME`` should start
 
 * Add a post-build step *Publish build status to GitLab commit (GitLab 8.1+ required)* to the job.
 * For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
