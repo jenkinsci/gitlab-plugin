@@ -67,11 +67,11 @@ public class PushBuildActionTest {
     public void invalidToken() throws IOException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
-        when(trigger.isWebHookAuthorized("test")).thenReturn(false);
+        when(trigger.getSecretToken()).thenReturn("secret");
         testProject.addTrigger(trigger);
 
         exception.expect(HttpResponses.HttpResponseException.class);
-        new PushBuildAction(testProject, getJson("PushEvent.json"), "test").execute(response);
+        new PushBuildAction(testProject, getJson("PushEvent.json"), "wrong-secret").execute(response);
 
         verify(trigger, never()).onPost(any(PushHook.class));
     }

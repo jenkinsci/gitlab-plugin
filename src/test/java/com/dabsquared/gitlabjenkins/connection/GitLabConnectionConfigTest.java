@@ -5,6 +5,8 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
@@ -35,6 +37,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -94,7 +97,9 @@ public class GitLabConnectionConfigTest {
         jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
         jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
-        jenkins.createFreeStyleProject("test");
+        FreeStyleProject project = jenkins.createFreeStyleProject("test");
+        GitLabPushTrigger trigger = mock(GitLabPushTrigger.class);
+        project.addTrigger(trigger);
 
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");

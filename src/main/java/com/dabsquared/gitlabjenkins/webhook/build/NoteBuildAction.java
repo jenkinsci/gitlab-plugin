@@ -8,6 +8,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerResponse;
 
 import java.util.logging.Level;
@@ -36,7 +37,7 @@ public class NoteBuildAction implements WebHookAction {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Note Hook is not supported for this project");
         }
-        ACL.impersonate(ACL.SYSTEM, new BuildWebHookAction.TriggerNotifier(project, secretToken) {
+        ACL.impersonate(ACL.SYSTEM, new BuildWebHookAction.TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
             @Override
             protected void performOnPost(GitLabPushTrigger trigger) {
                 trigger.onPost(noteHook);

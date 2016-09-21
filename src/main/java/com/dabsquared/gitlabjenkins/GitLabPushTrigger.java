@@ -235,11 +235,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return secretToken == null ? null : secretToken.getPlainText();
     }
 
-    public boolean isWebHookAuthorized(String secretToken) {
-        String plainText = this.secretToken.getPlainText();
-        return StringUtils.isEmpty(plainText) || StringUtils.equals(plainText, secretToken);
-    }
-
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
         pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);

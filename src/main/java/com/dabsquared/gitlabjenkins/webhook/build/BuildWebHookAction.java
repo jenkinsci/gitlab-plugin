@@ -5,10 +5,11 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Item;
 import hudson.model.Job;
-import hudson.security.AccessDeniedException2;
+import hudson.security.Messages;
 import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
+import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -29,10 +30,12 @@ abstract class BuildWebHookAction implements WebHookAction {
 
         private final Item project;
         private final String secretToken;
+        private final Authentication authentication;
 
-        public TriggerNotifier(Item project, String secretToken) {
+        public TriggerNotifier(Item project, String secretToken, Authentication authentication) {
             this.project = project;
             this.secretToken = secretToken;
+            this.authentication = authentication;
         }
 
         public void run() {
@@ -49,10 +52,9 @@ abstract class BuildWebHookAction implements WebHookAction {
 
         private void checkPermission(Permission permission) {
             if (((GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class)).isUseAuthenticatedEndpoint()) {
-                try {
-                    Jenkins.getInstance().checkPermission(permission);
-                } catch (AccessDeniedException2 e) {
-                    throw HttpResponses.errorWithoutStack(403, e.getMessage());
+                if (!Jenkins.getActiveInstance().getACL().hasPermission(authentication, permission)) {
+                    String message = Messages.AccessDeniedException2_MissingPermission(authentication.getName(), permission.group.title+"/"+permission.name);
+                    throw HttpResponses.errorWithoutStack(403, message);
                 }
             }
         }

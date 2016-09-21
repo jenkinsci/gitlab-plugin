@@ -9,6 +9,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
+import jenkins.model.Jenkins;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,7 +53,7 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Merge Request Hook is not supported for this project");
         }
-        ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken) {
+        ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
             @Override
             protected void performOnPost(GitLabPushTrigger trigger) {
                 trigger.onPost(mergeRequestHook);

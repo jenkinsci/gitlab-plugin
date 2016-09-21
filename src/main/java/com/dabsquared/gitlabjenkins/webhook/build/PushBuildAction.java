@@ -8,6 +8,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
+import jenkins.model.Jenkins;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
@@ -65,7 +66,7 @@ public class PushBuildAction extends BuildWebHookAction {
         }
 
         if (project instanceof Job<?, ?>) {
-            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken) {
+            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
                 @Override
                 protected void performOnPost(GitLabPushTrigger trigger) {
                     trigger.onPost(pushHook);
