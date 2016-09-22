@@ -60,18 +60,19 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 ### Git configuration for Freestyle jobs
 1. In the *Source Code Management* section:
     1. Click *Git*
-    2. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
-      * In the Advanced settings, set its *Name* to ``origin`` and its *refspec* to ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
-    3. To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
+    2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
+      * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
+        ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
+    3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
       * Add a second repository with:
         * *URL*: ``${gitlabSourceRepoURL}`` 
-        * *Name* (in Advanced): ``${gitlabSourceRepoName}``
+        * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
-      * For single-repository setups: ``origin/${gitlabSourceBranch}``
-      * For forked repository setups: ``merge-requests/${gitlabMergeRequestIid}``
+      * For single-repository workflows: ``origin/${gitlabSourceBranch}``
+      * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
     5. In *Additional Behaviours*:
-        * Click the *Add* drop-down button.
-        * Select *Merge before build* from the drop-down.
+        * Click the *Add* drop-down button
+        * Select *Merge before build* from the drop-down
         * Set *Name of the repository" to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
