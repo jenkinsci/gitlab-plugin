@@ -64,7 +64,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
       * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
         ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
     3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
-      * Add a second repository with:
+      * Click *Add Repository* to specify the merge request source repository.  Then specify:
         * *URL*: ``${gitlabSourceRepoURL}`` 
         * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
@@ -73,7 +73,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
     5. In *Additional Behaviours*:
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
-        * Set *Name of the repository" to ``origin`` 
+        * Set *Name of repository* to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
