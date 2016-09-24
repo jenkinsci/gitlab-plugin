@@ -26,7 +26,7 @@ class MergeRequestLabelFilterImpl implements MergeRequestLabelFilter {
 
     private boolean containsNoExcludeLabel(Collection<String> labels) {
         for (String excludeLabel : excludeLabels) {
-            if (labels.contains(excludeLabel)) {
+            if (labels != null && labels.contains(excludeLabel)) {
                 return false;
             }
         }
@@ -35,7 +35,7 @@ class MergeRequestLabelFilterImpl implements MergeRequestLabelFilter {
 
     private boolean containsIncludeLabel(Collection<String> labels) {
         for (String includeLabel : includeLabels) {
-            if (labels.contains(includeLabel)) {
+            if (labels != null && labels.contains(includeLabel)) {
                 return true;
             }
         }
