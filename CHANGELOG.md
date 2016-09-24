@@ -3,6 +3,14 @@ ChangeLog
 
 1.4.0
 =====================
+* #410: `NoStaplerConstructorException` for `addGitLabMRComment`
+* Use plugin ClassLoader for the resteasy client instead of the uberClassLoader
+* #406: Add include/exclude of merge requests based on gitlab merge request labels
+* Add possibility to configure secret tokens per job to allow only web hooks with the correct token to trigger builds
+* #415: Add actual trigger phrase as environment variable
+
+1.4.0
+=====================
 * Breaking changes for some Pipeline jobs (see [migration guide](https://github.com/jenkinsci/gitlab-plugin/wiki/Migration-Guides) for more information)
 * Cleanup UI for GitLabPushTrigger
 * #201: customize notes for merge requsts
