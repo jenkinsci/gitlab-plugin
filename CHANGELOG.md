@@ -1,7 +1,7 @@
 ChangeLog
 =====================
 
-1.4.0
+1.4.1
 =====================
 * #410: `NoStaplerConstructorException` for `addGitLabMRComment`
 * Use plugin ClassLoader for the resteasy client instead of the uberClassLoader
