@@ -8,8 +8,10 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -44,13 +46,15 @@ public final class CauseData {
     private final String after;
     private final String lastCommit;
     private final String targetProjectUrl;
+    private final String triggerPhrase;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
               String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
               Integer mergeRequestIid, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
-              String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl) {
+              String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
+              String triggerPhrase) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
         this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
@@ -78,10 +82,11 @@ public final class CauseData {
         this.after = after == null ? "" : after;
         this.lastCommit = checkNotNull(lastCommit, "lastCommit must not be null");
         this.targetProjectUrl = targetProjectUrl;
+        this.triggerPhrase = triggerPhrase;
     }
 
     public Map<String, String> getBuildVariables() {
-        HashMap<String, String> variables = new HashMap<>();
+        MapWrapper<String, String> variables = new MapWrapper<>(new HashMap<String, String>());
         variables.put("gitlabBranch", branch);
         variables.put("gitlabSourceBranch", sourceBranch);
         variables.put("gitlabActionType", actionType.name());
@@ -105,6 +110,7 @@ public final class CauseData {
         variables.put("gitlabTargetRepoHttpUrl", targetRepoHttpUrl);
         variables.put("gitlabBefore", before);
         variables.put("gitlabAfter", after);
+        variables.pufIfNotNull("gitlabTriggerPhrase", triggerPhrase);
         return variables;
     }
 
@@ -373,5 +379,30 @@ public final class CauseData {
         };
 
         abstract String getShortDescription(CauseData data);
+    }
+
+    private static class MapWrapper<K, V> extends AbstractMap<K, V> {
+
+        private final Map<K, V> map;
+
+        public MapWrapper(Map<K, V> map) {
+            this.map = map;
+        }
+
+        @Override
+        public V put(K key, V value) {
+            return map.put(key, value);
+        }
+
+        @Override
+        public Set<Entry<K, V>> entrySet() {
+            return map.entrySet();
+        }
+
+        public void pufIfNotNull(K key, V value) {
+            if (value != null) {
+                map.put(key, value);
+            }
+        }
     }
 }
