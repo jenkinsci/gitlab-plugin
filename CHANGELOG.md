@@ -1,6 +1,10 @@
 ChangeLog
 =====================
 
+1.4.2
+=====================
+* #408: Multiple branches pushed, Only one job triggered
+
 1.4.1
 =====================
 * #410: `NoStaplerConstructorException` for `addGitLabMRComment`
