@@ -8,6 +8,7 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Job;
+import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import org.eclipse.jgit.util.StringUtils;
 
@@ -83,8 +84,8 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(PushHook hook) throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+    protected RevisionParameterAction createRevisionParameter(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
+        return new RevisionParameterAction(retrieveRevisionToBuild(hook, gitSCM), retrieveUrIish(hook));
     }
 
     @Override
@@ -111,21 +112,21 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         return null;
     }
 
-    private String retrieveRevisionToBuild(PushHook hook) throws NoRevisionToBuildException {
-        if (hook.getCommits() == null || hook.getCommits().isEmpty()) {
-            if (isNewBranchPush(hook)) {
-                return hook.getAfter();
+    private String retrieveRevisionToBuild(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
+        if (inNoBranchDelete(hook)) {
+            if (gitSCM != null && gitSCM.getRepositories().size() == 1) {
+                String repositoryName = gitSCM.getRepositories().get(0).getName();
+                return hook.getRef().replaceFirst("^refs/heads", "remotes/" + repositoryName);
             } else {
-                throw new NoRevisionToBuildException();
+                return hook.getAfter();
             }
         } else {
-            List<Commit> commits = hook.getCommits();
-            return commits.get(commits.size() - 1).getId();
+            throw new NoRevisionToBuildException();
         }
     }
 
-    private boolean isNewBranchPush(PushHook hook) {
-        return hook.getBefore() != null && hook.getBefore().equals(NO_COMMIT);
+    private boolean inNoBranchDelete(PushHook hook) {
+        return hook.getAfter() != null && !hook.getAfter().equals(NO_COMMIT);
     }
 
     private boolean isNoRemoveBranchPush(PushHook hook) {

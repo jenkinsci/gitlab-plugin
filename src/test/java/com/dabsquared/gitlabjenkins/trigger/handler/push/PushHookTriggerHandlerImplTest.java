@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -23,6 +24,7 @@ import org.jvnet.hudson.test.TestBuilder;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
@@ -117,5 +119,58 @@ public class PushHookTriggerHandlerImplTest {
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void push_build2DifferentBranchesButSameCommit() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        Git.init().setDirectory(tmp.getRoot()).call();
+        tmp.newFile("test");
+        Git git = Git.open(tmp.getRoot());
+        git.add().addFilepattern("test");
+        RevCommit commit = git.commit().setMessage("test").call();
+        ObjectId head = git.getRepository().resolve(Constants.HEAD);
+        String repositoryUrl = tmp.getRoot().toURI().toString();
+
+        final AtomicInteger buildCount = new AtomicInteger(0);
+
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.setScm(new GitSCM(repositoryUrl));
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                int count = buildCount.incrementAndGet();
+                if (count == 2) {
+                    buildTriggered.signal();
+                }
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+        PushHookBuilder pushHookBuilder = pushHook()
+            .withBefore("0000000000000000000000000000000000000000")
+            .withProjectId(1)
+            .withUserName("test")
+            .withRepository(repository()
+                                .withName("test")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withGitSshUrl("git@gitlab.org:test.git")
+                                .withGitHttpUrl("https://gitlab.org/test.git")
+                                .build())
+            .withProject(project()
+                             .withNamespace("test-namespace")
+                             .withWebUrl("https://gitlab.org/test")
+                             .build())
+            .withAfter(commit.name())
+            .withRef("refs/heads/" + git.nameRev().add(head).call().get(head));
+        pushHookTriggerHandler.handle(project, pushHookBuilder.build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                                      newMergeRequestLabelFilter(null));
+        pushHookTriggerHandler.handle(project, pushHookBuilder
+                                          .but().withRef("refs/heads/" + git.nameRev().add(head).call().get(head) + "-2").build(), true,
+                                      newBranchFilter(branchFilterConfig().build(BranchFilterType.All)), newMergeRequestLabelFilter(null));
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+        assertThat(buildCount.intValue(), is(2));
     }
 }

@@ -12,6 +12,7 @@ import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandle
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.Job;
 import hudson.model.Run;
+import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
@@ -98,7 +99,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook) throws NoRevisionToBuildException {
+    protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }
 

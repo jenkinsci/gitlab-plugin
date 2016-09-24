@@ -15,9 +15,12 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
+import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
+import hudson.scm.SCM;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
+import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.eclipse.jgit.transport.URIish;
 
@@ -79,7 +82,9 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         ArrayList<Action> actions = new ArrayList<>();
         actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook))));
         try {
-            actions.add(createRevisionParameter(hook));
+            SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
+            GitSCM gitSCM = getGitSCM(item);
+            actions.add(createRevisionParameter(hook, gitSCM));
         } catch (NoRevisionToBuildException e) {
             LOGGER.log(Level.WARNING, "unknown handled situation, dont know what revision to build for req {0} for job {1}",
                     new Object[]{hook, (job != null ? job.getFullName() : null)});
@@ -91,7 +96,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected abstract String getTargetBranch(H hook);
 
-    protected abstract RevisionParameterAction createRevisionParameter(H hook) throws NoRevisionToBuildException;
+    protected abstract RevisionParameterAction createRevisionParameter(H hook, GitSCM gitSCM) throws NoRevisionToBuildException;
 
     protected abstract BuildStatusUpdate retrieveBuildStatusUpdate(H hook);
 
@@ -125,6 +130,17 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 return job;
             }
         };
+    }
+
+    private GitSCM getGitSCM(SCMTriggerItem item) {
+        if (item != null) {
+            for (SCM scm : item.getSCMs()) {
+                if (scm instanceof GitSCM) {
+                    return (GitSCM) scm;
+                }
+            }
+        }
+        return null;
     }
 
     public static class BuildStatusUpdate {
