@@ -86,11 +86,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
         git.add().addFilepattern("test");
         RevCommit commit = git.commit().setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
-        String repositoryUrl = tmp.getRoot().toURI().toString();
-
+        
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -181,7 +179,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withHttpUrl("https://gitlab.org/test.git")
                     .build())
                 .build())
-            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
+            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         final AbstractBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
 
@@ -213,7 +211,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withHttpUrl("https://gitlab.org/test.git")
                     .build())
                 .build())
-            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
+            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         buildNotifier.getLock().block(10000);
         assertThat(project.getLastBuild(), is(lastBuild));
@@ -262,7 +260,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withHttpUrl("https://gitlab.org/test.git")
                     .build())
                 .build())
-            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
+            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         final AbstractBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
 
@@ -294,7 +292,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withHttpUrl("https://gitlab.org/test.git")
                     .build())
                 .build())
-            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
+            .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         buildNotifier.getLock().block(10000);
         assertThat(project.getLastBuild(), not(is(lastBuild)));

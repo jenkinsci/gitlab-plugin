@@ -21,8 +21,8 @@ public class JenkinsProjectTestFactory {
 
     public ProjectSetupResult createProject(final JenkinsRule jenkins,
                                             final String gitRepoUrl) throws IOException {
-        final FreeStyleProject testProject = jenkins.createFreeStyleProject("test");
-        testProject.setScm(new GitSCM(gitRepoUrl));
+        final FreeStyleProject testProject = jenkins.createFreeStyleProject();
+        //testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);
 
         final BuildNotifier buildNotifier = addNotifier(testProject);

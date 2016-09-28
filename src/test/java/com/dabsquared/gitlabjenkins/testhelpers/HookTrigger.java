@@ -23,6 +23,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 
 /**
  * Intended to be the primary means to start off a merge request hook for testing purposes.
@@ -87,7 +88,7 @@ public class HookTrigger {
                 .build())
             .build(),
             false,
-            BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)));
+            BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         if (blocking) {
             //wait for hook to register build event - intended to make sure the trigger actually fires a build
