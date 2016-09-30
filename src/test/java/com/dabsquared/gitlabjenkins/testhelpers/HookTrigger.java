@@ -54,7 +54,7 @@ public class HookTrigger {
                                    boolean blocking) throws IOException, GitAPIException, InterruptedException {
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
 
-        MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(true, TriggerOpenMergeRequest.source, false).handle(project.getTestProject(), mergeRequestHook()
+        MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(true, TriggerOpenMergeRequest.source, false, false).handle(project.getTestProject(), mergeRequestHook()
             .withProject(project().withWebUrl("https://gitlab.org/test.git").build())
             .withObjectAttributes(mergeRequestObjectAttributes()
                 .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))

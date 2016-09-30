@@ -14,9 +14,10 @@ public final class PushHookTriggerHandlerFactory {
 
     public static PushHookTriggerHandler newPushHookTriggerHandler(boolean triggerOnPush,
                                                                    TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
-                                                                   boolean skipWorkInProgressMergeRequest) {
+                                                                   boolean skipWorkInProgressMergeRequest,
+                                                                   boolean alwaysBuildHead) {
         if (triggerOnPush || triggerOpenMergeRequestOnPush == TriggerOpenMergeRequest.both) {
-            return new PushHookTriggerHandlerList(retrieveHandlers(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest));
+            return new PushHookTriggerHandlerList(retrieveHandlers(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest, alwaysBuildHead));
         } else {
             return new NopPushHookTriggerHandler();
         }
@@ -24,13 +25,14 @@ public final class PushHookTriggerHandlerFactory {
 
     private static List<PushHookTriggerHandler> retrieveHandlers(boolean triggerOnPush,
                                                                  TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
-                                                                 boolean skipWorkInProgressMergeRequest) {
+                                                                 boolean skipWorkInProgressMergeRequest,
+                                                                 boolean alwaysBuildHead) {
         List<PushHookTriggerHandler> result = new ArrayList<>();
         if (triggerOnPush) {
-            result.add(new PushHookTriggerHandlerImpl());
+            result.add(new PushHookTriggerHandlerImpl(alwaysBuildHead));
         }
         if (triggerOpenMergeRequestOnPush == TriggerOpenMergeRequest.both) {
-            result.add(new OpenMergeRequestPushHookTriggerHandler(skipWorkInProgressMergeRequest));
+            result.add(new OpenMergeRequestPushHookTriggerHandler(skipWorkInProgressMergeRequest, alwaysBuildHead));
         }
         return result;
     }

@@ -5,8 +5,10 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
+import com.dabsquared.gitlabjenkins.trigger.WebHookRevisionParameterAction;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -15,8 +17,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
-import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.RevisionParameterAction;
 import hudson.scm.SCM;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
@@ -38,6 +38,12 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
 
+    private final boolean alwaysBuildHead;
+    
+    public AbstractWebHookTriggerHandler(boolean alwaysBuildHead) {
+        this.alwaysBuildHead = alwaysBuildHead;
+    }
+    
     @Override
     public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (ciSkip && isCiSkip(hook)) {
@@ -82,9 +88,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         ArrayList<Action> actions = new ArrayList<>();
         actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook))));
         try {
-            SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
-            GitSCM gitSCM = getGitSCM(item);
-            actions.add(createRevisionParameter(hook, gitSCM));
+            actions.add(createRevisionParameter(hook));
         } catch (NoRevisionToBuildException e) {
             LOGGER.log(Level.WARNING, "unknown handled situation, dont know what revision to build for req {0} for job {1}",
                     new Object[]{hook, (job != null ? job.getFullName() : null)});
@@ -96,8 +100,26 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected abstract String getTargetBranch(H hook);
 
-    protected abstract RevisionParameterAction createRevisionParameter(H hook, GitSCM gitSCM) throws NoRevisionToBuildException;
-
+    public WebHookRevisionParameterAction createRevisionParameter(H hook) throws NoRevisionToBuildException {
+        String sourceCommit = retrieveSourceCommit(hook);
+        String targetCommit = retrieveTargetCommit(hook);
+        return new WebHookRevisionParameterAction(retrieveUrIish(hook), sourceCommit, targetCommit);
+    }
+ 
+    private String retrieveSourceCommit(H hook) throws NoRevisionToBuildException {
+        return this.alwaysBuildHead?retrieveSourceBranch(hook):retrieveRevisionToBuild(hook);
+    }
+    
+    protected abstract String retrieveSourceBranch(H hook) throws NoRevisionToBuildException;
+    
+    private String retrieveTargetCommit(H hook) throws NoRevisionToBuildException {
+        return retrieveTargetBranch(hook);
+    }
+    
+    protected abstract String retrieveTargetBranch(H hook) throws NoRevisionToBuildException;
+    
+    protected abstract String retrieveRevisionToBuild(H hook) throws NoRevisionToBuildException;
+            
     protected abstract BuildStatusUpdate retrieveBuildStatusUpdate(H hook);
 
     protected URIish retrieveUrIish(WebHook hook) {
@@ -130,17 +152,6 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 return job;
             }
         };
-    }
-
-    private GitSCM getGitSCM(SCMTriggerItem item) {
-        if (item != null) {
-            for (SCM scm : item.getSCMs()) {
-                if (scm instanceof GitSCM) {
-                    return (GitSCM) scm;
-                }
-            }
-        }
-        return null;
     }
 
     public static class BuildStatusUpdate {

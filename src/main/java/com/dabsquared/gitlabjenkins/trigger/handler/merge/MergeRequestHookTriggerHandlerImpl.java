@@ -12,8 +12,6 @@ import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandle
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.Job;
 import hudson.model.Run;
-import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -33,8 +31,9 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private final List<State> allowedStates;
     private final boolean skipWorkInProgressMergeRequest;
-
-    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest) {
+  
+    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean alwaysBuildHead) {
+        super(alwaysBuildHead);
         this.allowedStates = allowedStates;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
     }
@@ -97,12 +96,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withTargetProjectUrl(hook.getObjectAttributes().getTarget().getWebUrl())
                 .build();
     }
-
-    @Override
-    protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
-    }
-
+   
     @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(MergeRequestHook hook) {
         return buildStatusUpdate()
@@ -112,14 +106,36 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             .build();
     }
 
-    private String retrieveRevisionToBuild(MergeRequestHook hook) throws NoRevisionToBuildException {
+    protected String retrieveRevisionToBuild(MergeRequestHook hook) throws NoRevisionToBuildException {
         if (hook.getObjectAttributes() != null
                 && hook.getObjectAttributes().getLastCommit() != null
                 && hook.getObjectAttributes().getLastCommit().getId() != null) {
 
             return hook.getObjectAttributes().getLastCommit().getId();
         } else {
-            throw new NoRevisionToBuildException();
+            throw new NoRevisionToBuildException("lastcommit id not found");
+        }
+    }
+    
+    protected String retrieveSourceBranch(MergeRequestHook hook) throws NoRevisionToBuildException {
+        if (hook.getObjectAttributes() != null
+                && hook.getObjectAttributes().getSourceBranch() != null
+                && !hook.getObjectAttributes().getSourceBranch().isEmpty()) {
+
+            return hook.getObjectAttributes().getSourceBranch();
+        } else {
+            throw new NoRevisionToBuildException("sourcebranch name not found");
+        }
+    }
+    
+    protected String retrieveTargetBranch(MergeRequestHook hook) throws NoRevisionToBuildException {
+        if (hook.getObjectAttributes() != null
+                && hook.getObjectAttributes().getTargetBranch() != null
+                && !hook.getObjectAttributes().getTargetBranch().isEmpty()) {
+
+            return hook.getObjectAttributes().getTargetBranch();
+        } else {
+            throw new NoRevisionToBuildException("targetbranch name not found");
         }
     }
 

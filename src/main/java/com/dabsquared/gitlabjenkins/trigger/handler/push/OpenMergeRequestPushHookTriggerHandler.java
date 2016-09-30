@@ -12,6 +12,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
+import com.dabsquared.gitlabjenkins.trigger.WebHookRevisionParameterAction;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
@@ -19,7 +20,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
-import hudson.plugins.git.RevisionParameterAction;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import org.eclipse.jgit.transport.URIish;
@@ -45,8 +45,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     private final boolean skipWorkInProgressMergeRequest;
 
-    OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest) {
+    private final boolean alwaysBuildHead;
+
+    OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest, boolean alwaysBuildHead) {
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+        this.alwaysBuildHead = alwaysBuildHead;
     }
 
     @Override
@@ -106,7 +109,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
 
             List<Action> actions = Arrays.<Action>asList(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
-                                                         new RevisionParameterAction(commit, retrieveUrIish(hook)));
+                                                         new WebHookRevisionParameterAction(retrieveUrIish(hook),sourceBranch, targetBranch));
             scheduleBuild(job, actions.toArray(new Action[actions.size()]));
         }
     }

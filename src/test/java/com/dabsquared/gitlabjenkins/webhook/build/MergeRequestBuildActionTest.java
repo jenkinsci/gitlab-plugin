@@ -8,7 +8,6 @@ import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueTaskFuture;
-import hudson.plugins.git.GitSCM;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -104,7 +103,6 @@ public class MergeRequestBuildActionTest {
     public void skip_alreadyBuiltMR() throws IOException, ExecutionException, InterruptedException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
-        testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
         future.get();
 
@@ -118,7 +116,6 @@ public class MergeRequestBuildActionTest {
     public void build_alreadyBuiltMR_differentTargetBranch() throws IOException, ExecutionException, InterruptedException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
-        testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabWebHookCause(causeData()
                 .withActionType(CauseData.ActionType.MERGE)
                 .withSourceProjectId(1)

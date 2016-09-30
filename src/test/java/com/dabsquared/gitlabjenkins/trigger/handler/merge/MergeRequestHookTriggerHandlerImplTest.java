@@ -54,7 +54,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Before
     public void setup() {
-        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false);
+        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false, false);
     }
 
     @Test
@@ -179,6 +179,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withHttpUrl("https://gitlab.org/test.git")
                     .build())
                 .build())
+            .withProject(project()
+                    .withWebUrl("https://gitlab.org/test.git")
+                    .build())
             .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         final AbstractBuild lastBuild = assertFirstBuildTriggered(project, buildNotifier);
@@ -207,10 +210,14 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withNamespace("test-namespace")
                     .withHomepage("https://gitlab.org/test")
                     .withUrl("git@gitlab.org:test.git")
+                    .withWebUrl("https://gitlab.org/test")
                     .withSshUrl("git@gitlab.org:test.git")
                     .withHttpUrl("https://gitlab.org/test.git")
                     .build())
                 .build())
+            .withProject(project()
+                    .withWebUrl("https://gitlab.org/test.git")
+                    .build())
             .build(), false, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),newMergeRequestLabelFilter(null));
 
         buildNotifier.getLock().block(10000);

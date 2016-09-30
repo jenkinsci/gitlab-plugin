@@ -158,11 +158,6 @@
     <!-- Jenkins dependencies -->
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>git</artifactId>
-      <version>2.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>git-client</artifactId>
       <version>1.19.0</version>
     </dependency>
@@ -276,6 +271,11 @@
       <artifactId>postgresql</artifactId>
       <version>9.4.1208</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.jenkins-ci.plugins</groupId>
+    	<artifactId>scm-api</artifactId>
+    	<version>1.0</version>
     </dependency>
   </dependencies>
 

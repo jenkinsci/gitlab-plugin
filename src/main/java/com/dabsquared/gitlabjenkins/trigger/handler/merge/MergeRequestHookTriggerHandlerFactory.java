@@ -15,10 +15,10 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
     public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(boolean triggerOnMergeRequest,
                                                                                    TriggerOpenMergeRequest triggerOpenMergeRequest,
-                                                                                   boolean skipWorkInProgressMergeRequest) {
+                                                                                   boolean skipWorkInProgressMergeRequest, boolean alwaysBuildHead) {
         if (triggerOnMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
             return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
-                                                          skipWorkInProgressMergeRequest);
+                                                          skipWorkInProgressMergeRequest, alwaysBuildHead);
         } else {
             return new NopMergeRequestHookTriggerHandler();
         }
