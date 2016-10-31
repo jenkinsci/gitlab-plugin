@@ -229,6 +229,9 @@ These include:
 * gitlabTargetNamespace
 * gitlabTargetRepoSshUrl
 * gitlabTargetRepoHttpUrl
+* gitlabBefore
+* gitlabAfter
+* gitlabTriggerPhrase
 
 # Contributing to the Plugin
 
