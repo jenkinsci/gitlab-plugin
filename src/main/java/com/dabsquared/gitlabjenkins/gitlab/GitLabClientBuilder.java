@@ -90,6 +90,7 @@ public class GitLabClientBuilder {
             .register(new JacksonConfig())
             .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId)))
             .register(new LoggingFilter())
+            .register(new RemoveAcceptEncodingFilter())
             .build().target(gitlabHostUrl)
             .proxyBuilder(GitLabApi.class)
             .classloader(GitLabApi.class.getClassLoader())
@@ -214,6 +215,15 @@ public class GitLabClientBuilder {
             public String apply(@Nullable Map.Entry<String, List<String>> input) {
                 return input == null ? null : input.getKey() + " = [" + Joiner.on(", ").join(input.getValue()) + "]";
             }
+        }
+    }
+
+    @Priority(Priorities.HEADER_DECORATOR)
+    private static class RemoveAcceptEncodingFilter implements ClientRequestFilter {
+        RemoveAcceptEncodingFilter() {}
+        @Override
+        public void filter(ClientRequestContext clientRequestContext) throws IOException {
+            clientRequestContext.getHeaders().remove("Accept-Encoding");
         }
     }
 
