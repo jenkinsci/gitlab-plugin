@@ -1,6 +1,10 @@
 ChangeLog
 =====================
 
+1.4.3
+=====================
+* #423: Added Remove-Accept Encoding Filter, to resolve occasional issues with data sent from GitLab
+
 1.4.2
 =====================
 * #408: Multiple branches pushed, Only one job triggered
