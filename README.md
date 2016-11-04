@@ -178,7 +178,7 @@ GitLab 8.1 has implemented a commit status api, you need an extra post-build ste
         }
     }
     ```
-* Configure access to GitLab as described above in "Configure access to GitLab" (the account needs at least developer permissions to post commit statuses)
+* Configure access to GitLab as described above in ["Configure access to GitLab"](#configuring-access-to-gitlab) (the account needs at least developer permissions to post commit statuses)
 
 # Branch filtering
 
