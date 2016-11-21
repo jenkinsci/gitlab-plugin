@@ -1,8 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
-import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
+import java.util.logging.Logger;
+
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.Messages;
@@ -12,11 +11,17 @@ import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerResponse;
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 
 /**
  * @author Xinran Xiao
  */
 abstract class BuildWebHookAction implements WebHookAction {
+
+    private final static Logger LOGGER = Logger.getLogger(BuildWebHookAction.class.getName());
+
     abstract void processForCompatibility();
 
     abstract void execute();
@@ -54,6 +59,7 @@ abstract class BuildWebHookAction implements WebHookAction {
             if (((GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class)).isUseAuthenticatedEndpoint()) {
                 if (!Jenkins.getActiveInstance().getACL().hasPermission(authentication, permission)) {
                     String message = Messages.AccessDeniedException2_MissingPermission(authentication.getName(), permission.group.title+"/"+permission.name);
+                    LOGGER.finest("Unauthorized (Did you forget to add API Token to the web hook ?)");
                     throw HttpResponses.errorWithoutStack(403, message);
                 }
             }
