@@ -250,12 +250,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
-    private void generateSecretToken() {
-        byte[] random = new byte[16];   // 16x8=128bit worth of randomness, since we use md5 digest as the API token
-        RANDOM.nextBytes(random);
-        secretToken = Secret.fromString(Util.toHexString(random));
-    }
-
     private void initializeTriggerHandler() {
         mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
@@ -403,9 +397,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         }
 
         public void doGenerateSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse response) {
-            GitLabPushTrigger trigger = getFromJob(project);
-            trigger.generateSecretToken();
-            response.setHeader("script", "document.getElementById('secretToken').value='" + trigger.getSecretToken() + "'");
+            byte[] random = new byte[16];   // 16x8=128bit worth of randomness, since we use md5 digest as the API token
+            RANDOM.nextBytes(random);
+            String secretToken = Util.toHexString(random);
+            response.setHeader("script", "document.getElementById('secretToken').value='" + secretToken + "'");
         }
     }
 }
