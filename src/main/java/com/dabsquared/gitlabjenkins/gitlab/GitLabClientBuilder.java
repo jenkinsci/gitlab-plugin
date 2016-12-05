@@ -27,6 +27,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.plugins.providers.JaxrsFormProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -91,6 +92,7 @@ public class GitLabClientBuilder {
             .register(new ApiHeaderTokenFilter(getApiToken(gitlabApiTokenId)))
             .register(new LoggingFilter())
             .register(new RemoveAcceptEncodingFilter())
+            .register(new JaxrsFormProvider())
             .build().target(gitlabHostUrl)
             .proxyBuilder(GitLabApi.class)
             .classloader(GitLabApi.class.getClassLoader())
