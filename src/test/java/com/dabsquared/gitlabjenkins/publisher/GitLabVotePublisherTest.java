@@ -29,6 +29,7 @@ import org.mockserver.model.HttpRequest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -139,7 +140,7 @@ public class GitLabVotePublisherTest {
                 .withPath("/gitlab/api/v3/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
-                .withQueryStringParameter("body", body);
+                .withBody("body=" + URLEncoder.encode(body, "UTF-8"));
     }
 
     private AbstractBuild mockBuild(String buildUrl, String gitLabConnection, Result result, Integer buildNumber, String... remoteUrls) {

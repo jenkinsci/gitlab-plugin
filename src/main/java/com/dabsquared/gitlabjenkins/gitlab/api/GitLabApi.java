@@ -8,7 +8,9 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
@@ -28,17 +30,19 @@ public interface GitLabApi {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects")
-    Project createProject(@QueryParam("name") String projectName);
+    Project createProject(@FormParam("name") String projectName);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests")
     void createMergeRequest(
         @PathParam("projectId") Integer projectId,
-        @QueryParam("source_branch") String sourceBranch,
-        @QueryParam("target_branch") String targetBranch,
-        @QueryParam("title") String title);
+        @FormParam("source_branch") String sourceBranch,
+        @FormParam("target_branch") String targetBranch,
+        @FormParam("title") String title);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -47,10 +51,11 @@ public interface GitLabApi {
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}")
     Project updateProject(@PathParam("projectId") String projectId,
-                          @QueryParam("name") String name,
-                          @QueryParam("path") String path);
+                          @FormParam("name") String name,
+                          @FormParam("path") String path);
 
     @DELETE
     @Path("/projects/{projectId}")
@@ -58,34 +63,37 @@ public interface GitLabApi {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/hooks")
     void addProjectHook(@PathParam("projectId") String projectId,
-                        @QueryParam("url") String url,
-                        @QueryParam("push_events") Boolean pushEvents,
-                        @QueryParam("merge_requests_events") Boolean mergeRequestEvents,
-                        @QueryParam("note_events") Boolean noteEvents);
+                        @FormParam("url") String url,
+                        @FormParam("push_events") Boolean pushEvents,
+                        @FormParam("merge_requests_events") Boolean mergeRequestEvents,
+                        @FormParam("note_events") Boolean noteEvents);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/statuses/{sha}")
     void changeBuildStatus(@PathParam("projectId") String projectId,
                            @PathParam("sha") String sha,
-                           @QueryParam("state") BuildState state,
-                           @QueryParam("ref") String ref,
-                           @QueryParam("context") String context,
-                           @QueryParam("target_url") String targetUrl,
-                           @QueryParam("description") String description);
+                           @FormParam("state") BuildState state,
+                           @FormParam("ref") String ref,
+                           @FormParam("context") String context,
+                           @FormParam("target_url") String targetUrl,
+                           @FormParam("description") String description);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/statuses/{sha}")
     void changeBuildStatus(@PathParam("projectId") Integer projectId,
                            @PathParam("sha") String sha,
-                           @QueryParam("state") BuildState state,
-                           @QueryParam("ref") String ref,
-                           @QueryParam("context") String context,
-                           @QueryParam("target_url") String targetUrl,
-                           @QueryParam("description") String description);
+                           @FormParam("state") BuildState state,
+                           @FormParam("ref") String ref,
+                           @FormParam("context") String context,
+                           @FormParam("target_url") String targetUrl,
+                           @FormParam("description") String description);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -95,18 +103,20 @@ public interface GitLabApi {
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/merge")
     void acceptMergeRequest(@PathParam("projectId") Integer projectId,
                             @PathParam("mergeRequestId") Integer mergeRequestId,
-                            @QueryParam("merge_commit_message") String mergeCommitMessage,
-                            @QueryParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
+                            @FormParam("merge_commit_message") String mergeCommitMessage,
+                            @FormParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
     void createMergeRequestNote(@PathParam("projectId") Integer projectId,
                                 @PathParam("mergeRequestId") Integer mergeRequestId,
-                                @QueryParam("body") String body);
+                                @FormParam("body") String body);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -139,20 +149,22 @@ public interface GitLabApi {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/users")
-    User addUser(@QueryParam("email") String email,
-                 @QueryParam("username") String username,
-                 @QueryParam("name") String name,
-                 @QueryParam("password") String password);
+    User addUser(@FormParam("email") String email,
+                 @FormParam("username") String username,
+                 @FormParam("name") String name,
+                 @FormParam("password") String password);
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/users/{userId}")
     User updateUser(@PathParam("userId") String userId,
-                    @QueryParam("email") String email,
-                    @QueryParam("username") String username,
-                    @QueryParam("name") String name,
-                    @QueryParam("password") String password);
+                    @FormParam("email") String email,
+                    @FormParam("username") String username,
+                    @FormParam("name") String name,
+                    @FormParam("password") String password);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
