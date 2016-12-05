@@ -348,11 +348,11 @@ public final class CauseData {
             String getShortDescription(CauseData data) {
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
                 if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter || data.getTargetProjectUrl() == null) {
-                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_plain(data.getMergeRequestIid(),
+                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_plain(String.valueOf(data.getMergeRequestIid()),
                                                                                                forkNamespace + data.getSourceBranch(),
                                                                                                data.getTargetBranch());
                 } else {
-                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_html(data.getMergeRequestIid(),
+                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_html(String.valueOf(data.getMergeRequestIid()),
                                                                                               forkNamespace + data.getSourceBranch(),
                                                                                               data.getTargetBranch(),
                                                                                               data.getTargetProjectUrl());
@@ -365,12 +365,12 @@ public final class CauseData {
                 String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
                 if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter || data.getTargetProjectUrl() == null) {
                     return Messages.GitLabWebHookCause_ShortDescription_NoteHook_plain(triggeredBy,
-                                                                                       data.getMergeRequestIid(),
+                                                                                       String.valueOf(data.getMergeRequestIid()),
                                                                                        forkNamespace + data.getSourceBranch(),
                                                                                        data.getTargetBranch());
                 } else {
                     return Messages.GitLabWebHookCause_ShortDescription_NoteHook_html(triggeredBy,
-                                                                                      data.getMergeRequestIid(),
+                                                                                      String.valueOf(data.getMergeRequestIid()),
                                                                                       forkNamespace + data.getSourceBranch(),
                                                                                       data.getTargetBranch(),
                                                                                       data.getTargetProjectUrl());
