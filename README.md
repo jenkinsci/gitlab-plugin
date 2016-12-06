@@ -62,14 +62,9 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
     1. Click *Git*
     2. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
       * In the Advanced settings, set its *Name* to ``origin`` and its *refspec* to ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
-    3. To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
-      * Add a second repository with:
-        * *URL*: ``${gitlabSourceRepoURL}`` 
-        * *Name* (in Advanced): ``${gitlabSourceRepoName}``
-    4. In *Branch Specifier* enter:
-      * For single-repository setups: ``origin/${gitlabSourceBranch}``
-      * For forked repository setups: ``merge-requests/${gitlabMergeRequestIid}``
-    5. In *Additional Behaviours*:
+    3. In *Branch Specifier* enter: ``origin/${gitlabSourceBranch}``
+        * To handle merge requests add a second *Branch Specifier*: ``origin/merge-requests/${gitlabMergeRequestIid}``
+    4. In *Additional Behaviours*:
         * Click the *Add* drop-down button.
         * Select *Merge before build* from the drop-down.
         * Set *Name of the repository" to ``origin`` 
