@@ -11,6 +11,7 @@
 - **Gitlab plugin version**: X.Y.Z
 - **Gitlab version**: X.Y.Z
 - **Jenkins version**: X.Y.Z
+- **Job type**: Pipeline, Freestyle, Matrix, etc.
 
 ### Logs & Traces
 
