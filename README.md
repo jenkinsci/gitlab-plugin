@@ -3,7 +3,6 @@
 - [User support](#user-support)
 - [Known bugs/issues](#known-bugsissues)
 - [Supported GitLab versions](#supported-gitlab-versions)
-- [Supported GitLabCI Functions](#supported-gitlabci-functions)
 - [Configuring access to GitLab](#configuring-access-to-gitlab)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
     - [Gitlab Configuration (>= 8.1)](#gitlab-configuration)
