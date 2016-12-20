@@ -46,6 +46,11 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
                     source.setHomepage(source.getHttpUrl().substring(0, source.getHttpUrl().lastIndexOf(".git")));
                 }
             }
+
+            // The MergeRequestHookTriggerHandlerImpl is looking for Project
+            if (mergeRequestHook.getProject() == null && attributes.getTarget() != null) {
+                mergeRequestHook.setProject(attributes.getTarget());
+            }
         }
     }
 
