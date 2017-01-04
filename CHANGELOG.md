@@ -3,7 +3,7 @@ ChangeLog
 
 1.4.3
 =====================
-* #423: Added Remove-Accept Encoding Filter, to resolve occasional issues with data sent from GitLab
+* #407: Added Remove-Accept Encoding Filter, to resolve occasional issues with data sent from GitLab
 
 1.4.2
 =====================
