@@ -1,6 +1,14 @@
 ChangeLog
 =====================
 
+1.4.4
+=====================
+* #429: Number format is added at merge requests > 1000
+* #447: Token creation throws exception
+* #448: When user is not permitted to trigger build there is no information logged
+* #455: "HTTP 414 Request-URI Too Long" when posting a large note
+* #470: NPE on merge request web hook
+
 1.4.3
 =====================
 * #407: Added Remove-Accept Encoding Filter, to resolve occasional issues with data sent from GitLab
