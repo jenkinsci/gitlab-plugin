@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -29,6 +30,9 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -71,13 +75,18 @@ public class MergeRequestBuildActionTest {
 
     @Test
     public void build() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.addTrigger(trigger);
+        try {
+            FreeStyleProject testProject = jenkins.createFreeStyleProject();
+            testProject.addTrigger(trigger);
 
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent.json"), null).execute(response);
-
-        verify(trigger).onPost(any(MergeRequestHook.class));
+            exception.expect(HttpResponses.HttpResponseException.class);
+            new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent.json"), null).execute(response);
+        } finally {
+            ArgumentCaptor<MergeRequestHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(MergeRequestHook.class);
+            verify(trigger).onPost(pushHookArgumentCaptor.capture());
+            assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+        }
     }
 
     @Test

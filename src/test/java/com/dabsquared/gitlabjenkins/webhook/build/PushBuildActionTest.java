@@ -13,15 +13,17 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Robin Müller
@@ -53,14 +55,19 @@ public class PushBuildActionTest {
 
     @Test
     public void build() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
-        testProject.addTrigger(trigger);
+        try {
+            FreeStyleProject testProject = jenkins.createFreeStyleProject();
+            when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
+            testProject.addTrigger(trigger);
 
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new PushBuildAction(testProject, getJson("PushEvent.json"), null).execute(response);
-
-        verify(trigger).onPost(any(PushHook.class));
+            exception.expect(HttpResponses.HttpResponseException.class);
+            new PushBuildAction(testProject, getJson("PushEvent.json"), null).execute(response);
+        } finally {
+            ArgumentCaptor<PushHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(PushHook.class);
+            verify(trigger).onPost(pushHookArgumentCaptor.capture());
+            assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+        }
     }
 
     @Test
