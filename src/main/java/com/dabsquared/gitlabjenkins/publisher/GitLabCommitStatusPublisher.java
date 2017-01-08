@@ -8,6 +8,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -18,11 +19,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Robin Müller
  */
 public class GitLabCommitStatusPublisher extends Notifier {
+
+    private static final Logger LOGGER = Logger.getLogger(GitLabCommitStatusPublisher.class.getName());
 
     private String name;
     private boolean markUnstableAsSuccess;
@@ -39,7 +44,7 @@ public class GitLabCommitStatusPublisher extends Notifier {
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.running, name);
+        CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.running, getExpandedName(build, listener));
         return true;
     }
 
@@ -47,13 +52,23 @@ public class GitLabCommitStatusPublisher extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         Result buildResult = build.getResult();
         if (buildResult == Result.SUCCESS || (buildResult == Result.UNSTABLE && markUnstableAsSuccess)) {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, name);
+            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, getExpandedName(build, listener));
         } else if (buildResult == Result.ABORTED) {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.canceled, name);
+            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.canceled, getExpandedName(build, listener));
         } else {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.failed, name);
+            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.failed, getExpandedName(build, listener));
         }
         return true;
+    }
+
+    public String getExpandedName(Run<?, ?> build, BuildListener listener) {
+        String expandedName = name;
+        try {
+            expandedName = build.getEnvironment(listener).expand(name);
+        } catch (IOException | InterruptedException e ) {
+            LOGGER.log(Level.INFO, "Error expanding build name variable : " + name);
+        }
+        return expandedName;
     }
 
     public String getName() {
