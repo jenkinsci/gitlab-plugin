@@ -128,6 +128,20 @@ node {
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
 
+> If you are using the pipeline model definition syntax in your pipeline job, you can enable the gitlab plugin in the triggers section:
+
+```
+pipeline {
+    agent any
+
+    triggers {
+        gitlab(triggerOnPush: true, triggerOnMergeRequest: true, [...])
+    }
+
+   [...]
+}
+```
+
 ### Matrix/Multi-configuration jobs
 **The Jenkins Matrix/Multi-configuration job type is not supported.**
 
