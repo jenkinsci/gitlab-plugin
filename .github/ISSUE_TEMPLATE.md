@@ -1,4 +1,4 @@
-### Before submitting an issue to I have first:
+### Before submitting an issue I have first:
 
 - [] read the documentation on the [homepage](https://github.com/jenkinsci/gitlab-plugin) 
 - [] searched for similar already existing issue
