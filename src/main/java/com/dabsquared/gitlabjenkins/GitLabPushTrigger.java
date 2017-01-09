@@ -44,6 +44,7 @@ import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -293,6 +294,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     @Extension
+    @Symbol("gitlab")
     public static class DescriptorImpl extends TriggerDescriptor {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
