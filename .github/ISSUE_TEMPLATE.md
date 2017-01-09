@@ -24,4 +24,4 @@ For Gitlab logs, ask an administrator to provide you the relevant Gitlab logs.
 _Describe your problem in a meaningful way_:
 - what were you doing (simple push, merge request, MR with fork, ...)
 - what was expected
-- what occured finally
+- what occurred finally
