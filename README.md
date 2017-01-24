@@ -64,19 +64,20 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 ### Git configuration for Freestyle jobs
 1. In the *Source Code Management* section:
     1. Click *Git*
-    2. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
-      * In the Advanced settings, set its *Name* to ``origin`` and its *refspec* to ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
-    3. To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
-      * Add a second repository with:
+    2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
+      * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
+        ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
+    3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
+      * Click *Add Repository* to specify the merge request source repository.  Then specify:
         * *URL*: ``${gitlabSourceRepoURL}`` 
-        * *Name* (in Advanced): ``${gitlabSourceRepoName}``
+        * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
-      * For single-repository setups: ``origin/${gitlabSourceBranch}``
-      * For forked repository setups: ``merge-requests/${gitlabMergeRequestIid}``
+      * For single-repository workflows: ``origin/${gitlabSourceBranch}``
+      * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
     5. In *Additional Behaviours*:
-        * Click the *Add* drop-down button.
-        * Select *Merge before build* from the drop-down.
-        * Set *Name of the repository" to ``origin`` 
+        * Click the *Add* drop-down button
+        * Select *Merge before build* from the drop-down
+        * Set *Name of repository* to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
@@ -121,10 +122,15 @@ node {
 
 ### Freestyle and Pipeline jobs
 1. In the *Build Triggers* section:
-    * Check the ``Build when a change is pushed to GitLab.``
-    * Use the check boxes to trigger builds on Push and/or Merge Request events and/or Note Request(Comment in Merge Request)
-    * Optionally enable building open merge requests again after a push to the source branch.
-    * If you check *Note Events* then you should set trigger phrase(exact phrase or Java Regular Expression) in Trigger Phrase field.
+    * Select *Build when a change is pushed to GitLab*
+    * Make a note of the *GitLab CI Service URL* appearing on the same line with *Build when a change is
+      pushed to GitLab*.  You will later use this URL to define a GitLab web hook.
+    * Use the check boxes to trigger builds on *Push Events* and/or *Merge Request Events*
+    * Optionally use *Rebuild open Merge Requests* to enable re-building open merge requests after a
+      push to the source branch
+    * If you selected *Rebuild open Merge Requests* other than *None*, check *Comments*, and specify the
+      *Comment for triggering a build*.  A new build will be triggered when this phrase appears in a
+      commit comment.  In addition to a literal phrase, you can also specify a Java regular expression.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
 
@@ -135,11 +141,19 @@ node {
 
 GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
 
-* In GitLab go to you repository's project *Settings*
+* In GitLab go to your repository's project *Settings*
     * Click on *Web Hooks*
-    * Add a Web Hook for *Merge Request Events* and *Push Events* to ``http://JENKINS_URL/project/PROJECT_NAME`` <br/>
+    * Earlier in Jenkins, you made a note of the *GitLab CI Service URL*, which is of the form
+      ``http://JENKINS_URL/project/JENKINS_PROJECT_NAME``.  Specify this as the web hook *URL*.
+      Note that ``JENKINS_PROJECT_NAME`` is the name of the Jenkins project you want to trigger, including
+      [Jenkins folders](https://wiki.jenkins-ci.org/display/JENKINS/CloudBees+Folders+Plugin).
+    * Select *Merge Request Events* and *Push Events*
+    * Click *Add Webhook*
+    * Click *Test Hook* to test your new web hook.  You should see two results:
+        * GitLab should display "Hook successfully executed"
+        * Jenkins project ``JENKINS_PROJECT_NAME`` should start
 
-* Add a post-build step ``Publish build status to GitLab commit (GitLab 8.1+ required)`` to the job.
+* Add a post-build step *Publish build status to GitLab commit (GitLab 8.1+ required)* to the job.
 * For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
 
     ```
