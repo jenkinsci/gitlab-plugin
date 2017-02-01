@@ -4,7 +4,9 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMCommit;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMNavigator;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import hudson.model.Cause;
 import hudson.model.TaskListener;
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHead;
@@ -20,7 +22,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 
-public class GitLabSCMPushEvent extends SCMHeadEvent<PushHook> {
+public class GitLabSCMPushEvent extends SCMHeadEvent<PushHook> implements GitLabSCMEvent {
     private final String hookId;
 
     public GitLabSCMPushEvent(String id, PushHook hook) {
@@ -76,5 +78,9 @@ public class GitLabSCMPushEvent extends SCMHeadEvent<PushHook> {
     @Override
     public boolean isMatch(@Nonnull SCM scm) {
         return false;
+    }
+
+    public Cause getCause() {
+        return new GitLabWebHookCause(CauseDataHelper.buildCauseData(getPayload()));
     }
 }

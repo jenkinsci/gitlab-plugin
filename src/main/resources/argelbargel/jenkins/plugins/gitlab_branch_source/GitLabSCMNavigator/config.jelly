@@ -53,5 +53,8 @@
                 (<strong>Push Events:</strong> false)
             </f:entry>
         </f:optionalBlock>
+        <f:entry title="${%Update Build Descriptions}" field="updateBuildDescription">
+            <f:checkbox/>
+        </f:entry>
     </f:advanced>
 </j:jelly>

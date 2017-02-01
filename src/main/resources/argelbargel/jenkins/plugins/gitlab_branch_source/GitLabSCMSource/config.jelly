@@ -47,5 +47,8 @@
                 (<strong>Push Events:</strong> true, <strong>Tag Push Events:</strong> true)
             </f:entry>
         </f:optionalBlock>
+        <f:entry title="${%Update Build Descriptions}" field="updateBuildDescription">
+            <f:checkbox/>
+        </f:entry>
     </f:advanced>
 </j:jelly>

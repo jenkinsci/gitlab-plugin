@@ -3,6 +3,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabMergeRequest;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
+import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMEvent;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHookListener;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
@@ -12,6 +13,7 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.Extension;
 import hudson.model.Action;
+import hudson.model.CauseAction;
 import hudson.model.TaskListener;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.browser.GitLab;
@@ -42,9 +44,9 @@ import org.kohsuke.stapler.QueryParameter;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -138,6 +140,10 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.getRegisterWebHooks();
     }
 
+    public boolean getUpdateBuildDescription() {
+        return settings.getUpdateBuildDescription();
+    }
+
     public int getProjectId() {
         return project.getId();
     }
@@ -162,7 +168,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Override
     protected void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        Set<String> originBranchesWithMergeRequest = new HashSet<>();
+//        Set<String> originBranchesWithMergeRequest = new HashSet<>();
 
         if (settings.getBuildMergeRequests()) {
             GitLabMergeRequestFilter filter = settings.getMergeRequestFilter();
@@ -171,7 +177,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
                 GitLabSCMMergeRequest head = new GitLabSCMMergeRequest(mr);
                 observer.observe(new GitLabSCMHolder(head, head.getSource()), head.getCommit());
-                originBranchesWithMergeRequest.add(head.getTarget().getName());
+//                originBranchesWithMergeRequest.add(head.getTarget().getName());
             }
         }
 
@@ -180,9 +186,9 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
                 checkInterrupt();
 
                 GitLabSCMBranch head = new GitLabSCMBranch(branch);
-                if (settings.getBuildBranchesWithMergeRequests() || !originBranchesWithMergeRequest.contains(head.getName())) {
+//                if (settings.getBuildBranchesWithMergeRequests() || !originBranchesWithMergeRequest.contains(head.getName())) {
                     observer.observe(new GitLabSCMHolder(head), head.getCommit());
-                }
+//                }
             }
         }
 
@@ -214,25 +220,36 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
             return retrieveActions(((GitLabSCMHolder) head).getTarget(), event, listener);
         }
 
-        return Collections.<Action>singletonList(GitLabLink.toTree(project, head.getName()));
+        List<Action> actions = new ArrayList<>();
+        actions.add(GitLabLink.toTree(project, head.getName()));
+        if (event instanceof GitLabSCMEvent) {
+            actions.add(new GitLabSCMCauseAction(((GitLabSCMEvent) event).getCause(), getUpdateBuildDescription()));
+        }
+
+        return actions;
     }
 
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (revision instanceof GitLabSCMCommit) {
-            String hash = ((GitLabSCMCommit) revision).getHash();
-            return Arrays.<Action>asList(
-                    GitLabLink.toCommit(project, hash),
-                    GitLabLink.toTree(project, hash)
-            );
-        }
-
         if (revision.getHead() instanceof GitLabSCMHolder) {
             return retrieveActions(((GitLabSCMHolder) revision.getHead()).getTarget(), event, listener);
         }
 
-        return Collections.<Action>singletonList(GitLabLink.toTree(project, revision.getHead().getName()));
+        List<Action> actions = new ArrayList<>();
+        if (event instanceof GitLabSCMEvent) {
+            actions.add(new GitLabSCMCauseAction(((GitLabSCMEvent) event).getCause(), getUpdateBuildDescription()));
+        }
+
+        if (revision instanceof GitLabSCMCommit) {
+            String hash = ((GitLabSCMCommit) revision).getHash();
+            actions.add(GitLabLink.toCommit(project, hash));
+            actions.add(GitLabLink.toTree(project, hash));
+        } else {
+            actions.add(GitLabLink.toTree(project, revision.getHead().getName()));
+        }
+
+        return actions;
     }
 
     @Override

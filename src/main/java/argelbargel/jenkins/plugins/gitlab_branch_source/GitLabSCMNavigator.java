@@ -191,6 +191,16 @@ public class GitLabSCMNavigator extends SCMNavigator {
         return (getBuildMergeRequestsFromOrigin()) ? sourceSettings.getForkMergeRequestBuildStrategies() : EnumSet.of(GitLabSCMMergeRequestBuildStrategy.MERGED);
     }
 
+    @DataBoundSetter
+    public void setUpdateBuildDescription(boolean updateBuildDescription) {
+        sourceSettings.setUpdateBuildDescription(updateBuildDescription);
+    }
+
+    public boolean getUpdateBuildDescription() {
+        return sourceSettings.getUpdateBuildDescription();
+    }
+
+
     public String getHookUrl() {
         return hookListener.url().toString();
     }

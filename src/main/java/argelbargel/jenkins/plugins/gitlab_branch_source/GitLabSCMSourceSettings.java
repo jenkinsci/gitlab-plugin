@@ -27,6 +27,7 @@ class GitLabSCMSourceSettings {
     private boolean ignoreOriginWIPMergeRequests;
     private boolean ignoreForkWIPMergeRequests;
     private boolean registerWebHooks;
+    private boolean updateBuildDescription;
 
 
     GitLabSCMSourceSettings(String connectionName, String credentialsId) {
@@ -42,6 +43,7 @@ class GitLabSCMSourceSettings {
         this.ignoreOriginWIPMergeRequests = true;
         this.ignoreForkWIPMergeRequests = true;
         this.registerWebHooks = true;
+        this.updateBuildDescription = true;
     }
 
     String getConnectionName() {
@@ -142,6 +144,14 @@ class GitLabSCMSourceSettings {
 
     void setRegisterWebHooks(boolean value) {
         registerWebHooks = value;
+    }
+
+    void setUpdateBuildDescription(boolean value) {
+        updateBuildDescription = value;
+    }
+
+    boolean getUpdateBuildDescription() {
+        return updateBuildDescription;
     }
 
     GitLabMergeRequestFilter getMergeRequestFilter() {
