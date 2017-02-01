@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:entry title="${%Connection}" field="connectionName">
+        <f:select/>
+    </f:entry>
+    <f:entry title="${%Project search pattern}" field="projectSearchPattern">
+        <f:textbox default=""/>
+    </f:entry>
+    <f:advanced>
+        <f:entry title="${%Checkout credentials}" field="checkoutCredentialsId">
+            <c:select/>
+        </f:entry>
+        <f:entry title="${%Project selector}" field="projectSelectorId">
+            <f:select/>
+        </f:entry>
+        <f:entry title="${%Project visibility}" field="projectVisibilityId">
+            <f:select/>
+        </f:entry>
+        <f:entry title="${%Include branches}" field="includes">
+            <f:textbox default="${descriptor.DEFAULT_INCLUDES}"/>
+        </f:entry>
+        <f:entry title="${%Exclude branches}" field="excludes">
+            <f:textbox default="${descriptor.DEFAULT_EXCLUDES}"/>
+        </f:entry>
+        <f:optionalBlock name="buildBranches" title="Build Origin Branches" field="buildBranches" inline="true">
+            <f:entry title="${%Build Branches also filed as Merge Requests}" field="buildBranchesWithMergeRequests">
+                <f:checkbox default="false"/>
+            </f:entry>
+        </f:optionalBlock>
+        <f:optionalBlock name="buildMergeRequestsFromOrigin" title="Build Merge Requests from Origin" field="buildMergeRequestsFromOrigin" inline="true">
+          <f:entry name="originBuildStrategies" title="Build Strategy" field="originMergeRequestBuildStrategies">
+            <f:enumSet/>
+          </f:entry>
+          <f:entry name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreOriginWIPMergeRequests">
+              <f:checkbox default="true"/>
+          </f:entry>
+        </f:optionalBlock>
+        <f:optionalBlock name="buildMergeRequestsFromForks" title="Build Merge Requests from Forks" field="buildMergeRequestsFromForks" inline="true">
+          <f:entry name="forkBuildStrategies" title="Build Strategy" field="forkMergeRequestBuildStrategies">
+            <f:enumSet/>
+          </f:entry>
+          <f:entry  name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreForkWIPMergeRequests">
+              <f:checkbox default="true"/>
+          </f:entry>
+        </f:optionalBlock>
+        <f:entry title="${%Build Tags}" field="buildTags">
+            <f:checkbox/>
+        </f:entry>
+        <f:optionalBlock name="registerWebHooks" title="Auto-Register Web-Hooks" field="registerWebHooks" inline="true" negative="true">
+            <f:entry title="${%Register this URL manually}:">
+                <f:readOnlyTextbox value="${instance.hookUrl}"/><br/>
+                (<strong>Push Events:</strong> false)
+            </f:entry>
+        </f:optionalBlock>
+    </f:advanced>
+</j:jelly>
