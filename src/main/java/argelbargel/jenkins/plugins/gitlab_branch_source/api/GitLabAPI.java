@@ -179,7 +179,8 @@ public final class GitLabAPI {
         for (GitlabProjectHook hook : delegate.getProjectHooks(projectId)) {
             if (hook.getUrl().equals(url)) {
                 LOGGER.fine("un-registering project-hook for project " + projectId + ": " + url + "...");
-                delegate.deleteProjectHook(hook);
+                String tailUrl = GitlabProject.URL + "/" + hook.getProjectId() + GitlabProjectHook.URL + "/" + hook.getId();
+                delegate.retrieve().method("DELETE").to(tailUrl, GitlabProjectHook[].class);
                 return true;
             }
         }

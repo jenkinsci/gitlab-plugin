@@ -61,13 +61,20 @@ class HookManager {
         }
     }
 
-    public void removeListener(GitLabSCMWebHookListener listener) {
-        ListenerState managed = this.managedListeners.get(listener.id());
+    private void removeListener(GitLabSCMWebHookListener listener) {
+        ListenerState managed = managedListeners.get(listener.id());
         if (managed != null) {
             managed.release();
             if (!managed.hasUsages()) {
-                unregisterHook(listener);
+                unregisterAndDestroy(listener, managed);
             }
+        }
+    }
+
+    private void unregisterAndDestroy(GitLabSCMWebHookListener listener, ListenerState managed) {
+        unregisterHook(listener);
+        if (!managed.isRegistered()) {
+            managedListeners.remove(listener.id());
         }
     }
 
