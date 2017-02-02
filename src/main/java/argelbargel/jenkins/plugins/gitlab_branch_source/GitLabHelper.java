@@ -1,6 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPI;
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
@@ -11,7 +12,6 @@ import hudson.model.Item;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gitlab.api.GitlabAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,9 +22,9 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
 public final class GitLabHelper {
     private GitLabHelper() { /* no instances allowed */ }
 
-    public static GitLabAPI gitLabAPI(String connectionName) {
+    public static GitLabAPI gitLabAPI(String connectionName) throws GitLabAPIException {
         GitLabConnection connection = gitLabConnection(connectionName);
-        return new GitLabAPI(GitlabAPI.connect(connection.getUrl(), gitLabApiToken(connection.getApiTokenId())));
+        return GitLabAPI.connect(connection.getUrl(), gitLabApiToken(connection.getApiTokenId()));
     }
 
     public static GitLabConnection gitLabConnection(String connectionName) {

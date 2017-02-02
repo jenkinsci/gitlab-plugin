@@ -5,13 +5,9 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.AllowMergeRe
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.FilterWorkInProgress;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
-import static java.util.Collections.emptySet;
 
-class GitLabSCMSourceSettings {
+class SourceSettings {
     private static final String DEFAULT_INCLUDES = "*";
     private static final String DEFAULT_EXCLUDES = "";
 
@@ -22,26 +18,22 @@ class GitLabSCMSourceSettings {
     private boolean buildBranches;
     private boolean buildBranchesWithMergeRequests;
     private boolean buildTags;
-    private Set<GitLabSCMMergeRequestBuildStrategy> originMergeRequestBuildStrategies;
-    private Set<GitLabSCMMergeRequestBuildStrategy> forkMergeRequestBuildStrategies;
-    private boolean ignoreOriginWIPMergeRequests;
-    private boolean ignoreForkWIPMergeRequests;
+    private MergeRequestBuildStrategy originMergeRequestBuildStrategy;
+    private MergeRequestBuildStrategy forkMergeRequestBuildStrategy;
     private boolean registerWebHooks;
     private boolean updateBuildDescription;
 
 
-    GitLabSCMSourceSettings(String connectionName, String credentialsId) {
+    SourceSettings(String connectionName, String credentialsId) {
         this.connectionName = connectionName;
         this.credentialsId = credentialsId;
         this.includes = DEFAULT_INCLUDES;
         this.excludes = DEFAULT_EXCLUDES;
         this.buildBranches = true;
         this.buildBranchesWithMergeRequests = false;
-        this.originMergeRequestBuildStrategies = EnumSet.allOf(GitLabSCMMergeRequestBuildStrategy.class);
-        this.forkMergeRequestBuildStrategies = emptySet();
+        this.originMergeRequestBuildStrategy = new MergeRequestBuildStrategy(true);
+        this.forkMergeRequestBuildStrategy = new MergeRequestBuildStrategy(false);
         this.buildTags = false;
-        this.ignoreOriginWIPMergeRequests = true;
-        this.ignoreForkWIPMergeRequests = true;
         this.registerWebHooks = true;
         this.updateBuildDescription = true;
     }
@@ -95,47 +87,15 @@ class GitLabSCMSourceSettings {
     }
 
     boolean getBuildMergeRequests() {
-        return getBuildMergeRequestsFromOrigin() || getBuildMergeRequestsFromForks();
+        return originMergeRequestBuildStrategy.enabled() || forkMergeRequestBuildStrategy.enabled();
     }
 
-    boolean getBuildMergeRequestsFromOrigin() {
-        return !originMergeRequestBuildStrategies.isEmpty();
+    MergeRequestBuildStrategy originMergeRequestBuildStrategy() {
+        return originMergeRequestBuildStrategy;
     }
 
-    boolean getBuildMergeRequestsFromForks() {
-        return !forkMergeRequestBuildStrategies.isEmpty();
-    }
-
-    Set<GitLabSCMMergeRequestBuildStrategy> getOriginMergeRequestBuildStrategies() {
-        return originMergeRequestBuildStrategies;
-    }
-
-    void setOriginMergeRequestBuildStrategies(Set<GitLabSCMMergeRequestBuildStrategy> value) {
-        originMergeRequestBuildStrategies = value;
-    }
-
-    Set<GitLabSCMMergeRequestBuildStrategy> getForkMergeRequestBuildStrategies() {
-        return forkMergeRequestBuildStrategies;
-    }
-
-    void setForkMergeRequestBuildStrategies(Set<GitLabSCMMergeRequestBuildStrategy> value) {
-        forkMergeRequestBuildStrategies = value;
-    }
-
-    boolean getIgnoreOriginWIPMergeRequests() {
-        return ignoreOriginWIPMergeRequests;
-    }
-
-    void setIgnoreOriginWIPMergeRequests(boolean value) {
-        ignoreOriginWIPMergeRequests = value;
-    }
-
-    boolean getIgnoreForkWIPMergeRequests() {
-        return ignoreForkWIPMergeRequests;
-    }
-
-    void setIgnoreForkWIPMergeRequests(boolean value) {
-        ignoreForkWIPMergeRequests = value;
+    MergeRequestBuildStrategy forkMergeRequestBuildStrategy() {
+        return forkMergeRequestBuildStrategy;
     }
 
     boolean getRegisterWebHooks() {
@@ -156,18 +116,18 @@ class GitLabSCMSourceSettings {
 
     GitLabMergeRequestFilter getMergeRequestFilter() {
         GitLabMergeRequestFilter filter = GitLabMergeRequestFilter.ALLOW_NONE;
-        if (getBuildMergeRequestsFromOrigin()) {
+        if (originMergeRequestBuildStrategy.enabled()) {
             GitLabMergeRequestFilter originFilter = new AllowMergeRequestsFromOrigin();
-            if (getIgnoreOriginWIPMergeRequests()) {
+            if (originMergeRequestBuildStrategy.ignoreWorkInProgress()) {
                 originFilter = originFilter.and(new FilterWorkInProgress());
             }
 
             filter = filter.or(originFilter);
         }
 
-        if (getBuildMergeRequestsFromForks()) {
+        if (forkMergeRequestBuildStrategy.enabled()) {
             GitLabMergeRequestFilter forkFilter = new AllowMergeRequestsFromForks();
-            if (getIgnoreOriginWIPMergeRequests()) {
+            if (forkMergeRequestBuildStrategy.ignoreWorkInProgress()) {
                 forkFilter = forkFilter.and(new FilterWorkInProgress());
             }
 

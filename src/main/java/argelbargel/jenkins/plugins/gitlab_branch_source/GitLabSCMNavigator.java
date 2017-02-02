@@ -30,9 +30,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
@@ -44,7 +42,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMNavigator.class.getName());
     private static final String DEFAULT_SEARCH_PATTERN = "";
 
-    private final GitLabSCMSourceSettings sourceSettings;
+    private final SourceSettings sourceSettings;
     private final GitLabSCMWebHookListener hookListener;
     private String projectSearchPattern;
     private String projectSelectorId;
@@ -52,14 +50,14 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
     @DataBoundConstructor
     public GitLabSCMNavigator(String connectionName, String checkoutCredentialsId) {
-        this.sourceSettings = new GitLabSCMSourceSettings(connectionName, checkoutCredentialsId);
+        this.sourceSettings = new SourceSettings(connectionName, checkoutCredentialsId);
         this.hookListener = GitLabSCMWebHook.createListener(this);
         this.projectSearchPattern = DEFAULT_SEARCH_PATTERN;
         this.projectSelectorId = GitLabProjectSelector.VISIBLE.id();
         this.projectVisibilityId = GitLabProjectVisibility.ALL.id();
     }
 
-    GitLabSCMSourceSettings getSourceSettings() {
+    SourceSettings getSourceSettings() {
         return sourceSettings;
     }
 
@@ -143,52 +141,92 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
     @DataBoundSetter
     public void setBuildMergeRequestsFromOrigin(boolean value) {
-        if (!value) {
-            sourceSettings.setOriginMergeRequestBuildStrategies(Collections.<GitLabSCMMergeRequestBuildStrategy>emptySet());
-        }
+        sourceSettings.originMergeRequestBuildStrategy().setEnabled(value);
     }
 
     public boolean getBuildMergeRequestsFromOrigin() {
-        return sourceSettings.getBuildMergeRequestsFromOrigin();
+        return sourceSettings.originMergeRequestBuildStrategy().enabled();
     }
 
     @DataBoundSetter
-    public void setOriginMergeRequestBuildStrategies(Set<GitLabSCMMergeRequestBuildStrategy> value) {
-        if (getBuildMergeRequestsFromOrigin()) {
-            sourceSettings.setOriginMergeRequestBuildStrategies(value);
-        } else {
-            sourceSettings.setOriginMergeRequestBuildStrategies(Collections.<GitLabSCMMergeRequestBuildStrategy>emptySet());
-            sourceSettings.setIgnoreOriginWIPMergeRequests(true);
-        }
+    public void setBuildMergeRequestsFromOriginMerged(boolean value) {
+        sourceSettings.originMergeRequestBuildStrategy().setBuildMerged(value);
     }
 
-    public Set<GitLabSCMMergeRequestBuildStrategy> getOriginMergeRequestBuildStrategies() {
-        return (getBuildMergeRequestsFromOrigin()) ? sourceSettings.getOriginMergeRequestBuildStrategies() : EnumSet.of(GitLabSCMMergeRequestBuildStrategy.MERGED);
+    public boolean getBuildMergeRequestsFromOriginMerged() {
+        return sourceSettings.originMergeRequestBuildStrategy().buildMerged();
+    }
+
+    @DataBoundSetter
+    public void setBuildMergeRequestsFromOriginUnmerged(boolean value) {
+        sourceSettings.originMergeRequestBuildStrategy().setBuildUnmerged(value);
+    }
+
+    public boolean getBuildMergeRequestsFromOriginUnmerged() {
+        return sourceSettings.originMergeRequestBuildStrategy().buildUnmerged();
+    }
+
+    @DataBoundSetter
+    public void setIgnoreWIPMergeRequestsFromOrigin(boolean ignoreWIPMergeRequests) {
+        sourceSettings.originMergeRequestBuildStrategy().setIgnoreWorkInProgress(ignoreWIPMergeRequests);
+    }
+
+    public boolean getIgnoreWIPMergeRequestsFromOrigin() {
+        return sourceSettings.originMergeRequestBuildStrategy().ignoreWorkInProgress();
+    }
+
+    @DataBoundSetter
+    public void setBuildOnlyMergeableMergeRequestsFromOrigin(boolean value) {
+        sourceSettings.originMergeRequestBuildStrategy().setBuildOnlyMergeable(value);
+    }
+
+    public boolean getBuildOnlyMergeableMergeRequestsFromOrigin() {
+        return sourceSettings.originMergeRequestBuildStrategy().buildOnlyMergeable();
     }
 
     @DataBoundSetter
     public void setBuildMergeRequestsFromForks(boolean value) {
-        if (!value) {
-            sourceSettings.setForkMergeRequestBuildStrategies(Collections.<GitLabSCMMergeRequestBuildStrategy>emptySet());
-        }
+        sourceSettings.forkMergeRequestBuildStrategy().setEnabled(value);
     }
 
     public boolean getBuildMergeRequestsFromForks() {
-        return sourceSettings.getBuildMergeRequestsFromForks();
+        return sourceSettings.forkMergeRequestBuildStrategy().enabled();
     }
 
     @DataBoundSetter
-    public void setForkMergeRequestBuildStrategies(Set<GitLabSCMMergeRequestBuildStrategy> value) {
-        if (getBuildMergeRequestsFromForks()) {
-            sourceSettings.setForkMergeRequestBuildStrategies(value);
-        } else {
-            sourceSettings.setForkMergeRequestBuildStrategies(Collections.<GitLabSCMMergeRequestBuildStrategy>emptySet());
-            sourceSettings.setIgnoreForkWIPMergeRequests(true);
-        }
+    public void setBuildMergeRequestsFromForksMerged(boolean value) {
+        sourceSettings.forkMergeRequestBuildStrategy().setBuildMerged(value);
     }
 
-    public Set<GitLabSCMMergeRequestBuildStrategy> getForkMergeRequestBuildStrategies() {
-        return (getBuildMergeRequestsFromOrigin()) ? sourceSettings.getForkMergeRequestBuildStrategies() : EnumSet.of(GitLabSCMMergeRequestBuildStrategy.MERGED);
+    public boolean getBuildMergeRequestsFromForksMerged() {
+        return sourceSettings.forkMergeRequestBuildStrategy().buildMerged();
+    }
+
+    @DataBoundSetter
+    public void setBuildMergeRequestsFromForksUnmerged(boolean value) {
+        sourceSettings.forkMergeRequestBuildStrategy().setBuildUnmerged(value);
+    }
+
+    public boolean getBuildMergeRequestsFromForksUnmerged() {
+        return sourceSettings.forkMergeRequestBuildStrategy().buildUnmerged();
+    }
+
+    @DataBoundSetter
+    public void setIgnoreWIPMergeRequestsFromForks(boolean ignoreWIPMergeRequests) {
+        sourceSettings.forkMergeRequestBuildStrategy().setIgnoreWorkInProgress(ignoreWIPMergeRequests);
+    }
+
+    public boolean getIgnoreWIPMergeRequestsFromForks() {
+        return sourceSettings.forkMergeRequestBuildStrategy().ignoreWorkInProgress();
+    }
+
+    @DataBoundSetter
+    public void setBuildOnlyMergeableMergeRequestsFromForks(boolean value) {
+        sourceSettings.forkMergeRequestBuildStrategy().setBuildOnlyMergeable(value);
+    }
+
+    public boolean getBuildOnlyMergeableMergeRequestsFromForks() {
+        return sourceSettings.forkMergeRequestBuildStrategy().buildOnlyMergeable();
     }
 
     @DataBoundSetter
@@ -212,24 +250,6 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
     public boolean getBuildTags() {
         return sourceSettings.getBuildTags();
-    }
-
-    @DataBoundSetter
-    public void setIgnoreOriginWIPMergeRequests(boolean ignoreWIPMergeRequests) {
-        sourceSettings.setIgnoreOriginWIPMergeRequests(ignoreWIPMergeRequests);
-    }
-
-    public boolean getIgnoreOriginWIPMergeRequests() {
-        return sourceSettings.getIgnoreOriginWIPMergeRequests();
-    }
-
-    @DataBoundSetter
-    public void setIgnoreForkWIPMergeRequests(boolean ignoreWIPMergeRequests) {
-        sourceSettings.setIgnoreForkWIPMergeRequests(ignoreWIPMergeRequests);
-    }
-
-    public boolean getIgnoreForkWIPMergeRequests() {
-        return sourceSettings.getIgnoreForkWIPMergeRequests();
     }
 
     @DataBoundSetter
@@ -266,8 +286,8 @@ public class GitLabSCMNavigator extends SCMNavigator {
         GitLabSCMWebHook.get().addListener(this);
     }
 
-    private GitLabSCMSourceVisitor createVisitor(@Nonnull SCMSourceObserver observer) {
-        return new GitLabSCMSourceVisitor(this, observer);
+    private SourceVisitor createVisitor(@Nonnull SCMSourceObserver observer) {
+        return new SourceVisitor(this, observer);
     }
 
     @Nonnull

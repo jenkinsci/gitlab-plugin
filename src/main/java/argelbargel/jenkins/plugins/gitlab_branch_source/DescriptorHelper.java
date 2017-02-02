@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
@@ -51,9 +52,15 @@ class DescriptorHelper {
 
     static ListBoxModel doFillProjectPathItems(String connectionName) {
         StandardListBoxModel result = new StandardListBoxModel();
-        for (GitlabProject project : gitLabAPI(connectionName).findProjects(VISIBLE, ALL, "")) {
-            result.add(project.getPathWithNamespace(), project.getPathWithNamespace());
+
+        try {
+            for (GitlabProject project : gitLabAPI(connectionName).findProjects(VISIBLE, ALL, "")) {
+                result.add(project.getPathWithNamespace(), project.getPathWithNamespace());
+            }
+        } catch (GitLabAPIException e) {
+            LOGGER.warning("could not find any projects for connection " + connectionName + ": " + e.getMessage());
         }
+
         return result;
     }
 

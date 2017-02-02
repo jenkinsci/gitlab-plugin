@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility;
 import jenkins.scm.api.SCMSourceObserver;
@@ -11,12 +12,12 @@ import java.io.PrintStream;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
 
 
-class GitLabSCMSourceVisitor {
+class SourceVisitor {
     private final SCMSourceObserver observer;
     private final GitLabSCMNavigator navigator;
     private final PrintStream log;
 
-    GitLabSCMSourceVisitor(GitLabSCMNavigator navigator, SCMSourceObserver observer) {
+    SourceVisitor(GitLabSCMNavigator navigator, SCMSourceObserver observer) {
         this.navigator = navigator;
         this.observer = observer;
         this.log = observer.getListener().getLogger();
@@ -31,16 +32,27 @@ class GitLabSCMSourceVisitor {
 
     private void visitSources(String connectionName, GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws InterruptedException, IOException {
         log("Looking up repositories for gitlab-connection %s...", navigator.getConnectionName());
-        for (GitlabProject project : gitLabAPI(connectionName).findProjects(selector, visibility, searchPattern)) {
-            checkInterrupt();
-            visitProject(project);
+
+        try {
+            for (GitlabProject project : gitLabAPI(connectionName).findProjects(selector, visibility, searchPattern)) {
+                checkInterrupt();
+                visitProject(project);
+            }
+        } catch (Exception e) {
+            log("error visiting projects for connection " + connectionName + ": " + e.getMessage());
+            throw e;
         }
     }
 
     void visitProject(String sourceName) throws IOException, InterruptedException {
-        GitlabProject project = gitLabAPI(navigator.getConnectionName()).getProject(sourceName);
-        if (project != null) {
-            visitProject(project);
+        try {
+            GitlabProject project = gitLabAPI(navigator.getConnectionName()).getProject(sourceName);
+            if (project != null) {
+                visitProject(project);
+            }
+        } catch (Exception e) {
+            log("error visiting source " + sourceName + ": " + e.getMessage());
+            throw e;
         }
     }
 

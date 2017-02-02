@@ -3,7 +3,6 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.api;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabBranch;
-import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
 import org.gitlab.api.models.GitlabProjectHook;
 import org.gitlab.api.models.GitlabSystemHook;
@@ -16,11 +15,19 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public final class GitLabAPI {
+    public static GitLabAPI connect(String url, String token) throws GitLabAPIException {
+        try {
+            return new GitLabAPI(GitlabAPI.connect(url, token));
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
     private static final Logger LOGGER = Logger.getLogger(GitLabAPI.class.getName());
 
     private final GitlabAPI delegate;
 
-    public GitLabAPI(GitlabAPI delegate) {
+    private GitLabAPI(GitlabAPI delegate) {
         this.delegate = delegate;
     }
 
@@ -72,22 +79,30 @@ public final class GitLabAPI {
         }
     }
 
-    public List<GitLabMergeRequest> getMergeRequests(int id) {
+    public List<GitLabMergeRequest> getMergeRequests(int id) throws GitLabAPIException {
         return getMergeRequests((Serializable) id);
     }
 
-    private List<GitLabMergeRequest> getMergeRequests(Serializable nameOrId) {
-        String tailUrl = "/projects/" + nameOrId + "/merge_requests?state=opened";
-        return delegate.retrieve()
-                .getAll(tailUrl, GitLabMergeRequest[].class);
+    private List<GitLabMergeRequest> getMergeRequests(Serializable nameOrId) throws GitLabAPIException {
+        try {
+            String tailUrl = "/projects/" + nameOrId + "/merge_requests?state=opened";
+            return delegate.retrieve()
+                    .getAll(tailUrl, GitLabMergeRequest[].class);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
     }
 
 
-    public List<GitlabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) {
+    public List<GitlabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
         LOGGER.fine("finding projects for " + selector + ", " + visibility + ", " + searchPattern + "...");
-        return delegate
-                .retrieve()
-                .getAll(projectUrl(selector, visibility, searchPattern), GitlabProject[].class);
+        try {
+            return delegate
+                    .retrieve()
+                    .getAll(projectUrl(selector, visibility, searchPattern), GitlabProject[].class);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
     }
 
     public GitlabSystemHook registerSystemHook(URL url) throws GitLabAPIException {

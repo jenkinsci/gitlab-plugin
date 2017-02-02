@@ -13,7 +13,6 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.Extension;
 import hudson.model.Action;
-import hudson.model.CauseAction;
 import hudson.model.TaskListener;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.browser.GitLab;
@@ -49,7 +48,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
@@ -61,11 +59,11 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     private static final RefSpec REFSPEC_MERGE_REQUESTS = new RefSpec("+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*");
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMSource.class.getName());
 
-    private final GitLabSCMSourceSettings settings;
+    private final SourceSettings settings;
     private final GitlabProject project;
     private final GitLabSCMWebHookListener hookListener;
 
-    GitLabSCMSource(GitlabProject project, GitLabSCMSourceSettings settings) {
+    GitLabSCMSource(GitlabProject project, SourceSettings settings) {
         super(project.getPathWithNamespace());
         this.settings = settings;
         this.project = project;
@@ -109,31 +107,47 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public boolean getBuildMergeRequestsFromOrigin() {
-        return settings.getBuildMergeRequestsFromOrigin();
+        return settings.originMergeRequestBuildStrategy().enabled();
     }
 
-    public Set<GitLabSCMMergeRequestBuildStrategy> getOriginMergeRequestBuildStrategies() {
-        return settings.getOriginMergeRequestBuildStrategies();
+    public boolean getBuildMergeRequestsFromOriginMerged() {
+        return settings.originMergeRequestBuildStrategy().buildMerged();
+    }
+
+    public boolean getBuildMergeRequestsFromOriginUnmerged() {
+        return settings.originMergeRequestBuildStrategy().buildUnmerged();
     }
 
     public boolean getIgnoreOriginWIPMergeRequests() {
-        return settings.getIgnoreOriginWIPMergeRequests();
+        return settings.originMergeRequestBuildStrategy().ignoreWorkInProgress();
+    }
+
+    public boolean getBuildOnlyMergeableMergeRequestsFromOrigin() {
+        return settings.originMergeRequestBuildStrategy().buildOnlyMergeable();
     }
 
     public boolean getBuildMergeRequestsFromForks() {
-        return settings.getBuildMergeRequestsFromForks();
+        return settings.forkMergeRequestBuildStrategy().enabled();
     }
 
-    public Set<GitLabSCMMergeRequestBuildStrategy> getForkMergeRequestBuildStrategies() {
-        return settings.getForkMergeRequestBuildStrategies();
+    public boolean getBuildMergeRequestsFromForksMerged() {
+        return settings.forkMergeRequestBuildStrategy().buildMerged();
+    }
+
+    public boolean getBuildMergeRequestsFromForksUnmerged() {
+        return settings.forkMergeRequestBuildStrategy().buildUnmerged();
+    }
+
+    public boolean getIgnoreForkWIPMergeRequests() {
+        return settings.forkMergeRequestBuildStrategy().ignoreWorkInProgress();
+    }
+
+    public boolean getBuildOnlyMergeableMergeRequestsFromForks() {
+        return settings.forkMergeRequestBuildStrategy().buildOnlyMergeable();
     }
 
     public boolean getBuildTags() {
         return settings.getBuildTags();
-    }
-
-    public boolean getIgnoreForkWIPMergeRequests() {
-        return settings.getIgnoreForkWIPMergeRequests();
     }
 
     public boolean getRegisterWebHooks() {
