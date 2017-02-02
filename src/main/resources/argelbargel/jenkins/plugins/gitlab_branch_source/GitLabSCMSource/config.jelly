@@ -23,19 +23,31 @@
             </f:entry>
         </f:optionalBlock>
         <f:optionalBlock name="buildMergeRequestsFromOrigin" title="Build Merge Requests from Origin" field="buildMergeRequestsFromOrigin" inline="true">
-          <f:entry name="originBuildStrategies" title="Build Strategy" field="originMergeRequestBuildStrategies">
-            <f:enumSet/>
+          <f:entry name="buildMergeRequestsFromOriginMerged" title="${%Build merged with base branch}" field="buildMergeRequestsFromOriginMerged">
+            <f:checkbox/>
           </f:entry>
-          <f:entry name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreOriginWIPMergeRequests">
-              <f:checkbox/>
+          <f:entry name="buildMergeRequestsFromOriginUnmerged" title="${%Build unmerged head}" field="buildMergeRequestsFromOriginUnmerged">
+            <f:checkbox/>
+          </f:entry>
+          <f:entry name="buildOnlyMergeableMergeRequestsFromOrigin" title="${%Build only mergeable requests}" field="buildOnlyMergeableMergeRequestsFromOrigin">
+            <f:checkbox/>
+          </f:entry>
+          <f:entry name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreWIPMergeRequestsFromOrigin">
+              <f:checkbox default="true"/>
           </f:entry>
         </f:optionalBlock>
         <f:optionalBlock name="buildMergeRequestsFromForks" title="Build Merge Requests from Forks" field="buildMergeRequestsFromForks" inline="true">
-          <f:entry name="forkBuildStrategies" title="Build Strategy" field="forkMergeRequestBuildStrategies">
-            <f:enumSet/>
+          <f:entry name="buildMergeRequestsFromForksMerged" title="${%Build merged with base branch}" field="buildMergeRequestsFromForksMerged">
+            <f:checkbox/>
           </f:entry>
-          <f:entry  name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreForkWIPMergeRequests">
-              <f:checkbox/>
+          <f:entry name="buildMergeRequestsFromForksUnmerged" title="${%Build unmerged head}" field="buildMergeRequestsFromForksUnmerged">
+            <f:checkbox/>
+          </f:entry>
+          <f:entry name="buildOnlyMergeableMergeRequestsFromForks" title="${%Build only mergeable requests}" field="buildOnlyMergeableMergeRequestsFromForks">
+            <f:checkbox/>
+          </f:entry>
+          <f:entry  name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreWIPMergeRequestsFromForks">
+              <f:checkbox default="true"/>
           </f:entry>
         </f:optionalBlock>
         <f:entry title="${%Build Tags}" field="buildTags">
