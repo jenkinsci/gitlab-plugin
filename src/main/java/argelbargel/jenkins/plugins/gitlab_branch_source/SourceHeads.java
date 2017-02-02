@@ -3,6 +3,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabMergeRequest;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
 import hudson.model.TaskListener;
+import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
 import jenkins.scm.api.SCMSourceCriteria;
@@ -12,6 +13,8 @@ import org.gitlab.api.models.GitlabTag;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
 
@@ -25,36 +28,37 @@ class SourceHeads {
     }
 
     void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-//        Set<String> originBranchesWithMergeRequest = new HashSet<>();
+        Set<SCMHead> originBranchesWithMergeRequest = new HashSet<>();
 
-        if (settings.getBuildMergeRequests()) {
+        if (settings.originMonitorStrategy().monitored() || settings.forksMonitorStrategy().monitored()) {
             GitLabMergeRequestFilter filter = settings.getMergeRequestFilter();
             for (GitLabMergeRequest mr : filter.filter(gitLabAPI(settings.getConnectionName()).getMergeRequests(projectId))) {
                 checkInterrupt();
 
                 GitLabSCMMergeRequest head = new GitLabSCMMergeRequest(mr);
-                observer.observe(new GitLabSCMHolder(head, head.getSource()), head.getCommit());
-//                originBranchesWithMergeRequest.add(head.getTarget().getName());
+                observer.observe(GitLabSCMHeadLabel.create(head, head.getSource()), head.getCommit());
+                if (mr.getSourceProjectId() == projectId) {
+                    originBranchesWithMergeRequest.add(head.getSource());
+                }
             }
         }
 
-        if (settings.getBuildBranches()) {
+        if (settings.branchMonitorStrategy().monitored()) {
             for (GitlabBranch branch : gitLabAPI(settings.getConnectionName()).getBranches(projectId)) {
                 checkInterrupt();
 
                 GitLabSCMBranch head = new GitLabSCMBranch(branch);
-//                if (settings.getBuildBranchesWithMergeRequests() || !originBranchesWithMergeRequest.contains(head.getName())) {
-                observer.observe(new GitLabSCMHolder(head), head.getCommit());
-//                }
+                boolean automaticBuild = settings.getBuildBranchesWithMergeRequests() || !originBranchesWithMergeRequest.contains(head);
+                observer.observe(GitLabSCMHeadLabel.create(head, automaticBuild), head.getCommit());
             }
         }
 
-        if (settings.getBuildTags()) {
+        if (settings.tagMonitorStrategy().monitored()) {
             for (GitlabTag tag : gitLabAPI(settings.getConnectionName()).getTags(projectId)) {
                 checkInterrupt();
 
                 GitLabSCMTag head = new GitLabSCMTag(tag);
-                observer.observe(new GitLabSCMHolder(head), head.getCommit());
+                observer.observe(GitLabSCMHeadLabel.create(head, settings.tagMonitorStrategy().buildUnmerged()), head.getCommit());
             }
         }
     }

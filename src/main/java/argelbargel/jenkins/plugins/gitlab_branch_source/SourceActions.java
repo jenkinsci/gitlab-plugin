@@ -38,8 +38,8 @@ class SourceActions {
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (head instanceof GitLabSCMHolder) {
-            return retrieve(((GitLabSCMHolder) head).getTarget(), event, listener);
+        if (head instanceof GitLabSCMHeadLabel) {
+            return retrieve(((GitLabSCMHeadLabel) head).getTarget(), event, listener);
         }
 
         List<Action> actions = new ArrayList<>();
@@ -53,8 +53,8 @@ class SourceActions {
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (revision.getHead() instanceof GitLabSCMHolder) {
-            return retrieve(((GitLabSCMHolder) revision.getHead()).getTarget(), event, listener);
+        if (revision.getHead() instanceof GitLabSCMHeadLabel) {
+            return retrieve(((GitLabSCMHeadLabel) revision.getHead()).getTarget(), event, listener);
         }
 
         List<Action> actions = new ArrayList<>();

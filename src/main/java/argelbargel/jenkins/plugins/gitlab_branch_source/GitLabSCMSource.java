@@ -57,6 +57,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     private final GitlabProject project;
     private final GitLabSCMWebHookListener hookListener;
 
+
     GitLabSCMSource(GitlabProject project, SourceSettings settings) {
         super(project.getPathWithNamespace());
         this.actions = new SourceActions(project, settings);
@@ -94,56 +95,52 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.getExcludes();
     }
 
-    public boolean getBuildBranches() {
-        return settings.getBuildBranches();
+    public boolean getMonitorAndBuildBranches() {
+        return settings.branchMonitorStrategy().monitored();
     }
 
     public boolean getBuildBranchesWithMergeRequests() {
-        return settings.getBuildBranchesWithMergeRequests();
+        return settings.originMonitorStrategy().monitored() && settings.getBuildBranchesWithMergeRequests();
     }
 
-    public boolean getBuildMergeRequestsFromOrigin() {
-        return settings.originMergeRequestBuildStrategy().enabled();
+    public boolean getMonitorAndBuildMergeRequestsFromOrigin() {
+        return settings.originMonitorStrategy().monitored();
     }
 
     public boolean getBuildMergeRequestsFromOriginMerged() {
-        return settings.originMergeRequestBuildStrategy().buildMerged();
+        return settings.originMonitorStrategy().buildMerged();
     }
 
     public boolean getBuildMergeRequestsFromOriginUnmerged() {
-        return settings.originMergeRequestBuildStrategy().buildUnmerged();
+        return settings.originMonitorStrategy().buildUnmerged();
     }
 
-    public boolean getIgnoreOriginWIPMergeRequests() {
-        return settings.originMergeRequestBuildStrategy().ignoreWorkInProgress();
+    public boolean getIgnoreWorkInProgressFromOrigin() {
+        return settings.originMonitorStrategy().ignoreWorkInProgress();
     }
 
-    public boolean getBuildOnlyMergeableMergeRequestsFromOrigin() {
-        return settings.originMergeRequestBuildStrategy().buildOnlyMergeable();
-    }
-
-    public boolean getBuildMergeRequestsFromForks() {
-        return settings.forkMergeRequestBuildStrategy().enabled();
+    public boolean getMonitorAndBuildMergeRequestsFromForks() {
+        return settings.forksMonitorStrategy().monitored();
     }
 
     public boolean getBuildMergeRequestsFromForksMerged() {
-        return settings.forkMergeRequestBuildStrategy().buildMerged();
+        return settings.forksMonitorStrategy().buildMerged();
     }
 
     public boolean getBuildMergeRequestsFromForksUnmerged() {
-        return settings.forkMergeRequestBuildStrategy().buildUnmerged();
+        return settings.forksMonitorStrategy().buildUnmerged();
     }
 
-    public boolean getIgnoreForkWIPMergeRequests() {
-        return settings.forkMergeRequestBuildStrategy().ignoreWorkInProgress();
+    public boolean getIgnoreWorkInProgressFromForks() {
+        return settings.forksMonitorStrategy().ignoreWorkInProgress();
     }
 
-    public boolean getBuildOnlyMergeableMergeRequestsFromForks() {
-        return settings.forkMergeRequestBuildStrategy().buildOnlyMergeable();
+    public boolean getMonitorTags() {
+        return settings.tagMonitorStrategy().monitored();
     }
 
     public boolean getBuildTags() {
-        return settings.getBuildTags();
+        return settings.tagMonitorStrategy().buildUnmerged();
     }
 
     public boolean getRegisterWebHooks() {
@@ -202,15 +199,15 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Override
     protected List<RefSpec> getRefSpecs() {
         List<RefSpec> refSpecs = new LinkedList<>();
-        if (settings.getBuildBranches()) {
+        if (settings.branchMonitorStrategy().monitored()) {
             refSpecs.add(REFSPEC_BRANCHES);
         }
 
-        if (settings.getBuildTags()) {
+        if (settings.tagMonitorStrategy().monitored()) {
             refSpecs.add(REFSPEC_TAGS);
         }
 
-        if (settings.getBuildMergeRequests()) {
+        if (settings.originMonitorStrategy().monitored() || settings.forksMonitorStrategy().monitored()) {
             refSpecs.add(REFSPEC_MERGE_REQUESTS);
         }
         return refSpecs;
@@ -219,13 +216,18 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Override
     public void afterSave() {
+        LOGGER.info("auto-registering system-hook for source " + getId() + "...");
         GitLabSCMWebHook.get().addListener(this);
     }
 
     @Nonnull
     @Override
     public SCM build(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
-        GitSCM scm = (GitSCM) super.build((head instanceof GitLabSCMHolder) ? ((GitLabSCMHolder) head).getTarget() : head, revision);
+        if (head instanceof GitLabSCMHeadLabel) {
+            return build(((GitLabSCMHeadLabel) head).getTarget(), revision);
+        }
+
+        GitSCM scm = (GitSCM) super.build(head, revision);
         scm.setBrowser(getBrowser());
         return scm;
     }

@@ -36,7 +36,7 @@ public class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements GitLabS
     }
 
     protected Map<SCMHead, SCMRevision> heads(@Nonnull GitLabSCMSource source) {
-        if (!source.getBuildTags()) {
+        if (!source.getMonitorTags()) {
             return emptyMap();
         }
 

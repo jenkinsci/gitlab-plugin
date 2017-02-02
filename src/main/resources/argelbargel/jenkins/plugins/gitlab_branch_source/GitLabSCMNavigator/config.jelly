@@ -23,42 +23,38 @@
         <f:entry title="${%Exclude branches}" field="excludes">
             <f:textbox default="${descriptor.DEFAULT_EXCLUDES}"/>
         </f:entry>
-        <f:optionalBlock name="buildBranches" title="Build Origin Branches" field="buildBranches" inline="true">
+        <f:optionalBlock title="${%Monitor &amp; Build Origin Branches}" field="monitorAndBuildBranches" inline="true">
             <f:entry title="${%Build Branches also filed as Merge Requests}" field="buildBranchesWithMergeRequests">
                 <f:checkbox default="false"/>
             </f:entry>
         </f:optionalBlock>
-        <f:optionalBlock name="buildMergeRequestsFromOrigin" title="Build Merge Requests from Origin" field="buildMergeRequestsFromOrigin" inline="true">
-          <f:entry name="buildMergeRequestsFromOriginMerged" title="${%Build merged with base branch}" field="buildMergeRequestsFromOriginMerged">
-            <f:checkbox/>
-          </f:entry>
-          <f:entry name="buildMergeRequestsFromOriginUnmerged" title="${%Build unmerged head}" field="buildMergeRequestsFromOriginUnmerged">
-            <f:checkbox/>
-          </f:entry>
-          <f:entry name="buildOnlyMergeableMergeRequestsFromOrigin" title="${%Build only mergeable requests}" field="buildOnlyMergeableMergeRequestsFromOrigin">
-            <f:checkbox/>
-          </f:entry>
-          <f:entry name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreWIPMergeRequestsFromOrigin">
+        <f:optionalBlock title="${%Monitor &amp; Build Merge Requests from Origin}" field="monitorAndBuildMergeRequestsFromOrigin" inline="true">
+          <f:entry title="${%Ignore Work In Progress}" field="ignoreWorkInProgressFromOrigin">
               <f:checkbox default="true"/>
           </f:entry>
+          <f:entry title="${%Build merged with base branch}" field="buildMergeRequestsFromOriginMerged">
+            <f:checkbox/>
+          </f:entry>
+          <f:entry title="${%Build unmerged head}" field="buildMergeRequestsFromOriginUnmerged">
+            <f:checkbox/>
+          </f:entry>
         </f:optionalBlock>
-        <f:optionalBlock name="buildMergeRequestsFromForks" title="Build Merge Requests from Forks" field="buildMergeRequestsFromForks" inline="true">
-          <f:entry name="buildMergeRequestsFromForksMerged" title="${%Build merged with base branch}" field="buildMergeRequestsFromForksMerged">
-            <f:checkbox/>
-          </f:entry>
-          <f:entry name="buildMergeRequestsFromForksUnmerged" title="${%Build unmerged head}" field="buildMergeRequestsFromForksUnmerged">
-            <f:checkbox/>
-          </f:entry>
-          <f:entry name="buildOnlyMergeableMergeRequestsFromForks" title="${%Build only mergeable requests}" field="buildOnlyMergeableMergeRequestsFromForks">
-            <f:checkbox/>
-          </f:entry>
-          <f:entry  name="ignoreOriginWIPMergeRequests" title="${%Ignore WIP Merge Requests}" field="ignoreWIPMergeRequestsFromForks">
+        <f:optionalBlock title="Monitor &amp; Build Merge Requests from Forks" field="monitorAndBuildMergeRequestsFromForks" inline="true">
+          <f:entry title="${%Ignore Work In Progress}" field="ignoreWorkInProgressFromForks">
               <f:checkbox default="true"/>
           </f:entry>
-        </f:optionalBlock>
-        <f:entry title="${%Build Tags}" field="buildTags">
+          <f:entry title="${%Build merged with base branch}" field="buildMergeRequestsFromForksMerged">
             <f:checkbox/>
-        </f:entry>
+          </f:entry>
+          <f:entry title="${%Build unmerged head}" field="buildMergeRequestsFromForksUnmerged">
+            <f:checkbox/>
+          </f:entry>
+        </f:optionalBlock>
+        <f:optionalBlock title="${%Monitor Tags}" field="monitorTags" inline="true">
+            <f:entry title="${%Build Tags}" field="buildTags">
+                <f:checkbox default="false"/>
+            </f:entry>
+        </f:optionalBlock>
         <f:optionalBlock name="registerWebHooks" title="Auto-Register Web-Hooks" field="registerWebHooks" inline="true" negative="true">
             <f:entry title="${%Register this URL manually}:">
                 <f:readOnlyTextbox value="${instance.hookUrl}"/><br/>

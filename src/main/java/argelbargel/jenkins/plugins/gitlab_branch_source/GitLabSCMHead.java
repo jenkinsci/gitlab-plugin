@@ -3,8 +3,6 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.mixin.SCMHeadMixin;
 
-import java.util.Objects;
-
 public class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
     private final String hash;
 

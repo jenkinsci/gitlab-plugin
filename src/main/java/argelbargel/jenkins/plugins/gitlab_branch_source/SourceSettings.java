@@ -15,11 +15,11 @@ class SourceSettings {
     private final String credentialsId;
     private String includes;
     private String excludes;
-    private boolean buildBranches;
+    private final MonitorStrategy branchMonitorStrategy;
+    private final MonitorStrategy originMonitorStrategy;
+    private final MonitorStrategy forksMonitorStrategy;
+    private final MonitorStrategy tagMonitorStrategy;
     private boolean buildBranchesWithMergeRequests;
-    private boolean buildTags;
-    private MergeRequestBuildStrategy originMergeRequestBuildStrategy;
-    private MergeRequestBuildStrategy forkMergeRequestBuildStrategy;
     private boolean registerWebHooks;
     private boolean updateBuildDescription;
 
@@ -29,11 +29,11 @@ class SourceSettings {
         this.credentialsId = credentialsId;
         this.includes = DEFAULT_INCLUDES;
         this.excludes = DEFAULT_EXCLUDES;
-        this.buildBranches = true;
+        this.branchMonitorStrategy = new MonitorStrategy(true, false);
         this.buildBranchesWithMergeRequests = false;
-        this.originMergeRequestBuildStrategy = new MergeRequestBuildStrategy(true);
-        this.forkMergeRequestBuildStrategy = new MergeRequestBuildStrategy(false);
-        this.buildTags = false;
+        this.originMonitorStrategy = new MonitorStrategy(true, true);
+        this.forksMonitorStrategy = new MonitorStrategy(false, true);
+        this.tagMonitorStrategy = new MonitorStrategy(false, false);
         this.registerWebHooks = true;
         this.updateBuildDescription = true;
     }
@@ -70,32 +70,16 @@ class SourceSettings {
         buildBranchesWithMergeRequests = value;
     }
 
-    boolean getBuildBranches() {
-        return buildBranches;
+    MonitorStrategy branchMonitorStrategy() { return branchMonitorStrategy; }
+
+    MonitorStrategy tagMonitorStrategy() { return tagMonitorStrategy; }
+
+    MonitorStrategy originMonitorStrategy() {
+        return originMonitorStrategy;
     }
 
-    void setBuildBranches(boolean value) {
-        buildBranches = value;
-    }
-
-    boolean getBuildTags() {
-        return buildTags;
-    }
-
-    void setBuildTags(boolean buildTags) {
-        this.buildTags = buildTags;
-    }
-
-    boolean getBuildMergeRequests() {
-        return originMergeRequestBuildStrategy.enabled() || forkMergeRequestBuildStrategy.enabled();
-    }
-
-    MergeRequestBuildStrategy originMergeRequestBuildStrategy() {
-        return originMergeRequestBuildStrategy;
-    }
-
-    MergeRequestBuildStrategy forkMergeRequestBuildStrategy() {
-        return forkMergeRequestBuildStrategy;
+    MonitorStrategy forksMonitorStrategy() {
+        return forksMonitorStrategy;
     }
 
     boolean getRegisterWebHooks() {
@@ -116,18 +100,18 @@ class SourceSettings {
 
     GitLabMergeRequestFilter getMergeRequestFilter() {
         GitLabMergeRequestFilter filter = GitLabMergeRequestFilter.ALLOW_NONE;
-        if (originMergeRequestBuildStrategy.enabled()) {
+        if (originMonitorStrategy.monitored()) {
             GitLabMergeRequestFilter originFilter = new AllowMergeRequestsFromOrigin();
-            if (originMergeRequestBuildStrategy.ignoreWorkInProgress()) {
+            if (originMonitorStrategy.ignoreWorkInProgress()) {
                 originFilter = originFilter.and(new FilterWorkInProgress());
             }
 
             filter = filter.or(originFilter);
         }
 
-        if (forkMergeRequestBuildStrategy.enabled()) {
+        if (forksMonitorStrategy.monitored()) {
             GitLabMergeRequestFilter forkFilter = new AllowMergeRequestsFromForks();
-            if (forkMergeRequestBuildStrategy.ignoreWorkInProgress()) {
+            if (forksMonitorStrategy.ignoreWorkInProgress()) {
                 forkFilter = forkFilter.and(new FilterWorkInProgress());
             }
 

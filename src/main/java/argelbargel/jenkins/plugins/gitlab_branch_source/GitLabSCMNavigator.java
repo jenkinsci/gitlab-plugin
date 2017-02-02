@@ -119,114 +119,96 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
-    public void setBuildBranches(boolean buildBranches) {
-        sourceSettings.setBuildBranches(buildBranches);
-        if (!buildBranches) {
+    public void setMonitorBranches(boolean monitorBranches) {
+        sourceSettings.branchMonitorStrategy().setMonitored(monitorBranches);
+        if (!monitorBranches) {
             sourceSettings.setBuildBranchesWithMergeRequests(false);
         }
     }
 
-    public boolean getBuildBranches() {
-        return sourceSettings.getBuildBranches();
+    public boolean getMonitorAndBuildBranches() {
+        return sourceSettings.branchMonitorStrategy().monitored();
     }
 
     @DataBoundSetter
     public void setBuildBranchesWithMergeRequests(boolean value) {
-        sourceSettings.setBuildBranchesWithMergeRequests(sourceSettings.getBuildBranches() && value);
+        sourceSettings.setBuildBranchesWithMergeRequests(sourceSettings.branchMonitorStrategy().monitored() && value);
     }
 
     public boolean getBuildBranchesWithMergeRequests() {
-        return sourceSettings.getBuildBranchesWithMergeRequests();
+        return sourceSettings.originMonitorStrategy().monitored() && sourceSettings.getBuildBranchesWithMergeRequests();
     }
 
     @DataBoundSetter
-    public void setBuildMergeRequestsFromOrigin(boolean value) {
-        sourceSettings.originMergeRequestBuildStrategy().setEnabled(value);
+    public void setMonitorAndBuildMergeRequestsFromOrigin(boolean value) {
+        sourceSettings.originMonitorStrategy().setMonitored(value);
     }
 
-    public boolean getBuildMergeRequestsFromOrigin() {
-        return sourceSettings.originMergeRequestBuildStrategy().enabled();
+    public boolean getMonitorAndBuildMergeRequestsFromOrigin() {
+        return sourceSettings.originMonitorStrategy().monitored();
     }
 
     @DataBoundSetter
     public void setBuildMergeRequestsFromOriginMerged(boolean value) {
-        sourceSettings.originMergeRequestBuildStrategy().setBuildMerged(value);
+        sourceSettings.originMonitorStrategy().setBuildMerged(value);
     }
 
     public boolean getBuildMergeRequestsFromOriginMerged() {
-        return sourceSettings.originMergeRequestBuildStrategy().buildMerged();
+        return sourceSettings.originMonitorStrategy().buildMerged();
     }
 
     @DataBoundSetter
     public void setBuildMergeRequestsFromOriginUnmerged(boolean value) {
-        sourceSettings.originMergeRequestBuildStrategy().setBuildUnmerged(value);
+        sourceSettings.originMonitorStrategy().setBuildUnmerged(value);
     }
 
     public boolean getBuildMergeRequestsFromOriginUnmerged() {
-        return sourceSettings.originMergeRequestBuildStrategy().buildUnmerged();
+        return sourceSettings.originMonitorStrategy().buildUnmerged();
     }
 
     @DataBoundSetter
-    public void setIgnoreWIPMergeRequestsFromOrigin(boolean ignoreWIPMergeRequests) {
-        sourceSettings.originMergeRequestBuildStrategy().setIgnoreWorkInProgress(ignoreWIPMergeRequests);
+    public void setIgnoreWorkInProgressFromOrigin(boolean ignoreWIPMergeRequests) {
+        sourceSettings.originMonitorStrategy().setIgnoreWorkInProgress(ignoreWIPMergeRequests);
     }
 
-    public boolean getIgnoreWIPMergeRequestsFromOrigin() {
-        return sourceSettings.originMergeRequestBuildStrategy().ignoreWorkInProgress();
-    }
-
-    @DataBoundSetter
-    public void setBuildOnlyMergeableMergeRequestsFromOrigin(boolean value) {
-        sourceSettings.originMergeRequestBuildStrategy().setBuildOnlyMergeable(value);
-    }
-
-    public boolean getBuildOnlyMergeableMergeRequestsFromOrigin() {
-        return sourceSettings.originMergeRequestBuildStrategy().buildOnlyMergeable();
+    public boolean getIgnoreWorkInProgressFromOrigin() {
+        return sourceSettings.originMonitorStrategy().ignoreWorkInProgress();
     }
 
     @DataBoundSetter
-    public void setBuildMergeRequestsFromForks(boolean value) {
-        sourceSettings.forkMergeRequestBuildStrategy().setEnabled(value);
+    public void setMonitorAndBuildMergeRequestsFromForks(boolean value) {
+        sourceSettings.forksMonitorStrategy().setMonitored(value);
     }
 
-    public boolean getBuildMergeRequestsFromForks() {
-        return sourceSettings.forkMergeRequestBuildStrategy().enabled();
+    public boolean getMonitorAndBuildMergeRequestsFromForks() {
+        return sourceSettings.forksMonitorStrategy().monitored();
     }
 
     @DataBoundSetter
     public void setBuildMergeRequestsFromForksMerged(boolean value) {
-        sourceSettings.forkMergeRequestBuildStrategy().setBuildMerged(value);
+        sourceSettings.forksMonitorStrategy().setBuildMerged(value);
     }
 
     public boolean getBuildMergeRequestsFromForksMerged() {
-        return sourceSettings.forkMergeRequestBuildStrategy().buildMerged();
+        return sourceSettings.forksMonitorStrategy().buildMerged();
     }
 
     @DataBoundSetter
     public void setBuildMergeRequestsFromForksUnmerged(boolean value) {
-        sourceSettings.forkMergeRequestBuildStrategy().setBuildUnmerged(value);
+        sourceSettings.forksMonitorStrategy().setBuildUnmerged(value);
     }
 
     public boolean getBuildMergeRequestsFromForksUnmerged() {
-        return sourceSettings.forkMergeRequestBuildStrategy().buildUnmerged();
+        return sourceSettings.forksMonitorStrategy().buildUnmerged();
     }
 
     @DataBoundSetter
-    public void setIgnoreWIPMergeRequestsFromForks(boolean ignoreWIPMergeRequests) {
-        sourceSettings.forkMergeRequestBuildStrategy().setIgnoreWorkInProgress(ignoreWIPMergeRequests);
+    public void setIgnoreWorkInProgressFromForks(boolean ignoreWIPMergeRequests) {
+        sourceSettings.forksMonitorStrategy().setIgnoreWorkInProgress(ignoreWIPMergeRequests);
     }
 
-    public boolean getIgnoreWIPMergeRequestsFromForks() {
-        return sourceSettings.forkMergeRequestBuildStrategy().ignoreWorkInProgress();
-    }
-
-    @DataBoundSetter
-    public void setBuildOnlyMergeableMergeRequestsFromForks(boolean value) {
-        sourceSettings.forkMergeRequestBuildStrategy().setBuildOnlyMergeable(value);
-    }
-
-    public boolean getBuildOnlyMergeableMergeRequestsFromForks() {
-        return sourceSettings.forkMergeRequestBuildStrategy().buildOnlyMergeable();
+    public boolean getIgnoreWorkInProgressFromForks() {
+        return sourceSettings.forksMonitorStrategy().ignoreWorkInProgress();
     }
 
     @DataBoundSetter
@@ -244,13 +226,23 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
+    public void setMonitorTags(boolean monitorTags) {
+        sourceSettings.tagMonitorStrategy().setMonitored(monitorTags);
+    }
+
+    public boolean getMonitorTags() {
+        return sourceSettings.tagMonitorStrategy().monitored();
+    }
+
+    @DataBoundSetter
     public void setBuildTags(boolean buildTags) {
-        sourceSettings.setBuildTags(buildTags);
+        sourceSettings.tagMonitorStrategy().setBuildUnmerged(buildTags);
     }
 
     public boolean getBuildTags() {
-        return sourceSettings.getBuildTags();
+        return sourceSettings.tagMonitorStrategy().buildUnmerged();
     }
+
 
     @DataBoundSetter
     public void setRegisterWebHooks(boolean registerWebHooks) {
