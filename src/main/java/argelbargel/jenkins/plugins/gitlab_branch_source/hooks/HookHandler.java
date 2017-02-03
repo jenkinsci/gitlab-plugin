@@ -2,9 +2,11 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.hooks;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabHookEventType;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.SystemHook;
+import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMMergeRequestEvent;
 import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMPushEvent;
 import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMSourceEvent;
 import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMTagPushEvent;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
@@ -28,7 +30,7 @@ class HookHandler {
                 SCMHeadEvent.fireNow(new GitLabSCMTagPushEvent(id, readHook(PushHook.class, body)));
                 break;
             case MERGE_REQUEST:
-//                SCMHeadEvent.fireNow(new GitLabSCMHeadEvent(id, readHook(MergeRequestHook.class, body)));
+                SCMHeadEvent.fireNow(GitLabSCMMergeRequestEvent.create(id, readHook(MergeRequestHook.class, body)));
                 break;
             case SYSTEM_HOOK:
                 handleSystemHook(id, body);

@@ -2,9 +2,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMNavigator;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import hudson.model.Cause;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadEvent;
@@ -19,12 +17,12 @@ import java.util.logging.Logger;
 
 import static java.util.Collections.emptyMap;
 
-public abstract class GitLabSCMHeadEvent extends SCMHeadEvent<PushHook> implements GitLabSCMEvent {
+public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent<T> implements GitLabSCMEvent {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMHeadEvent.class.getName());
 
     private final String hookId;
 
-    GitLabSCMHeadEvent(Type type, PushHook payload, String id) {
+    GitLabSCMHeadEvent(Type type, String id, T payload) {
         super(type, payload);
         this.hookId = id;
     }
@@ -34,8 +32,8 @@ public abstract class GitLabSCMHeadEvent extends SCMHeadEvent<PushHook> implemen
         return navigator instanceof GitLabSCMNavigator && isMatch((GitLabSCMNavigator) navigator);
     }
 
-    private boolean isMatch(@Nonnull GitLabSCMNavigator navigator) {
-        return hookId.equals(navigator.getHookListener().id()) && EventHelper.getMatchingProject(navigator, getPayload()) != null;
+    protected boolean isMatch(@Nonnull GitLabSCMNavigator navigator) {
+        return hookId.equals(navigator.getHookListener().id());
     }
 
     @Override
@@ -44,13 +42,7 @@ public abstract class GitLabSCMHeadEvent extends SCMHeadEvent<PushHook> implemen
     }
 
     protected boolean isMatch(@Nonnull GitLabSCMSource source) {
-        return hookId.equals(source.getHookListener().id()) && getPayload().getProjectId().equals(source.getProjectId());
-    }
-
-    @Nonnull
-    @Override
-    public final String getSourceName() {
-        return getPayload().getProject().getPathWithNamespace();
+        return hookId.equals(source.getHookListener().id());
     }
 
     @Nonnull
@@ -72,10 +64,5 @@ public abstract class GitLabSCMHeadEvent extends SCMHeadEvent<PushHook> implemen
     @Override
     public boolean isMatch(@Nonnull SCM scm) {
         return false;
-    }
-
-    @Override
-    public final Cause getCause() {
-        return new GitLabWebHookCause(CauseDataHelper.buildCauseData(getPayload()));
     }
 }

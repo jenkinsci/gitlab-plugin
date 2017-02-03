@@ -190,11 +190,11 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Nonnull
     @Override
-    protected  List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
+    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
         return actions.retrieve(event, listener);
     }
 
-    private void retrieve(SCMHeadObserver observer, GitLabSCMHeadEvent event, TaskListener listener) throws IOException, InterruptedException {
+    private void retrieve(SCMHeadObserver observer, GitLabSCMHeadEvent<?> event, TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().format(Messages.GitLabSCMSource_headFromEvent(event.getPayload().getObjectKind()) + "\n");
         if (event.getType() != REMOVED) {
             // for events emitted by us we trust the event's heads
@@ -203,7 +203,9 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
                 observer.observe(entry.getKey(), entry.getValue());
             }
         } else {
-            listener.getLogger().format(Messages.GitLabSCMSource_removedHead(event.getPayload().getRef()) + "\n");
+            for (Map.Entry<SCMHead, SCMRevision> entry : event.heads(this).entrySet()) {
+                listener.getLogger().format(Messages.GitLabSCMSource_removedHead(entry.getKey().getName()) + "\n");
+            }
         }
     }
 
@@ -260,17 +262,18 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return scm;
     }
 
-
-    public GitLabSCMHead createBranch(String name) throws IOException, InterruptedException {
-        return heads.createBranch(name);
-    }
-
     public GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
         return heads.createBranch(name, hash);
     }
 
     public GitLabSCMHead createTag(String name, String hash) {
         return heads.createTag(name, hash);
+    }
+
+    public GitLabSCMHead createMergeRequest(String name, String sourceBranch, String hash, String targetBranch) {
+        return heads.createMergeRequest(name,
+                heads.createBranch(sourceBranch, hash, true),
+                heads.createBranch(targetBranch, true));
     }
 
     private <T extends StandardCredentials> T getCredentials(@Nonnull Class<T> type) {

@@ -32,14 +32,6 @@ class SourceHeads {
         public void observe(@Nonnull SCMHead head, @Nonnull SCMRevision revision) { /* NOOP */ }
     };
 
-    private static GitLabSCMHead createMergeRequest(String name, GitLabSCMHead source, GitLabSCMHead target) {
-        return createLabel(new SCMMergeRequestHead(name.replaceFirst("^" + ORIGIN_REF_MERGE_REQUESTS, ""), source, target), true);
-    }
-
-    private static GitLabSCMHead createBranch(String name, String hash, boolean automaticBuild) {
-        return createLabel(Messages.GitLabSCMBranch_Pronoun(), ORIGIN_REF_BRANCHES, name, hash, automaticBuild);
-    }
-
     private static GitLabSCMHead createLabel(String pronoun, String originRef, String name, String hash, boolean automaticBuild) {
         return createLabel(new SCMHeadImpl(pronoun, name.replaceFirst("^" + originRef, ""), hash), automaticBuild);
     }
@@ -57,11 +49,7 @@ class SourceHeads {
         this.settings = settings;
     }
 
-    final GitLabSCMHead createBranch(String name) throws IOException, InterruptedException {
-        return createBranch(name, "HEAD");
-    }
-
-    final GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
+    GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
         boolean automaticBuild = true;
 
         if (!settings.getBuildBranchesWithMergeRequests()) {
@@ -75,8 +63,21 @@ class SourceHeads {
         return createBranch(name, hash, automaticBuild);
     }
 
-    final GitLabSCMHead createTag(String name, String hash) {
+    @SuppressWarnings("SameParameterValue")
+    GitLabSCMHead createBranch(String name, boolean automaticBuild) {
+        return createBranch(name, "HEAD", automaticBuild);
+    }
+
+    GitLabSCMHead createBranch(String name, String hash, boolean automaticBuild) {
+        return createLabel(Messages.GitLabSCMBranch_Pronoun(), ORIGIN_REF_BRANCHES, name, hash, automaticBuild);
+    }
+
+    GitLabSCMHead createTag(String name, String hash) {
         return createLabel(Messages.GitLabSCMTag_Pronoun(), ORIGIN_REF_TAGS, name, hash, settings.tagMonitorStrategy().buildUnmerged());
+    }
+
+    GitLabSCMHead createMergeRequest(String name, GitLabSCMHead source, GitLabSCMHead target) {
+        return createLabel(new SCMMergeRequestHead(name.replaceFirst("^" + ORIGIN_REF_MERGE_REQUESTS, ""), source, target), true);
     }
 
     void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @Nonnull TaskListener listener) throws IOException, InterruptedException {
@@ -135,7 +136,7 @@ class SourceHeads {
                 createMergeRequest(
                         String.valueOf(mergeRequest.getId()),
                         createBranch(mergeRequest.getSourceBranch(), mergeRequest.getSha(), true),
-                        createBranch(mergeRequest.getTargetBranch(), "HEAD", true)));
+                        createBranch(mergeRequest.getTargetBranch(), true)));
     }
 
     private void observe(@Nonnull SCMHeadObserver observer, GitLabSCMHead head) {
