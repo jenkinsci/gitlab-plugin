@@ -1,6 +1,5 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
-import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility;
 import jenkins.scm.api.SCMSourceObserver;

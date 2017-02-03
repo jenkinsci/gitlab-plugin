@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
 
@@ -35,20 +36,16 @@ class SourceHeads {
         return createLabel(new SCMMergeRequestHead(name.replaceFirst("^" + ORIGIN_REF_MERGE_REQUESTS, ""), source, target), true);
     }
 
+    private static GitLabSCMHead createBranch(String name, String hash, boolean automaticBuild) {
+        return createLabel(Messages.GitLabSCMBranch_Pronoun(), ORIGIN_REF_BRANCHES, name, hash, automaticBuild);
+    }
+
     private static GitLabSCMHead createLabel(String pronoun, String originRef, String name, String hash, boolean automaticBuild) {
         return createLabel(new SCMHeadImpl(pronoun, name.replaceFirst("^" + originRef, ""), hash), automaticBuild);
     }
 
     private static GitLabSCMHead createLabel(GitLabSCMHead head, boolean automaticBuild) {
         return SCMHeadLabel.create(head, automaticBuild);
-    }
-
-    private static GitLabSCMHead createBranch(String name, boolean automaticBuild) {
-        return createLabel(Messages.GitLabSCMBranch_Pronoun(), ORIGIN_REF_BRANCHES, name, "HEAD", automaticBuild);
-    }
-
-    private static GitLabSCMHead createBranch(String name, String hash, boolean automaticBuild) {
-        return createLabel(Messages.GitLabSCMBranch_Pronoun(), ORIGIN_REF_BRANCHES, name, hash, automaticBuild);
     }
 
     private final GitlabProject project;
@@ -118,7 +115,7 @@ class SourceHeads {
 
                 observe(observer, mr);
                 listener.getLogger().format(Messages.GitLabSCMSource_monitoringMergeRequest(mr.getId()) + "\n");
-                if (mr.getSourceProjectId() == project.getId()) {
+                if (Objects.equals(mr.getSourceProjectId(), project.getId())) {
                     branchesWithMergeRequestsCache.add(mr.getSourceBranch());
                 }
             }
@@ -138,7 +135,7 @@ class SourceHeads {
                 createMergeRequest(
                         String.valueOf(mergeRequest.getId()),
                         createBranch(mergeRequest.getSourceBranch(), mergeRequest.getSha(), true),
-                        createBranch(mergeRequest.getTargetBranch(), true)));
+                        createBranch(mergeRequest.getTargetBranch(), "HEAD", true)));
     }
 
     private void observe(@Nonnull SCMHeadObserver observer, GitLabSCMHead head) {

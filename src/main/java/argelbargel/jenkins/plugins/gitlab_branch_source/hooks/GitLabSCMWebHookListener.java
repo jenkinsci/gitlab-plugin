@@ -1,6 +1,5 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.hooks;
 
-import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.Messages;
 import jenkins.model.Jenkins;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -61,7 +60,7 @@ public final class GitLabSCMWebHookListener {
         try {
             return new URL(Jenkins.getInstance().getRootUrl() + NOTIFICATION_ENDPOINT + HOOK_PATH_SEP + id());
         } catch (MalformedURLException e) {
-            throw new GitLabSCMException(Messages.GitLabSCMWebHook_hook_url_is_malformed(e.getMessage()));
+            throw new RuntimeException(Messages.GitLabSCMWebHook_hook_url_is_malformed(e.getMessage()));
         }
     }
 }
