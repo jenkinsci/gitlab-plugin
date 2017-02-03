@@ -1,41 +1,22 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
-import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabMergeRequest;
-
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
-class GitLabSCMMergeRequest extends GitLabSCMHead {
-    private final GitLabMergeRequest delegate;
+class GitLabSCMMergeRequest extends GitLabSCMHeadImpl {
+    private final GitLabSCMHead source;
+    private final GitLabSCMHead target;
 
-    GitLabSCMMergeRequest(@Nonnull GitLabMergeRequest delegate) {
-        super(String.valueOf(delegate.getId()), "HEAD");
-        this.delegate = delegate;
+    GitLabSCMMergeRequest(@Nonnull String name, GitLabSCMHead source, GitLabSCMHead target) {
+        super(Messages.GitLabSCMMergeRequest_Pronoun(), name, "HEAD");
+        this.source = source;
+        this.target = target;
     }
 
-    boolean isFromOrigin() {
-        return Objects.equals(delegate.getSourceProjectId(), delegate.getTargetProjectId());
+    GitLabSCMHead getSource() {
+        return source;
     }
 
-    boolean isFromFork() {
-        return !isFromOrigin();
-    }
-
-    boolean isWorkInProgress() {
-        return delegate.isWorkInProgress();
-    }
-
-    GitLabSCMBranch getSource() {
-        return new GitLabSCMBranch(delegate.getSourceBranch(), delegate.getSha());
-    }
-
-    GitLabSCMBranch getTarget() {
-        return new GitLabSCMBranch(delegate.getTargetBranch(), "HEAD");
-    }
-
-    @CheckForNull
-    public String getPronoun() {
-        return Messages.GitLabSCMMergeRequest_Pronoun();
+    GitLabSCMHead getTarget() {
+        return target;
     }
 }

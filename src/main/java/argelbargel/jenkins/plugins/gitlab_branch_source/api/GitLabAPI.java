@@ -8,13 +8,18 @@ import org.gitlab.api.models.GitlabProjectHook;
 import org.gitlab.api.models.GitlabSystemHook;
 import org.gitlab.api.models.GitlabTag;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 public final class GitLabAPI {
+    private static final String PATH_SEP = "/";
+
     public static GitLabAPI connect(String url, String token) throws GitLabAPIException {
         try {
             return new GitLabAPI(GitlabAPI.connect(url, token));
@@ -50,6 +55,8 @@ public final class GitLabAPI {
     private GitlabProject getProject(Serializable nameOrId) throws GitLabAPIException {
         try {
             return delegate.getProject(nameOrId);
+        } catch (FileNotFoundException e) {
+            throw new NoSuchElementException("unknown project " + nameOrId);
         } catch (IOException e) {
             throw new GitLabAPIException(e);
         }
@@ -62,7 +69,18 @@ public final class GitLabAPI {
     private List<GitlabBranch> getBranches(Serializable nameOrId) throws GitLabAPIException {
         try {
             return delegate.getBranches(nameOrId);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
+    public GitlabBranch getBranch(int projectId, String branch) throws GitLabAPIException {
+        try {
+            String tailUrl = GitlabProject.URL + PATH_SEP + projectId + GitlabBranch.URL + PATH_SEP + URLEncoder.encode(branch, "UTF-8");
+            return delegate.retrieve().to(tailUrl, GitlabBranch.class);
+        } catch (FileNotFoundException e) {
+            throw new NoSuchElementException("unknown branch " + branch);
+        } catch (Exception e) {
             throw new GitLabAPIException(e);
         }
     }
@@ -75,6 +93,17 @@ public final class GitLabAPI {
         try {
             return delegate.getTags(nameOrId);
         } catch (IOException e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
+    public GitlabTag getTag(int projectId, String tag) throws GitLabAPIException {
+        try {
+            String tailUrl = GitlabProject.URL + PATH_SEP + projectId + GitlabTag.URL + PATH_SEP + URLEncoder.encode(tag, "UTF-8");
+            return delegate.retrieve().to(tailUrl, GitlabTag.class);
+        } catch (FileNotFoundException e) {
+            throw new NoSuchElementException("unknown tag " + tag);
+        } catch (Exception e) {
             throw new GitLabAPIException(e);
         }
     }
@@ -179,7 +208,7 @@ public final class GitLabAPI {
         for (GitlabProjectHook hook : delegate.getProjectHooks(projectId)) {
             if (hook.getUrl().equals(url)) {
                 LOGGER.fine("un-registering project-hook for project " + projectId + ": " + url + "...");
-                String tailUrl = GitlabProject.URL + "/" + hook.getProjectId() + GitlabProjectHook.URL + "/" + hook.getId();
+                String tailUrl = GitlabProject.URL + PATH_SEP + hook.getProjectId() + GitlabProjectHook.URL + PATH_SEP + hook.getId();
                 delegate.retrieve().method("DELETE").to(tailUrl, GitlabProjectHook[].class);
                 return true;
             }
@@ -190,7 +219,7 @@ public final class GitLabAPI {
 
     private String projectUrl(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) {
         StringBuilder urlBuilder = new StringBuilder(GitlabProject.URL)
-                .append("/").append(selector.id());
+                .append(PATH_SEP).append(selector.id());
 
         if (!GitLabProjectVisibility.ALL.equals(visibility)) {
             urlBuilder.append("?visibility=").append(visibility.id());

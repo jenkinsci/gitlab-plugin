@@ -10,7 +10,7 @@ import org.gitlab.api.models.GitlabProject;
 
 import javax.annotation.Nonnull;
 
-public class GitLabSCMSourceEvent extends SCMSourceEvent<SystemHook> {
+public final class GitLabSCMSourceEvent extends SCMSourceEvent<SystemHook> {
     public static GitLabSCMSourceEvent create(String id, SystemHook hook) {
         if (hook.isProjectCreated()) {
             return new GitLabSCMSourceEvent(Type.CREATED, id, hook);

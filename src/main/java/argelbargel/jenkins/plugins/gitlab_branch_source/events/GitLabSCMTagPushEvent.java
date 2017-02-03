@@ -1,55 +1,41 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import hudson.model.Cause;
-import hudson.scm.SCM;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
-import jenkins.scm.api.SCMSource;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Map;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.createTag;
 import static java.util.Collections.emptyMap;
+import static jenkins.scm.api.SCMEvent.Type.CREATED;
+import static jenkins.scm.api.SCMEvent.Type.REMOVED;
 
-public class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements GitLabSCMEvent {
+
+public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements GitLabSCMEvent {
+    private static final String NONE_HASH_PATTERN = "^0+$";
+
     public GitLabSCMTagPushEvent(String id, PushHook hook) {
-        super(id, hook);
+        super((hook.getBefore().matches(NONE_HASH_PATTERN) ? CREATED : REMOVED), id, hook);
     }
 
-    @Nonnull
     @Override
-    public String getSourceName() {
-        return getPayload().getProject().getPathWithNamespace();
+    protected boolean isMatch(@Nonnull GitLabSCMSource source) {
+        return super.isMatch(source) && source.getMonitorTags();
     }
 
-    @Nonnull
     @Override
-    public Map<SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
-        if (source instanceof GitLabSCMSource) {
-            return heads((GitLabSCMSource) source);
-        }
-
-        return emptyMap();
-    }
-
     protected Map<SCMHead, SCMRevision> heads(@Nonnull GitLabSCMSource source) {
         if (!source.getMonitorTags()) {
             return emptyMap();
         }
 
-        return super.heads(source);
-    }
-
-    @Override
-    public boolean isMatch(@Nonnull SCM scm) {
-        return false;
-    }
-
-    @Override
-    public Cause getCause() {
-        return new GitLabWebHookCause(CauseDataHelper.buildCauseData(getPayload()));
+        String hash = getType() == REMOVED ? getPayload().getBefore() : getPayload().getAfter();
+        GitLabSCMHead head = createTag(getPayload().getRef(), hash, source.getBuildTags());
+        return Collections.<SCMHead, SCMRevision>singletonMap(head, head.getCommit());
     }
 }

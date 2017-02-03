@@ -43,15 +43,18 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.ORIGIN_REF_BRANCHES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.ORIGIN_REF_MERGE_REQUESTS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.ORIGIN_REF_TAGS;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class GitLabSCMSource extends AbstractGitSCMSource {
-    private static final RefSpec REFSPEC_BRANCHES = new RefSpec("+refs/heads/*:refs/remotes/origin/*");
-    private static final RefSpec REFSPEC_TAGS = new RefSpec("+refs/tags/*:refs/remotes/origin/tags/*");
-    private static final RefSpec REFSPEC_MERGE_REQUESTS = new RefSpec("+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*");
+    private static final RefSpec REFSPEC_BRANCHES = new RefSpec("+" + ORIGIN_REF_BRANCHES + "*:refs/remotes/origin/*");
+    private static final RefSpec REFSPEC_TAGS = new RefSpec("+" + ORIGIN_REF_TAGS + "*:refs/remotes/origin/tags/*");
+    private static final RefSpec REFSPEC_MERGE_REQUESTS = new RefSpec("+" + ORIGIN_REF_MERGE_REQUESTS + "*/head:refs/remotes/origin/merge-requests/*");
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMSource.class.getName());
 
-    private final SourceHeads heads;
+    private final GitLabSCMHeads heads;
     private final SourceActions actions;
     private final SourceSettings settings;
     private final GitlabProject project;
@@ -61,7 +64,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     GitLabSCMSource(GitlabProject project, SourceSettings settings) {
         super(project.getPathWithNamespace());
         this.actions = new SourceActions(project, settings);
-        this.heads = new SourceHeads(project.getId(), settings);
+        this.heads = new GitLabSCMHeads(project.getId(), settings);
         this.settings = settings;
         this.project = project;
         this.hookListener = GitLabSCMWebHook.createListener(this);
