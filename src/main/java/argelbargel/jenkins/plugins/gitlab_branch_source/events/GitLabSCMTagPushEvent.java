@@ -10,7 +10,6 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Map;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.createTag;
 import static java.util.Collections.emptyMap;
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
 import static jenkins.scm.api.SCMEvent.Type.REMOVED;
@@ -35,7 +34,7 @@ public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements G
         }
 
         String hash = getType() == REMOVED ? getPayload().getBefore() : getPayload().getAfter();
-        GitLabSCMHead head = createTag(getPayload().getRef(), hash, source.getBuildTags());
-        return Collections.<SCMHead, SCMRevision>singletonMap(head, head.getCommit());
+        GitLabSCMHead head = source.createTag(getPayload().getRef(), hash);
+        return Collections.<SCMHead, SCMRevision>singletonMap(head, head.getRevision());
     }
 }

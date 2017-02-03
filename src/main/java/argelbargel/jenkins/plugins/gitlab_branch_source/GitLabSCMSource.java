@@ -1,6 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
+import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMHeadEvent;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHookListener;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
@@ -40,12 +41,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.ORIGIN_REF_BRANCHES;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.ORIGIN_REF_MERGE_REQUESTS;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHeads.ORIGIN_REF_TAGS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.SourceHeads.ORIGIN_REF_BRANCHES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.SourceHeads.ORIGIN_REF_MERGE_REQUESTS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.SourceHeads.ORIGIN_REF_TAGS;
+import static jenkins.scm.api.SCMEvent.Type.REMOVED;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class GitLabSCMSource extends AbstractGitSCMSource {
@@ -54,20 +57,20 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     private static final RefSpec REFSPEC_MERGE_REQUESTS = new RefSpec("+" + ORIGIN_REF_MERGE_REQUESTS + "*/head:refs/remotes/origin/merge-requests/*");
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMSource.class.getName());
 
-    private final GitLabSCMHeads heads;
-    private final SourceActions actions;
     private final SourceSettings settings;
     private final GitlabProject project;
     private final GitLabSCMWebHookListener hookListener;
+    private final SourceHeads heads;
+    private final SourceActions actions;
 
 
     GitLabSCMSource(GitlabProject project, SourceSettings settings) {
         super(project.getPathWithNamespace());
-        this.actions = new SourceActions(project, settings);
-        this.heads = new GitLabSCMHeads(project.getId(), settings);
         this.settings = settings;
         this.project = project;
         this.hookListener = GitLabSCMWebHook.createListener(this);
+        this.actions = new SourceActions(project, settings);
+        this.heads = new SourceHeads(project, settings);
     }
 
     public String getConnectionName() {
@@ -178,13 +181,30 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Override
     protected void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        heads.retrieve(criteria, observer, event, listener);
+        if (event instanceof GitLabSCMHeadEvent) {
+            retrieve(observer, (GitLabSCMHeadEvent) event, listener);
+        } else {
+            heads.retrieve(criteria, observer, listener);
+        }
     }
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
+    protected  List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
         return actions.retrieve(event, listener);
+    }
+
+    private void retrieve(SCMHeadObserver observer, GitLabSCMHeadEvent event, TaskListener listener) throws IOException, InterruptedException {
+        listener.getLogger().format(Messages.GitLabSCMSource_headFromEvent(event.getPayload().getObjectKind()) + "\n");
+        if (event.getType() != REMOVED) {
+            // for events emitted by us we trust the event's heads
+            for (Map.Entry<SCMHead, SCMRevision> entry : event.heads(this).entrySet()) {
+                listener.getLogger().format(Messages.GitLabSCMSource_createdOrUpdatedHead(entry.getKey().getName(), entry.getValue()) + "\n");
+                observer.observe(entry.getKey(), entry.getValue());
+            }
+        } else {
+            listener.getLogger().format(Messages.GitLabSCMSource_removedHead(event.getPayload().getRef()) + "\n");
+        }
     }
 
     @Nonnull
@@ -226,13 +246,31 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     public SCM build(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
-        if (head instanceof GitLabSCMHeadLabel) {
-            return build(((GitLabSCMHeadLabel) head).getTarget(), revision);
+        if (head instanceof SCMHeadLabel) {
+            return build(((SCMHeadLabel) head).getTarget(), revision);
+        }
+
+        if (head instanceof SCMMergeRequestHead) {
+            GitLabSCMHead source = ((SCMMergeRequestHead) head).getSource();
+            return build(source, source.getRevision());
         }
 
         GitSCM scm = (GitSCM) super.build(head, revision);
         scm.setBrowser(getBrowser());
         return scm;
+    }
+
+
+    public GitLabSCMHead createBranch(String name) throws IOException, InterruptedException {
+        return heads.createBranch(name);
+    }
+
+    public GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
+        return heads.createBranch(name, hash);
+    }
+
+    public GitLabSCMHead createTag(String name, String hash) {
+        return heads.createTag(name, hash);
     }
 
     private <T extends StandardCredentials> T getCredentials(@Nonnull Class<T> type) {
@@ -242,7 +280,6 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
                 CredentialsMatchers.withId(getCredentialsId()),
                 CredentialsMatchers.instanceOf(type)));
     }
-
 
     @SuppressWarnings("unused")
     @Extension

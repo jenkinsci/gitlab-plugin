@@ -1,6 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.mixin.SCMHeadMixin;
 
 public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
@@ -8,5 +9,5 @@ public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
         super(name);
     }
 
-    public abstract GitLabSCMCommit getCommit();
+    public abstract SCMRevision getRevision();
 }

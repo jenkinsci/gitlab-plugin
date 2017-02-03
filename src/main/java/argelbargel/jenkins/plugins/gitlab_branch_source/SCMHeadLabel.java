@@ -1,13 +1,13 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
-import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.mixin.TagSCMHead;
 
 /**
  * Changes the name/label of the job for the given head
  */
-abstract class GitLabSCMHeadLabel extends GitLabSCMHead {
-    static GitLabSCMHeadLabel create(GitLabSCMHead head, boolean automaticBuild) {
+abstract class SCMHeadLabel extends GitLabSCMHead {
+    static SCMHeadLabel create(GitLabSCMHead head, boolean automaticBuild) {
         String label = head.getPronoun() + " " + head.getName();
         return (automaticBuild) ? new AutomaticBuildLabel(label, head) : new ManualBuildLabel(label, head);
     }
@@ -15,22 +15,22 @@ abstract class GitLabSCMHeadLabel extends GitLabSCMHead {
 
     private final GitLabSCMHead target;
 
-    GitLabSCMHeadLabel(String label, GitLabSCMHead target) {
+    SCMHeadLabel(String label, GitLabSCMHead target) {
         super(label);
         this.target = target;
     }
 
     @Override
-    public GitLabSCMCommit getCommit() {
-        return target.getCommit();
+    public final SCMRevision getRevision() {
+        return target.getRevision();
     }
 
-    final SCMHead getTarget() {
+    final GitLabSCMHead getTarget() {
         return target;
     }
 
 
-    private static class AutomaticBuildLabel extends GitLabSCMHeadLabel {
+    private static class AutomaticBuildLabel extends SCMHeadLabel {
         AutomaticBuildLabel(String label, GitLabSCMHead target) {
             super(label, target);
         }
@@ -38,7 +38,7 @@ abstract class GitLabSCMHeadLabel extends GitLabSCMHead {
 
     // HACK ALERT: the current default buildstrategy of MultiBranchProject does not build TagSCMHead instances automatically;
     // when our sources are observed by another Project which uses different buildstrategies this might not work...
-    private static class ManualBuildLabel extends GitLabSCMHeadLabel implements TagSCMHead {
+    private static class ManualBuildLabel extends SCMHeadLabel implements TagSCMHead {
         ManualBuildLabel(String label, GitLabSCMHead target) {
             super(label, target);
         }

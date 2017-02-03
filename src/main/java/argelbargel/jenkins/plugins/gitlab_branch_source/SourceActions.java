@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
+
+
 class SourceActions {
     private final GitlabProject project;
     private final SourceSettings settings;
@@ -38,8 +41,8 @@ class SourceActions {
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (head instanceof GitLabSCMHeadLabel) {
-            return retrieve(((GitLabSCMHeadLabel) head).getTarget(), event, listener);
+        if (head instanceof SCMHeadLabel) {
+            return retrieve(((SCMHeadLabel) head).getTarget(), event, listener);
         }
 
         List<Action> actions = new ArrayList<>();
@@ -53,8 +56,8 @@ class SourceActions {
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (revision.getHead() instanceof GitLabSCMHeadLabel) {
-            return retrieve(((GitLabSCMHeadLabel) revision.getHead()).getTarget(), event, listener);
+        if (revision.getHead() instanceof SCMHeadLabel) {
+            return retrieve(((SCMHeadLabel) revision.getHead()).getTarget(), event, listener);
         }
 
         List<Action> actions = new ArrayList<>();
@@ -62,8 +65,8 @@ class SourceActions {
             actions.add(new GitLabSCMCauseAction(((GitLabSCMEvent) event).getCause(), settings.getUpdateBuildDescription()));
         }
 
-        if (revision instanceof GitLabSCMCommit) {
-            String hash = ((GitLabSCMCommit) revision).getHash();
+        if (revision instanceof SCMRevisionImpl) {
+            String hash = ((SCMRevisionImpl) revision).getHash();
             actions.add(GitLabLink.toCommit(project, hash));
             actions.add(GitLabLink.toTree(project, hash));
         } else {

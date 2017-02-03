@@ -31,7 +31,7 @@ class SourceVisitor {
     }
 
     private void visitSources(String connectionName, GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws InterruptedException, IOException {
-        log("Looking up repositories for gitlab-connection %s...", navigator.getConnectionName());
+        log(Messages.GitLabSCMNavigator_visitSources(connectionName));
 
         try {
             for (GitlabProject project : gitLabAPI(connectionName).findProjects(selector, visibility, searchPattern)) {
@@ -39,7 +39,7 @@ class SourceVisitor {
                 visitProject(project);
             }
         } catch (Exception e) {
-            log("error visiting projects for connection " + connectionName + ": " + e.getMessage());
+            log(Messages.GitLabSCMNavigator_visitSources_error(connectionName, e));
             throw e;
         }
     }
@@ -51,7 +51,7 @@ class SourceVisitor {
                 visitProject(project);
             }
         } catch (Exception e) {
-            log("error visiting source " + sourceName + ": " + e.getMessage());
+            log(Messages.GitLabSCMNavigator_visitSource_error(sourceName, e));
             throw e;
         }
     }
@@ -63,7 +63,7 @@ class SourceVisitor {
 
         checkInterrupt();
 
-        log("Proposing repository %s", project.getHttpUrl());
+        log(Messages.GitLabSCMNavigator_visitProject(project.getPathWithNamespace()));
         SCMSourceObserver.ProjectObserver projectObserver = observer.observe(project.getPathWithNamespace());
         GitLabSCMSource source = new GitLabSCMSource(project, navigator.getSourceSettings());
         projectObserver.addSource(source);

@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 
 @SuppressWarnings("unused")
 @Extension
-public final class GitlabSCMWebHookItemListener extends ItemListener {
+public final class GitLabSCMWebHookItemListener extends ItemListener {
     @Override
     public void onDeleted(Item item) {
         if (item instanceof SCMNavigatorOwner) {

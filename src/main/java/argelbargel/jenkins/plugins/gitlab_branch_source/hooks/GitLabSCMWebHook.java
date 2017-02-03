@@ -139,6 +139,7 @@ public final class GitLabSCMWebHook implements UnprotectedRootAction {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private String getRequestBody(StaplerRequest request) {
         try {
             String charset = request.getCharacterEncoding() == null ? CHARSET_UTF_8 : request.getCharacterEncoding();

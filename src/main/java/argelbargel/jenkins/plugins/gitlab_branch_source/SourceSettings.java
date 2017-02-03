@@ -4,6 +4,7 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.AllowMergeRe
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.AllowMergeRequestsFromOrigin;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.FilterWorkInProgress;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
+import hudson.model.TaskListener;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 
@@ -98,21 +99,21 @@ class SourceSettings {
         return updateBuildDescription;
     }
 
-    GitLabMergeRequestFilter getMergeRequestFilter() {
+    GitLabMergeRequestFilter getMergeRequestFilter(TaskListener listener) {
         GitLabMergeRequestFilter filter = GitLabMergeRequestFilter.ALLOW_NONE;
         if (originMonitorStrategy.monitored()) {
-            GitLabMergeRequestFilter originFilter = new AllowMergeRequestsFromOrigin();
+            GitLabMergeRequestFilter originFilter = new AllowMergeRequestsFromOrigin(listener);
             if (originMonitorStrategy.ignoreWorkInProgress()) {
-                originFilter = originFilter.and(new FilterWorkInProgress());
+                originFilter = originFilter.and(new FilterWorkInProgress(listener));
             }
 
             filter = filter.or(originFilter);
         }
 
         if (forksMonitorStrategy.monitored()) {
-            GitLabMergeRequestFilter forkFilter = new AllowMergeRequestsFromForks();
+            GitLabMergeRequestFilter forkFilter = new AllowMergeRequestsFromForks(listener);
             if (forksMonitorStrategy.ignoreWorkInProgress()) {
-                forkFilter = forkFilter.and(new FilterWorkInProgress());
+                forkFilter = forkFilter.and(new FilterWorkInProgress(listener));
             }
 
             filter = filter.or(forkFilter);
