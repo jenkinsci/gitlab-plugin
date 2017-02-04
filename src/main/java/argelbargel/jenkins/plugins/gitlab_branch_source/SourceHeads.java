@@ -102,8 +102,7 @@ class SourceHeads {
           listener.getLogger().format(Messages.GitLabSCMSource_retrievingMergeRequest(mrId) + "\n");
           try {
               GitLabMergeRequest mr = api().getMergeRequest(project.getId(), mrId);
-              listener.getLogger().format(Messages.GitLabSCMSource_monitoringMergeRequest(mr.getId()) + "\n");
-              observe(observer, mr);
+              observe(mr, observer, listener);
           } catch (NoSuchElementException e) {
               listener.getLogger().format(Messages.GitLabSCMSource_removedMergeRequest(mrId) + "\n");
           }
@@ -114,8 +113,7 @@ class SourceHeads {
         listener.getLogger().format(Messages.GitLabSCMSource_retrievingBranch(branchName) + "\n");
         try {
             GitlabBranch branch = api().getBranch(project.getId(), branchName);
-            listener.getLogger().format(Messages.GitLabSCMSource_monitoringBranch(branch.getName()) + "\n");
-            observe(observer, branch);
+            observe(branch, observer, listener);
         } catch (NoSuchElementException e) {
             listener.getLogger().format(Messages.GitLabSCMSource_removedHead(branchName) + "\n");
         }
@@ -126,13 +124,11 @@ class SourceHeads {
         listener.getLogger().format(Messages.GitLabSCMSource_retrievingTag(tagName) + "\n");
         try {
             GitlabTag tag = api().getTag(project.getId(), tagName);
-            listener.getLogger().format(Messages.GitLabSCMSource_monitoringTag(tag.getName()) + "\n");
-            observe(observer, tag);
+            observe(tag, observer, listener);
         } catch (NoSuchElementException e) {
             listener.getLogger().format(Messages.GitLabSCMSource_removedHead(tagName) + "\n");
         }
     }
-
 
     private void retrieveAll(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().format(Messages.GitLabSCMSource_retrievingHeadsForProject(project.getPathWithNamespace()) + "\n");
@@ -143,8 +139,7 @@ class SourceHeads {
 
             for (GitlabBranch branch : api().getBranches(project.getId())) {
                 checkInterrupt();
-                listener.getLogger().format(Messages.GitLabSCMSource_monitoringBranch(branch.getName()) + "\n");
-                observe(observer, branch);
+                observe(branch, observer, listener);
             }
         }
 
@@ -152,8 +147,7 @@ class SourceHeads {
             listener.getLogger().format(Messages.GitLabSCMSource_retrievingTags() + "\n");
             for (GitlabTag tag : api().getTags(project.getId())) {
                 checkInterrupt();
-                listener.getLogger().format(Messages.GitLabSCMSource_monitoringTag(tag.getName()) + "\n");
-                observe(observer, tag);
+                observe(tag, observer, listener);
             }
         }
     }
@@ -168,8 +162,7 @@ class SourceHeads {
             for (GitLabMergeRequest mr : filter.filter(api().getMergeRequests(project.getId()))) {
                 checkInterrupt();
 
-                observe(observer, mr);
-                listener.getLogger().format(Messages.GitLabSCMSource_monitoringMergeRequest(mr.getId()) + "\n");
+                observe(mr, observer, listener);
                 if (Objects.equals(mr.getSourceProjectId(), project.getId())) {
                     branchesWithMergeRequestsCache.add(mr.getSourceBranch());
                 }
@@ -177,15 +170,18 @@ class SourceHeads {
         }
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitlabBranch branch) throws IOException, InterruptedException {
+    private void observe(GitlabBranch branch, @Nonnull SCMHeadObserver observer, TaskListener listener) throws IOException, InterruptedException {
+        listener.getLogger().format(Messages.GitLabSCMSource_monitoringBranch(branch.getName()) + "\n");
         observe(observer, createBranch(branch.getName(), branch.getCommit().getId()));
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitlabTag tag) {
+    private void observe(GitlabTag tag, @Nonnull SCMHeadObserver observer, TaskListener listener) {
+        listener.getLogger().format(Messages.GitLabSCMSource_monitoringTag(tag.getName()) + "\n");
         observe(observer, createTag(tag.getName(), tag.getCommit().getId()));
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitLabMergeRequest mergeRequest) throws IOException, InterruptedException {
+    private void observe(GitLabMergeRequest mergeRequest, @Nonnull SCMHeadObserver observer, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+        listener.getLogger().format(Messages.GitLabSCMSource_monitoringMergeRequest(mergeRequest.getId()) + "\n");
         observe(observer,
                 createMergeRequest(
                         String.valueOf(mergeRequest.getId()),
