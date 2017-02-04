@@ -33,6 +33,7 @@ import org.gitlab.api.models.GitlabProject;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.CheckForNull;
@@ -157,6 +158,10 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.getUpdateBuildDescription();
     }
 
+    public boolean getTrustEvents() {
+        return settings.getTrustEvents();
+    }
+
     public int getProjectId() {
         return project.getId();
     }
@@ -181,20 +186,14 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Override
     protected void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (event instanceof GitLabSCMHeadEvent) {
-            retrieve(observer, (GitLabSCMHeadEvent) event, listener);
+        if (settings.getTrustEvents() && event instanceof GitLabSCMHeadEvent) {
+            retrieve(criteria, observer, (GitLabSCMHeadEvent) event, listener);
         } else {
-            heads.retrieve(criteria, observer, listener);
+            heads.retrieve(criteria, observer, event, listener);
         }
     }
 
-    @Nonnull
-    @Override
-    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
-        return actions.retrieve(event, listener);
-    }
-
-    private void retrieve(SCMHeadObserver observer, GitLabSCMHeadEvent<?> event, TaskListener listener) throws IOException, InterruptedException {
+    private void retrieve(SCMSourceCriteria criteria, SCMHeadObserver observer, GitLabSCMHeadEvent<?> event, TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().format(Messages.GitLabSCMSource_headFromEvent(event.getPayload().getObjectKind()) + "\n");
         if (event.getType() != REMOVED) {
             // for events emitted by us we trust the event's heads
@@ -207,6 +206,12 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
                 listener.getLogger().format(Messages.GitLabSCMSource_removedHead(entry.getKey().getName()) + "\n");
             }
         }
+    }
+
+    @Nonnull
+    @Override
+    protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
+        return actions.retrieve(event, listener);
     }
 
     @Nonnull

@@ -23,6 +23,7 @@ class SourceSettings {
     private boolean buildBranchesWithMergeRequests;
     private boolean registerWebHooks;
     private boolean updateBuildDescription;
+    private boolean trustEvents;
 
 
     SourceSettings(String connectionName, String credentialsId) {
@@ -37,6 +38,7 @@ class SourceSettings {
         this.tagMonitorStrategy = new MonitorStrategy(false, false);
         this.registerWebHooks = true;
         this.updateBuildDescription = true;
+        this.trustEvents = false;
     }
 
     String getConnectionName() {
@@ -97,6 +99,14 @@ class SourceSettings {
 
     boolean getUpdateBuildDescription() {
         return updateBuildDescription;
+    }
+
+    void setTrustEvents(boolean value) {
+        trustEvents = value;
+    }
+
+    boolean getTrustEvents() {
+        return trustEvents;
     }
 
     GitLabMergeRequestFilter getMergeRequestFilter(TaskListener listener) {

@@ -212,6 +212,15 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
+    public void setTrustEvents(boolean trustEvents) {
+        sourceSettings.setTrustEvents(trustEvents);
+    }
+
+    public boolean getTrustEvents() {
+        return sourceSettings.getTrustEvents();
+    }
+
+    @DataBoundSetter
     public void setUpdateBuildDescription(boolean updateBuildDescription) {
         sourceSettings.setUpdateBuildDescription(updateBuildDescription);
     }

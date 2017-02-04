@@ -61,6 +61,9 @@
                 (<strong>Push Events:</strong> false)
             </f:entry>
         </f:optionalBlock>
+        <f:entry title="${%Trust Events}" field="trustEvents">
+            <f:checkbox/>
+        </f:entry>
         <f:entry title="${%Update Build Descriptions}" field="updateBuildDescription">
             <f:checkbox/>
         </f:entry>

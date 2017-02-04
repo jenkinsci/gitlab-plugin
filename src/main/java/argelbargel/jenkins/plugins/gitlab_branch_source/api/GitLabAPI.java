@@ -3,6 +3,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.api;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabBranch;
+import org.gitlab.api.models.GitlabMergeRequest;
 import org.gitlab.api.models.GitlabProject;
 import org.gitlab.api.models.GitlabProjectHook;
 import org.gitlab.api.models.GitlabSystemHook;
@@ -108,19 +109,27 @@ public final class GitLabAPI {
         }
     }
 
-    public List<GitLabMergeRequest> getMergeRequests(int id) throws GitLabAPIException {
-        return getMergeRequests((Serializable) id);
-    }
-
-    private List<GitLabMergeRequest> getMergeRequests(Serializable nameOrId) throws GitLabAPIException {
+    public List<GitLabMergeRequest> getMergeRequests(int projectId) throws GitLabAPIException {
         try {
-            String tailUrl = "/projects/" + nameOrId + "/merge_requests?state=opened";
+            String tailUrl = "/projects/" + projectId + "/merge_requests?state=opened";
             return delegate.retrieve()
                     .getAll(tailUrl, GitLabMergeRequest[].class);
         } catch (Exception e) {
             throw new GitLabAPIException(e);
         }
     }
+
+    public GitLabMergeRequest getMergeRequest(int projectId, int mergeRequestId) throws GitLabAPIException {
+        try {
+            String tailUrl = "/projects/" + projectId + "/merge_requests/" + mergeRequestId;
+            return delegate.retrieve().to(tailUrl, GitLabMergeRequest.class);
+        } catch (FileNotFoundException e) {
+            throw new NoSuchElementException("unknown merge-request for project " + projectId + ": " + mergeRequestId);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
 
 
     public List<GitlabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
