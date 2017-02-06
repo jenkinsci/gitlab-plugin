@@ -39,7 +39,7 @@ public final class ProjectBranchesProvider {
     }
 
     private List<String> getProjectBranches(Job<?, ?> project) {
-        final URIish sourceRepository = getSourceRepoURLDefault(project);
+        final URIish sourceRepository = WebHookRevisionParameterAction.getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
             return GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
@@ -109,27 +109,5 @@ public final class ProjectBranchesProvider {
         }
         return new String[0];
     }
-
-
-    /**
-     * Get the URL of the first declared repository in the project configuration.
-     * Use this as default source repository url.
-     *
-     * @return URIish the default value of the source repository url
-     * @throws IllegalStateException Project does not use git scm.
-     */
-    private URIish getSourceRepoURLDefault(Job<?, ?> job) {
-        List<WebHookRevisionParameterAction> actions = job.getActions(WebHookRevisionParameterAction.class);
-        return getFirstRepoURL(actions);
-    }
-
-    private URIish getFirstRepoURL(List<WebHookRevisionParameterAction> actions) {
-        if (!actions.isEmpty()) {
-            WebHookRevisionParameterAction action = actions.get(actions.size() - 1);
-            return action.getRepoURI();
-        }
-        throw new IllegalStateException(Messages.GitLabPushTrigger_NoSourceRepository());
-    }
-
    
 }

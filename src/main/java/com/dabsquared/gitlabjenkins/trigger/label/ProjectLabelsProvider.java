@@ -40,7 +40,7 @@ public final class ProjectLabelsProvider {
     }
 
     private List<String> getProjectLabels(Job<?, ?> project) {
-        final URIish sourceRepository = getSourceRepoURLDefault(project);
+        final URIish sourceRepository = WebHookRevisionParameterAction.getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
             return GitLabProjectLabelsService.instance().getLabels(connectionProperty.getClient(), sourceRepository.toString());
@@ -106,27 +106,6 @@ public final class ProjectLabelsProvider {
             LOGGER.log(Level.FINEST, "Failed to load labels from GitLab. Please check the logs and your configuration.", e);
         }
         return new String[0];
-    }
-
-
-    /**
-     * Get the URL of the first declared repository in the project configuration.
-     * Use this as default source repository url.
-     *
-     * @return URIish the default value of the source repository url
-     * @throws IllegalStateException Project does not use git scm.
-     */
-    private URIish getSourceRepoURLDefault(Job<?, ?> job) {
-        List<WebHookRevisionParameterAction> actions = job.getActions(WebHookRevisionParameterAction.class);
-        return getFirstRepoURL(actions);
-    }
-
-    private URIish getFirstRepoURL(List<WebHookRevisionParameterAction> actions) {
-        if (!actions.isEmpty()) {
-            WebHookRevisionParameterAction action = actions.get(actions.size()-1);
-            return action.getRepoURI();
-        }
-        throw new IllegalStateException(Messages.GitLabPushTrigger_NoSourceRepository());
     }
     
 }

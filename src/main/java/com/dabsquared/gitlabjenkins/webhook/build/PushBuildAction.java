@@ -9,6 +9,7 @@ import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
+import jenkins.plugins.git.GitSCMSource;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.lang.StringUtils;
@@ -73,7 +74,35 @@ public class PushBuildAction extends BuildWebHookAction {
             });
             throw HttpResponses.ok();
         }
+        if (project instanceof SCMSourceOwner) {
+            ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
+            throw HttpResponses.ok();
+        }
         throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");
+    }
+
+    private class SCMSourceOwnerNotifier implements Runnable {
+        public void run() {
+            for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
+                if (scmSource instanceof GitSCMSource) {
+                    GitSCMSource gitSCMSource = (GitSCMSource) scmSource;
+                    try {
+                        if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
+                            if (!gitSCMSource.isIgnoreOnPushNotifications()) {
+                                LOGGER.log(Level.FINE, "Notify scmSourceOwner {0} about changes for {1}",
+                                           toArray(project.getName(), gitSCMSource.getRemote()));
+                                ((SCMSourceOwner) project).onSCMSourceUpdated(scmSource);
+                            } else {
+                                LOGGER.log(Level.FINE, "Ignore on push notification for scmSourceOwner {0} about changes for {1}",
+                                           toArray(project.getName(), gitSCMSource.getRemote()));
+                            }
+                        }
+                    } catch (URISyntaxException e) {
+                        // nothing to do
+                    }
+                }
+            }
+        }
     }
 
 }

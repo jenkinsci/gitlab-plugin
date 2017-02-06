@@ -8,6 +8,6 @@ import hudson.model.Job;
  */
 public class CommitStatusPngAction extends StatusPngAction {
     public CommitStatusPngAction(Job<?, ?> project, String sha1) {
-        super(project, BuildUtil.getBuildBySHA1(project, sha1));
+        super(project, BuildUtil.getBuildBySHA1WithoutMergeBuilds(project, sha1));
     }
 }

@@ -223,6 +223,10 @@ public final class CauseData {
         return targetProjectUrl;
     }
 
+    public boolean isMergeBuild() {
+        return !getSourceBranch().equals(getTargetBranch());
+    }
+    
     String getShortDescription() {
         return actionType.getShortDescription(this);
     }
