@@ -24,8 +24,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.AUTOMATIC;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.MANUAL;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.determineBuildMode;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.withBuildMode;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadLabel.createLabel;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createBranch;
@@ -158,28 +161,29 @@ class SourceHeads {
 
     private void observe(GitlabBranch branch, @Nonnull SCMHeadObserver observer, TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().format(Messages.GitLabSCMSource_monitoringBranch(branch.getName()) + "\n");
-        observe(observer, createLabel(
-                createBranch(
-                        branch.getName(),
-                        branch.getCommit().getId(),
-                        getBranchesWithMergeRequests(NULL).containsValue(branch.getName()))));
+        observe(observer,
+                determineBuildMode(
+                        createBranch(
+                                branch.getName(),
+                                branch.getCommit().getId(),
+                                getBranchesWithMergeRequests(NULL).containsValue(branch.getName()))));
     }
 
     private void observe(GitlabTag tag, @Nonnull SCMHeadObserver observer, TaskListener listener) {
         listener.getLogger().format(Messages.GitLabSCMSource_monitoringTag(tag.getName()) + "\n");
         observe(observer,
-                createLabel(
+                withBuildMode(
                         createTag(
                                 tag.getName(),
                                 tag.getCommit().getId(),
                                 tag.getCommit().getCommittedDate().getTime()),
-                        settings.tagMonitorStrategy().buildUnmerged()));
+                        settings.tagMonitorStrategy().buildUnmerged() ? AUTOMATIC : MANUAL));
     }
 
     private void observe(GitLabMergeRequest mergeRequest, @Nonnull SCMHeadObserver observer, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().format(Messages.GitLabSCMSource_monitoringMergeRequest(mergeRequest.getId()) + "\n");
         observe(observer,
-                createLabel(
+                determineBuildMode(
                         createMergeRequest(
                                 mergeRequest.getId(), mergeRequest.getTitle(),
                                 createBranch(mergeRequest.getSourceBranch(), mergeRequest.getSha()),

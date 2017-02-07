@@ -46,11 +46,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadLabel.createLabel;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.AUTOMATIC;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.MANUAL;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.withBuildMode;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_MERGE_REQUESTS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class GitLabSCMSource extends AbstractGitSCMSource {
@@ -249,8 +251,8 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     public SCM build(@Nonnull jenkins.scm.api.SCMHead head, @CheckForNull SCMRevision revision) {
-        if (head instanceof HeadLabel) {
-            return build(((HeadLabel) head).getHead(), revision);
+        if (head instanceof GitLabSCMBuildModeHead) {
+            return build(((GitLabSCMBuildModeHead) head).getHead(), revision);
         }
 
         if (head instanceof GitLabSCMMergeRequestHead) {
@@ -264,15 +266,15 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
-        return createLabel(GitLabSCMHead.createBranch(name, hash));
+        return GitLabSCMBuildModeHead.determineBuildMode(GitLabSCMHead.createBranch(name, hash));
     }
 
     public GitLabSCMHead createTag(String name, String hash, long timestamp) {
-        return createLabel(GitLabSCMHead.createTag(name, hash, timestamp), getBuildTags());
+        return withBuildMode(GitLabSCMHead.createTag(name, hash, timestamp), getBuildTags() ? AUTOMATIC : MANUAL);
     }
 
     public GitLabSCMHead createMergeRequest(int id, String name, String sourceBranch, String hash, String targetBranch) {
-        return createLabel(
+        return GitLabSCMBuildModeHead.determineBuildMode(
                 GitLabSCMHead.createMergeRequest(id, name,
                         GitLabSCMHead.createBranch(sourceBranch, hash),
                         GitLabSCMHead.createBranch(targetBranch)));
