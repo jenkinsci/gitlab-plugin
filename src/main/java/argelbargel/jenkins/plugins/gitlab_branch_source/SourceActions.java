@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabLink.mergeRequestUrl;
 import static jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 
 
@@ -41,23 +42,30 @@ class SourceActions {
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (head instanceof SCMHeadLabel) {
-            return retrieve(((SCMHeadLabel) head).getTarget(), event, listener);
+        if (head instanceof HeadLabel) {
+            return retrieve(((HeadLabel) head).getHead(), event, listener);
         }
 
         List<Action> actions = new ArrayList<>();
         actions.add(GitLabLink.toTree(project, head.getName()));
+
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            actions.add(new ObjectMetadataAction(head.getName(), "testeststeststeststes", mergeRequestUrl(project, ((GitLabSCMMergeRequestHead) head).getId())));
+            actions.add(GitLabLink.toMergeRequest(project, ((GitLabSCMMergeRequestHead) head).getId()));
+        }
+
         if (event instanceof GitLabSCMEvent) {
             actions.add(new GitLabSCMCauseAction(((GitLabSCMEvent) event).getCause(), settings.getUpdateBuildDescription()));
         }
+
 
         return actions;
     }
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (revision.getHead() instanceof SCMHeadLabel) {
-            return retrieve(((SCMHeadLabel) revision.getHead()).getTarget(), event, listener);
+        if (revision.getHead() instanceof HeadLabel) {
+            return retrieve(((HeadLabel) revision.getHead()).getHead(), event, listener);
         }
 
         List<Action> actions = new ArrayList<>();

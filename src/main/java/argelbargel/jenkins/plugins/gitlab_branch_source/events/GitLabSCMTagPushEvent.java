@@ -3,14 +3,9 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.SCMRevision;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.Map;
 
-import static java.util.Collections.emptyMap;
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
 import static jenkins.scm.api.SCMEvent.Type.REMOVED;
 
@@ -28,13 +23,9 @@ public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements G
     }
 
     @Override
-    protected Map<SCMHead, SCMRevision> heads(@Nonnull GitLabSCMSource source) {
-        if (!source.getMonitorTags()) {
-            return emptyMap();
-        }
-
-        String hash = getType() == REMOVED ? getPayload().getBefore() : getPayload().getAfter();
-        GitLabSCMHead head = source.createTag(getPayload().getRef(), hash);
-        return Collections.<SCMHead, SCMRevision>singletonMap(head, head.getRevision());
+    public GitLabSCMHead head(@Nonnull GitLabSCMSource source) {
+        PushHook hook = getPayload();
+        String hash = getType() == REMOVED ? hook.getBefore() : hook.getAfter();
+        return source.createTag(hook.getRef(), hash, hook.getCommits().get(0).getTimestamp().getTime());
     }
 }

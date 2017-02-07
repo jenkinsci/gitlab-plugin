@@ -5,13 +5,9 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import hudson.model.Cause;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.SCMRevision;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
 import static jenkins.scm.api.SCMEvent.Type.REMOVED;
@@ -58,16 +54,13 @@ public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRe
         return getPayload().getObjectAttributes();
     }
 
-
     @Override
-    protected Map<SCMHead, SCMRevision> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
-        GitLabSCMHead head = source.createMergeRequest(
-                String.valueOf(getAttributes().getId()),
+    public GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
+        return source.createMergeRequest(
+                getAttributes().getId(), getAttributes().getTitle(),
                 getAttributes().getSourceBranch(),
                 getAttributes().getLastCommit().getId(),
                 getAttributes().getTargetBranch());
-
-        return Collections.<SCMHead, SCMRevision>singletonMap(head, head.getRevision());
     }
 
     @Nonnull

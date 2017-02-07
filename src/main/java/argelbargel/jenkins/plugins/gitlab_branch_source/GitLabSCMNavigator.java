@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnectionId;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.iconfilePathPattern;
 
 
 @SuppressWarnings({"unused", "WeakerAccess" })
@@ -212,15 +214,6 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
-    public void setTrustEvents(boolean trustEvents) {
-        sourceSettings.setTrustEvents(trustEvents);
-    }
-
-    public boolean getTrustEvents() {
-        return sourceSettings.getTrustEvents();
-    }
-
-    @DataBoundSetter
     public void setUpdateBuildDescription(boolean updateBuildDescription) {
         sourceSettings.setUpdateBuildDescription(updateBuildDescription);
     }
@@ -319,6 +312,16 @@ public class GitLabSCMNavigator extends SCMNavigator {
         @Override
         public String getDescription() {
             return Messages.GitLabSCMNavigator_Description();
+        }
+
+        @Override
+        public String getIconClassName() {
+            return ICON_GITLAB_LOGO;
+        }
+
+        @Override
+        public String getIconFilePathPattern() {
+            return iconfilePathPattern(getIconClassName());
         }
 
         @Override

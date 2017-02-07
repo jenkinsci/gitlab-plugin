@@ -1,10 +1,10 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMNavigator;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import hudson.scm.SCM;
-import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMNavigator;
 import jenkins.scm.api.SCMRevision;
@@ -12,6 +12,7 @@ import jenkins.scm.api.SCMSource;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -47,10 +48,11 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
 
     @Nonnull
     @Override
-    public final Map<SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
+    public final Map<jenkins.scm.api.SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
         if (source instanceof GitLabSCMSource) {
             try {
-                return heads((GitLabSCMSource) source);
+                GitLabSCMHead head = head((GitLabSCMSource) source);
+                return Collections.<jenkins.scm.api.SCMHead, SCMRevision>singletonMap(head, head.getRevision());
             } catch (Exception e) {
                 LOGGER.warning("could not get heads from " + source + ": " + e.getMessage());
             }
@@ -59,7 +61,7 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
         return emptyMap();
     }
 
-    protected abstract Map<SCMHead, SCMRevision> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
+    public abstract GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
 
     @Override
     public boolean isMatch(@Nonnull SCM scm) {

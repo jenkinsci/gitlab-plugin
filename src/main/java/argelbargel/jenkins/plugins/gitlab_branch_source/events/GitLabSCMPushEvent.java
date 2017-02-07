@@ -6,13 +6,9 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import hudson.model.Cause;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.SCMRevision;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 
 
 public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
@@ -41,12 +37,9 @@ public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
     }
 
     @Override
-    protected Map<SCMHead, SCMRevision> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
-        String ref = getPayload().getRef();
-        GitLabSCMHead head = source.createBranch(ref, getPayload().getAfter());
-        return Collections.<SCMHead, SCMRevision>singletonMap(head, head.getRevision());
+    public GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
+        return source.createBranch(getPayload().getRef(), getPayload().getAfter());
     }
-
 
     @Override
     public final Cause getCause() {

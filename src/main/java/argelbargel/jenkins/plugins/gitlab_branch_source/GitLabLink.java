@@ -7,6 +7,9 @@ import org.jenkins.ui.icon.IconSpec;
 import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnection;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.Size.MEDIUM;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.iconFileName;
 
 class GitLabLink implements Action, IconSpec {
     static GitLabLink toServer(String connectionName) {
@@ -33,6 +36,12 @@ class GitLabLink implements Action, IconSpec {
                 "tree", path);
     }
 
+    static GitLabLink toMergeRequest(GitlabProject project, String id) {
+        return toProject(project,
+                Messages.GitLabLink_DisplayName_MergeRequest(),
+                "merge_requests", String.valueOf(id));
+    }
+
     private static GitLabLink toProject(GitlabProject project, String displayName, String what, String path) {
         return new GitLabLink(
                 displayName,
@@ -42,6 +51,11 @@ class GitLabLink implements Action, IconSpec {
     static String treeUrl(GitlabProject project, String path) {
         return toTree(project, path).getUrlName();
     }
+
+    static String mergeRequestUrl(GitlabProject project, String id) {
+        return toMergeRequest(project, id).getUrlName();
+    }
+
 
     private final String displayName;
     private final String url;
@@ -53,7 +67,7 @@ class GitLabLink implements Action, IconSpec {
 
     @Override
     public String getIconFileName() {
-        return "computer.png";
+        return iconFileName(ICON_GITLAB_LOGO, MEDIUM);
     }
 
     @Override

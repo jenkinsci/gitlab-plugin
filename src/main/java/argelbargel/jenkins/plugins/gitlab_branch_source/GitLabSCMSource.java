@@ -1,7 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
-import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMHeadEvent;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHookListener;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
@@ -20,7 +19,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.plugins.git.AbstractGitSCMSource;
-import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
 import jenkins.scm.api.SCMRevision;
@@ -28,12 +27,14 @@ import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
 import jenkins.scm.api.SCMSourceEvent;
 import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.impl.ChangeRequestSCMHeadCategory;
+import jenkins.scm.impl.TagSCMHeadCategory;
 import org.eclipse.jgit.transport.RefSpec;
 import org.gitlab.api.models.GitlabProject;
+import org.jenkins.ui.icon.IconSpec;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.CheckForNull;
@@ -42,14 +43,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.SourceHeads.ORIGIN_REF_BRANCHES;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.SourceHeads.ORIGIN_REF_MERGE_REQUESTS;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.SourceHeads.ORIGIN_REF_TAGS;
-import static jenkins.scm.api.SCMEvent.Type.REMOVED;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadLabel.createLabel;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_MERGE_REQUESTS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class GitLabSCMSource extends AbstractGitSCMSource {
@@ -158,10 +159,6 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.getUpdateBuildDescription();
     }
 
-    public boolean getTrustEvents() {
-        return settings.getTrustEvents();
-    }
-
     public int getProjectId() {
         return project.getId();
     }
@@ -186,26 +183,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Override
     protected void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        if (settings.getTrustEvents() && event instanceof GitLabSCMHeadEvent) {
-            retrieve(criteria, observer, (GitLabSCMHeadEvent) event, listener);
-        } else {
-            heads.retrieve(criteria, observer, event, listener);
-        }
-    }
-
-    private void retrieve(SCMSourceCriteria criteria, SCMHeadObserver observer, GitLabSCMHeadEvent<?> event, TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().format(Messages.GitLabSCMSource_headFromEvent(event.getPayload().getObjectKind()) + "\n");
-        if (event.getType() != REMOVED) {
-            // for events emitted by us we trust the event's heads
-            for (Map.Entry<SCMHead, SCMRevision> entry : event.heads(this).entrySet()) {
-                listener.getLogger().format(Messages.GitLabSCMSource_createdOrUpdatedHead(entry.getKey().getName(), entry.getValue()) + "\n");
-                observer.observe(entry.getKey(), entry.getValue());
-            }
-        } else {
-            for (Map.Entry<SCMHead, SCMRevision> entry : event.heads(this).entrySet()) {
-                listener.getLogger().format(Messages.GitLabSCMSource_removedHead(entry.getKey().getName()) + "\n");
-            }
-        }
+        heads.retrieve(criteria, observer, event, listener);
     }
 
     @Nonnull
@@ -216,7 +194,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    protected List<Action> retrieveActions(@Nonnull jenkins.scm.api.SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         return actions.retrieve(head, event, listener);
     }
 
@@ -243,6 +221,24 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return refSpecs;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    protected boolean isCategoryEnabled(@Nonnull SCMHeadCategory category) {
+        if (!super.isCategoryEnabled(category)) {
+            return false;
+        }
+
+        if (category instanceof ChangeRequestSCMHeadCategory) {
+            return getMonitorAndBuildMergeRequestsFromOrigin() || getMonitorAndBuildMergeRequestsFromForks();
+        }
+
+        if (category instanceof TagSCMHeadCategory) {
+            return getMonitorTags();
+        }
+
+        return true;
+    }
+
 
     @Override
     public void afterSave() {
@@ -252,13 +248,13 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Nonnull
     @Override
-    public SCM build(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
-        if (head instanceof SCMHeadLabel) {
-            return build(((SCMHeadLabel) head).getTarget(), revision);
+    public SCM build(@Nonnull jenkins.scm.api.SCMHead head, @CheckForNull SCMRevision revision) {
+        if (head instanceof HeadLabel) {
+            return build(((HeadLabel) head).getHead(), revision);
         }
 
-        if (head instanceof SCMMergeRequestHead) {
-            GitLabSCMHead source = ((SCMMergeRequestHead) head).getSource();
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            GitLabSCMHead source = ((GitLabSCMMergeRequestHead) head).getSource();
             return build(source, source.getRevision());
         }
 
@@ -268,17 +264,18 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
-        return heads.createBranch(name, hash);
+        return createLabel(GitLabSCMHead.createBranch(name, hash));
     }
 
-    public GitLabSCMHead createTag(String name, String hash) {
-        return heads.createTag(name, hash);
+    public GitLabSCMHead createTag(String name, String hash, long timestamp) {
+        return createLabel(GitLabSCMHead.createTag(name, hash, timestamp), getBuildTags());
     }
 
-    public GitLabSCMHead createMergeRequest(String name, String sourceBranch, String hash, String targetBranch) {
-        return heads.createMergeRequest(name,
-                heads.createBranch(sourceBranch, hash, true),
-                heads.createBranch(targetBranch, true));
+    public GitLabSCMHead createMergeRequest(int id, String name, String sourceBranch, String hash, String targetBranch) {
+        return createLabel(
+                GitLabSCMHead.createMergeRequest(id, name,
+                        GitLabSCMHead.createBranch(sourceBranch, hash),
+                        GitLabSCMHead.createBranch(targetBranch)));
     }
 
     private <T extends StandardCredentials> T getCredentials(@Nonnull Class<T> type) {
@@ -291,7 +288,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @SuppressWarnings("unused")
     @Extension
-    public static class DescriptorImpl extends SCMSourceDescriptor {
+    public static class DescriptorImpl extends SCMSourceDescriptor implements IconSpec {
         @Nonnull
         public String getDisplayName() {
             return Messages.GitLabSCMSource_DisplayName();
@@ -300,6 +297,17 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         @Override
         public String getPronoun() {
             return Messages.GitLabSCMSource_Pronoun();
+        }
+
+        @Override
+        public String getIconClassName() {
+            return ICON_GITLAB_LOGO;
+        }
+
+        @Nonnull
+        @Override
+        protected SCMHeadCategory[] createCategories() {
+            return GitLabSCMHeadCategory.ALL;
         }
 
         @Restricted(NoExternalUse.class)

@@ -195,7 +195,7 @@
                 <artifactId>maven-hpi-plugin</artifactId>
                 <version>1.121</version>
                 <configuration>
-                    <compatibleSinceVersion>2.0.0</compatibleSinceVersion>
+                    <compatibleSinceVersion>2.7.1</compatibleSinceVersion>
                 </configuration>
             </plugin>
         </plugins>
