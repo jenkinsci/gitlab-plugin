@@ -1,8 +1,15 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabGroup;
 import jenkins.model.Jenkins;
 import org.apache.commons.jelly.JellyContext;
+import org.gitlab.api.models.GitlabNamespace;
+import org.gitlab.api.models.GitlabProject;
 import org.jenkins.ui.icon.Icon;
+import org.kohsuke.stapler.Stapler;
+
+import java.util.NoSuchElementException;
 
 import static org.jenkins.ui.icon.Icon.ICON_LARGE_STYLE;
 import static org.jenkins.ui.icon.Icon.ICON_MEDIUM_STYLE;
@@ -16,6 +23,16 @@ final class Icons {
         MEDIUM("icon-md", "24x24", ICON_MEDIUM_STYLE),
         LARGE("icon-lg", "32x32", ICON_LARGE_STYLE),
         XLARGE("icon-xlg", "48x48", ICON_XLARGE_STYLE);
+
+        static Size byDimensions(String dimensions) {
+            for (Size s : values()) {
+                if (s.dimensions.equals(dimensions)) {
+                    return s;
+                }
+            }
+
+            throw new NoSuchElementException("unknown dimensions: " + dimensions);
+        }
 
         private final String className;
         private final String dimensions;
@@ -42,9 +59,34 @@ final class Icons {
         }
 
         JellyContext ctx = new JellyContext();
-        ctx.setVariable("resURL", Jenkins.RESOURCE_PATH);
+        ctx.setVariable("resURL", Stapler.getCurrentRequest().getContextPath() + Jenkins.RESOURCE_PATH);
         return icon.getQualifiedUrl(ctx);
     }
+
+    static String avatarFileName(GitlabProject project, String connectionName, Size size) {
+        // TODO: size!
+        String avatarUrl = project.getAvatarUrl();
+        if (avatarUrl == null) {
+            avatarUrl = groupAvatarUrl(project, connectionName);
+        }
+
+        return avatarUrl != null ? avatarUrl : iconFileName(Icons.ICON_GITLAB_LOGO, size);
+    }
+
+    private static String groupAvatarUrl(GitlabProject project, String connectionName) {
+        GitlabNamespace namespace = project.getNamespace();
+        if (namespace.getOwnerId() != null) {
+            return null;
+        }
+
+        try {
+            GitLabGroup group = GitLabHelper.gitLabAPI(connectionName).getGroup(namespace.getId());
+            return group.getAvatarUrl();
+        } catch (GitLabAPIException e) {
+            return null;
+        }
+    }
+
 
     static void initialize() {
         addIcon(ICON_GITLAB_LOGO);

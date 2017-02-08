@@ -19,6 +19,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.plugins.git.AbstractGitSCMSource;
+import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
@@ -46,12 +47,12 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.withBuildMode;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_MERGE_REQUESTS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.withBuildMode;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -191,13 +192,13 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
-        return actions.retrieve(event, listener);
+        return actions.retrieveSourceActions();
     }
 
     @Nonnull
     @Override
-    protected List<Action> retrieveActions(@Nonnull jenkins.scm.api.SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        return actions.retrieve(head, event, listener);
+    protected List<Action> retrieveActions(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+        return actions.retrieveHeadActions(head, event, listener);
     }
 
     @Nonnull
@@ -241,6 +242,9 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return true;
     }
 
+    String getDescription() {
+        return project.getDescription();
+    }
 
     @Override
     public void afterSave() {
@@ -250,17 +254,8 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Nonnull
     @Override
-    public SCM build(@Nonnull jenkins.scm.api.SCMHead head, @CheckForNull SCMRevision revision) {
-        if (head instanceof HeadBuildMode) {
-            return build(((HeadBuildMode) head).getHead(), revision);
-        }
-
-        if (head instanceof GitLabSCMMergeRequestHead) {
-            GitLabSCMHead source = ((GitLabSCMMergeRequestHead) head).getSource();
-            return build(source, source.getRevision());
-        }
-
-        GitSCM scm = (GitSCM) super.build(head, revision);
+    public SCM build(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
+        GitSCM scm = (GitSCM) super.build(revision.getHead(), revision);
         scm.setBrowser(getBrowser());
         return scm;
     }
@@ -274,10 +269,9 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public GitLabSCMHead createMergeRequest(int id, String name, String sourceBranch, String hash, String targetBranch) {
-        return HeadBuildMode.determineBuildMode(
-                GitLabSCMHead.createMergeRequest(id, name,
-                        GitLabSCMHead.createBranch(sourceBranch, hash),
-                        GitLabSCMHead.createBranch(targetBranch)));
+        return GitLabSCMHead.createMergeRequest(id, name,
+                GitLabSCMHead.createBranch(sourceBranch, hash),
+                GitLabSCMHead.createBranch(targetBranch));
     }
 
     private <T extends StandardCredentials> T getCredentials(@Nonnull Class<T> type) {

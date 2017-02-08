@@ -3,7 +3,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.api;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabBranch;
-import org.gitlab.api.models.GitlabMergeRequest;
+import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabProject;
 import org.gitlab.api.models.GitlabProjectHook;
 import org.gitlab.api.models.GitlabSystemHook;
@@ -119,6 +119,10 @@ public final class GitLabAPI {
         }
     }
 
+    public GitLabMergeRequest getMergeRequest(int projectId, String mergeRequestId) throws GitLabAPIException {
+        return getMergeRequest(projectId, Integer.parseInt(mergeRequestId));
+    }
+
     public GitLabMergeRequest getMergeRequest(int projectId, int mergeRequestId) throws GitLabAPIException {
         try {
             String tailUrl = "/projects/" + projectId + "/merge_requests/" + mergeRequestId;
@@ -130,14 +134,20 @@ public final class GitLabAPI {
         }
     }
 
-
-
     public List<GitlabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
         LOGGER.fine("finding projects for " + selector + ", " + visibility + ", " + searchPattern + "...");
         try {
             return delegate
                     .retrieve()
                     .getAll(projectUrl(selector, visibility, searchPattern), GitlabProject[].class);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
+    public GitLabGroup getGroup(int id) throws GitLabAPIException {
+        try {
+            return delegate.retrieve().to(GitlabGroup.URL + PATH_SEP + id, GitLabGroup.class);
         } catch (Exception e) {
             throw new GitLabAPIException(e);
         }

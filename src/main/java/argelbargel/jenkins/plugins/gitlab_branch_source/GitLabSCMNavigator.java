@@ -259,7 +259,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@Nonnull SCMNavigatorOwner owner, @CheckForNull SCMNavigatorEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        return Collections.<Action>singletonList(GitLabLink.toServer(getConnectionName()));
+        return Collections.<Action>singletonList(GitLabLinkAction.toServer(getPronoun(), getConnectionName()));
     }
 
     @Override

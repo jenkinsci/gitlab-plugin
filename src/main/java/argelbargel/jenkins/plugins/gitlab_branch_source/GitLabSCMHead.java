@@ -4,6 +4,8 @@ import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.mixin.SCMHeadMixin;
 
+import javax.annotation.Nonnull;
+
 public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
     static final String ORIGIN_REF_BRANCHES = "refs/heads/";
     static final String ORIGIN_REF_TAGS = "refs/tags/";
@@ -34,6 +36,9 @@ public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
         super(name);
     }
 
+    @Nonnull
     public abstract SCMRevisionImpl getRevision();
+
+    @Nonnull
     abstract String getRef();
 }

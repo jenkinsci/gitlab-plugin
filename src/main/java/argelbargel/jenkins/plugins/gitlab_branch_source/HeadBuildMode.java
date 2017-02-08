@@ -3,7 +3,10 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 import jenkins.scm.api.mixin.TagSCMHead;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.*;
+import javax.annotation.Nonnull;
+
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
 
 
 abstract class HeadBuildMode extends GitLabSCMHead {
@@ -28,11 +31,13 @@ abstract class HeadBuildMode extends GitLabSCMHead {
         this.target = target;
     }
 
+    @Nonnull
     @Override
     public final SCMRevisionImpl getRevision() {
         return target.getRevision();
     }
 
+    @Nonnull
     @Override
     final String getRef() {
         return getHead().getRef();
