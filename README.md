@@ -31,7 +31,7 @@ If you have a problem or question about using the plugin, please make sure you a
 * Jenkins version (e.g. 1.651.1)
 * Relevant log output from the plugin (see below for instructions on capturing this)
 
-Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it: 
+Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
@@ -69,7 +69,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
         ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
     3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
       * Click *Add Repository* to specify the merge request source repository.  Then specify:
-        * *URL*: ``${gitlabSourceRepoURL}`` 
+        * *URL*: ``${gitlabSourceRepoURL}``
         * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
       * For single-repository workflows: ``origin/${gitlabSourceBranch}``
@@ -77,13 +77,13 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
     5. In *Additional Behaviours*:
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
-        * Set *Name of repository* to ``origin`` 
+        * Set *Name of repository* to ``origin``
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
 
 ### Git configuration for Pipeline/Workflow jobs
-**Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. ${gitlabSourceBranch}. After version 1.2.1, these variables are only accessible in the env[] map. E.g. ${env.gitlabSourceBranch}. 
+**Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. ${gitlabSourceBranch}. After version 1.2.1, these variables are only accessible in the env[] map. E.g. ${env.gitlabSourceBranch}.
 
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
 
@@ -102,7 +102,7 @@ Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeli
 Example `Jenkinsfile` for multibranch pipeline jobs
 ```
 // Reference the GitLab connection name from your Jenkins Global configuration (http://JENKINS_URL/configure, GitLab section)
-properties([[$class: 'GitLabConnectionProperty', gitLabConnection: '<your-gitlab-connection-name']])
+properties([gitLabConnection('<your-gitlab-connection-name')])
 
 node {
     stage "checkout"
@@ -133,6 +133,31 @@ node {
       commit comment.  In addition to a literal phrase, you can also specify a Java regular expression.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
+
+### Declarative Pipeline Syntax
+
+The plugin supports the new [declarative pipeline syntax](https://github.com/jenkinsci/pipeline-model-definition-plugin/wiki/Syntax-Reference). The example below configures the GitLab connection and triggers the job on a push to GitLab. It also sets the Gitlab commit status as the status of the build.
+
+```
+pipeline {
+    agent any
+    options {
+      gitLabConnection('<your-gitlab-connection-name')
+      gitlabCommitStatus(name: 'jenkins')
+    }
+    triggers {
+        gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
+    }
+    stages {
+      stage("build") {
+        steps {
+          echo "hello world"
+        }
+      }
+    }
+   [...]
+}
+```
 
 ### Matrix/Multi-configuration jobs
 **The Jenkins Matrix/Multi-configuration job type is not supported.**
