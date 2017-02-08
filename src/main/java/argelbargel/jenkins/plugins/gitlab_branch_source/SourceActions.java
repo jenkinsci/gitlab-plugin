@@ -57,7 +57,7 @@ class SourceActions {
         if (head instanceof GitLabSCMMergeRequestHead) {
             listener.getLogger().format(Messages.GitLabSCMSource_retrievingMergeRequest(((GitLabSCMMergeRequestHead) head).getId()));
             GitLabMergeRequest mr = gitLabAPI(settings.getConnectionName()).getMergeRequest(project.getId(), ((GitLabSCMMergeRequestHead) head).getId());
-            actions.add(new ObjectMetadataAction(head.getName(), mr.getDescription(), mergeRequestUrl(project, ((GitLabSCMMergeRequestHead) head).getId())));
+            actions.add(new ObjectMetadataAction(mr.getTitle(), mr.getDescription(), mergeRequestUrl(project, ((GitLabSCMMergeRequestHead) head).getId())));
             actions.add(GitLabLinkAction.toMergeRequest(head.getPronoun(), project, mr.getId()));
         } else {
             actions.add(new ObjectMetadataAction(head.getName(), "", treeUrl(project, head.getName())));

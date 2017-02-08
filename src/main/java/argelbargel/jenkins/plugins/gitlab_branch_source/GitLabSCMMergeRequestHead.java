@@ -6,21 +6,25 @@ import jenkins.scm.api.mixin.ChangeRequestSCMHead;
 import javax.annotation.Nonnull;
 
 final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements ChangeRequestSCMHead {
-    private final String id;
+    private final int id;
+    private final String title;
     private final GitLabSCMHead source;
     private final GitLabSCMHead target;
+    private final boolean merge;
 
-    GitLabSCMMergeRequestHead(int id, String name, GitLabSCMHead source, GitLabSCMHead target) {
-        super(name + " (!" + id + ")", Messages.GitLabSCMMergeRequest_Pronoun(), ORIGIN_REF_MERGE_REQUESTS);
-        this.id = String.valueOf(id);
+    GitLabSCMMergeRequestHead(int id, String title, GitLabSCMHead source, GitLabSCMHead target, boolean merge) {
+        super(title + " (!" + id + ")" + (merge ? " merged" : ""), Messages.GitLabSCMMergeRequest_Pronoun(), ORIGIN_REF_MERGE_REQUESTS);
+        this.id = id;
+        this.title = title;
         this.source = source;
         this.target = target;
+        this.merge = merge;
     }
 
     @Nonnull
     @Override
     public String getId() {
-        return id;
+        return String.valueOf(id);
     }
 
     @Nonnull
@@ -33,5 +37,13 @@ final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements Chang
     @Override
     public SCMRevisionImpl getRevision() {
         return source.getRevision();
+    }
+
+    GitLabSCMMergeRequestHead merged() {
+        return new GitLabSCMMergeRequestHead(id, title, source, target, true);
+    }
+
+    boolean merge() {
+        return merge;
     }
 }

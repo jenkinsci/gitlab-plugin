@@ -28,8 +28,8 @@ public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
         return new GitLabSCMTagHead(name, hash, timestamp);
     }
 
-    static GitLabSCMHead createMergeRequest(int id, String name, GitLabSCMHead source, GitLabSCMHead target) {
-        return new GitLabSCMMergeRequestHead(id, name, source, target);
+    static GitLabSCMMergeRequestHead createMergeRequest(int id, String name, GitLabSCMHead source, GitLabSCMHead target) {
+        return new GitLabSCMMergeRequestHead(id, name, source, target, false);
     }
 
     GitLabSCMHead(String name) {

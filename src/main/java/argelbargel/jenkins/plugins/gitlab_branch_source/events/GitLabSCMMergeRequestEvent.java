@@ -2,13 +2,14 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
-import hudson.model.Cause;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.events.CauseDataHelper.buildCauseData;
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
 import static jenkins.scm.api.SCMEvent.Type.REMOVED;
 import static jenkins.scm.api.SCMEvent.Type.UPDATED;
@@ -32,8 +33,8 @@ public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRe
     }
 
     @Override
-    public Cause getCause() {
-        return null;
+    CauseData getCauseData() {
+        return buildCauseData(getPayload());
     }
 
     @Override

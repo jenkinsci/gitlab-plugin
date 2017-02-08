@@ -189,6 +189,12 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         heads.retrieve(criteria, observer, event, listener);
     }
 
+    @Override
+    @CheckForNull
+    protected SCMRevision retrieve(@Nonnull SCMHead head, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+        return heads.retrieve(head, listener);
+    }
+
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
@@ -255,7 +261,16 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     public SCM build(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
-        GitSCM scm = (GitSCM) super.build(revision.getHead(), revision);
+        if (revision == null) {
+            if (head instanceof GitLabSCMHead) {
+                SCMRevision rev = ((GitLabSCMHead) head).getRevision();
+                return build(rev.getHead(), rev);
+            } else {
+                return build(head, new SCMRevisionImpl(head, "HEAD"));
+            }
+        }
+
+        GitSCM scm = (GitSCM) super.build(head, revision);
         scm.setBrowser(getBrowser());
         return scm;
     }

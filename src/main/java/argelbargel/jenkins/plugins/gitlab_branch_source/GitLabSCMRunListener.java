@@ -1,10 +1,10 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 
@@ -15,14 +15,14 @@ public class GitLabSCMRunListener extends RunListener<Run<?, ?>> {
     public void onStarted(Run<?, ?> build, TaskListener listener) {
         GitLabSCMCauseAction action = build.getAction(GitLabSCMCauseAction.class);
         if (action != null && action.updateBuildDescription()) {
-            onStarted(action.findCause(GitLabWebHookCause.class), build, listener);
+            onStarted(action.getDescription(), build, listener);
         }
     }
 
-    private void onStarted(GitLabWebHookCause cause, Run<?, ?> build, TaskListener listener) {
-        if (cause != null && !cause.getShortDescription().isEmpty()) {
+    private void onStarted(String description, Run<?, ?> build, TaskListener listener) {
+        if (!StringUtils.isBlank(description)) {
             try {
-                build.setDescription(cause.getShortDescription());
+                build.setDescription(description);
             } catch (IOException e) {
                 listener.getLogger().println("Failed to set build description");
             }

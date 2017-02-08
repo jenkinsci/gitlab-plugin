@@ -3,12 +3,13 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMNavigator;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import hudson.model.Cause;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+
+import static argelbargel.jenkins.plugins.gitlab_branch_source.events.CauseDataHelper.buildCauseData;
 
 
 public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
@@ -42,7 +43,7 @@ public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
     }
 
     @Override
-    public final Cause getCause() {
-        return new GitLabWebHookCause(CauseDataHelper.buildCauseData(getPayload()));
+    final CauseData getCauseData() {
+        return buildCauseData(getPayload());
     }
 }

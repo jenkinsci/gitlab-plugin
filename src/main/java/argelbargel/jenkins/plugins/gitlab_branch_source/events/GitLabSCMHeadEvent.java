@@ -3,7 +3,10 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMNavigator;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
+import hudson.model.Cause;
 import hudson.scm.SCM;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMNavigator;
@@ -61,7 +64,14 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
         return emptyMap();
     }
 
+    @Override
+    public final Cause getCause() {
+        return new GitLabWebHookCause(getCauseData());
+    }
+
     public abstract GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
+
+    abstract CauseData getCauseData();
 
     @Override
     public boolean isMatch(@Nonnull SCM scm) {
