@@ -46,6 +46,10 @@ final class Icons {
         return icon.getQualifiedUrl(ctx);
     }
 
+    static void initialize() {
+        addIcon(ICON_GITLAB_LOGO);
+    }
+
     private static String classSpec(String name, Size size) {
         return name + " " + size.className;
     }
@@ -54,10 +58,6 @@ final class Icons {
         for (Size size : Size.values()) {
             icons.addIcon(new Icon(classSpec(name, size), ICON_PATH + size.dimensions + "/" + name + ".png", size.style));
         }
-    }
-
-    static {
-        addIcon(ICON_GITLAB_LOGO);
     }
 
     private Icons() { /* no instances allowed */}

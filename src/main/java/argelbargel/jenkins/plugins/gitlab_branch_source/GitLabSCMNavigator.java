@@ -384,5 +384,9 @@ public class GitLabSCMNavigator extends SCMNavigator {
             }
             return items;
         }
+
+        static {
+            Icons.initialize();
+        }
     }
 }

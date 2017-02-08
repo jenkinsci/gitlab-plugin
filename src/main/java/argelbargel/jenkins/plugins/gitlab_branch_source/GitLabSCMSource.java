@@ -46,9 +46,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.AUTOMATIC;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.MANUAL;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.withBuildMode;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.withBuildMode;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_MERGE_REQUESTS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
@@ -251,8 +251,8 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     public SCM build(@Nonnull jenkins.scm.api.SCMHead head, @CheckForNull SCMRevision revision) {
-        if (head instanceof GitLabSCMBuildModeHead) {
-            return build(((GitLabSCMBuildModeHead) head).getHead(), revision);
+        if (head instanceof HeadBuildMode) {
+            return build(((HeadBuildMode) head).getHead(), revision);
         }
 
         if (head instanceof GitLabSCMMergeRequestHead) {
@@ -266,7 +266,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
-        return GitLabSCMBuildModeHead.determineBuildMode(GitLabSCMHead.createBranch(name, hash));
+        return HeadBuildMode.determineBuildMode(GitLabSCMHead.createBranch(name, hash));
     }
 
     public GitLabSCMHead createTag(String name, String hash, long timestamp) {
@@ -274,7 +274,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public GitLabSCMHead createMergeRequest(int id, String name, String sourceBranch, String hash, String targetBranch) {
-        return GitLabSCMBuildModeHead.determineBuildMode(
+        return HeadBuildMode.determineBuildMode(
                 GitLabSCMHead.createMergeRequest(id, name,
                         GitLabSCMHead.createBranch(sourceBranch, hash),
                         GitLabSCMHead.createBranch(targetBranch)));

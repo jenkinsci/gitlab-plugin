@@ -24,10 +24,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.AUTOMATIC;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.BuildMode.MANUAL;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.determineBuildMode;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBuildModeHead.withBuildMode;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.determineBuildMode;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.withBuildMode;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
