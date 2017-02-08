@@ -1,6 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
+import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMMergeRequestHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
@@ -8,7 +9,12 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttribut
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createMergeRequest;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.events.CauseDataHelper.buildCauseData;
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
 import static jenkins.scm.api.SCMEvent.Type.REMOVED;
@@ -56,12 +62,25 @@ public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRe
     }
 
     @Override
-    public GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
-        return source.createMergeRequest(
+    Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
+        Collection<GitLabSCMHead> heads = new ArrayList<>();
+
+        GitLabSCMMergeRequestHead head = createMergeRequest(
                 getAttributes().getId(), getAttributes().getTitle(),
-                getAttributes().getSourceBranch(),
-                getAttributes().getLastCommit().getId(),
-                getAttributes().getTargetBranch());
+                GitLabSCMHead.createBranch(getAttributes().getSourceBranch(), getAttributes().getLastCommit().getId()),
+                GitLabSCMHead.createBranch(getAttributes().getTargetBranch(), REVISION_HEAD));
+
+        boolean fromOrigin = Objects.equals(getAttributes().getSourceProjectId(), source.getProjectId());
+
+        if ((fromOrigin && source.getBuildMergeRequestsFromOriginUnmerged()) || (!fromOrigin && source.getBuildMergeRequestsFromForksUnmerged())) {
+            heads.add(head);
+        }
+
+        if ((fromOrigin && source.getBuildMergeRequestsFromOriginMerged()) || (!fromOrigin && source.getBuildMergeRequestsFromForksMerged())) {
+            heads.add(head.merged());
+        }
+
+        return heads;
     }
 
     @Nonnull

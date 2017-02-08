@@ -5,7 +5,7 @@ import jenkins.scm.api.mixin.TagSCMHead;
 
 import javax.annotation.Nonnull;
 
-final class GitLabSCMTagHead extends GitLabSCMHeadImpl implements TagSCMHead {
+public final class GitLabSCMTagHead extends GitLabSCMHeadImpl implements TagSCMHead {
     private final String hash;
     private final long timestamp;
 

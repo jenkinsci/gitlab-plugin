@@ -50,9 +50,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitL
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_MERGE_REQUESTS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.withBuildMode;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -266,27 +264,13 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
                 SCMRevision rev = ((GitLabSCMHead) head).getRevision();
                 return build(rev.getHead(), rev);
             } else {
-                return build(head, new SCMRevisionImpl(head, "HEAD"));
+                return build(head, new SCMRevisionImpl(head, REVISION_HEAD));
             }
         }
 
         GitSCM scm = (GitSCM) super.build(head, revision);
         scm.setBrowser(getBrowser());
         return scm;
-    }
-
-    public GitLabSCMHead createBranch(String name, String hash) throws IOException, InterruptedException {
-        return HeadBuildMode.determineBuildMode(GitLabSCMHead.createBranch(name, hash));
-    }
-
-    public GitLabSCMHead createTag(String name, String hash, long timestamp) {
-        return withBuildMode(GitLabSCMHead.createTag(name, hash, timestamp), getBuildTags() ? AUTOMATIC : MANUAL);
-    }
-
-    public GitLabSCMHead createMergeRequest(int id, String name, String sourceBranch, String hash, String targetBranch) {
-        return GitLabSCMHead.createMergeRequest(id, name,
-                GitLabSCMHead.createBranch(sourceBranch, hash),
-                GitLabSCMHead.createBranch(targetBranch));
     }
 
     private <T extends StandardCredentials> T getCredentials(@Nonnull Class<T> type) {

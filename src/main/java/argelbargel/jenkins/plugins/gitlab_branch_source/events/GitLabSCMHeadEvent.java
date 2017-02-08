@@ -8,6 +8,7 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import hudson.model.Cause;
 import hudson.scm.SCM;
+import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMNavigator;
 import jenkins.scm.api.SCMRevision;
@@ -15,11 +16,10 @@ import jenkins.scm.api.SCMSource;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static java.util.Collections.emptyMap;
 
 public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent<T> implements GitLabSCMEvent {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMHeadEvent.class.getName());
@@ -51,17 +51,20 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
 
     @Nonnull
     @Override
-    public final Map<jenkins.scm.api.SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
+    public final Map<SCMHead, SCMRevision> heads(@Nonnull SCMSource source) {
+        Map<SCMHead, SCMRevision> heads = new HashMap<>();
+
         if (source instanceof GitLabSCMSource) {
             try {
-                GitLabSCMHead head = head((GitLabSCMSource) source);
-                return Collections.<jenkins.scm.api.SCMHead, SCMRevision>singletonMap(head, head.getRevision());
+                for (GitLabSCMHead head : heads((GitLabSCMSource) source)) {
+                    heads.put(head, head.getRevision());
+                }
             } catch (Exception e) {
                 LOGGER.warning("could not get heads from " + source + ": " + e.getMessage());
             }
         }
 
-        return emptyMap();
+        return heads;
     }
 
     @Override
@@ -69,7 +72,7 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
         return new GitLabWebHookCause(getCauseData());
     }
 
-    public abstract GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
+    abstract Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
 
     abstract CauseData getCauseData();
 

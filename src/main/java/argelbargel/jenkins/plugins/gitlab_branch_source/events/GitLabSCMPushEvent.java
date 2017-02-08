@@ -8,8 +8,11 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Collection;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createBranch;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.events.CauseDataHelper.buildCauseData;
+import static java.util.Collections.singletonList;
 
 
 public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
@@ -38,8 +41,8 @@ public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
     }
 
     @Override
-    public GitLabSCMHead head(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
-        return source.createBranch(getPayload().getRef(), getPayload().getAfter());
+    Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
+        return singletonList(createBranch(getPayload().getRef(), getPayload().getAfter()));
     }
 
     @Override

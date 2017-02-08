@@ -4,7 +4,7 @@ import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 
 import javax.annotation.Nonnull;
 
-final class GitLabSCMBranchHead extends GitLabSCMHeadImpl {
+public final class GitLabSCMBranchHead extends GitLabSCMHeadImpl {
     private final boolean hasMergeRequest;
     private final String hash;
 

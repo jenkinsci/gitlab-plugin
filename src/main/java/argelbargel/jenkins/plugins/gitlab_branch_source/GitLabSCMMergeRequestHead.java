@@ -5,7 +5,7 @@ import jenkins.scm.api.mixin.ChangeRequestSCMHead;
 
 import javax.annotation.Nonnull;
 
-final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements ChangeRequestSCMHead {
+public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements ChangeRequestSCMHead {
     private final int id;
     private final String title;
     private final GitLabSCMHead source;
@@ -39,7 +39,7 @@ final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements Chang
         return source.getRevision();
     }
 
-    GitLabSCMMergeRequestHead merged() {
+    public GitLabSCMMergeRequestHead merged() {
         return new GitLabSCMMergeRequestHead(id, title, source, target, true);
     }
 

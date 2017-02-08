@@ -5,7 +5,10 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createTag;
+import static java.util.Collections.singletonList;
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
 import static jenkins.scm.api.SCMEvent.Type.REMOVED;
 
@@ -23,9 +26,9 @@ public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements G
     }
 
     @Override
-    public GitLabSCMHead head(@Nonnull GitLabSCMSource source) {
+    Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) {
         PushHook hook = getPayload();
         String hash = getType() == REMOVED ? hook.getBefore() : hook.getAfter();
-        return source.createTag(hook.getRef(), hash, hook.getCommits().get(0).getTimestamp().getTime());
+        return singletonList(createTag(hook.getRef(), hash, hook.getCommits().get(0).getTimestamp().getTime()));
     }
 }
