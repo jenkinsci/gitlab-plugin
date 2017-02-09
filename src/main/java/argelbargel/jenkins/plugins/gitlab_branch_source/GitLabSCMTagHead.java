@@ -1,6 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
-import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
+
 import jenkins.scm.api.mixin.TagSCMHead;
 
 import javax.annotation.Nonnull;
@@ -8,19 +8,11 @@ import javax.annotation.Nonnull;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
 
 public final class GitLabSCMTagHead extends GitLabSCMHeadImpl implements TagSCMHead {
-    private final String hash;
     private final long timestamp;
 
     GitLabSCMTagHead(@Nonnull String name, String hash, long timestamp) {
-        super(name, Messages.GitLabSCMTag_Pronoun(), TAGS);
-        this.hash = hash;
+        super(name, hash, Messages.GitLabSCMTag_Pronoun(), TAGS);
         this.timestamp = timestamp;
-    }
-
-    @Nonnull
-    @Override
-    public SCMRevisionImpl getRevision() {
-        return new SCMRevisionImpl(this, hash);
     }
 
     @Override

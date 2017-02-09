@@ -12,19 +12,19 @@ import javax.annotation.Nonnull;
 public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
     public static final String REVISION_HEAD = "HEAD";
 
-    public static GitLabSCMHead createBranch(String name, String hash) {
+    public static GitLabSCMBranchHead createBranch(String name, String hash) {
         return createBranch(name, hash, false);
     }
 
-    public static GitLabSCMHead createTag(String name, String hash, long timestamp) {
+    public static GitLabSCMTagHead createTag(String name, String hash, long timestamp) {
         return new GitLabSCMTagHead(name, hash, timestamp);
     }
 
-    public static GitLabSCMMergeRequestHead createMergeRequest(int id, String name, GitLabSCMHead source, GitLabSCMHead target) {
-        return new GitLabSCMMergeRequestHead(id, name, source, target, false);
+    public static GitLabSCMMergeRequestHead createMergeRequest(int id, String name, int sourceProjectId, GitLabSCMHead source, GitLabSCMBranchHead target) {
+        return new GitLabSCMMergeRequestHead(id, name, sourceProjectId, source, target, false);
     }
 
-    static GitLabSCMHead createBranch(String name, String hash, boolean hasMergeRequest) {
+    static GitLabSCMBranchHead createBranch(String name, String hash, boolean hasMergeRequest) {
         return new GitLabSCMBranchHead(name, hash, hasMergeRequest);
     }
 

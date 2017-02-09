@@ -28,10 +28,6 @@ class GitLabSCMHeadCategory extends SCMHeadCategory {
     @SuppressWarnings("SimplifiableIfStatement")
     @Override
     public boolean isMatch(@Nonnull SCMHead head) {
-        if (head instanceof HeadBuildMode) {
-            return isMatch(((HeadBuildMode) head).getHead());
-        }
-
         return delegate.isMatch(head);
     }
 

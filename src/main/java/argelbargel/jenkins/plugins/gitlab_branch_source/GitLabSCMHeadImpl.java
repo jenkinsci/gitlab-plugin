@@ -9,6 +9,7 @@ import hudson.plugins.git.SubmoduleConfig;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.browser.GitLab;
 import hudson.plugins.git.extensions.GitSCMExtension;
+import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -23,12 +24,14 @@ import static java.util.Collections.singletonList;
 
 
 abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
+    private final SCMRevisionImpl revision;
     private final String pronoun;
     private final GitLabSCMRefSpec ref;
     private transient Map<Integer, GitLabProject> projectCache;
 
-    GitLabSCMHeadImpl(@Nonnull String name, @Nonnull String pronoun, @Nonnull GitLabSCMRefSpec ref) {
-        super(ref.name(name));
+    GitLabSCMHeadImpl(@Nonnull String name, @Nonnull String hash, @Nonnull String pronoun, @Nonnull GitLabSCMRefSpec ref) {
+        super(ref.remoteName(name));
+        this.revision = new SCMRevisionImpl(this, hash);
         this.pronoun = pronoun;
         this.ref = ref;
     }
@@ -37,6 +40,12 @@ abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
     @CheckForNull
     public final String getPronoun() {
         return pronoun;
+    }
+
+    @Nonnull
+    @Override
+    public final SCMRevisionImpl getRevision() {
+        return revision;
     }
 
     @Nonnull
@@ -56,18 +65,21 @@ abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
         }
     }
 
+    @Nonnull
     List<UserRemoteConfig> getRemotes(@Nonnull GitLabSCMSource source) throws GitLabAPIException {
         return singletonList(
                 new UserRemoteConfig(
                         getProject(source.getProjectId(), source).getRemote(source),
-                        "origin", getRefSpec().refSpec().toString(),
+                        "origin", getRefSpec().delegate().toString(),
                         source.getCredentialsId()));
     }
 
+    @Nonnull
     List<BranchSpec> getBranchSpecs() {
         return singletonList(new BranchSpec(getName()));
     }
 
+    @Nonnull
     List<GitSCMExtension> getExtensions(GitLabSCMSource source) {
         return emptyList();
     }

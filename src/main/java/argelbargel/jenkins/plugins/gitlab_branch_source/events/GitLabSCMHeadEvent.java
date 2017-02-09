@@ -26,8 +26,8 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
 
     private final String hookId;
 
-    GitLabSCMHeadEvent(Type type, String id, T payload) {
-        super(type, payload);
+    GitLabSCMHeadEvent(Type type, String id, T payload, String origin) {
+        super(type, payload, origin);
         this.hookId = id;
     }
 
@@ -72,7 +72,7 @@ public abstract class GitLabSCMHeadEvent<T extends WebHook> extends SCMHeadEvent
         return new GitLabWebHookCause(getCauseData());
     }
 
-    abstract Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
+    abstract Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException;
 
     abstract CauseData getCauseData();
 

@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMNavigator;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
@@ -16,12 +17,12 @@ import static java.util.Collections.singletonList;
 
 
 public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
-    public GitLabSCMPushEvent(String id, PushHook hook) {
-        this(Type.UPDATED, id, hook);
+    public GitLabSCMPushEvent(String id, PushHook hook, String origin) {
+        this(Type.UPDATED, id, hook, origin);
     }
 
-    GitLabSCMPushEvent(Type type, String id, PushHook hook) {
-        super(type, id, hook);
+    GitLabSCMPushEvent(Type type, String id, PushHook hook, String origin) {
+        super(type, id, hook, origin);
     }
 
     @Nonnull
@@ -41,7 +42,7 @@ public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
     }
 
     @Override
-    Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
+    Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
         return singletonList(createBranch(getPayload().getRef(), getPayload().getAfter()));
     }
 

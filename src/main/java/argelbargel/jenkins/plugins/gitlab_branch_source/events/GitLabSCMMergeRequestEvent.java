@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createBranch;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createMergeRequest;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.events.CauseDataHelper.buildCauseData;
 import static jenkins.scm.api.SCMEvent.Type.CREATED;
@@ -22,20 +23,20 @@ import static jenkins.scm.api.SCMEvent.Type.UPDATED;
 
 
 public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRequestHook> {
-    public static GitLabSCMMergeRequestEvent create(String id, MergeRequestHook hook) {
+    public static GitLabSCMMergeRequestEvent create(String id, MergeRequestHook hook, String origin) {
         switch (hook.getObjectAttributes().getAction()) {
             case open:
-                return new GitLabSCMMergeRequestEvent(CREATED, id, hook);
+                return new GitLabSCMMergeRequestEvent(CREATED, id, hook, origin);
             case update:
-                return new GitLabSCMMergeRequestEvent(UPDATED, id, hook);
+                return new GitLabSCMMergeRequestEvent(UPDATED, id, hook, origin);
             default:
                 // other actions are "merged" and "closed". in both cases we can remove the head
-                return new GitLabSCMMergeRequestEvent(REMOVED, id, hook);
+                return new GitLabSCMMergeRequestEvent(REMOVED, id, hook, origin);
         }
     }
 
-    private GitLabSCMMergeRequestEvent(Type type, String id, MergeRequestHook payload) {
-        super(type, id, payload);
+    private GitLabSCMMergeRequestEvent(Type type, String id, MergeRequestHook payload, String origin) {
+        super(type, id, payload, origin);
     }
 
     @Override
@@ -62,13 +63,14 @@ public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRe
     }
 
     @Override
-    Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
+    Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
         Collection<GitLabSCMHead> heads = new ArrayList<>();
 
         GitLabSCMMergeRequestHead head = createMergeRequest(
                 getAttributes().getId(), getAttributes().getTitle(),
-                GitLabSCMHead.createBranch(getAttributes().getSourceBranch(), getAttributes().getLastCommit().getId()),
-                GitLabSCMHead.createBranch(getAttributes().getTargetBranch(), REVISION_HEAD));
+                getAttributes().getSourceProjectId(),
+                createBranch(getAttributes().getSourceBranch(), getAttributes().getLastCommit().getId()),
+                createBranch(getAttributes().getTargetBranch(), REVISION_HEAD));
 
         boolean fromOrigin = Objects.equals(getAttributes().getSourceProjectId(), source.getProjectId());
 

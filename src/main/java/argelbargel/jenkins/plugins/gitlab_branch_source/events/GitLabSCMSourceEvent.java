@@ -11,17 +11,17 @@ import org.gitlab.api.models.GitlabProject;
 import javax.annotation.Nonnull;
 
 public final class GitLabSCMSourceEvent extends SCMSourceEvent<SystemHook> {
-    public static GitLabSCMSourceEvent create(String id, SystemHook hook) {
+    public static GitLabSCMSourceEvent create(String id, SystemHook hook, String origin) {
         if (hook.isProjectCreated()) {
-            return new GitLabSCMSourceEvent(Type.CREATED, id, hook);
+            return new GitLabSCMSourceEvent(Type.CREATED, id, hook, origin);
         }
 
         if (hook.isProjectDestroyed()) {
-            return new GitLabSCMSourceEvent(Type.UPDATED, id, hook);
+            return new GitLabSCMSourceEvent(Type.UPDATED, id, hook, origin);
         }
 
         if (hook.isProjectUpdated()) {
-            return new GitLabSCMSourceEvent(Type.UPDATED, id, hook);
+            return new GitLabSCMSourceEvent(Type.UPDATED, id, hook, origin);
         }
 
         throw new IllegalArgumentException("cannot handle system-hook " + hook);
@@ -30,8 +30,8 @@ public final class GitLabSCMSourceEvent extends SCMSourceEvent<SystemHook> {
     private final String hookId;
     private String sourceName;
 
-    private GitLabSCMSourceEvent(@Nonnull Type type, @Nonnull String id, @Nonnull SystemHook hook) {
-        super(type, hook);
+    private GitLabSCMSourceEvent(@Nonnull Type type, @Nonnull String id, @Nonnull SystemHook hook, String origin) {
+        super(type, hook, origin);
         hookId = id;
         sourceName = getPayload().getPathWithNamespace();
     }

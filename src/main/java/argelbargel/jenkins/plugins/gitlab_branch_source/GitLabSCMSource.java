@@ -207,13 +207,13 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         List<RefSpec> refSpecs = new LinkedList<>();
 
         if (settings.branchMonitorStrategy().monitored()) {
-            refSpecs.add(BRANCHES.refSpec());
+            refSpecs.add(BRANCHES.delegate());
         }
         if (settings.tagMonitorStrategy().monitored()) {
-            refSpecs.add(TAGS.refSpec());
+            refSpecs.add(TAGS.delegate());
         }
         if (settings.originMonitorStrategy().monitored() || settings.forksMonitorStrategy().monitored()) {
-            refSpecs.add(MERGE_REQUESTS.refSpec());
+            refSpecs.add(MERGE_REQUESTS.delegate());
         }
 
         return refSpecs;
@@ -266,7 +266,6 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
 
-    @SuppressWarnings("unused")
     @Extension
     public static class DescriptorImpl extends SCMSourceDescriptor implements IconSpec {
         @Nonnull
@@ -310,8 +309,8 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         }
 
         @Restricted(NoExternalUse.class)
-        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath SCMSourceOwner context, @QueryParameter String connectionName, @QueryParameter String checkoutCredentialsId) {
-            return DescriptorHelper.doFillCheckoutCredentialsIdItems(context, connectionName, checkoutCredentialsId);
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath SCMSourceOwner context, @QueryParameter String connectionName, @QueryParameter String credentialsId) {
+            return DescriptorHelper.doFillCheckoutCredentialsIdItems(context, connectionName, credentialsId);
         }
     }
 }

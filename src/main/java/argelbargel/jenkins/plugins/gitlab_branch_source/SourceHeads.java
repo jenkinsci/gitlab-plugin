@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPI;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabMergeRequest;
@@ -32,12 +33,9 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.cre
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createTag;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.determineBuildMode;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.withBuildMode;
 import static hudson.model.TaskListener.NULL;
 import static java.util.Collections.emptyMap;
+
 
 class SourceHeads {
     private static final SCMHeadObserver NOOP_OBSERVER = new SCMHeadObserver() {
@@ -84,10 +82,6 @@ class SourceHeads {
     }
 
     private String retrieveRevision(SCMHead head) throws GitLabAPIException {
-        if (head instanceof HeadBuildMode) {
-            return retrieveRevision(((HeadBuildMode) head).getHead());
-        }
-
         if (head instanceof GitLabSCMMergeRequestHead) {
             return retrieveMergeRequestRevision(((GitLabSCMMergeRequestHead) head).getId());
         } else if (head instanceof GitLabSCMTagHead) {
@@ -122,7 +116,7 @@ class SourceHeads {
     }
 
     private void retrieveBranch(@Nonnull SCMHeadObserver observer, @Nonnull GitLabSCMPushEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        String branchName = BRANCHES.name(event.getPayload().getRef());
+        String branchName = BRANCHES.remoteName(event.getPayload().getRef());
         log(listener, Messages.GitLabSCMSource_retrievingBranch(branchName));
         try {
             GitlabBranch branch = api().getBranch(project.getId(), branchName);
@@ -133,7 +127,7 @@ class SourceHeads {
     }
 
     private void retrieveTag(@Nonnull SCMHeadObserver observer, @Nonnull GitLabSCMTagPushEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        String tagName = TAGS.name(event.getPayload().getRef());
+        String tagName = TAGS.remoteName(event.getPayload().getRef());
         log(listener, Messages.GitLabSCMSource_retrievingTag(tagName));
         try {
             GitlabTag tag = api().getTag(project.getId(), tagName);
@@ -190,22 +184,19 @@ class SourceHeads {
         log(listener, Messages.GitLabSCMSource_monitoringBranch(branch.getName()));
         String revision = branch.getCommit().getId();
         observe(observer,
-                determineBuildMode(
-                        createBranch(
-                                branch.getName(),
-                                revision,
-                                branchesWithMergeRequests(NULL).containsValue(branch.getName()))));
+                createBranch(
+                        branch.getName(),
+                        revision,
+                        branchesWithMergeRequests(NULL).containsValue(branch.getName())));
     }
 
     private void observe(GitlabTag tag, @Nonnull SCMHeadObserver observer, TaskListener listener) {
         log(listener, Messages.GitLabSCMSource_monitoringTag(tag.getName()));
         observe(observer,
-                withBuildMode(
-                        createTag(
-                                tag.getName(),
-                                tag.getCommit().getId(),
-                                tag.getCommit().getCommittedDate().getTime()),
-                        settings.tagMonitorStrategy().buildUnmerged() ? AUTOMATIC : MANUAL));
+                createTag(
+                        tag.getName(),
+                        tag.getCommit().getId(),
+                        tag.getCommit().getCommittedDate().getTime()));
     }
 
     private void observe(GitLabMergeRequest mergeRequest, @Nonnull SCMHeadObserver observer, @Nonnull TaskListener listener) throws IOException, InterruptedException {
@@ -214,6 +205,7 @@ class SourceHeads {
         String targetBranch = mergeRequest.getTargetBranch();
         GitLabSCMMergeRequestHead head = createMergeRequest(
                 mergeRequest.getId(), mergeRequest.getTitle(),
+                mergeRequest.getSourceProjectId(),
                 createBranch(mergeRequest.getSourceBranch(), mergeRequest.getSha()),
                 createBranch(targetBranch, retrieveBranchRevision(targetBranch)));
 

@@ -16,8 +16,8 @@ import static jenkins.scm.api.SCMEvent.Type.REMOVED;
 public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements GitLabSCMEvent {
     private static final String NONE_HASH_PATTERN = "^0+$";
 
-    public GitLabSCMTagPushEvent(String id, PushHook hook) {
-        super((hook.getBefore().matches(NONE_HASH_PATTERN) ? CREATED : REMOVED), id, hook);
+    public GitLabSCMTagPushEvent(String id, PushHook hook, String origin) {
+        super((hook.getBefore().matches(NONE_HASH_PATTERN) ? CREATED : REMOVED), id, hook, origin);
     }
 
     @Override
@@ -26,7 +26,7 @@ public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements G
     }
 
     @Override
-    Collection<GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) {
+    Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) {
         PushHook hook = getPayload();
         String hash = getType() == REMOVED ? hook.getBefore() : hook.getAfter();
         return singletonList(createTag(hook.getRef(), hash, hook.getCommits().get(0).getTimestamp().getTime()));
