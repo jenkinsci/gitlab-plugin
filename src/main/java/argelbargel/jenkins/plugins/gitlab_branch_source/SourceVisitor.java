@@ -1,9 +1,10 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility;
 import jenkins.scm.api.SCMSourceObserver;
-import org.gitlab.api.models.GitlabProject;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -33,7 +34,7 @@ class SourceVisitor {
         log(Messages.GitLabSCMNavigator_visitSources(connectionName));
 
         try {
-            for (GitlabProject project : gitLabAPI(connectionName).findProjects(selector, visibility, searchPattern)) {
+            for (GitLabProject project : gitLabAPI(connectionName).findProjects(selector, visibility, searchPattern)) {
                 checkInterrupt();
                 visitProject(project);
             }
@@ -45,7 +46,7 @@ class SourceVisitor {
 
     void visitProject(String sourceName) throws IOException, InterruptedException {
         try {
-            GitlabProject project = gitLabAPI(navigator.getConnectionName()).getProject(sourceName);
+            GitLabProject project = gitLabAPI(navigator.getConnectionName()).getProject(sourceName);
             if (project != null) {
                 visitProject(project);
             }
@@ -55,7 +56,7 @@ class SourceVisitor {
         }
     }
 
-    private void visitProject(GitlabProject project) throws IOException, InterruptedException {
+    private void visitProject(GitLabProject project) throws IOException, InterruptedException {
         if (!observer.isObserving()) {
             return;
         }

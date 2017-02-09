@@ -27,11 +27,11 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createBranch;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createMergeRequest;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createTag;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.BRANCHES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.AUTOMATIC;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.BuildMode.MANUAL;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.HeadBuildMode.determineBuildMode;
@@ -122,7 +122,7 @@ class SourceHeads {
     }
 
     private void retrieveBranch(@Nonnull SCMHeadObserver observer, @Nonnull GitLabSCMPushEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        String branchName = event.getPayload().getRef().replaceFirst(ORIGIN_REF_BRANCHES, "");
+        String branchName = BRANCHES.name(event.getPayload().getRef());
         log(listener, Messages.GitLabSCMSource_retrievingBranch(branchName));
         try {
             GitlabBranch branch = api().getBranch(project.getId(), branchName);
@@ -133,7 +133,7 @@ class SourceHeads {
     }
 
     private void retrieveTag(@Nonnull SCMHeadObserver observer, @Nonnull GitLabSCMTagPushEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        String tagName = event.getPayload().getRef().replaceFirst(ORIGIN_REF_TAGS, "");
+        String tagName = TAGS.name(event.getPayload().getRef());
         log(listener, Messages.GitLabSCMSource_retrievingTag(tagName));
         try {
             GitlabTag tag = api().getTag(project.getId(), tagName);

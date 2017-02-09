@@ -5,6 +5,8 @@ import jenkins.scm.api.mixin.ChangeRequestSCMHead;
 
 import javax.annotation.Nonnull;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.MERGE_REQUESTS;
+
 public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements ChangeRequestSCMHead {
     private final int id;
     private final String title;
@@ -13,7 +15,7 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
     private final boolean merge;
 
     GitLabSCMMergeRequestHead(int id, String title, GitLabSCMHead source, GitLabSCMHead target, boolean merge) {
-        super(title + " (!" + id + ")" + (merge ? " merged" : ""), Messages.GitLabSCMMergeRequest_Pronoun(), ORIGIN_REF_MERGE_REQUESTS);
+        super(title + " (!" + id + ")" + (merge ? " merged" : ""), Messages.GitLabSCMMergeRequest_Pronoun(), MERGE_REQUESTS);
         this.id = id;
         this.title = title;
         this.source = source;
@@ -41,9 +43,5 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
 
     public GitLabSCMMergeRequestHead merged() {
         return new GitLabSCMMergeRequestHead(id, title, source, target, true);
-    }
-
-    boolean merge() {
-        return merge;
     }
 }

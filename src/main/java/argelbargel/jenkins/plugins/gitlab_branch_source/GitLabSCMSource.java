@@ -1,21 +1,18 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHookListener;
-import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.TaskListener;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.browser.GitLab;
 import hudson.plugins.git.browser.GitRepositoryBrowser;
+import hudson.plugins.git.extensions.impl.BuildChooserSetting;
 import hudson.scm.SCM;
-import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.plugins.git.AbstractGitSCMSource;
@@ -31,7 +28,6 @@ import jenkins.scm.api.SCMSourceOwner;
 import jenkins.scm.impl.ChangeRequestSCMHeadCategory;
 import jenkins.scm.impl.TagSCMHeadCategory;
 import org.eclipse.jgit.transport.RefSpec;
-import org.gitlab.api.models.GitlabProject;
 import org.jenkins.ui.icon.IconSpec;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -41,33 +37,28 @@ import org.kohsuke.stapler.QueryParameter;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_BRANCHES;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_MERGE_REQUESTS;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.ORIGIN_REF_TAGS;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.BRANCHES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.MERGE_REQUESTS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class GitLabSCMSource extends AbstractGitSCMSource {
-    private static final RefSpec REFSPEC_BRANCHES = new RefSpec("+" + ORIGIN_REF_BRANCHES + "*:refs/remotes/origin/*");
-    private static final RefSpec REFSPEC_TAGS = new RefSpec("+" + ORIGIN_REF_TAGS + "*:refs/remotes/origin/tags/*");
-    private static final RefSpec REFSPEC_MERGE_REQUESTS = new RefSpec("+" + ORIGIN_REF_MERGE_REQUESTS + "*/head:refs/remotes/origin/merge-requests/*");
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMSource.class.getName());
 
     private final SourceSettings settings;
-    private final GitlabProject project;
+    private final GitLabProject project;
     private final GitLabSCMWebHookListener hookListener;
     private final SourceHeads heads;
     private final SourceActions actions;
 
 
-    GitLabSCMSource(GitlabProject project, SourceSettings settings) {
+    GitLabSCMSource(GitLabProject project, SourceSettings settings) {
         super(project.getPathWithNamespace());
         this.settings = settings;
         this.project = project;
@@ -86,12 +77,8 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     @Override
-    public String getRemote() {
-        if (getCredentialsId() != null && getCredentials(StandardCredentials.class) instanceof SSHUserPrivateKey) {
-            return project.getSshUrl();
-        } else {
-            return project.getHttpUrl();
-        }
+    public final String getRemote() {
+        return project.getRemote(this);
     }
 
     @Override
@@ -175,11 +162,15 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Override
     public GitRepositoryBrowser getBrowser() {
         try {
-            return new GitLab(project.getWebUrl(), gitLabAPI(getConnectionName()).getVersion().toString());
+            return new GitLab(project.getWebUrl(), getGitLabVersion());
         } catch (GitLabAPIException e) {
             LOGGER.warning("could not determine gitlab-version:" + e.getMessage());
             return super.getBrowser();
         }
+    }
+
+    final String getGitLabVersion() throws GitLabAPIException {
+        return gitLabAPI(getConnectionName()).getVersion().toString();
     }
 
     @Override
@@ -214,17 +205,17 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Override
     protected List<RefSpec> getRefSpecs() {
         List<RefSpec> refSpecs = new LinkedList<>();
+
         if (settings.branchMonitorStrategy().monitored()) {
-            refSpecs.add(REFSPEC_BRANCHES);
+            refSpecs.add(BRANCHES.refSpec());
         }
-
         if (settings.tagMonitorStrategy().monitored()) {
-            refSpecs.add(REFSPEC_TAGS);
+            refSpecs.add(TAGS.refSpec());
+        }
+        if (settings.originMonitorStrategy().monitored() || settings.forksMonitorStrategy().monitored()) {
+            refSpecs.add(MERGE_REQUESTS.refSpec());
         }
 
-        if (settings.originMonitorStrategy().monitored() || settings.forksMonitorStrategy().monitored()) {
-            refSpecs.add(REFSPEC_MERGE_REQUESTS);
-        }
         return refSpecs;
     }
 
@@ -259,27 +250,21 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     public SCM build(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
-        if (revision == null) {
-            if (head instanceof GitLabSCMHead) {
-                SCMRevision rev = ((GitLabSCMHead) head).getRevision();
-                return build(rev.getHead(), rev);
-            } else {
-                return build(head, new SCMRevisionImpl(head, REVISION_HEAD));
+        GitSCM scm;
+
+        if (head instanceof GitLabSCMHead) {
+            scm = ((GitLabSCMHead) head).createSCM(this);
+            if (revision instanceof SCMRevisionImpl) {
+                scm.getExtensions().add(new BuildChooserSetting(new SpecificRevisionBuildChooser((SCMRevisionImpl) revision)));
             }
+        } else {
+            scm = (GitSCM) super.build(head, revision);
+            scm.setBrowser(getBrowser());
         }
 
-        GitSCM scm = (GitSCM) super.build(head, revision);
-        scm.setBrowser(getBrowser());
         return scm;
     }
 
-    private <T extends StandardCredentials> T getCredentials(@Nonnull Class<T> type) {
-        return CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
-                type, getOwner(), ACL.SYSTEM,
-                Collections.<DomainRequirement>emptyList()), CredentialsMatchers.allOf(
-                CredentialsMatchers.withId(getCredentialsId()),
-                CredentialsMatchers.instanceOf(type)));
-    }
 
     @SuppressWarnings("unused")
     @Extension

@@ -5,12 +5,14 @@ import jenkins.scm.api.mixin.TagSCMHead;
 
 import javax.annotation.Nonnull;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
+
 public final class GitLabSCMTagHead extends GitLabSCMHeadImpl implements TagSCMHead {
     private final String hash;
     private final long timestamp;
 
     GitLabSCMTagHead(@Nonnull String name, String hash, long timestamp) {
-        super(name, Messages.GitLabSCMTag_Pronoun(), ORIGIN_REF_TAGS);
+        super(name, Messages.GitLabSCMTag_Pronoun(), TAGS);
         this.hash = hash;
         this.timestamp = timestamp;
     }

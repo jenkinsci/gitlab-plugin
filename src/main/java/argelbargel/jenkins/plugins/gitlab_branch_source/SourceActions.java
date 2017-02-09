@@ -29,6 +29,7 @@ class SourceActions {
     private final GitlabProject project;
     private final SourceSettings settings;
 
+
     SourceActions(GitlabProject project, SourceSettings settings) {
         this.project = project;
         this.settings = settings;
@@ -40,7 +41,6 @@ class SourceActions {
                 new GitLabProjectMetadataAction(project),
                 new GitLabProjectAvatarMetadataAction(project, settings.getConnectionName()),
                 GitLabLinkAction.toProject(Messages.GitLabSCMSource_Pronoun(), project));
-
     }
 
     @Nonnull
@@ -55,7 +55,7 @@ class SourceActions {
         }
 
         if (head instanceof GitLabSCMMergeRequestHead) {
-            listener.getLogger().format(Messages.GitLabSCMSource_retrievingMergeRequest(((GitLabSCMMergeRequestHead) head).getId()));
+            listener.getLogger().format(Messages.GitLabSCMSource_retrievingMergeRequest(((GitLabSCMMergeRequestHead) head).getId()) + "\n");
             GitLabMergeRequest mr = gitLabAPI(settings.getConnectionName()).getMergeRequest(project.getId(), ((GitLabSCMMergeRequestHead) head).getId());
             actions.add(new ObjectMetadataAction(mr.getTitle(), mr.getDescription(), mergeRequestUrl(project, ((GitLabSCMMergeRequestHead) head).getId())));
             actions.add(GitLabLinkAction.toMergeRequest(head.getPronoun(), project, mr.getId()));

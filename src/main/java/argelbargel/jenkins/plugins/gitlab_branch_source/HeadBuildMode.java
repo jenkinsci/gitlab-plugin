@@ -1,5 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
+import hudson.plugins.git.GitSCM;
 import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
 import jenkins.scm.api.mixin.TagSCMHead;
 
@@ -39,13 +41,20 @@ abstract class HeadBuildMode extends GitLabSCMHead {
 
     @Nonnull
     @Override
-    final String getRef() {
-        return getHead().getRef();
+    final GitLabSCMRefSpec getRefSpec() {
+        return getHead().getRefSpec();
     }
 
     final GitLabSCMHead getHead() {
         return target;
     }
+
+    @Nonnull
+    @Override
+    GitSCM createSCM(GitLabSCMSource source) {
+        return getHead().createSCM(source);
+    }
+
 
     private static class AutomaticBuild extends HeadBuildMode {
         AutomaticBuild(String label, GitLabSCMHead target) {
@@ -53,7 +62,8 @@ abstract class HeadBuildMode extends GitLabSCMHead {
         }
     }
 
-    // HACK ALERT: the current default buildstrategy of MultiBranchProject does not build TagSCMHead instances automatically;
+
+    // HACK ALERT: the current default build-strategy of MultiBranchProject does not build TagSCMHead instances automatically;
     // when our sources are observed by another Project which uses different buildstrategies this might not work...
     private static class ManualBuild extends HeadBuildMode implements TagSCMHead {
         ManualBuild(String label, GitLabSCMHead target) {

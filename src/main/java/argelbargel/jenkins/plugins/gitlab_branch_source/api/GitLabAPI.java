@@ -45,17 +45,18 @@ public final class GitLabAPI {
         }
     }
 
-    public GitlabProject getProject(int id) throws GitLabAPIException {
+    public GitLabProject getProject(int id) throws GitLabAPIException {
         return getProject((Serializable) id);
     }
 
-    public GitlabProject getProject(String name) throws GitLabAPIException {
+    public GitLabProject getProject(String name) throws GitLabAPIException {
         return getProject((Serializable) name);
     }
 
-    private GitlabProject getProject(Serializable nameOrId) throws GitLabAPIException {
+    private GitLabProject getProject(Serializable nameOrId) throws GitLabAPIException {
         try {
-            return delegate.getProject(nameOrId);
+            String tailUrl = GitlabProject.URL + "/" + nameOrId;
+            return delegate.retrieve().to(tailUrl, GitLabProject.class);
         } catch (FileNotFoundException e) {
             throw new NoSuchElementException("unknown project " + nameOrId);
         } catch (IOException e) {
@@ -134,12 +135,12 @@ public final class GitLabAPI {
         }
     }
 
-    public List<GitlabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
+    public List<GitLabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
         LOGGER.fine("finding projects for " + selector + ", " + visibility + ", " + searchPattern + "...");
         try {
             return delegate
                     .retrieve()
-                    .getAll(projectUrl(selector, visibility, searchPattern), GitlabProject[].class);
+                    .getAll(projectUrl(selector, visibility, searchPattern), GitLabProject[].class);
         } catch (Exception e) {
             throw new GitLabAPIException(e);
         }
