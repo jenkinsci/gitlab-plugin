@@ -82,7 +82,6 @@ public class CommitStatusUpdater {
                 String commitHash = info.getCommitHash();
                 String branchNameOrNull = info.getBranchNameOrNull();
                 try {
-                    
                     if (existsCommit(client, projectId, commitHash)) {
                         client.changeBuildStatus(projectId, commitHash, state, branchNameOrNull, name, buildUrl, null);
                     }
