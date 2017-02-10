@@ -9,8 +9,8 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.
 public final class GitLabSCMBranchHead extends GitLabSCMHeadImpl {
     private final boolean hasMergeRequest;
 
-    GitLabSCMBranchHead(@Nonnull String name, String hash, boolean hasMergeRequest) {
-        super(name, hash, Messages.GitLabSCMBranch_Pronoun(), BRANCHES);
+    GitLabSCMBranchHead(int projectId, @Nonnull String name, String hash, boolean hasMergeRequest) {
+        super(projectId, name, hash, Messages.GitLabSCMBranch_Pronoun(), BRANCHES);
         this.hasMergeRequest = hasMergeRequest;
     }
 

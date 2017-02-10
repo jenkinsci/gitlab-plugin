@@ -151,12 +151,39 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
+    public void setPublishBuildResultsForBranches(boolean value) {
+        sourceSettings.originMonitorStrategy().setPublishBuildStatus(value);
+    }
+
+    public boolean getPublishBuildStatusForBranches() {
+        return sourceSettings.originMonitorStrategy().getPublishBuildStatus();
+    }
+
+    @DataBoundSetter
     public void setBuildMergeRequestsFromOriginMerged(boolean value) {
         sourceSettings.originMonitorStrategy().setBuildMerged(value);
     }
 
     public boolean getBuildMergeRequestsFromOriginMerged() {
         return sourceSettings.originMonitorStrategy().buildMerged();
+    }
+
+    @DataBoundSetter
+    public void setPublishBuildStatusFromOrigin(boolean value) {
+        sourceSettings.originMonitorStrategy().setPublishBuildStatus(value);
+    }
+
+    public boolean getPublishBuildStatusFromOrigin() {
+        return sourceSettings.originMonitorStrategy().getPublishBuildStatus();
+    }
+
+    @DataBoundSetter
+    public void setBuildOnlyMergeableRequestsFromOriginMerged(boolean value) {
+        sourceSettings.originMonitorStrategy().setBuildOnlyMergeableRequestsMerged(value);
+    }
+
+    public boolean getBuildOnlyMergeableRequestsFromOriginMerged() {
+        return sourceSettings.originMonitorStrategy().buildOnlyMergeableRequestsMerged();
     }
 
     @DataBoundSetter
@@ -187,12 +214,30 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
+    public void setPublishBuildStatusFromForks(boolean value) {
+        sourceSettings.forksMonitorStrategy().setPublishBuildStatus(value);
+    }
+
+    public boolean getPublishBuildStatusFromForks() {
+        return sourceSettings.forksMonitorStrategy().getPublishBuildStatus();
+    }
+
+    @DataBoundSetter
     public void setBuildMergeRequestsFromForksMerged(boolean value) {
         sourceSettings.forksMonitorStrategy().setBuildMerged(value);
     }
 
     public boolean getBuildMergeRequestsFromForksMerged() {
         return sourceSettings.forksMonitorStrategy().buildMerged();
+    }
+
+    @DataBoundSetter
+    public void setBuildOnlyMergeableRequestsFromForksMerged(boolean value) {
+        sourceSettings.forksMonitorStrategy().setBuildOnlyMergeableRequestsMerged(value);
+    }
+
+    public boolean getBuildOnlyMergeableRequestsFromForksMerged() {
+        return sourceSettings.forksMonitorStrategy().buildOnlyMergeableRequestsMerged();
     }
 
     @DataBoundSetter
@@ -245,6 +290,14 @@ public class GitLabSCMNavigator extends SCMNavigator {
         return sourceSettings.tagMonitorStrategy().buildUnmerged();
     }
 
+    @DataBoundSetter
+    public void setPublishBuildStatusForTags(boolean value) {
+        sourceSettings.tagMonitorStrategy().setPublishBuildStatus(value);
+    }
+
+    public boolean getPublishBuildStatusForTags() {
+        return sourceSettings.tagMonitorStrategy().getPublishBuildStatus();
+    }
 
     @DataBoundSetter
     public void setRegisterWebHooks(boolean registerWebHooks) {
@@ -252,9 +305,28 @@ public class GitLabSCMNavigator extends SCMNavigator {
         sourceSettings.setRegisterWebHooks(!registerWebHooks);
     }
 
+
     public boolean getRegisterWebHooks() {
         return sourceSettings.getRegisterWebHooks();
     }
+
+    public String getPublisherName() {
+        return sourceSettings.getPublisherName();
+    }
+
+    @DataBoundSetter
+    public void setPublisherName(String name) {
+        sourceSettings.setPublisherName(name);
+    }
+
+    public void setPublishUnstableBuildsAsSuccess(boolean value) {
+        sourceSettings.setPublishUnstableBuildsAsSuccess(value);
+    }
+
+    public boolean getPublishUnstableBuildsAsSuccess() {
+        return sourceSettings.getPublishUnstableBuildsAsSuccess();
+    }
+
 
     @Nonnull
     @Override
@@ -383,10 +455,6 @@ public class GitLabSCMNavigator extends SCMNavigator {
                 items.add(id, id);
             }
             return items;
-        }
-
-        static {
-            Icons.initialize();
         }
     }
 }

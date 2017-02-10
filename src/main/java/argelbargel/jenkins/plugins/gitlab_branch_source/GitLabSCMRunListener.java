@@ -1,31 +1,54 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
-import java.io.IOException;
+import javax.annotation.Nonnull;
+import java.util.concurrent.Executor;
+
 
 @SuppressWarnings("unused")
 @Extension
 public class GitLabSCMRunListener extends RunListener<Run<?, ?>> {
     @Override
     public void onStarted(Run<?, ?> build, TaskListener listener) {
-        GitLabSCMCauseAction action = build.getAction(GitLabSCMCauseAction.class);
-        if (action != null && action.updateBuildDescription()) {
-            onStarted(action.getDescription(), build, listener);
+        if (build instanceof WorkflowRun) {
+            attachListener((WorkflowRun) build);
+        }
+
+        GitLabSCMCauseAction causeAction = build.getParent().getAction(GitLabSCMCauseAction.class);
+        GitLabSCMPublishAction publishAction = build.getParent().getAction(GitLabSCMPublishAction.class);
+        if (causeAction != null && publishAction != null) {
+            publishAction.updateBuildDescription(build, causeAction, listener);
+            publishAction.publishPending(build, causeAction, listener);
         }
     }
 
-    private void onStarted(String description, Run<?, ?> build, TaskListener listener) {
-        if (!StringUtils.isBlank(description)) {
-            try {
-                build.setDescription(description);
-            } catch (IOException e) {
-                listener.getLogger().println("Failed to set build description");
-            }
+    @Override
+    public void onCompleted(Run<?, ?> build, @Nonnull TaskListener listener) {
+        GitLabSCMCauseAction causeAction = build.getParent().getAction(GitLabSCMCauseAction.class);
+        GitLabSCMPublishAction publishAction = build.getParent().getAction(GitLabSCMPublishAction.class);
+        if (causeAction != null && publishAction != null) {
+            publishAction.publishResult(build, causeAction, listener);
         }
+    }
+
+    private void attachListener(final WorkflowRun build) {
+        build.getExecutionPromise().addListener(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        System.out.println(build.getExecution());
+                                                    }
+                                                },
+                new Executor() {
+                    @Override
+                    public void execute(Runnable command) {
+                        command.run();
+                    }
+                });
     }
 }

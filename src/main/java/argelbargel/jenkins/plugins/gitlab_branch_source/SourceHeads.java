@@ -31,6 +31,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitL
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createBranch;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createMergeRequest;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createTag;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMMergeRequestHead.CAN_BE_MERGED;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
 import static hudson.model.TaskListener.NULL;
@@ -182,21 +183,18 @@ class SourceHeads {
 
     private void observe(GitlabBranch branch, @Nonnull SCMHeadObserver observer, TaskListener listener) throws IOException, InterruptedException {
         log(listener, Messages.GitLabSCMSource_monitoringBranch(branch.getName()));
-        String revision = branch.getCommit().getId();
-        observe(observer,
-                createBranch(
-                        branch.getName(),
-                        revision,
-                        branchesWithMergeRequests(NULL).containsValue(branch.getName())));
+
+        boolean hasMergeRequest = branchesWithMergeRequests(NULL).containsValue(branch.getName());
+        if (hasMergeRequest && !settings.getBuildBranchesWithMergeRequests()) {
+            log(listener, Messages.GitLabSCMSource_willNotBuildBranchWithMergeRequest(branch.getName()));
+        }
+
+        observe(observer, createBranch(project.getId(), branch.getName(), branch.getCommit().getId(), hasMergeRequest));
     }
 
     private void observe(GitlabTag tag, @Nonnull SCMHeadObserver observer, TaskListener listener) {
         log(listener, Messages.GitLabSCMSource_monitoringTag(tag.getName()));
-        observe(observer,
-                createTag(
-                        tag.getName(),
-                        tag.getCommit().getId(),
-                        tag.getCommit().getCommittedDate().getTime()));
+        observe(observer, createTag(project.getId(), tag.getName(), tag.getCommit().getId(), tag.getCommit().getCommittedDate().getTime()));
     }
 
     private void observe(GitLabMergeRequest mergeRequest, @Nonnull SCMHeadObserver observer, @Nonnull TaskListener listener) throws IOException, InterruptedException {
@@ -205,10 +203,11 @@ class SourceHeads {
         String targetBranch = mergeRequest.getTargetBranch();
         GitLabSCMMergeRequestHead head = createMergeRequest(
                 mergeRequest.getId(), mergeRequest.getTitle(),
-                mergeRequest.getSourceProjectId(),
-                createBranch(mergeRequest.getSourceBranch(), mergeRequest.getSha()),
-                createBranch(targetBranch, retrieveBranchRevision(targetBranch)));
+                createBranch(mergeRequest.getSourceProjectId(), mergeRequest.getSourceBranch(), mergeRequest.getSha()),
+                createBranch(mergeRequest.getTargetProjectId(), targetBranch, retrieveBranchRevision(targetBranch)),
+                Objects.equals(mergeRequest.getMergeStatus(), CAN_BE_MERGED));
 
+        // TOOD: We're doing these checks at least three times - centralize in GitLabMergeRequest?
         boolean fromOrigin = Objects.equals(mergeRequest.getSourceProjectId(), project.getId());
 
         if ((fromOrigin && settings.originMonitorStrategy().buildUnmerged()) || (!fromOrigin && settings.forksMonitorStrategy().buildUnmerged())) {
@@ -216,6 +215,9 @@ class SourceHeads {
         }
 
         if ((fromOrigin && settings.originMonitorStrategy().buildMerged()) || (!fromOrigin && settings.forksMonitorStrategy().buildMerged())) {
+            if (!head.isMergeable() && ((fromOrigin && settings.originMonitorStrategy().buildOnlyMergeableRequestsMerged()) || (!fromOrigin && settings.forksMonitorStrategy().buildOnlyMergeableRequestsMerged()))) {
+                log(listener, Messages.GitLabSCMSource_willNotBuildUnmergeableRequest(mergeRequest.getId(), mergeRequest.getTargetBranch(), mergeRequest.getMergeStatus()));
+            }
             observe(observer, head.merged());
         }
 

@@ -24,16 +24,18 @@ import static java.util.Collections.singletonList;
 
 
 abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
+    private final int projectId;
     private final SCMRevisionImpl revision;
     private final String pronoun;
-    private final GitLabSCMRefSpec ref;
+    private final GitLabSCMRefSpec refSpec;
     private transient Map<Integer, GitLabProject> projectCache;
 
-    GitLabSCMHeadImpl(@Nonnull String name, @Nonnull String hash, @Nonnull String pronoun, @Nonnull GitLabSCMRefSpec ref) {
-        super(ref.remoteName(name));
+    GitLabSCMHeadImpl(@Nonnull int projectId, @Nonnull String name, @Nonnull String hash, @Nonnull String pronoun, @Nonnull GitLabSCMRefSpec refSpec) {
+        super(refSpec.remoteName(name));
+        this.projectId = projectId;
         this.revision = new SCMRevisionImpl(this, hash);
         this.pronoun = pronoun;
-        this.ref = ref;
+        this.refSpec = refSpec;
     }
 
     @Override
@@ -51,7 +53,18 @@ abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
     @Nonnull
     @Override
     final GitLabSCMRefSpec getRefSpec() {
-        return ref;
+        return refSpec;
+    }
+
+    @Override
+    final int getProjectId() {
+        return projectId;
+    }
+
+    @Nonnull
+    @Override
+    String getRef() {
+        return refSpec.destinationRef(getName());
     }
 
     @Nonnull
@@ -69,14 +82,14 @@ abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
     List<UserRemoteConfig> getRemotes(@Nonnull GitLabSCMSource source) throws GitLabAPIException {
         return singletonList(
                 new UserRemoteConfig(
-                        getProject(source.getProjectId(), source).getRemote(source),
+                        getProject(projectId, source).getRemote(source),
                         "origin", getRefSpec().delegate().toString(),
                         source.getCredentialsId()));
     }
 
     @Nonnull
     List<BranchSpec> getBranchSpecs() {
-        return singletonList(new BranchSpec(getName()));
+        return singletonList(new BranchSpec(getRef()));
     }
 
     @Nonnull

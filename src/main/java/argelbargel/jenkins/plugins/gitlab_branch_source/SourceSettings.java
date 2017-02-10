@@ -5,6 +5,7 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.AllowMergeRe
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.FilterWorkInProgress;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
 import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 
@@ -23,6 +24,8 @@ class SourceSettings {
     private boolean buildBranchesWithMergeRequests;
     private boolean registerWebHooks;
     private boolean updateBuildDescription;
+    private String publisherName;
+    private boolean publishUnstableBuildsAsSuccess;
 
 
     SourceSettings(String connectionName, String credentialsId) {
@@ -30,13 +33,15 @@ class SourceSettings {
         this.credentialsId = credentialsId;
         this.includes = DEFAULT_INCLUDES;
         this.excludes = DEFAULT_EXCLUDES;
-        this.branchMonitorStrategy = new MonitorStrategy(true, false);
+        this.branchMonitorStrategy = new MonitorStrategy(true, false, true);
         this.buildBranchesWithMergeRequests = false;
-        this.originMonitorStrategy = new MonitorStrategy(true, true);
-        this.forksMonitorStrategy = new MonitorStrategy(false, true);
-        this.tagMonitorStrategy = new MonitorStrategy(false, false);
+        this.originMonitorStrategy = new MonitorStrategy(true, true, true);
+        this.forksMonitorStrategy = new MonitorStrategy(false, true, true);
+        this.tagMonitorStrategy = new MonitorStrategy(false, false, false);
         this.registerWebHooks = true;
         this.updateBuildDescription = true;
+        this.publisherName = Jenkins.getInstance().getDisplayName();
+        this.publishUnstableBuildsAsSuccess = false;
     }
 
     String getConnectionName() {
@@ -99,6 +104,22 @@ class SourceSettings {
         return updateBuildDescription;
     }
 
+    void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
+    }
+
+    String getPublisherName() {
+        return publisherName;
+    }
+
+    void setPublishUnstableBuildsAsSuccess(boolean publishUnstableBuildsAsSuccess) {
+        this.publishUnstableBuildsAsSuccess = publishUnstableBuildsAsSuccess;
+    }
+
+    boolean getPublishUnstableBuildsAsSuccess() {
+        return publishUnstableBuildsAsSuccess;
+    }
+
     GitLabMergeRequestFilter getMergeRequestFilter(TaskListener listener) {
         GitLabMergeRequestFilter filter = GitLabMergeRequestFilter.ALLOW_NONE;
         if (originMonitorStrategy.monitored()) {
@@ -121,4 +142,5 @@ class SourceSettings {
 
         return filter;
     }
+
 }

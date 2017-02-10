@@ -107,6 +107,10 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.originMonitorStrategy().buildMerged();
     }
 
+    public boolean getBuildOnlyMergeableRequestsFromOriginMerged() {
+        return settings.originMonitorStrategy().buildOnlyMergeableRequestsMerged();
+    }
+
     public boolean getBuildMergeRequestsFromOriginUnmerged() {
         return settings.originMonitorStrategy().buildUnmerged();
     }
@@ -121,6 +125,10 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     public boolean getBuildMergeRequestsFromForksMerged() {
         return settings.forksMonitorStrategy().buildMerged();
+    }
+
+    public boolean getBuildOnlyMergeableRequestsFromForksMerged() {
+        return settings.forksMonitorStrategy().buildOnlyMergeableRequestsMerged();
     }
 
     public boolean getBuildMergeRequestsFromForksUnmerged() {
@@ -193,7 +201,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        return actions.retrieveHeadActions(head, event, listener);
+        return actions.retrieve(head, event, listener);
     }
 
     @Nonnull

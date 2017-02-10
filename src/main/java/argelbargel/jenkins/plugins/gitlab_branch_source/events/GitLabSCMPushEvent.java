@@ -43,7 +43,8 @@ public class GitLabSCMPushEvent extends GitLabSCMHeadEvent<PushHook> {
 
     @Override
     Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
-        return singletonList(createBranch(getPayload().getRef(), getPayload().getAfter()));
+        PushHook hook = getPayload();
+        return singletonList(createBranch(hook.getProjectId(), hook.getRef(), hook.getAfter()));
     }
 
     @Override

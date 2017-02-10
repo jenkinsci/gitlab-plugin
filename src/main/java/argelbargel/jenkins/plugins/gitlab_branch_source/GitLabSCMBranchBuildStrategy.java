@@ -38,7 +38,24 @@ public class GitLabSCMBranchBuildStrategy extends BranchBuildStrategy {
             return !((GitLabSCMBranchHead) head).hasMergeRequest() || source.getBuildBranchesWithMergeRequests();
         }
 
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            return isAutomaticBuild(source, (GitLabSCMMergeRequestHead) head);
+        }
+
         return true;
+    }
+
+    private boolean isAutomaticBuild(GitLabSCMSource source, GitLabSCMMergeRequestHead head) {
+        if (!head.isMerged()) {
+            return true;
+        }
+
+        if (head.isMergeable()) {
+            return true;
+        }
+
+        boolean fromOrigin = source.getProjectId() == head.getProjectId();
+        return (fromOrigin && !source.getBuildOnlyMergeableRequestsFromOriginMerged()) || (!fromOrigin && !source.getBuildOnlyMergeableRequestsFromForksMerged());
     }
 
     boolean isApplicable(BranchSource branchSource) {

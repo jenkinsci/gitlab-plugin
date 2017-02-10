@@ -66,13 +66,13 @@ public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRe
     Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) throws IOException, InterruptedException {
         Collection<GitLabSCMHead> heads = new ArrayList<>();
 
+        MergeRequestObjectAttributes attributes = getAttributes();
         GitLabSCMMergeRequestHead head = createMergeRequest(
-                getAttributes().getId(), getAttributes().getTitle(),
-                getAttributes().getSourceProjectId(),
-                createBranch(getAttributes().getSourceBranch(), getAttributes().getLastCommit().getId()),
-                createBranch(getAttributes().getTargetBranch(), REVISION_HEAD));
+                attributes.getId(), attributes.getTitle(),
+                createBranch(attributes.getSourceProjectId(), attributes.getSourceBranch(), attributes.getLastCommit().getId()),
+                createBranch(attributes.getTargetProjectId(), attributes.getTargetBranch(), REVISION_HEAD));
 
-        boolean fromOrigin = Objects.equals(getAttributes().getSourceProjectId(), source.getProjectId());
+        boolean fromOrigin = Objects.equals(attributes.getSourceProjectId(), source.getProjectId());
 
         if ((fromOrigin && source.getBuildMergeRequestsFromOriginUnmerged()) || (!fromOrigin && source.getBuildMergeRequestsFromForksUnmerged())) {
             heads.add(head);

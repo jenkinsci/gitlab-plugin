@@ -12,20 +12,24 @@ import javax.annotation.Nonnull;
 public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
     public static final String REVISION_HEAD = "HEAD";
 
-    public static GitLabSCMBranchHead createBranch(String name, String hash) {
-        return createBranch(name, hash, false);
+    public static GitLabSCMBranchHead createBranch(int projectId, String name, String hash) {
+        return createBranch(projectId, name, hash, false);
     }
 
-    public static GitLabSCMTagHead createTag(String name, String hash, long timestamp) {
-        return new GitLabSCMTagHead(name, hash, timestamp);
+    public static GitLabSCMTagHead createTag(int projectId, String name, String hash, long timestamp) {
+        return new GitLabSCMTagHead(projectId, name, hash, timestamp);
     }
 
-    public static GitLabSCMMergeRequestHead createMergeRequest(int id, String name, int sourceProjectId, GitLabSCMHead source, GitLabSCMBranchHead target) {
-        return new GitLabSCMMergeRequestHead(id, name, sourceProjectId, source, target, false);
+    public static GitLabSCMMergeRequestHead createMergeRequest(int id, String name, GitLabSCMHead source, GitLabSCMBranchHead target) {
+        return new GitLabSCMMergeRequestHead(id, name, source, target, false);
     }
 
-    static GitLabSCMBranchHead createBranch(String name, String hash, boolean hasMergeRequest) {
-        return new GitLabSCMBranchHead(name, hash, hasMergeRequest);
+    static GitLabSCMMergeRequestHead createMergeRequest(int id, String name, GitLabSCMHead source, GitLabSCMBranchHead target, boolean mergeable) {
+        return new GitLabSCMMergeRequestHead(id, name, source, target, mergeable);
+    }
+
+    static GitLabSCMBranchHead createBranch(int projectId, String name, String hash, boolean hasMergeRequest) {
+        return new GitLabSCMBranchHead(projectId, name, hash, hasMergeRequest);
     }
 
 
@@ -35,6 +39,11 @@ public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
 
     @Nonnull
     public abstract SCMRevisionImpl getRevision();
+
+    abstract int getProjectId();
+
+    @Nonnull
+    abstract String getRef();
 
     @Nonnull
     abstract GitLabSCMRefSpec getRefSpec();

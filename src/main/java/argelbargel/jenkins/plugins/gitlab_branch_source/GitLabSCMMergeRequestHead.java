@@ -28,21 +28,27 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.
 
 
 public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implements ChangeRequestSCMHead {
+    static final String CAN_BE_MERGED = "can_be_merged";
+
     private final int id;
     private final String title;
-    private final int sourceProjectId;
     private final GitLabSCMHead sourceBranch;
     private final GitLabSCMBranchHead targetBranch;
+    private final boolean mergeable;
     private final boolean merge;
 
 
-    GitLabSCMMergeRequestHead(int id, String title, int sourceProjectId, GitLabSCMHead source, GitLabSCMBranchHead target, boolean merge) {
-        super(title + " (!" + id + ")" + (merge ? " merged" : ""), source.getRevision().getHash(), Messages.GitLabSCMMergeRequest_Pronoun(), MERGE_REQUESTS);
+    GitLabSCMMergeRequestHead(int id, String title, GitLabSCMHead source, GitLabSCMBranchHead target, boolean mergeable) {
+        this(id, title, source, target, mergeable, false);
+    }
+
+    private GitLabSCMMergeRequestHead(int id, String title, GitLabSCMHead source, GitLabSCMBranchHead target, boolean mergeable, boolean merge) {
+        super(source.getProjectId(), title + " (!" + id + ")" + (merge ? " merged" : ""), source.getRevision().getHash(), Messages.GitLabSCMMergeRequest_Pronoun(), MERGE_REQUESTS);
         this.id = id;
         this.title = title;
-        this.sourceProjectId = sourceProjectId;
         this.sourceBranch = source;
         this.targetBranch = target;
+        this.mergeable = mergeable;
         this.merge = merge;
     }
 
@@ -59,7 +65,22 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
     }
 
     public GitLabSCMMergeRequestHead merged() {
-        return new GitLabSCMMergeRequestHead(id, title, sourceProjectId, sourceBranch, targetBranch, true);
+        return new GitLabSCMMergeRequestHead(id, title, sourceBranch, targetBranch, mergeable, true);
+    }
+
+    @Nonnull
+    @Override
+    String getRef() {
+        return getRefSpec().destinationRef(sourceBranch.getName());
+    }
+
+
+    boolean isMergeable() {
+        return mergeable;
+    }
+
+    boolean isMerged() {
+        return merge;
     }
 
     @Nonnull
@@ -67,7 +88,7 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
     List<UserRemoteConfig> getRemotes(@Nonnull GitLabSCMSource source) throws GitLabAPIException {
         List<UserRemoteConfig> remotes = new ArrayList<>(2);
         remotes.add(new UserRemoteConfig(
-                getProject(sourceProjectId, source).getRemote(source),
+                getProject(getProjectId(), source).getRemote(source),
                 "merge-request", "",
                 source.getCredentialsId()));
         if (merge) {
@@ -80,12 +101,13 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
     @Nonnull
     @Override
     List<BranchSpec> getBranchSpecs() {
-        List<BranchSpec> branches = new ArrayList<>(2);
-        branches.add(new BranchSpec(getRefSpec().destinationRef(sourceBranch.getName())));
-        if (merge) {
-            branches.add(new BranchSpec(targetBranch.getRefSpec().destinationRef(targetBranch.getName())));
+        if (!merge) {
+            return super.getBranchSpecs();
         }
 
+        List<BranchSpec> branches = new ArrayList<>(2);
+        branches.addAll(super.getBranchSpecs());
+        branches.add(new BranchSpec(targetBranch.getRef()));
         return branches;
     }
 

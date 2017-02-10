@@ -1,22 +1,36 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import jenkins.plugins.git.AbstractGitSCMSource.SCMRevisionImpl;
+
 
 class GitLabSCMCauseAction extends CauseAction {
-    private final boolean updateBuildDescription;
+    private final GitLabSCMHead head;
+    private final String hash;
 
-    GitLabSCMCauseAction(Cause c, boolean updateBuildDescription) {
-        super(c);
-        this.updateBuildDescription = updateBuildDescription;
+    GitLabSCMCauseAction(SCMRevisionImpl revision, Cause... causes) {
+        super(causes);
+        this.head = (GitLabSCMHead) revision.getHead();
+        this.hash = revision.getHash();
     }
 
     String getDescription() {
-        return findCause(GitLabWebHookCause.class).getShortDescription();
+        GitLabWebHookCause cause = findCause(GitLabWebHookCause.class);
+        return (cause != null) ? cause.getShortDescription() : null;
     }
 
-    boolean updateBuildDescription() {
-        return updateBuildDescription;
+    int getProjectId() {
+        return head.getProjectId();
+    }
+
+    String getRef() {
+        return head.getRef();
+    }
+
+    String getHash() {
+        return hash;
     }
 }

@@ -29,6 +29,6 @@ public final class GitLabSCMTagPushEvent extends GitLabSCMPushEvent implements G
     Collection<? extends GitLabSCMHead> heads(@Nonnull GitLabSCMSource source) {
         PushHook hook = getPayload();
         String hash = getType() == REMOVED ? hook.getBefore() : hook.getAfter();
-        return singletonList(createTag(hook.getRef(), hash, hook.getCommits().get(0).getTimestamp().getTime()));
+        return singletonList(createTag(hook.getProjectId(), hook.getRef(), hash, hook.getCommits().get(0).getTimestamp().getTime()));
     }
 }

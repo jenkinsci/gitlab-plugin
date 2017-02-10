@@ -2,6 +2,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabGroup;
+import hudson.init.Initializer;
 import jenkins.model.Jenkins;
 import org.apache.commons.jelly.JellyContext;
 import org.gitlab.api.models.GitlabNamespace;
@@ -17,7 +18,8 @@ import static org.jenkins.ui.icon.Icon.ICON_SMALL_STYLE;
 import static org.jenkins.ui.icon.Icon.ICON_XLARGE_STYLE;
 import static org.jenkins.ui.icon.IconSet.icons;
 
-final class Icons {
+
+public final class Icons {
     enum Size {
         SMALL("icon-sm", "16x16", ICON_SMALL_STYLE),
         MEDIUM("icon-md", "24x24", ICON_MEDIUM_STYLE),
@@ -47,6 +49,11 @@ final class Icons {
 
     static final String ICON_GITLAB_LOGO = "icon-gitlab-logo";
     private static final String ICON_PATH = "plugin/gitlab-branch-source/images/";
+
+    @Initializer
+    public static void initialize() {
+        addIcon(ICON_GITLAB_LOGO);
+    }
 
     static String iconfilePathPattern(String name) {
         return ICON_PATH + ":size/" + name + ".png";
@@ -87,10 +94,6 @@ final class Icons {
         }
     }
 
-
-    static void initialize() {
-        addIcon(ICON_GITLAB_LOGO);
-    }
 
     private static String classSpec(String name, Size size) {
         return name + " " + size.className;
