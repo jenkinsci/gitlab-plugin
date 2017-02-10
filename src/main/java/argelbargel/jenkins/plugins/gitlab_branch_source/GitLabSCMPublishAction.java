@@ -66,7 +66,7 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
                 client.changeBuildStatus(cause.getProjectId(), cause.getHash(), state, cause.getRef(), publisherName,
                         Jenkins.getInstance().getRootUrl() + build.getUrl() + build.getNumber(), description);
             } catch (Exception e) {
-                listener.getLogger().format("Failed to set gitlab-build-status to pending: " + e.getMessage());
+                listener.getLogger().format("Failed to set gitlab-build-status: " + e.getMessage());
             }
         } else {
             listener.getLogger().format("cannot publish build-status pending as no gitlab-connection is configured!");
