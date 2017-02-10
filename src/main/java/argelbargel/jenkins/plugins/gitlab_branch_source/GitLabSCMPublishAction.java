@@ -19,6 +19,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.failed;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.pending;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.success;
 import static hudson.model.Result.ABORTED;
+import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
 
 
@@ -49,7 +50,7 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
 
     void publishResult(Run<?, ?> build, GitLabSCMCauseAction cause, TaskListener listener) {
         Result buildResult = build.getResult();
-        if ((buildResult == Result.SUCCESS) || ((buildResult == UNSTABLE) && markUnstableAsSuccess)) {
+        if ((buildResult == SUCCESS) || ((buildResult == UNSTABLE) && markUnstableAsSuccess)) {
             publishBuildStatus(build, cause, success, "", listener);
         } else if (buildResult == ABORTED) {
             publishBuildStatus(build, cause, canceled, "", listener);
