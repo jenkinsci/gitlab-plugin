@@ -19,7 +19,7 @@ import static org.jenkins.ui.icon.Icon.ICON_XLARGE_STYLE;
 import static org.jenkins.ui.icon.IconSet.icons;
 
 
-public final class Icons {
+public final class GitLabSCMIcons {
     enum Size {
         SMALL("icon-sm", "16x16", ICON_SMALL_STYLE),
         MEDIUM("icon-md", "24x24", ICON_MEDIUM_STYLE),
@@ -77,7 +77,7 @@ public final class Icons {
             avatarUrl = groupAvatarUrl(project, connectionName);
         }
 
-        return avatarUrl != null ? avatarUrl : iconFileName(Icons.ICON_GITLAB_LOGO, size);
+        return avatarUrl != null ? avatarUrl : iconFileName(GitLabSCMIcons.ICON_GITLAB_LOGO, size);
     }
 
     private static String groupAvatarUrl(GitlabProject project, String connectionName) {
@@ -105,5 +105,5 @@ public final class Icons {
         }
     }
 
-    private Icons() { /* no instances allowed */}
+    private GitLabSCMIcons() { /* no instances allowed */}
 }

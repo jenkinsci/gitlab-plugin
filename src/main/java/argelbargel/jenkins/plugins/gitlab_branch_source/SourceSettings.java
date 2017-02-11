@@ -10,6 +10,8 @@ import jenkins.model.Jenkins;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.mixin.TagSCMHead;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.NONE;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.STAGES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 
 
@@ -37,11 +39,11 @@ class SourceSettings {
         this.credentialsId = credentialsId;
         this.includes = DEFAULT_INCLUDES;
         this.excludes = DEFAULT_EXCLUDES;
-        this.branchMonitorStrategy = new MonitorStrategy(true, false, true);
+        this.branchMonitorStrategy = new MonitorStrategy(true, false, STAGES);
         this.buildBranchesWithMergeRequests = false;
-        this.originMonitorStrategy = new MonitorStrategy(true, true, true);
-        this.forksMonitorStrategy = new MonitorStrategy(false, true, true);
-        this.tagMonitorStrategy = new MonitorStrategy(false, false, false);
+        this.originMonitorStrategy = new MonitorStrategy(true, true, STAGES);
+        this.forksMonitorStrategy = new MonitorStrategy(false, true, STAGES);
+        this.tagMonitorStrategy = new MonitorStrategy(false, false, NONE);
         this.registerWebHooks = true;
         this.updateBuildDescription = true;
         this.publisherName = Jenkins.getInstance().getDisplayName();
@@ -179,14 +181,14 @@ class SourceSettings {
         return true;
     }
 
-    boolean publishBuildStatus(SCMHead head) {
+    BuildStatusPublishMode buildStatusPublishMode(SCMHead head) {
         if (head instanceof GitLabSCMMergeRequestHead) {
-            return determineMergeRequestStrategyValue((GitLabSCMMergeRequestHead) head, originMonitorStrategy.getPublishBuildStatus(), forksMonitorStrategy.getPublishBuildStatus());
+            return ((GitLabSCMMergeRequestHead) head).fromOrigin() ? originMonitorStrategy().getBuildStatusPublishMode() : forksMonitorStrategy.getBuildStatusPublishMode();
         } else if (head instanceof TagSCMHead) {
-            return tagMonitorStrategy.getPublishBuildStatus();
+            return tagMonitorStrategy.getBuildStatusPublishMode();
         }
 
-        return branchMonitorStrategy.getPublishBuildStatus();
+        return branchMonitorStrategy.getBuildStatusPublishMode();
     }
 
     private boolean determineMergeRequestStrategyValue(GitLabSCMMergeRequestHead head, boolean originStrategy, boolean forksStrategy) {

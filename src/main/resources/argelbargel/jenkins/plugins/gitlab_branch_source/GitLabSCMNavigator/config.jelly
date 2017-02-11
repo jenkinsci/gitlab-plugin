@@ -41,8 +41,8 @@
                     <f:optionalBlock title="${%Monitor &amp; Build Origin Branches}" field="monitorAndBuildBranches" inline="true">
                         <f:nested>
                             <table>
-                                <f:entry title="${%Publish build status}" field="publishBuildStatusForBranches">
-                                    <f:checkbox/>
+                                <f:entry title="${%Publish build status}" field="branchBuildStatusPublishMode">
+                                    <f:select/>
                                 </f:entry>
                                 <f:entry title="${%Build Branches also filed as Merge Requests}" field="buildBranchesWithMergeRequests">
                                     <f:checkbox default="false"/>
@@ -57,8 +57,8 @@
                     <f:optionalBlock title="${%Monitor &amp; Build Merge Requests from Origin}" field="monitorAndBuildMergeRequestsFromOrigin" inline="true">
                         <f:nested>
                             <table>
-                                <f:entry title="${%Publish build status}" field="publishBuildStatusFromOrigin">
-                                    <f:checkbox default="false"/>
+                                <f:entry title="${%Publish build status}" field="originBuildStatusPublishMode">
+                                    <f:select/>
                                 </f:entry>
                                 <f:entry title="${%Ignore Work In Progress}" field="ignoreWorkInProgressFromOrigin">
                                   <f:checkbox default="true"/>
@@ -89,8 +89,8 @@
                     <f:optionalBlock title="Monitor &amp; Build Merge Requests from Forks" field="monitorAndBuildMergeRequestsFromForks" inline="true">
                         <f:nested>
                             <table>
-                                <f:entry title="${%Publish build status}" field="publishBuildStatusFromForks">
-                                    <f:checkbox default="false"/>
+                                <f:entry title="${%Publish build status}" field="forkBuildStatusPublishMode">
+                                    <f:select/>
                                 </f:entry>
                                 <f:entry title="${%Ignore Work In Progress}" field="ignoreWorkInProgressFromForks">
                                   <f:checkbox default="true"/>
@@ -119,8 +119,8 @@
                         <f:nested>
                             <table>
                                 <f:optionalBlock  title="${%Build Tags}" field="buildTags" inline="true">
-                                    <f:entry title="${%Publish build status}" field="publishBuildStatusForTags">
-                                        <f:checkbox default="false"/>
+                                    <f:entry title="${%Publish build status}" field="tagBuildStatusPublishMode">
+                                        <f:select/>
                                     </f:entry>
                                 </f:optionalBlock>
                             </table>

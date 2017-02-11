@@ -35,8 +35,8 @@ import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnectionId;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.iconfilePathPattern;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconfilePathPattern;
 
 
 @SuppressWarnings({"unused", "WeakerAccess" })
@@ -151,12 +151,12 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
-    public void setPublishBuildResultsForBranches(boolean value) {
-        sourceSettings.originMonitorStrategy().setPublishBuildStatus(value);
+    public void setBranchBuildStatusPublishMode(String value) {
+        sourceSettings.branchMonitorStrategy().setBuildStatusPublishMode(BuildStatusPublishMode.valueOf(value));
     }
 
-    public boolean getPublishBuildStatusForBranches() {
-        return sourceSettings.originMonitorStrategy().getPublishBuildStatus();
+    public String getBranchBuildStatusPublishMode() {
+        return sourceSettings.branchMonitorStrategy().getBuildStatusPublishMode().name();
     }
 
     @DataBoundSetter
@@ -169,12 +169,12 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
-    public void setPublishBuildStatusFromOrigin(boolean value) {
-        sourceSettings.originMonitorStrategy().setPublishBuildStatus(value);
+    public void setOriginBuildStatusPublishMode(String value) {
+        sourceSettings.originMonitorStrategy().setBuildStatusPublishMode(BuildStatusPublishMode.valueOf(value));
     }
 
-    public boolean getPublishBuildStatusFromOrigin() {
-        return sourceSettings.originMonitorStrategy().getPublishBuildStatus();
+    public String getOriginBuildStatusPublishMode() {
+        return sourceSettings.originMonitorStrategy().getBuildStatusPublishMode().name();
     }
 
     @DataBoundSetter
@@ -214,12 +214,12 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
-    public void setPublishBuildStatusFromForks(boolean value) {
-        sourceSettings.forksMonitorStrategy().setPublishBuildStatus(value);
+    public void setForkBuildStatusPublishMode(String value) {
+        sourceSettings.forksMonitorStrategy().setBuildStatusPublishMode(BuildStatusPublishMode.valueOf(value));
     }
 
-    public boolean getPublishBuildStatusFromForks() {
-        return sourceSettings.forksMonitorStrategy().getPublishBuildStatus();
+    public String getForkBuildStatusPublishMode() {
+        return sourceSettings.forksMonitorStrategy().getBuildStatusPublishMode().name();
     }
 
     @DataBoundSetter
@@ -291,12 +291,12 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
-    public void setPublishBuildStatusForTags(boolean value) {
-        sourceSettings.tagMonitorStrategy().setPublishBuildStatus(value);
+    public void setTagBuildStatusPublishMode(String value) {
+        sourceSettings.tagMonitorStrategy().setBuildStatusPublishMode(BuildStatusPublishMode.valueOf(value));
     }
 
-    public boolean getPublishBuildStatusForTags() {
-        return sourceSettings.tagMonitorStrategy().getPublishBuildStatus();
+    public String getTagBuildStatusPublishMode() {
+        return sourceSettings.tagMonitorStrategy().getBuildStatusPublishMode().name();
     }
 
     @DataBoundSetter
@@ -438,6 +438,27 @@ public class GitLabSCMNavigator extends SCMNavigator {
         public FormValidation doCheckProjectVisibilityId(@AncestorInPath SCMSourceOwner context, @QueryParameter String projectVisibilityId) {
             return GitLabProjectVisibility.ids().contains(projectVisibilityId) ? FormValidation.ok() : FormValidation.error("invalid visibility-id: " + projectVisibilityId);
         }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillBranchBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillOriginBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillForkBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillTagBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
 
         @Restricted(NoExternalUse.class)
         public ListBoxModel doFillProjectSelectorIdItems() {

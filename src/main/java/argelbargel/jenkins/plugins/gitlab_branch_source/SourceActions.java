@@ -82,9 +82,12 @@ class SourceActions {
             actions.add(GitLabLinkAction.toTree(head.getPronoun(), project, head.getName()));
         }
 
-        if (settings.publishBuildStatus(head)) {
-            actions.add(new GitLabSCMPublishAction(settings.getPublisherName(), settings.getPublishUnstableBuildsAsSuccess(), settings.getUpdateBuildDescription()));
-        }
+        actions.add(new GitLabSCMPublishAction(
+                settings.getUpdateBuildDescription(),
+                settings.buildStatusPublishMode(head),
+                settings.getPublishUnstableBuildsAsSuccess(),
+                settings.getPublisherName()
+        ));
 
         if (head instanceof GitLabSCMBranchHead && StringUtils.equals(project.getDefaultBranch(), head.getName())) {
             actions.add(new PrimaryInstanceMetadataAction());

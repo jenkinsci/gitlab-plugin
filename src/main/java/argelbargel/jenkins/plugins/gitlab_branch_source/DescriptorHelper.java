@@ -97,6 +97,15 @@ class DescriptorHelper {
         return builder.build();
     }
 
+    static ListBoxModel doBuildStatusPublishModeItems() {
+        StandardListBoxModel result = new StandardListBoxModel();
+        for (BuildStatusPublishMode mode : BuildStatusPublishMode.values()) {
+            result.add(mode.name());
+        }
+
+        return result;
+    }
+
 
     private DescriptorHelper() { /* NO INSTANCES ALLOWED */ }
 }

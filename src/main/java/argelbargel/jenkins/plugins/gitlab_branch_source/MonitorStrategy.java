@@ -6,16 +6,16 @@ class MonitorStrategy {
     private boolean unmerged;
     private boolean ignoreWIP;
     private boolean onlyMergeable;
-    private boolean publishBuildStatus;
+    private BuildStatusPublishMode buildStatusPublishMode;
 
 
-    MonitorStrategy(boolean monitor, boolean merge, boolean publish) {
+    MonitorStrategy(boolean monitor, boolean merge, BuildStatusPublishMode publish) {
         this.monitor = monitor;
         this.merged = merge;
         this.unmerged = !merge;
         this.ignoreWIP = true;
         this.onlyMergeable = false;
-        this.publishBuildStatus = publish;
+        this.buildStatusPublishMode = publish;
     }
 
     void setMonitored(boolean value) {
@@ -58,11 +58,11 @@ class MonitorStrategy {
         return onlyMergeable;
     }
 
-    void setPublishBuildStatus(boolean value) {
-        publishBuildStatus = value;
+    void setBuildStatusPublishMode(BuildStatusPublishMode value) {
+        buildStatusPublishMode = value;
     }
 
-    boolean getPublishBuildStatus() {
-        return publishBuildStatus;
+    BuildStatusPublishMode getBuildStatusPublishMode() {
+        return buildStatusPublishMode;
     }
 }

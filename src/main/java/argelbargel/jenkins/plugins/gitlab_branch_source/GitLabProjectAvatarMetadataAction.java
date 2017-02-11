@@ -1,13 +1,14 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
-import argelbargel.jenkins.plugins.gitlab_branch_source.Icons.Size;
+
+import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.Size;
 import jenkins.scm.api.metadata.AvatarMetadataAction;
 import org.gitlab.api.models.GitlabProject;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.avatarFileName;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.avatarFileName;
 
 class GitLabProjectAvatarMetadataAction extends AvatarMetadataAction {
     private final GitlabProject project;

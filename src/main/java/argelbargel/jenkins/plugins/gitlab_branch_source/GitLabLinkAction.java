@@ -8,9 +8,9 @@ import org.kohsuke.stapler.Stapler;
 import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnection;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.ICON_GITLAB_LOGO;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.Size.MEDIUM;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.Icons.iconFileName;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.Size.MEDIUM;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconFileName;
 
 class GitLabLinkAction implements Action, IconSpec {
     static GitLabLinkAction toServer(String pronoun, String connectionName) {
