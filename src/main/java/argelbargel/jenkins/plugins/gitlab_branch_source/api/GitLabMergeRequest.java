@@ -6,7 +6,8 @@ import org.gitlab.api.models.GitlabMergeRequest;
 @SuppressWarnings("unused")
 public class GitLabMergeRequest extends GitlabMergeRequest {
     private String sha;
-
+    @JsonProperty("force_remove_source_branch")
+    private boolean removeSourceBranch;
     @JsonProperty("work_in_progress")
     private boolean wip;
 
@@ -24,5 +25,13 @@ public class GitLabMergeRequest extends GitlabMergeRequest {
 
     public boolean isWorkInProgress() {
         return wip;
+    }
+
+    public void setRemoveSourceBranch(boolean value) {
+        removeSourceBranch = value;
+    }
+
+    public boolean getRemoveSourceBranch() {
+        return removeSourceBranch;
     }
 }

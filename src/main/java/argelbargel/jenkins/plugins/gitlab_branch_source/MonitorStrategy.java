@@ -6,6 +6,8 @@ class MonitorStrategy {
     private boolean unmerged;
     private boolean ignoreWIP;
     private boolean onlyMergeable;
+    private boolean acceptMergeRequests;
+    private boolean removeSourceBranch;
     private BuildStatusPublishMode buildStatusPublishMode;
 
 
@@ -16,6 +18,8 @@ class MonitorStrategy {
         this.ignoreWIP = true;
         this.onlyMergeable = false;
         this.buildStatusPublishMode = publish;
+        this.acceptMergeRequests = false;
+        this.removeSourceBranch = false;
     }
 
     void setMonitored(boolean value) {
@@ -56,6 +60,22 @@ class MonitorStrategy {
 
     boolean buildOnlyMergeableRequestsMerged() {
         return onlyMergeable;
+    }
+
+    void setAcceptMergeRequests(boolean value) {
+        acceptMergeRequests = value;
+    }
+
+    boolean getRemoveSourceBranch() {
+        return removeSourceBranch;
+    }
+
+    void setRemoveSourceBranch(boolean value) {
+        removeSourceBranch = value;
+    }
+
+    boolean getAcceptMergeRequests() {
+        return acceptMergeRequests;
     }
 
     void setBuildStatusPublishMode(BuildStatusPublishMode value) {

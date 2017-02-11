@@ -205,6 +205,25 @@ public class GitLabSCMNavigator extends SCMNavigator {
     }
 
     @DataBoundSetter
+    public void setAcceptMergeRequestsFromOrigin(boolean value) {
+        sourceSettings.originMonitorStrategy().setAcceptMergeRequests(value);
+    }
+
+    public boolean getAcceptMergeRequestsFromOrigin() {
+        return sourceSettings.originMonitorStrategy().getAcceptMergeRequests();
+    }
+
+    @DataBoundSetter
+    public void setRemoveSourceBranchFromOrigin(boolean value) {
+        sourceSettings.originMonitorStrategy().setRemoveSourceBranch(value);
+    }
+
+    public boolean getRemoveSourceBranchFromOrigin() {
+        return sourceSettings.originMonitorStrategy().getRemoveSourceBranch();
+    }
+
+
+    @DataBoundSetter
     public void setMonitorAndBuildMergeRequestsFromForks(boolean value) {
         sourceSettings.forksMonitorStrategy().setMonitored(value);
     }
@@ -229,6 +248,15 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
     public boolean getBuildMergeRequestsFromForksMerged() {
         return sourceSettings.forksMonitorStrategy().buildMerged();
+    }
+
+    @DataBoundSetter
+    public void setAcceptMergeRequestsFromForks(boolean value) {
+        sourceSettings.forksMonitorStrategy().setAcceptMergeRequests(value);
+    }
+
+    public boolean getAcceptMergeRequestsFromForks() {
+        return sourceSettings.forksMonitorStrategy().getAcceptMergeRequests();
     }
 
     @DataBoundSetter
@@ -319,6 +347,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
         sourceSettings.setPublisherName(name);
     }
 
+    @DataBoundSetter
     public void setPublishUnstableBuildsAsSuccess(boolean value) {
         sourceSettings.setPublishUnstableBuildsAsSuccess(value);
     }
@@ -327,6 +356,14 @@ public class GitLabSCMNavigator extends SCMNavigator {
         return sourceSettings.getPublishUnstableBuildsAsSuccess();
     }
 
+    @DataBoundSetter
+    public void setMergeCommitMessage(String value) {
+        sourceSettings.setMergeCommitMessage(value);
+    }
+
+    public String getMergeCommitMessage() {
+        return sourceSettings.getMergeCommitMessage();
+    }
 
     @Nonnull
     @Override

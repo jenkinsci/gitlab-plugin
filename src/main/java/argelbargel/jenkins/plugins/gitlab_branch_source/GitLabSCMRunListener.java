@@ -8,6 +8,8 @@ import hudson.model.listeners.RunListener;
 
 import javax.annotation.Nonnull;
 
+import static hudson.model.Result.SUCCESS;
+
 
 @SuppressWarnings("unused")
 @Extension
@@ -28,6 +30,13 @@ public class GitLabSCMRunListener extends RunListener<Run<?, ?>> {
         GitLabSCMPublishAction publishAction = build.getParent().getAction(GitLabSCMPublishAction.class);
         if (causeAction != null && publishAction != null) {
             publishAction.publishResult(build, causeAction);
+        }
+
+        if (build.getResult() == SUCCESS) {
+            GitLabSCMAcceptMergeRequestAction acceptAction = build.getParent().getAction(GitLabSCMAcceptMergeRequestAction.class);
+            if (acceptAction != null) {
+                acceptAction.acceptMergeRequest(build, listener);
+            }
         }
     }
 }

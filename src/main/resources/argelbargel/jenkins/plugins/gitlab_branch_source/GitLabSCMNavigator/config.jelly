@@ -70,14 +70,12 @@
                                     <f:entry title="${%Build only mergeable requests}" field="buildOnlyMergeableRequestsFromOriginMerged">
                                         <f:checkbox/>
                                     </f:entry>
-<!--
-                                    <f:entry title="${%Accept merge-request when build succeeds}" field="buildMergeRequestsFromOriginMerged">
+                                    <f:entry title="${%Accept merge-request when build succeeds}" field="acceptMergeRequestsFromOrigin">
                                         <f:checkbox/>
                                     </f:entry>
-                                    <f:entry title="${%Remove source branch when build succeeds}" field="buildMergeRequestsFromOriginMerged">
+                                    <f:entry title="${%Remove source branch when build succeeds}" field="removeSourceBranchFromOrigin">
                                         <f:checkbox/>
                                     </f:entry>
--->
                                 </f:optionalBlock>
                             </table>
                         </f:nested>
@@ -102,11 +100,9 @@
                                     <f:entry title="${%Build only mergeable requests}" field="buildOnlyMergeableRequestsFromForksMerged">
                                         <f:checkbox/>
                                     </f:entry>
-<!--
-                                    <f:entry title="${%Accept merge-request when build succeeds}" field="buildMergeRequestsFromForksMerged">
+                                    <f:entry title="${%Accept merge-request when build succeeds}" field="acceptMergeRequestsFromForks">
                                         <f:checkbox/>
                                     </f:entry>
--->
                                 </f:optionalBlock>
                             </table>
                         </f:nested>
@@ -143,11 +139,14 @@
         </f:section>
         <f:section title="Miscellaneous">
             <f:block>
-                <table>
+                <table style="width: 100%">
                     <f:entry title="${%Update Build Descriptions}" field="updateBuildDescription">
                         <f:checkbox/>
                     </f:entry>
                     <f:entry title="${%Publisher Name}" field="publisherName">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="${%Merge Commit Message}" field="mergeCommitMessage">
                         <f:textbox/>
                     </f:entry>
                     <f:entry title="${%Publish unstable builds as success}" field="publishUnstableBuildsAsSuccess">

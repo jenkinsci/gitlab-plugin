@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 
 
@@ -43,7 +44,7 @@ public class GitLabSCMBuildStatusPublisher {
     private final ExecutorService executorService;
 
     private GitLabSCMBuildStatusPublisher() {
-        executorService = Executors.newCachedThreadPool();
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     public void publish(Run<?, ?> build, String publisherName, int projectId, String ref, String hash, BuildState state, String description) {
@@ -63,17 +64,17 @@ public class GitLabSCMBuildStatusPublisher {
         private final String ref;
         private final String hash;
         private final BuildState state;
-        private final String publisherName;
+        private final String context;
         private final String description;
 
 
-        private Message(Run<?, ?> build, String publisherName, int projectId, String ref, String hash, BuildState state, String description) {
+        private Message(Run<?, ?> build, String context, int projectId, String ref, String hash, BuildState state, String description) {
             this.build = build;
             this.projectId = projectId;
             this.ref = ref;
             this.hash = hash;
             this.state = state;
-            this.publisherName = publisherName;
+            this.context = context;
             this.description = description;
         }
 
@@ -84,10 +85,10 @@ public class GitLabSCMBuildStatusPublisher {
                 LOGGER.log(WARNING, "cannot publish build-status pending as no gitlab-connection is configured!");
             } else {
                 try {
-                    client.changeBuildStatus(projectId, hash, state, ref, publisherName,
+                    client.changeBuildStatus(projectId, hash, state, ref, context,
                             Jenkins.getInstance().getRootUrl() + build.getUrl() + build.getNumber(), description);
                 } catch (Exception e) {
-                    LOGGER.log(WARNING, "failed to set gitlab-build-status", e);
+                    LOGGER.log(SEVERE, "failed to set build-status of '" + context + "' for project " + projectId + " to " + state, e);
                 }
             }
         }

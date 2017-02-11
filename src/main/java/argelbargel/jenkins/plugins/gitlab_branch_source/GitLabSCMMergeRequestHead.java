@@ -75,7 +75,7 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
     }
 
 
-    boolean fromOrigin() {
+    public boolean fromOrigin() {
         return getProjectId() == getTarget().getProjectId();
     }
 

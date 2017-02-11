@@ -7,8 +7,6 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.FilterWorkIn
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.mixin.TagSCMHead;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.NONE;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.STAGES;
@@ -18,6 +16,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.
 class SourceSettings {
     private static final String DEFAULT_INCLUDES = "*";
     private static final String DEFAULT_EXCLUDES = "";
+    private static final String DEFAULT_MERGE_COMMIT_MESSAGE = "Accepted Merge-Request #{0} after build {1} succeeded";
 
     private final String connectionName;
     private final String credentialsId;
@@ -32,6 +31,7 @@ class SourceSettings {
     private boolean updateBuildDescription;
     private String publisherName;
     private boolean publishUnstableBuildsAsSuccess;
+    private String mergeCommitMessage;
 
 
     SourceSettings(String connectionName, String credentialsId) {
@@ -48,6 +48,7 @@ class SourceSettings {
         this.updateBuildDescription = true;
         this.publisherName = Jenkins.getInstance().getDisplayName();
         this.publishUnstableBuildsAsSuccess = false;
+        this.mergeCommitMessage = DEFAULT_MERGE_COMMIT_MESSAGE;
     }
 
     String getConnectionName() {
@@ -130,6 +131,14 @@ class SourceSettings {
         return publishUnstableBuildsAsSuccess;
     }
 
+    String getMergeCommitMessage() {
+        return mergeCommitMessage;
+    }
+
+    void setMergeCommitMessage(String value) {
+        this.mergeCommitMessage = value;
+    }
+
     GitLabMergeRequestFilter getMergeRequestFilter(TaskListener listener) {
         GitLabMergeRequestFilter filter = GitLabMergeRequestFilter.ALLOW_NONE;
         if (originMonitorStrategy.monitored()) {
@@ -153,45 +162,7 @@ class SourceSettings {
         return filter;
     }
 
-    @SuppressWarnings("SimplifiableIfStatement")
-    boolean buildMerged(SCMHead head) {
-        if (head instanceof GitLabSCMMergeRequestHead) {
-            return determineMergeRequestStrategyValue(((GitLabSCMMergeRequestHead) head), originMonitorStrategy().buildMerged(), forksMonitorStrategy().buildMerged());
-        }
-
-        return false;
-    }
-
-    boolean buildUnmerged(SCMHead head) {
-        if (head instanceof GitLabSCMMergeRequestHead) {
-            return determineMergeRequestStrategyValue(((GitLabSCMMergeRequestHead) head), originMonitorStrategy.buildUnmerged(), forksMonitorStrategy.buildUnmerged());
-        } else if (head instanceof TagSCMHead) {
-            return tagMonitorStrategy.buildUnmerged();
-        }
-
-        return branchMonitorStrategy.buildUnmerged();
-    }
-
-    @SuppressWarnings("SimplifiableIfStatement")
-    boolean buildOnlyMergeableRequests(SCMHead head) {
-        if (head instanceof GitLabSCMMergeRequestHead) {
-            return determineMergeRequestStrategyValue(((GitLabSCMMergeRequestHead) head), originMonitorStrategy.buildOnlyMergeableRequestsMerged(), forksMonitorStrategy.buildOnlyMergeableRequestsMerged());
-        }
-
-        return true;
-    }
-
-    BuildStatusPublishMode buildStatusPublishMode(SCMHead head) {
-        if (head instanceof GitLabSCMMergeRequestHead) {
-            return ((GitLabSCMMergeRequestHead) head).fromOrigin() ? originMonitorStrategy().getBuildStatusPublishMode() : forksMonitorStrategy.getBuildStatusPublishMode();
-        } else if (head instanceof TagSCMHead) {
-            return tagMonitorStrategy.getBuildStatusPublishMode();
-        }
-
-        return branchMonitorStrategy.getBuildStatusPublishMode();
-    }
-
-    private boolean determineMergeRequestStrategyValue(GitLabSCMMergeRequestHead head, boolean originStrategy, boolean forksStrategy) {
+    boolean determineMergeRequestStrategyValue(GitLabSCMMergeRequestHead head, boolean originStrategy, boolean forksStrategy) {
         boolean fromOrigin = head.fromOrigin();
         return (fromOrigin && originStrategy) || (!fromOrigin && forksStrategy);
     }

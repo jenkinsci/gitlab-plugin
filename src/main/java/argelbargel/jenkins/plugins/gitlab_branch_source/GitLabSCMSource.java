@@ -177,6 +177,15 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         }
     }
 
+    public boolean buildMerged(GitLabSCMMergeRequestHead head) {
+        return heads.buildMerged(head);
+    }
+
+    public boolean buildUnmerged(GitLabSCMMergeRequestHead head) {
+        return heads.buildUnmerged(head);
+    }
+
+
     final String getGitLabVersion() throws GitLabAPIException {
         return gitLabAPI(getConnectionName()).getVersion().toString();
     }

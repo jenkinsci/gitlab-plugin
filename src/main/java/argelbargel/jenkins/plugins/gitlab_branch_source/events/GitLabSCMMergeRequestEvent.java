@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.events;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMMergeRequestHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMSource;
@@ -11,7 +12,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.createBranch;
@@ -67,19 +67,24 @@ public final class GitLabSCMMergeRequestEvent extends GitLabSCMHeadEvent<MergeRe
         Collection<GitLabSCMHead> heads = new ArrayList<>();
 
         MergeRequestObjectAttributes attributes = getAttributes();
+        Integer sourceProjectId = attributes.getSourceProjectId();
+        String sourceBranch = attributes.getSourceBranch();
+        String hash = attributes.getLastCommit().getId();
         GitLabSCMMergeRequestHead head = createMergeRequest(
                 attributes.getId(), attributes.getTitle(),
-                createBranch(attributes.getSourceProjectId(), attributes.getSourceBranch(), attributes.getLastCommit().getId()),
+                createBranch(sourceProjectId, sourceBranch, hash),
                 createBranch(attributes.getTargetProjectId(), attributes.getTargetBranch(), REVISION_HEAD));
 
-        boolean fromOrigin = Objects.equals(attributes.getSourceProjectId(), source.getProjectId());
-
-        if ((fromOrigin && source.getBuildMergeRequestsFromOriginUnmerged()) || (!fromOrigin && source.getBuildMergeRequestsFromForksUnmerged())) {
+        if (source.buildUnmerged(head)) {
             heads.add(head);
         }
 
-        if ((fromOrigin && source.getBuildMergeRequestsFromOriginMerged()) || (!fromOrigin && source.getBuildMergeRequestsFromForksMerged())) {
+        if (source.buildMerged(head)) {
             heads.add(head.merged());
+        }
+
+        if (head.fromOrigin()) {
+            heads.add(createBranch(sourceProjectId, sourceBranch, hash));
         }
 
         return heads;
