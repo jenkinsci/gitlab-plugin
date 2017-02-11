@@ -3,6 +3,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHookListener;
 import hudson.Extension;
@@ -64,7 +65,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         this.project = project;
         this.hookListener = GitLabSCMWebHook.createListener(this);
         this.actions = new SourceActions(project, settings);
-        this.heads = new SourceHeads(project, settings);
+        this.heads = new SourceHeads(this);
     }
 
     public String getConnectionName() {
@@ -178,11 +179,12 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public boolean buildMerged(GitLabSCMMergeRequestHead head) {
-        return heads.buildMerged(head);
+        return settings.determineMergeRequestStrategyValue(head, settings.originMonitorStrategy().buildMerged(), settings.forksMonitorStrategy().buildMerged());
+
     }
 
     public boolean buildUnmerged(GitLabSCMMergeRequestHead head) {
-        return heads.buildUnmerged(head);
+        return settings.determineMergeRequestStrategyValue(head, settings.originMonitorStrategy().buildUnmerged(), settings.forksMonitorStrategy().buildUnmerged());
     }
 
 
@@ -192,6 +194,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     @Override
     protected void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+        listener.getLogger().format(Messages.GitLabSCMSource_retrievingHeadsForProject(project.getPathWithNamespace()) + "\n");
         heads.retrieve(criteria, observer, event, listener);
     }
 
@@ -280,6 +283,19 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         }
 
         return scm;
+    }
+
+    GitLabMergeRequestFilter createMergeRequestFilter(TaskListener listener) {
+        return settings.createMergeRequestFilter(listener);
+    }
+
+    boolean determineMergeRequestStrategyValue(GitLabSCMMergeRequestHead head, boolean originValue, boolean forksValue) {
+        return settings.determineMergeRequestStrategyValue(head, originValue, forksValue);
+    }
+
+    @Override
+    protected boolean isExcluded(String branchName) {
+        return super.isExcluded(branchName);
     }
 
 

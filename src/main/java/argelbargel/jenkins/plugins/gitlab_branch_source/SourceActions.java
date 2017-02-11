@@ -29,6 +29,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REV
 import static java.util.Arrays.asList;
 
 
+// TODO: refactor to use instance of GitLabSCMSource instead of project and settings
 class SourceActions {
     private final GitlabProject project;
     private final SourceSettings settings;

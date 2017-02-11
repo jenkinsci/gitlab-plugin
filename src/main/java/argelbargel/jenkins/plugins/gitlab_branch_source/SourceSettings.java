@@ -139,7 +139,7 @@ class SourceSettings {
         this.mergeCommitMessage = value;
     }
 
-    GitLabMergeRequestFilter getMergeRequestFilter(TaskListener listener) {
+    GitLabMergeRequestFilter createMergeRequestFilter(TaskListener listener) {
         GitLabMergeRequestFilter filter = GitLabMergeRequestFilter.ALLOW_NONE;
         if (originMonitorStrategy.monitored()) {
             GitLabMergeRequestFilter originFilter = new AllowMergeRequestsFromOrigin(listener);
