@@ -75,6 +75,10 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
     }
 
 
+    boolean fromOrigin() {
+        return getProjectId() == getTarget().getProjectId();
+    }
+
     boolean isMergeable() {
         return mergeable;
     }

@@ -1,13 +1,17 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.AllowMergeRequestsFromForks;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.AllowMergeRequestsFromOrigin;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.FilterWorkInProgress;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeRequestFilter;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.mixin.TagSCMHead;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
+
 
 class SourceSettings {
     private static final String DEFAULT_INCLUDES = "*";
@@ -76,9 +80,13 @@ class SourceSettings {
         buildBranchesWithMergeRequests = value;
     }
 
-    MonitorStrategy branchMonitorStrategy() { return branchMonitorStrategy; }
+    MonitorStrategy branchMonitorStrategy() {
+        return branchMonitorStrategy;
+    }
 
-    MonitorStrategy tagMonitorStrategy() { return tagMonitorStrategy; }
+    MonitorStrategy tagMonitorStrategy() {
+        return tagMonitorStrategy;
+    }
 
     MonitorStrategy originMonitorStrategy() {
         return originMonitorStrategy;
@@ -143,4 +151,46 @@ class SourceSettings {
         return filter;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
+    boolean buildMerged(SCMHead head) {
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            return determineMergeRequestStrategyValue(((GitLabSCMMergeRequestHead) head), originMonitorStrategy().buildMerged(), forksMonitorStrategy().buildMerged());
+        }
+
+        return false;
+    }
+
+    boolean buildUnmerged(SCMHead head) {
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            return determineMergeRequestStrategyValue(((GitLabSCMMergeRequestHead) head), originMonitorStrategy.buildUnmerged(), forksMonitorStrategy.buildUnmerged());
+        } else if (head instanceof TagSCMHead) {
+            return tagMonitorStrategy.buildUnmerged();
+        }
+
+        return branchMonitorStrategy.buildUnmerged();
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    boolean buildOnlyMergeableRequests(SCMHead head) {
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            return determineMergeRequestStrategyValue(((GitLabSCMMergeRequestHead) head), originMonitorStrategy.buildOnlyMergeableRequestsMerged(), forksMonitorStrategy.buildOnlyMergeableRequestsMerged());
+        }
+
+        return true;
+    }
+
+    boolean publishBuildStatus(SCMHead head) {
+        if (head instanceof GitLabSCMMergeRequestHead) {
+            return determineMergeRequestStrategyValue((GitLabSCMMergeRequestHead) head, originMonitorStrategy.getPublishBuildStatus(), forksMonitorStrategy.getPublishBuildStatus());
+        } else if (head instanceof TagSCMHead) {
+            return tagMonitorStrategy.getPublishBuildStatus();
+        }
+
+        return branchMonitorStrategy.getPublishBuildStatus();
+    }
+
+    private boolean determineMergeRequestStrategyValue(GitLabSCMMergeRequestHead head, boolean originStrategy, boolean forksStrategy) {
+        boolean fromOrigin = head.fromOrigin();
+        return (fromOrigin && originStrategy) || (!fromOrigin && forksStrategy);
+    }
 }

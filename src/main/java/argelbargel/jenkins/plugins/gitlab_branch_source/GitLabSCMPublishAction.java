@@ -1,14 +1,11 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.model.InvisibleAction;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -44,32 +41,23 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
         }
     }
 
-    void publishPending(Run<?, ?> build, GitLabSCMCauseAction cause, TaskListener listener) {
-        publishBuildStatus(build, cause, pending, cause.getDescription(), listener);
+    void publishPending(Run<?, ?> build, GitLabSCMCauseAction cause) {
+        publishBuildStatus(build, cause, pending, cause.getDescription());
     }
 
-    void publishResult(Run<?, ?> build, GitLabSCMCauseAction cause, TaskListener listener) {
+    void publishResult(Run<?, ?> build, GitLabSCMCauseAction cause) {
         Result buildResult = build.getResult();
         if ((buildResult == SUCCESS) || ((buildResult == UNSTABLE) && markUnstableAsSuccess)) {
-            publishBuildStatus(build, cause, success, "", listener);
+            publishBuildStatus(build, cause, success, "");
         } else if (buildResult == ABORTED) {
-            publishBuildStatus(build, cause, canceled, "", listener);
+            publishBuildStatus(build, cause, canceled, "");
         } else {
-            publishBuildStatus(build, cause, failed, "", listener);
+            publishBuildStatus(build, cause, failed, "");
         }
     }
 
-    private void publishBuildStatus(Run<?, ?> build, GitLabSCMCauseAction cause, BuildState state, String description, TaskListener listener) {
-        GitLabApi client = GitLabConnectionProperty.getClient(build);
-        if (client != null) {
-            try {
-                client.changeBuildStatus(cause.getProjectId(), cause.getHash(), state, cause.getRef(), publisherName,
-                        Jenkins.getInstance().getRootUrl() + build.getUrl() + build.getNumber(), description);
-            } catch (Exception e) {
-                listener.getLogger().format("Failed to set gitlab-build-status: " + e.getMessage());
-            }
-        } else {
-            listener.getLogger().format("cannot publish build-status pending as no gitlab-connection is configured!");
-        }
+    private void publishBuildStatus(Run<?, ?> build, GitLabSCMCauseAction cause, BuildState state, String description) {
+        GitLabSCMBuildStatusPublisher.instance()
+                .publish(build, publisherName, cause.getProjectId(), cause.getRef(), cause.getHash(), state, description);
     }
 }

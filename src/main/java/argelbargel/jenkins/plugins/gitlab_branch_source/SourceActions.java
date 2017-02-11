@@ -12,7 +12,6 @@ import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.metadata.ObjectMetadataAction;
 import jenkins.scm.api.metadata.PrimaryInstanceMetadataAction;
-import jenkins.scm.api.mixin.TagSCMHead;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab.api.models.GitlabProject;
 
@@ -78,17 +77,13 @@ class SourceActions {
             GitLabMergeRequest mr = gitLabAPI(settings.getConnectionName()).getMergeRequest(project.getId(), ((GitLabSCMMergeRequestHead) head).getId());
             actions.add(new ObjectMetadataAction(mr.getTitle(), mr.getDescription(), mergeRequestUrl(project, ((GitLabSCMMergeRequestHead) head).getId())));
             actions.add(GitLabLinkAction.toMergeRequest(head.getPronoun(), project, mr.getId()));
-            // TODO: the fourth time we do this - centralize me!
-            boolean fromOrigin = ((GitLabSCMMergeRequestHead) head).getProjectId() == project.getId();
-            if (fromOrigin && (settings.originMonitorStrategy().getPublishBuildStatus()) || (!fromOrigin && settings.forksMonitorStrategy().getPublishBuildStatus())) {
-                actions.add(new GitLabSCMPublishAction(settings.getPublisherName(), settings.getPublishUnstableBuildsAsSuccess(), settings.getUpdateBuildDescription()));
-            }
         } else {
-            if ((head instanceof TagSCMHead && settings.tagMonitorStrategy().getPublishBuildStatus()) || settings.branchMonitorStrategy().getPublishBuildStatus()) {
-                actions.add(new GitLabSCMPublishAction(settings.getPublisherName(), settings.getPublishUnstableBuildsAsSuccess(), settings.getUpdateBuildDescription()));
-            }
             actions.add(new ObjectMetadataAction(head.getName(), "", treeUrl(project, head.getName())));
             actions.add(GitLabLinkAction.toTree(head.getPronoun(), project, head.getName()));
+        }
+
+        if (settings.publishBuildStatus(head)) {
+            actions.add(new GitLabSCMPublishAction(settings.getPublisherName(), settings.getPublishUnstableBuildsAsSuccess(), settings.getUpdateBuildDescription()));
         }
 
         if (head instanceof GitLabSCMBranchHead && StringUtils.equals(project.getDefaultBranch(), head.getName())) {

@@ -207,21 +207,18 @@ class SourceHeads {
                 createBranch(mergeRequest.getTargetProjectId(), targetBranch, retrieveBranchRevision(targetBranch)),
                 Objects.equals(mergeRequest.getMergeStatus(), CAN_BE_MERGED));
 
-        // TOOD: We're doing these checks at least three times - centralize in GitLabMergeRequest?
-        boolean fromOrigin = Objects.equals(mergeRequest.getSourceProjectId(), project.getId());
-
-        if ((fromOrigin && settings.originMonitorStrategy().buildUnmerged()) || (!fromOrigin && settings.forksMonitorStrategy().buildUnmerged())) {
+        if (settings.buildUnmerged(head)) {
             observe(observer, head);
         }
 
-        if ((fromOrigin && settings.originMonitorStrategy().buildMerged()) || (!fromOrigin && settings.forksMonitorStrategy().buildMerged())) {
-            if (!head.isMergeable() && ((fromOrigin && settings.originMonitorStrategy().buildOnlyMergeableRequestsMerged()) || (!fromOrigin && settings.forksMonitorStrategy().buildOnlyMergeableRequestsMerged()))) {
+        if (settings.buildMerged(head)) {
+            if (!head.isMergeable() && settings.buildOnlyMergeableRequests(head)) {
                 log(listener, Messages.GitLabSCMSource_willNotBuildUnmergeableRequest(mergeRequest.getId(), mergeRequest.getTargetBranch(), mergeRequest.getMergeStatus()));
             }
             observe(observer, head.merged());
         }
 
-        if (fromOrigin) {
+        if (head.fromOrigin()) {
             branchesWithMergeRequests(listener).put(mergeRequest.getId(), mergeRequest.getSourceBranch());
         }
     }

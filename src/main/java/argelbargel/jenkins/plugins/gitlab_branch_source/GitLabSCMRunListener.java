@@ -24,7 +24,7 @@ public class GitLabSCMRunListener extends RunListener<Run<?, ?>> {
         GitLabSCMPublishAction publishAction = build.getParent().getAction(GitLabSCMPublishAction.class);
         if (causeAction != null && publishAction != null) {
             publishAction.updateBuildDescription(build, causeAction, listener);
-            publishAction.publishPending(build, causeAction, listener);
+            publishAction.publishPending(build, causeAction);
         }
     }
 
@@ -33,7 +33,7 @@ public class GitLabSCMRunListener extends RunListener<Run<?, ?>> {
         GitLabSCMCauseAction causeAction = build.getParent().getAction(GitLabSCMCauseAction.class);
         GitLabSCMPublishAction publishAction = build.getParent().getAction(GitLabSCMPublishAction.class);
         if (causeAction != null && publishAction != null) {
-            publishAction.publishResult(build, causeAction, listener);
+            publishAction.publishResult(build, causeAction);
         }
     }
 
