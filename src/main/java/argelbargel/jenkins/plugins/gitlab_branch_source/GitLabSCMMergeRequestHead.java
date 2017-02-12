@@ -68,6 +68,10 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
         return new GitLabSCMMergeRequestHead(id, title, sourceBranch, targetBranch, mergeable, true);
     }
 
+    GitLabSCMHead getSource() {
+        return sourceBranch;
+    }
+
     @Nonnull
     @Override
     String getRef() {

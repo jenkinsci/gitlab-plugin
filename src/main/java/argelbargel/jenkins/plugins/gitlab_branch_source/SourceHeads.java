@@ -111,7 +111,7 @@ class SourceHeads {
             log(listener, Messages.GitLabSCMSource_retrievingMergeRequest(mrId));
             try {
                 GitLabMergeRequest mr = api().getMergeRequest(source.getProjectId(), mrId);
-                observe(observer, mr, listener);
+                observe(criteria, observer, mr, listener);
             } catch (NoSuchElementException e) {
                 log(listener, Messages.GitLabSCMSource_removedMergeRequest(mrId));
                 branchesWithMergeRequests(listener).remove(mrId);
@@ -119,7 +119,7 @@ class SourceHeads {
 
             int sourceProjectId = attributes.getSourceProjectId();
             if (sourceProjectId == source.getProjectId()) {
-                observe(observer, createBranch(source.getProjectId(), attributes.getSourceBranch(), attributes.getLastCommit().getId()));
+                observe(criteria, observer, createBranch(source.getProjectId(), attributes.getSourceBranch(), attributes.getLastCommit().getId()), listener);
             }
         }
     }
@@ -133,7 +133,7 @@ class SourceHeads {
             log(listener, Messages.GitLabSCMSource_retrievingBranch(branchName));
             try {
                 GitlabBranch branch = api().getBranch(source.getProjectId(), branchName);
-                observe(observer, branch, listener);
+                observe(criteria, observer, branch, listener);
             } catch (NoSuchElementException e) {
                 log(listener, Messages.GitLabSCMSource_removedHead(branchName));
             }
@@ -150,7 +150,7 @@ class SourceHeads {
             try {
                 GitlabTag tag = api().getTag(source.getProjectId(), tagName);
                 tag.getCommit().getCommittedDate().getTime();
-                observe(observer, tag, listener);
+                observe(criteria, observer, tag, listener);
             } catch (NoSuchElementException e) {
                 log(listener, Messages.GitLabSCMSource_removedHead(tagName));
             }
@@ -175,7 +175,7 @@ class SourceHeads {
                 checkInterrupt();
 
                 if (!source.isExcluded(mr.getTargetBranch())) {
-                    observe(observer, mr, listener);
+                    observe(criteria, observer, mr, listener);
                 }
             }
         }
@@ -189,7 +189,7 @@ class SourceHeads {
                 checkInterrupt();
 
                 if (!source.isExcluded(branch.getName())) {
-                    observe(observer, branch, listener);
+                    observe(criteria, observer, branch, listener);
                 }
             }
         }
@@ -202,13 +202,13 @@ class SourceHeads {
                 checkInterrupt();
 
                 if (!source.isExcluded(tag.getName())) {
-                    observe(observer, tag, listener);
+                    observe(criteria, observer, tag, listener);
                 }
             }
         }
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitlabBranch branch, TaskListener listener) throws IOException, InterruptedException {
+    private void observe(SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, GitlabBranch branch, TaskListener listener) throws IOException, InterruptedException {
         log(listener, Messages.GitLabSCMSource_monitoringBranch(branch.getName()));
 
         boolean hasMergeRequest = branchesWithMergeRequests(NULL).containsValue(branch.getName());
@@ -216,15 +216,15 @@ class SourceHeads {
             log(listener, Messages.GitLabSCMSource_willNotBuildBranchWithMergeRequest(branch.getName()));
         }
 
-        observe(observer, createBranch(source.getProjectId(), branch.getName(), branch.getCommit().getId(), hasMergeRequest));
+        observe(criteria, observer, createBranch(source.getProjectId(), branch.getName(), branch.getCommit().getId(), hasMergeRequest), listener);
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitlabTag tag, TaskListener listener) {
+    private void observe(SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, GitlabTag tag, TaskListener listener) {
         log(listener, Messages.GitLabSCMSource_monitoringTag(tag.getName()));
-        observe(observer, createTag(source.getProjectId(), tag.getName(), tag.getCommit().getId(), tag.getCommit().getCommittedDate().getTime()));
+        observe(criteria, observer, createTag(source.getProjectId(), tag.getName(), tag.getCommit().getId(), tag.getCommit().getCommittedDate().getTime()), listener);
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitLabMergeRequest mergeRequest, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    private void observe(SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, GitLabMergeRequest mergeRequest, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         log(listener, Messages.GitLabSCMSource_monitoringMergeRequest(mergeRequest.getId()));
 
         String targetBranch = mergeRequest.getTargetBranch();
@@ -235,14 +235,14 @@ class SourceHeads {
                 Objects.equals(mergeRequest.getMergeStatus(), CAN_BE_MERGED));
 
         if (source.buildUnmerged(head)) {
-            observe(observer, head);
+            observe(criteria, observer, head, listener);
         }
 
         if (source.buildMerged(head)) {
             if (!head.isMergeable() && buildOnlyMergeableRequests(head)) {
                 log(listener, Messages.GitLabSCMSource_willNotBuildUnmergeableRequest(mergeRequest.getId(), mergeRequest.getTargetBranch(), mergeRequest.getMergeStatus()));
             }
-            observe(observer, head.merged());
+            observe(criteria, observer, head.merged(), listener);
         }
 
         if (head.fromOrigin()) {
@@ -250,8 +250,26 @@ class SourceHeads {
         }
     }
 
-    private void observe(@Nonnull SCMHeadObserver observer, GitLabSCMHead head) {
-        observer.observe(head, head.getRevision());
+    private void observe(SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, GitLabSCMHead head, TaskListener listener) {
+        if (criteria == null || matches(criteria, head, listener)) {
+            observer.observe(head, head.getRevision());
+        }
+    }
+
+    private boolean matches(SCMSourceCriteria criteria, GitLabSCMHead head, TaskListener listener) {
+        SCMSourceCriteria.Probe probe = source.createProbe(head, head.getRevision());
+        try {
+            if (criteria.isHead(probe, listener)) {
+                log(listener, head.getName() + " (" + head.getRevision().getHash() + ") meets criteria");
+                return true;
+            } else {
+                log(listener, head.getName() + " (" + head.getRevision().getHash() + ") does not meet criteria");
+            }
+        } catch (IOException e) {
+            log(listener, "error checking criteria: " + e.getMessage());
+        }
+
+        return false;
     }
 
     private GitLabAPI api() throws GitLabAPIException {

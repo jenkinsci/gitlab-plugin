@@ -30,7 +30,7 @@ abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
     private final GitLabSCMRefSpec refSpec;
     private transient Map<Integer, GitLabProject> projectCache;
 
-    GitLabSCMHeadImpl(@Nonnull int projectId, @Nonnull String name, @Nonnull String hash, @Nonnull String pronoun, @Nonnull GitLabSCMRefSpec refSpec) {
+    GitLabSCMHeadImpl(int projectId, @Nonnull String name, @Nonnull String hash, @Nonnull String pronoun, @Nonnull GitLabSCMRefSpec refSpec) {
         super(refSpec.remoteName(name));
         this.projectId = projectId;
         this.revision = new SCMRevisionImpl(this, hash);

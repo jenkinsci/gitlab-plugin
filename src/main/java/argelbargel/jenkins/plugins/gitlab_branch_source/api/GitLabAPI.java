@@ -2,10 +2,13 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.api;
 
 import org.apache.commons.lang.StringUtils;
 import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.http.Query;
 import org.gitlab.api.models.GitlabBranch;
+import org.gitlab.api.models.GitlabCommit;
 import org.gitlab.api.models.GitlabGroup;
 import org.gitlab.api.models.GitlabProject;
 import org.gitlab.api.models.GitlabProjectHook;
+import org.gitlab.api.models.GitlabRepositoryTree;
 import org.gitlab.api.models.GitlabSystemHook;
 import org.gitlab.api.models.GitlabTag;
 
@@ -14,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
@@ -149,6 +153,29 @@ public final class GitLabAPI {
     public GitLabGroup getGroup(int id) throws GitLabAPIException {
         try {
             return delegate.retrieve().to(GitlabGroup.URL + PATH_SEP + id, GitLabGroup.class);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
+    public GitlabCommit getCommit(int id, String ref) throws GitLabAPIException {
+        try {
+            return delegate.getCommit(id, ref);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
+    public List<GitlabRepositoryTree> getTree(int id, String ref, String path) throws GitLabAPIException {
+        try {
+            Query query = new Query()
+                    .appendIf("path", path)
+                    .appendIf("ref_name", ref);
+
+
+            String tailUrl = GitlabProject.URL + "/" + id + "/repository" + GitlabRepositoryTree.URL + query.toString();
+            GitlabRepositoryTree[] tree = delegate.retrieve().to(tailUrl, GitlabRepositoryTree[].class);
+            return Arrays.asList(tree);
         } catch (Exception e) {
             throw new GitLabAPIException(e);
         }

@@ -21,6 +21,7 @@ import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMHeadCategory;
 import jenkins.scm.api.SCMHeadEvent;
 import jenkins.scm.api.SCMHeadObserver;
+import jenkins.scm.api.SCMProbe;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSourceCriteria;
 import jenkins.scm.api.SCMSourceDescriptor;
@@ -298,6 +299,11 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return super.isExcluded(branchName);
     }
 
+    @Nonnull
+    @Override
+    protected SCMProbe createProbe(@Nonnull SCMHead head, @CheckForNull SCMRevision revision) {
+        return GitLabSCMProbe.create(this, head, revision);
+    }
 
     @Extension
     public static class DescriptorImpl extends SCMSourceDescriptor implements IconSpec {
