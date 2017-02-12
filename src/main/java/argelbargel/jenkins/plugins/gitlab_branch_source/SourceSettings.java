@@ -13,6 +13,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublis
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 
 
+// TODO: extract common interface for GitLabSCMSource, GitLabSCMNavigator and SourceSettings
 class SourceSettings {
     private static final String DEFAULT_INCLUDES = "*";
     private static final String DEFAULT_EXCLUDES = "";

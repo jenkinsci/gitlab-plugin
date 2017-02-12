@@ -49,6 +49,8 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.MERGE_REQUESTS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
 
+
+// TODO: extract common interface for GitLabSCMSource, GitLabSCMNavigator and SourceSettings
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class GitLabSCMSource extends AbstractGitSCMSource {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMSource.class.getName());
@@ -65,7 +67,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         this.settings = settings;
         this.project = project;
         this.hookListener = GitLabSCMWebHook.createListener(this);
-        this.actions = new SourceActions(project, settings);
+        this.actions = new SourceActions(this);
         this.heads = new SourceHeads(this);
     }
 
@@ -157,6 +159,46 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.getUpdateBuildDescription();
     }
 
+    public boolean getPublishUnstableBuildsAsSuccess() {
+        return settings.getPublishUnstableBuildsAsSuccess();
+    }
+
+    public String getPublisherName() {
+        return settings.getPublisherName();
+    }
+
+    public boolean getAcceptMergeRequestsFromOrigin() {
+        return settings.originMonitorStrategy().getAcceptMergeRequests();
+    }
+
+    public boolean getAcceptMergeRequestsFromForks() {
+        return settings.forksMonitorStrategy().getAcceptMergeRequests();
+    }
+
+    public boolean getRemoveSourceBranchFromOrigin() {
+        return settings.originMonitorStrategy().getRemoveSourceBranch();
+    }
+
+    BuildStatusPublishMode getBranchBuildStatusPublishMode() {
+        return settings.branchMonitorStrategy().getBuildStatusPublishMode();
+    }
+
+    BuildStatusPublishMode getOriginBuildStatusPublishMode() {
+        return settings.originMonitorStrategy().getBuildStatusPublishMode();
+    }
+
+    BuildStatusPublishMode getForkBuildStatusPublishMode() {
+        return settings.forksMonitorStrategy().getBuildStatusPublishMode();
+    }
+
+    BuildStatusPublishMode getTagBuildStatusPublishMode() {
+        return settings.tagMonitorStrategy().getBuildStatusPublishMode();
+    }
+
+    GitLabProject getProject() {
+        return project;
+    }
+
     public int getProjectId() {
         return project.getId();
     }
@@ -186,6 +228,10 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
     public boolean buildUnmerged(GitLabSCMMergeRequestHead head) {
         return settings.determineMergeRequestStrategyValue(head, settings.originMonitorStrategy().buildUnmerged(), settings.forksMonitorStrategy().buildUnmerged());
+    }
+
+    public String getMergeCommitMessage() {
+        return settings.getMergeCommitMessage();
     }
 
 

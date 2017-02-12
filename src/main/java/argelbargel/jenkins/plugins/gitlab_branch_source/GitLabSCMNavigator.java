@@ -39,6 +39,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.IC
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconfilePathPattern;
 
 
+// TODO: extract common interface for GitLabSCMSource, GitLabSCMNavigator and SourceSettings
 @SuppressWarnings({"unused", "WeakerAccess" })
 public class GitLabSCMNavigator extends SCMNavigator {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMNavigator.class.getName());
