@@ -1,1 +1,3 @@
-# Multibranch projects and organization folders from GitLab 
+# Multibranch projects and organization folders from GitLab
+ 
+This plugin is still in development and thus not yet usable... 
