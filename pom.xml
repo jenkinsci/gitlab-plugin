@@ -11,6 +11,7 @@
     </parent>
 
     <properties>
+        <jenkins.version>2.7.1</jenkins.version>
         <release>DEV-SNAPSHOT</release>
     </properties>
 
@@ -28,10 +29,6 @@
             <url>http://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
-
-    <properties>
-        <jenkins.version>2.7.1</jenkins.version>
-    </properties>
 
     <dependencies>
         <dependency>
