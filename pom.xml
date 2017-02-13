@@ -171,13 +171,13 @@
 
     <repositories>
         <repository>
-            <id>jenkins-releases</id>
+            <id>1_jenkins-releases</id>
             <url>http://repo.jenkins-ci.org/releases/</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>jenkins-releases</id>
+            <id>1_jenkins-releases</id>
             <url>http://repo.jenkins-ci.org/releases/</url>
         </pluginRepository>
     </pluginRepositories>
