@@ -1,2 +1,1 @@
-"# gitlab-branch-source-plugin" 
-"# gitlab-branch-source-plugin" 
+# Multibranch projects and organization folders from GitLab 
