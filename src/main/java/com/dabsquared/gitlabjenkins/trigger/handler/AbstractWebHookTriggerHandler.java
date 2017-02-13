@@ -69,8 +69,10 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 if (client == null) {
                     LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                 } else {
-                    client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(), BuildState.pending, buildStatusUpdate.getRef(),
-                                             publisher.getName(), Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber(), null);
+                    String targetUrl =
+                        Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
+                    client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
+                        BuildState.pending, buildStatusUpdate.getRef(), publisher.getName(), targetUrl, null);
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);

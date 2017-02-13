@@ -147,8 +147,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
             GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
-                client.changeBuildStatus(projectId, commit, BuildState.pending, ref, publisher.getName(),
-                                         Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber(), null);
+                String targetUrl = Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
+                client.changeBuildStatus(projectId, commit, BuildState.pending, ref, publisher.getName(), targetUrl, null);
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
