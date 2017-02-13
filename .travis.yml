@@ -1,13 +1,16 @@
 language: java
 jdk:
   - oraclejdk7
+
 script: ./travis.sh
+
 cache:
   directories:
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
-  - rm -f $HOME/.m2/repository/argelbargel/jenkins/plugins/gitlab-branch-source
+  - rm -rf $HOME/.m2/repository/argelbargel/jenkins/plugins/gitlab-branch-source
+
 deploy:
   provider: releases
   api_key: "$GITHUB_API_TOKEN"
