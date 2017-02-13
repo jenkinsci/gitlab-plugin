@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-export MAVEN_OPTS="-Dmaven.javadoc.skip=true -B"
 
-./mvnw verify
+./mvnw verify -Dmaven.javadoc.skip=true -B
 
 if [ "$TRAVIS_TAG" != "" ]; then
     ./mvnw versions::set -DnewVersion=${TRAVIS_TAG}
-    ./mvnw install
+    ./mvnw install -Dmaven.javadoc.skip=true -B
 fi
 
