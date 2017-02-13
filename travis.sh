@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export MAVEN_OPTS=-Dmaven.javadoc.skip=true -B
 
 ./mvnw verify
 
