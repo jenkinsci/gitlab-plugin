@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
 <div>
-    Multibranch projects and organization folders from GitHub. Maintained by CloudBees, Inc.
+    Multibranch projects and organization folders from GitLab
 </div>
