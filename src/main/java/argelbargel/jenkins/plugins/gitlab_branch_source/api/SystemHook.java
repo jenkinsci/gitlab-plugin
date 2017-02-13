@@ -1,6 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source.api;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class SystemHook extends WebHook {
     private static final List<String> CREATE_EVENTS = singletonList("project_create");
     private static final List<String> REMOVE_EVENTS = singletonList("project_destroy");

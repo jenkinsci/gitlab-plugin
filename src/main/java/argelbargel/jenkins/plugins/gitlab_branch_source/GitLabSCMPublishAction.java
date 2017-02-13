@@ -9,6 +9,7 @@ import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode;
 import org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode;
+import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.flow.GraphListener;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.RESULT;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.STAGES;
@@ -33,9 +35,12 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.success;
 import static hudson.model.Result.ABORTED;
 import static hudson.model.Result.SUCCESS;
 import static hudson.model.Result.UNSTABLE;
+import static java.util.logging.Level.SEVERE;
 
 
 class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
+    private static final Logger LOGGER = Logger.getLogger(GitLabSCMPublishAction.class.getName());
+
     private final String publisherName;
     private final boolean markUnstableAsSuccess;
     private final boolean updateBuildDescription;
@@ -73,7 +78,12 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
                     @Override
                     public void run() {
                         build.addAction(new RunningContextsAction());
-                        build.getExecution().addListener(listener);
+                        FlowExecution execution = build.getExecution();
+                        if (execution != null) {
+                            execution.addListener(listener);
+                        } else {
+                            LOGGER.log(SEVERE, "could not get flow-execution for build " + build.getFullDisplayName());
+                        }
                     }
                 },
                 Executors.newSingleThreadExecutor());
@@ -116,13 +126,13 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
         public void onNewHead(FlowNode node) {
             if (isNamedStageStartNode(node)) {
                 publishBuildStatus(build, cause, getRunningContexts().push(node), running, "");
-            } else if (isStageEndNode(node, getRunningContexts().peekNode())) {
+            } else if (isStageEndNode(node, getRunningContexts().peekNodeId())) {
                 publishBuildStatus(build, cause, getRunningContexts().pop(), success, "");
             }
         }
 
-        private boolean isStageEndNode(FlowNode node, FlowNode startNode) {
-            return startNode != null && node instanceof StepEndNode && ((StepEndNode) node).getStartNode().equals(startNode);
+        private boolean isStageEndNode(FlowNode node, String startNodeId) {
+            return startNodeId != null && node instanceof StepEndNode && ((StepEndNode) node).getStartNode().getId().equals(startNodeId);
         }
 
         private boolean isNamedStageStartNode(FlowNode node) {
@@ -136,12 +146,12 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
 
 
     private static final class RunningContextsAction extends InvisibleAction implements Serializable {
-        private final Stack<FlowNode> nodes;
+        private final Stack<String> nodeIds;
         private final LinkedHashMap<String, String> contexts;
-        private int id = 0;
+        private int stageCount = 0;
 
         RunningContextsAction() {
-            nodes = new Stack<>();
+            nodeIds = new Stack<>();
             contexts = new LinkedHashMap<>();
         }
 
@@ -151,25 +161,30 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
         }
 
         String push(FlowNode node) {
-            nodes.push(node);
-            String context = "#" + (++id) + " " + node.getDisplayName();
-            contexts.put(node.getId(), context);
-            return context;
+            return push(node.getId(), node.getDisplayName());
         }
 
-        FlowNode peekNode() {
-            return !nodes.isEmpty() ? nodes.peek() : null;
+        private String push(String id, String name) {
+            nodeIds.push(id);
+            String context = "#" + (++stageCount) + " " + name;
+            contexts.put(id, context);
+            return context;
+
+        }
+
+        String peekNodeId() {
+            return !nodeIds.isEmpty() ? nodeIds.peek() : null;
         }
 
         String pop() {
-            FlowNode node = nodes.pop();
-            return contexts.remove(node.getId());
+            String nodeId = nodeIds.pop();
+            return contexts.remove(nodeId);
         }
 
         Collection<String> clear() {
             List<String> names = new ArrayList<>(contexts.values());
 
-            nodes.clear();
+            nodeIds.clear();
             contexts.clear();
 
             Collections.reverse(names);

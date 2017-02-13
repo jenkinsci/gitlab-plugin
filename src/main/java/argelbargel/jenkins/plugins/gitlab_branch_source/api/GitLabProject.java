@@ -24,10 +24,15 @@ public class GitLabProject extends GitlabProject {
     }
 
     private <T extends StandardCredentials> T credentials(AbstractGitSCMSource source, @Nonnull Class<T> type) {
+        String credentialsId = source.getCredentialsId();
+        if (credentialsId == null) {
+            return null;
+        }
+
         return CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
                 type, source.getOwner(), ACL.SYSTEM,
                 Collections.<DomainRequirement>emptyList()), CredentialsMatchers.allOf(
-                CredentialsMatchers.withId(source.getCredentialsId()),
+                CredentialsMatchers.withId(credentialsId),
                 CredentialsMatchers.instanceOf(type)));
     }
 }

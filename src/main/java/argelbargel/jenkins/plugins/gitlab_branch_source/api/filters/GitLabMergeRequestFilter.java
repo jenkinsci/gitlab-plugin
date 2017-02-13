@@ -11,14 +11,14 @@ import static hudson.model.TaskListener.NULL;
 
 @SuppressWarnings("unused")
 public abstract class GitLabMergeRequestFilter {
-    public static GitLabMergeRequestFilter ALLOW_NONE = new GitLabMergeRequestFilter(NULL) {
+    public static final GitLabMergeRequestFilter ALLOW_NONE = new GitLabMergeRequestFilter(NULL) {
         @Override
         public boolean accepts(GitLabMergeRequest mr) {
             return false;
         }
     };
 
-    public static GitLabMergeRequestFilter ALLOW_ALL = new GitLabMergeRequestFilter(NULL) {
+    public static final GitLabMergeRequestFilter ALLOW_ALL = new GitLabMergeRequestFilter(NULL) {
         @Override
         public boolean accepts(GitLabMergeRequest mr) {
             return false;

@@ -64,7 +64,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
         return sourceSettings;
     }
 
-    @CheckForNull
+    @Nonnull
     public String getConnectionName() {
         return sourceSettings.getConnectionName();
     }

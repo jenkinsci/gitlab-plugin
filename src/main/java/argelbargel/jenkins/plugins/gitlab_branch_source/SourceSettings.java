@@ -8,6 +8,8 @@ import argelbargel.jenkins.plugins.gitlab_branch_source.api.filters.GitLabMergeR
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 
+import javax.annotation.Nonnull;
+
 import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.NONE;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.STAGES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
@@ -52,6 +54,7 @@ class SourceSettings {
         this.mergeCommitMessage = DEFAULT_MERGE_COMMIT_MESSAGE;
     }
 
+    @Nonnull
     String getConnectionName() {
         return connectionName;
     }

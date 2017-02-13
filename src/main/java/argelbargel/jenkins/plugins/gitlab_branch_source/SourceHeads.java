@@ -58,7 +58,7 @@ class SourceHeads {
         this.source = source;
     }
 
-    void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @Nonnull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    void retrieve(@CheckForNull SCMSourceCriteria criteria, @Nonnull SCMHeadObserver observer, @CheckForNull SCMHeadEvent<?> event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         if (event instanceof GitLabSCMMergeRequestEvent) {
             retrieveMergeRequest(criteria, observer, (GitLabSCMMergeRequestEvent) event, listener);
         } else if (event instanceof GitLabSCMTagPushEvent) {

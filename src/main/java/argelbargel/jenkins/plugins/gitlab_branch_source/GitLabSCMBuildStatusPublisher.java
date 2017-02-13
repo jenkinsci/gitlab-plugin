@@ -24,11 +24,16 @@ import static java.util.logging.Level.WARNING;
 public class GitLabSCMBuildStatusPublisher {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMBuildStatusPublisher.class.getName());
 
-    private static GitLabSCMBuildStatusPublisher instance;
+    private static final Object instanceLock = new Object();
+    private static volatile GitLabSCMBuildStatusPublisher instance;
 
     static GitLabSCMBuildStatusPublisher instance() {
         if (instance == null) {
-            instance = new GitLabSCMBuildStatusPublisher();
+            synchronized (instanceLock) {
+                if (instance == null) {
+                    instance = new GitLabSCMBuildStatusPublisher();
+                }
+            }
         }
 
         return instance;

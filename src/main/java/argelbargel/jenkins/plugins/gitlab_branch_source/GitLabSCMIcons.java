@@ -2,6 +2,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabGroup;
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
 import hudson.init.Initializer;
 import jenkins.model.Jenkins;
 import org.apache.commons.jelly.JellyContext;
@@ -12,6 +13,7 @@ import org.kohsuke.stapler.Stapler;
 
 import java.util.NoSuchElementException;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
 import static org.jenkins.ui.icon.Icon.ICON_LARGE_STYLE;
 import static org.jenkins.ui.icon.Icon.ICON_MEDIUM_STYLE;
 import static org.jenkins.ui.icon.Icon.ICON_SMALL_STYLE;
@@ -70,28 +72,29 @@ public final class GitLabSCMIcons {
         return icon.getQualifiedUrl(ctx);
     }
 
-    static String avatarFileName(GitlabProject project, String connectionName, Size size) {
+    static String avatarFileName(int projectId, String connectionName, Size size) {
         // TODO: size!
-        String avatarUrl = project.getAvatarUrl();
-        if (avatarUrl == null) {
-            avatarUrl = groupAvatarUrl(project, connectionName);
+        try {
+            GitLabProject project = gitLabAPI(connectionName).getProject(projectId);
+            String avatarUrl = project.getAvatarUrl();
+            if (avatarUrl == null) {
+                avatarUrl = groupAvatarUrl(project, connectionName);
+            }
+            return avatarUrl != null ? avatarUrl : iconFileName(GitLabSCMIcons.ICON_GITLAB_LOGO, size);
+        } catch (GitLabAPIException e) {
+            return iconFileName(GitLabSCMIcons.ICON_GITLAB_LOGO, size);
         }
 
-        return avatarUrl != null ? avatarUrl : iconFileName(GitLabSCMIcons.ICON_GITLAB_LOGO, size);
     }
 
-    private static String groupAvatarUrl(GitlabProject project, String connectionName) {
+    private static String groupAvatarUrl(GitlabProject project, String connectionName) throws GitLabAPIException {
         GitlabNamespace namespace = project.getNamespace();
         if (namespace.getOwnerId() != null) {
             return null;
         }
 
-        try {
-            GitLabGroup group = GitLabHelper.gitLabAPI(connectionName).getGroup(namespace.getId());
-            return group.getAvatarUrl();
-        } catch (GitLabAPIException e) {
-            return null;
-        }
+        GitLabGroup group = gitLabAPI(connectionName).getGroup(namespace.getId());
+        return group.getAvatarUrl();
     }
 
 

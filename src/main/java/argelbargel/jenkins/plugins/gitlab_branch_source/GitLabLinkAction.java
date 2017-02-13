@@ -5,6 +5,8 @@ import org.gitlab.api.models.GitlabProject;
 import org.jenkins.ui.icon.IconSpec;
 import org.kohsuke.stapler.Stapler;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnection;
@@ -12,16 +14,18 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.IC
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.Size.MEDIUM;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconFileName;
 
+
+// TODO: remove duplicate check for pronoun != null
 class GitLabLinkAction implements Action, IconSpec {
     static GitLabLinkAction toServer(String pronoun, String connectionName) {
         return new GitLabLinkAction(
-                pronoun,
+                pronoun != null ? pronoun : "",
                 gitLabConnection(connectionName).getUrl());
     }
 
     static GitLabLinkAction toProject(String pronoun, GitlabProject project) {
         return new GitLabLinkAction(
-                pronoun,
+                pronoun != null ? pronoun : "",
                 project.getWebUrl());
     }
 
@@ -31,19 +35,19 @@ class GitLabLinkAction implements Action, IconSpec {
                 "commits", path);
     }
 
-    static GitLabLinkAction toTree(String pronoun, GitlabProject project, String path) {
+    static GitLabLinkAction toTree(@CheckForNull String pronoun, GitlabProject project, String path) {
         return toProject(project, pronoun, "tree", path);
     }
 
-    static GitLabLinkAction toMergeRequest(String pronoun, GitlabProject project, int id) {
+    static GitLabLinkAction toMergeRequest(@CheckForNull String pronoun, GitlabProject project, int id) {
         return toProject(project,
                 pronoun,
                 "merge_requests", String.valueOf(id));
     }
 
-    private static GitLabLinkAction toProject(GitlabProject project, String displayName, String what, String path) {
+    private static GitLabLinkAction toProject(@Nonnull GitlabProject project, @CheckForNull String displayName, String what, String path) {
         return new GitLabLinkAction(
-                displayName,
+                displayName == null ? "" : displayName,
                 project.getWebUrl() + "/" + what + "/" + path);
     }
 
@@ -61,7 +65,7 @@ class GitLabLinkAction implements Action, IconSpec {
     private final String displayName;
     private final String url;
 
-    private GitLabLinkAction(String displayName, String url) {
+    private GitLabLinkAction(@Nonnull String displayName, @Nonnull String url) {
         this.displayName = displayName.startsWith(Messages.GitLabLink_DisplayName_Prefix()) ? displayName : Messages.GitLabLink_DisplayName_Prefix() + " " + displayName;
         this.url = url;
     }

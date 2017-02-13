@@ -39,7 +39,7 @@ class SourceActions {
     List<Action> retrieveSourceActions() throws IOException {
         return asList(
                 new GitLabProjectMetadataAction(source.getProject()),
-                new GitLabProjectAvatarMetadataAction(source.getProject(), source.getConnectionName()),
+                new GitLabProjectAvatarMetadataAction(source.getProjectId(), source.getConnectionName()),
                 GitLabLinkAction.toProject(Messages.GitLabSCMSource_Pronoun(), source.getProject()));
     }
 
