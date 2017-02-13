@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-./mvnw verify -Drelease=${TRAVIS_TAG}
+./mvnw verify
 
 if [ "$TRAVIS_TAG" != "" ]; then
-    ./mvnw install -Drelease=${TRAVIS_TAG}
+    ./mvnw versions::set -DnewVersion=${TRAVIS_TAG}
+    ./mvnw install
 fi
 
