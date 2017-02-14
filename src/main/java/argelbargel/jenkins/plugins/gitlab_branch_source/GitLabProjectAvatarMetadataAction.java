@@ -12,15 +12,21 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.av
 class GitLabProjectAvatarMetadataAction extends AvatarMetadataAction {
     private final int projectId;
     private final String connectionName;
+    private transient String avatarUrlCache;
 
     GitLabProjectAvatarMetadataAction(int projectId, String connectionName) {
         this.projectId = projectId;
         this.connectionName = connectionName;
+        this.avatarUrlCache = null;
     }
 
     @Override
     public String getAvatarImageOf(@Nonnull String size) {
-        return avatarFileName(projectId, connectionName, Size.byDimensions(size));
+        if (avatarUrlCache == null) {
+            avatarUrlCache = avatarFileName(projectId, connectionName, Size.byDimensions(size));
+        }
+
+        return avatarUrlCache;
     }
 
     @Override

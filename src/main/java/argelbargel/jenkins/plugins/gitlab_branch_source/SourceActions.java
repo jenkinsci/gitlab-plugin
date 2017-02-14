@@ -3,6 +3,7 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabMergeRequest;
+import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
 import argelbargel.jenkins.plugins.gitlab_branch_source.events.GitLabSCMEvent;
 import hudson.model.Action;
 import hudson.model.TaskListener;
@@ -37,10 +38,11 @@ class SourceActions {
 
     @Nonnull
     List<Action> retrieveSourceActions() throws IOException {
+        GitLabProject project = source.getProject();
         return asList(
-                new GitLabProjectMetadataAction(source.getProject()),
-                new GitLabProjectAvatarMetadataAction(source.getProjectId(), source.getConnectionName()),
-                GitLabLinkAction.toProject(Messages.GitLabSCMSource_Pronoun(), source.getProject()));
+                new ObjectMetadataAction(null, project.getDescription(), project.getWebUrl()),
+                new GitLabProjectAvatarMetadataAction(project.getId(), source.getConnectionName()),
+                GitLabLinkAction.toProject(Messages.GitLabSCMSource_Pronoun(), project));
     }
 
     @Nonnull
@@ -130,5 +132,4 @@ class SourceActions {
 
         return false;
     }
-
 }
