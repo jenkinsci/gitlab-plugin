@@ -10,7 +10,6 @@ cache:
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
-  - ./mvnw clean
   - rm -rf $HOME/.m2/repository/argelbargel/jenkins/plugins/gitlab-branch-source
 
 deploy:
@@ -21,3 +20,4 @@ deploy:
     tags: true
   file:
     - "./target/gitlab-branch-source.hpi"
+    - "./target/gitlab-branch-source.jar"
