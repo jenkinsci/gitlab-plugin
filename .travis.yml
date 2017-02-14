@@ -2,6 +2,7 @@ language: java
 jdk:
   - oraclejdk7
 
+install: true
 script: ./travis.sh
 
 cache:
@@ -9,6 +10,7 @@ cache:
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
+  - ./mvnw clean
   - rm -rf $HOME/.m2/repository/argelbargel/jenkins/plugins/gitlab-branch-source
 
 deploy:
@@ -18,4 +20,4 @@ deploy:
   on:
     tags: true
   file:
-    - "$HOME/.m2/repository/argelbargel/jenkins/plugins/gitlab-branch-source/$TRAVIS_TAG/gitlab-branch-source-$TRAVIS_TAG.hpi"
+    - "./target/gitlab-branch-source.hpi"
