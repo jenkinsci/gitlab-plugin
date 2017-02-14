@@ -1,6 +1,11 @@
 ChangeLog
 =====================
 
+1.4.5
+=====================
+* #488: Support Declarative Pipeline job syntax
+* #503: Don't create spurious 'pending' states in GitLab when updating build status
+
 1.4.4
 =====================
 * #429: Number format is added at merge requests > 1000
