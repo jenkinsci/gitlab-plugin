@@ -17,7 +17,7 @@
 
 # Introduction
 
-This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and report build status back to GitLab.
+This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and/or after an existing merge request was merged/closed, and report build status back to GitLab.
 
 # Seeking maintainers
 
@@ -125,7 +125,7 @@ node {
     * Select *Build when a change is pushed to GitLab*
     * Make a note of the *GitLab CI Service URL* appearing on the same line with *Build when a change is
       pushed to GitLab*.  You will later use this URL to define a GitLab web hook.
-    * Use the check boxes to trigger builds on *Push Events* and/or *Merge Request Events*
+    * Use the check boxes to trigger builds on *Push Events* and/or *Created Merge Request Events* and/or *Accepted Merge Request Events* and/or *Closed Merge Request Events*
     * Optionally use *Rebuild open Merge Requests* to enable re-building open merge requests after a
       push to the source branch
     * If you selected *Rebuild open Merge Requests* other than *None*, check *Comments*, and specify the
@@ -267,6 +267,9 @@ These include:
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
 * gitlabMergeRequestIid
+* gitMergeRequestState
+* gitMergedByUser
+* gitMergeRequestAssignee
 * gitlabMergeRequestLastCommit
 * gitlabTargetBranch
 * gitlabTargetRepoName
