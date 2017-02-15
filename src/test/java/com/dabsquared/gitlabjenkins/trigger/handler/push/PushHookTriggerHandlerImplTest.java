@@ -6,7 +6,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleProject;
-import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -51,7 +50,7 @@ public class PushHookTriggerHandlerImplTest {
 
     @Before
     public void setup() {
-        pushHookTriggerHandler = new PushHookTriggerHandlerImpl();
+        pushHookTriggerHandler = new PushHookTriggerHandlerImpl(false);
     }
 
     @Test
@@ -88,7 +87,6 @@ public class PushHookTriggerHandlerImplTest {
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -135,7 +133,6 @@ public class PushHookTriggerHandlerImplTest {
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {

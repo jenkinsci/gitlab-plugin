@@ -7,8 +7,6 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Job;
-import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.logging.Logger;
@@ -26,7 +24,8 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
 
     private final String noteRegex;
 
-    NoteHookTriggerHandlerImpl(String noteRegex) {
+    NoteHookTriggerHandlerImpl(String noteRegex, boolean alwaysBuildHead) {
+        super(alwaysBuildHead);
         this.noteRegex = noteRegex;
     }
 
@@ -88,11 +87,6 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(NoteHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
-    }
-
-    @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(NoteHook hook) {
         return buildStatusUpdate()
             .withProjectId(hook.getMergeRequest().getSourceProjectId())
@@ -100,8 +94,32 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
             .withRef(hook.getMergeRequest().getSourceBranch())
             .build();
     }
+    
+    @Override
+    protected String retrieveSourceBranch(NoteHook hook) throws NoRevisionToBuildException {
+        if (hook.getMergeRequest() != null
+                && hook.getMergeRequest().getSourceBranch() != null
+                && !hook.getMergeRequest().getSourceBranch().isEmpty()) {
 
-    private String retrieveRevisionToBuild(NoteHook hook) throws NoRevisionToBuildException {
+            return hook.getMergeRequest().getSourceBranch();
+        } else {
+            throw new NoRevisionToBuildException();
+        }
+    }
+    
+    @Override
+    protected String retrieveTargetBranch(NoteHook hook) throws NoRevisionToBuildException {
+        if (hook.getMergeRequest() != null
+                && hook.getMergeRequest().getTargetBranch() != null
+                && !hook.getMergeRequest().getTargetBranch().isEmpty()) {
+
+            return hook.getMergeRequest().getTargetBranch();
+        } else {
+            throw new NoRevisionToBuildException();
+        }
+    }
+
+    protected String retrieveRevisionToBuild(NoteHook hook) throws NoRevisionToBuildException {
         if (hook.getMergeRequest() != null
                 && hook.getMergeRequest().getLastCommit() != null
                 && hook.getMergeRequest().getLastCommit().getId() != null) {
@@ -110,6 +128,11 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
         } else {
             throw new NoRevisionToBuildException();
         }
+    }
+    
+    protected String retrieveTargetRevisionToBaseOn(NoteHook hook) throws NoRevisionToBuildException {
+        //we always integrate on top of the head
+        return retrieveTargetBranch(hook);
     }
 
     private boolean isValidTriggerPhrase(String note) {

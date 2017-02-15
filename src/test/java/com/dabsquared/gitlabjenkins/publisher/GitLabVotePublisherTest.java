@@ -13,7 +13,6 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
-import hudson.plugins.git.util.BuildData;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
@@ -145,9 +144,6 @@ public class GitLabVotePublisherTest {
 
     private AbstractBuild mockBuild(String buildUrl, String gitLabConnection, Result result, Integer buildNumber, String... remoteUrls) {
         AbstractBuild build = mock(AbstractBuild.class);
-        BuildData buildData = mock(BuildData.class);
-        when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
-        when(build.getAction(BuildData.class)).thenReturn(buildData);
         when(build.getResult()).thenReturn(result);
         when(build.getUrl()).thenReturn(buildUrl);
         when(build.getResult()).thenReturn(result);

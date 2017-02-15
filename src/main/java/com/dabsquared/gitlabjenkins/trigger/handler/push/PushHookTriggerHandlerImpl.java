@@ -8,8 +8,6 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Job;
-import hudson.plugins.git.GitSCM;
-import hudson.plugins.git.RevisionParameterAction;
 import org.eclipse.jgit.util.StringUtils;
 
 import java.util.List;
@@ -23,6 +21,10 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.Bui
 class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
 
     private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
+    
+    public PushHookTriggerHandlerImpl(boolean alwaysBuildHead) {
+        super(alwaysBuildHead);
+    }
 
     @Override
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
@@ -84,11 +86,6 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook, gitSCM), retrieveUrIish(hook));
-    }
-
-    @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(PushHook hook) {
         return buildStatusUpdate()
             .withProjectId(hook.getProjectId())
@@ -112,19 +109,30 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         return null;
     }
 
-    private String retrieveRevisionToBuild(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
+    @Override
+    protected String retrieveSourceBranch(PushHook hook) throws NoRevisionToBuildException {
         if (inNoBranchDelete(hook)) {
-            if (gitSCM != null && gitSCM.getRepositories().size() == 1) {
-                String repositoryName = gitSCM.getRepositories().get(0).getName();
-                return hook.getRef().replaceFirst("^refs/heads", "remotes/" + repositoryName);
-            } else {
-                return hook.getAfter();
-            }
+            //extract branch name 
+            return hook.getRef().replaceFirst("^refs/heads/","");
+        } else {
+            throw new NoRevisionToBuildException();
+        }            
+    }
+    
+    protected String retrieveRevisionToBuild(PushHook hook) throws NoRevisionToBuildException {
+        if (inNoBranchDelete(hook)) {
+            return hook.getAfter();
         } else {
             throw new NoRevisionToBuildException();
         }
     }
-
+    
+    @Override
+    protected String retrieveTargetBranch(PushHook hook) throws NoRevisionToBuildException {
+        //when pushing, we don't integrate the branch
+        return retrieveSourceBranch(hook);
+    }
+    
     private boolean inNoBranchDelete(PushHook hook) {
         return hook.getAfter() != null && !hook.getAfter().equals(NO_COMMIT);
     }

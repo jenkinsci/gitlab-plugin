@@ -7,7 +7,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleProject;
-import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -52,7 +51,7 @@ public class NoteHookTriggerHandlerImplTest {
 
     @Before
     public void setup() {
-        noteHookTriggerHandler = new NoteHookTriggerHandlerImpl("ci-run");
+        noteHookTriggerHandler = new NoteHookTriggerHandlerImpl("ci-run", false);
     }
 
     @Test
@@ -98,7 +97,6 @@ public class NoteHookTriggerHandlerImplTest {
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {

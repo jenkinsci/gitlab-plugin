@@ -4,7 +4,6 @@ import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
 import hudson.util.HttpResponses;
 import jenkins.triggers.SCMTriggerItem;
@@ -24,26 +23,12 @@ abstract class BuildStatusAction implements WebHookAction {
     }
 
     public void execute(StaplerResponse response) {
-        SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
-        if (!hasGitSCM(item)) {
-            throw HttpResponses.error(409, "The project has no GitSCM configured");
-        }
         writeStatusBody(response, build, getStatus(build));
     }
 
     protected abstract void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status);
 
-    private boolean hasGitSCM(SCMTriggerItem item) {
-        if (item != null) {
-            for (SCM scm : item.getSCMs()) {
-                if (scm instanceof GitSCM) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
+   
     private BuildStatus getStatus(Run<?, ?> build) {
         if (build == null) {
             return BuildStatus.NOT_FOUND;
