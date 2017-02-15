@@ -10,6 +10,8 @@ import java.util.Objects;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.avatarFileName;
 
 class GitLabProjectAvatarMetadataAction extends AvatarMetadataAction {
+    private static final long serialVersionUID = 1L;
+
     private final int projectId;
     private final String connectionName;
     private transient String avatarUrlCache;
