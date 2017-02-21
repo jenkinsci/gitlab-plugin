@@ -180,10 +180,53 @@
             <id>1_jenkins-releases</id>
             <url>http://repo.jenkins-ci.org/releases/</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>svg-rasterizer-maven-plugin-mvn-repo</id>
+            <url>https://raw.githubusercontent.com/Argelbargel/svg-rasterizer-maven-plugin/mvn-repo/</url>
+        </pluginRepository>
     </pluginRepositories>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>argelbargel.maven</groupId>
+                <artifactId>svg-rasterizer-maven-plugin</artifactId>
+                <version>1.0.1-RELEASE</version>
+                <executions>
+                    <execution>
+                        <id>Rasterize icons</id>
+                        <goals>
+                            <goal>rasterize-directory</goal>
+                        </goals>
+                        <configuration>
+                            <inputDir>src/main/images</inputDir>
+                            <destDir>src/main/webapp/images</destDir>
+                            <defaults>
+                                <path>{width}x{height}/{name}{ext}</path>
+                                <format>png</format>
+                            </defaults>
+                            <outputs>
+                                <output>
+                                    <width>48</width>
+                                    <height>48</height>
+                                </output>
+                                <output>
+                                    <width>32</width>
+                                    <height>32</height>
+                                </output>
+                                <output>
+                                    <width>24</width>
+                                    <height>24</height>
+                                </output>
+                                <output>
+                                    <width>16</width>
+                                    <height>16</height>
+                                </output>
+                            </outputs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>

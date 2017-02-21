@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
@@ -34,8 +35,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnection;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnectionId;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconfilePathPattern;
 
 
@@ -369,7 +371,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@Nonnull SCMNavigatorOwner owner, @CheckForNull SCMNavigatorEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        return Collections.<Action>singletonList(GitLabLinkAction.toServer(getPronoun(), getConnectionName()));
+        return Collections.<Action>singletonList(GitLabLinkAction.create(getPronoun(), ICON_GITLAB, gitLabConnection(getConnectionName()).getUrl()));
     }
 
     @Override
@@ -426,7 +428,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
         @Override
         public String getIconClassName() {
-            return ICON_GITLAB_LOGO;
+            return ICON_GITLAB;
         }
 
         @Override

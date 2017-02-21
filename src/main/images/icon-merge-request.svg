@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        height="1024"
+        width="1024"
+        version="1.1"
+        id="svg32"
+        sodipodi:docname="icon-merge-request.svg"
+        inkscape:version="0.92.0 r15299">
+    <metadata
+            id="metadata38">
+        <rdf:RDF>
+            <cc:Work
+                    rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <dc:title></dc:title>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <defs
+            id="defs36"/>
+    <sodipodi:namedview
+            pagecolor="#ffffff"
+            bordercolor="#666666"
+            borderopacity="1"
+            objecttolerance="10"
+            gridtolerance="10"
+            guidetolerance="10"
+            inkscape:pageopacity="0"
+            inkscape:pageshadow="2"
+            inkscape:window-width="1920"
+            inkscape:window-height="1028"
+            id="namedview34"
+            showgrid="false"
+            inkscape:zoom="0.23046875"
+            inkscape:cx="384"
+            inkscape:cy="512"
+            inkscape:window-x="-8"
+            inkscape:window-y="-8"
+            inkscape:window-maximized="1"
+            inkscape:current-layer="svg32"/>
+    <path
+            d="m 832,748 c 0,0 0,-306 0,-402 0,-96 -96,-192 -192,-192 -64,0 -64,0 -64,0 V 26 L 384,218 576,410 V 282 c 0,0 32,0 64,0 32,0 64,32 64,64 0,32 0,402 0,402 -38,22 -64,63 -64,110 0,71 57,128 128,128 71,0 128,-57 128,-128 0,-47 -26,-88 -64,-110 z m -64,174 c -35,0 -64,-29 -64,-64 0,-35 29,-64 64,-64 35,0 64,29 64,64 0,35 -29,64 -64,64 z M 256,90 c -71,0 -128,57 -128,128 0,47 26,88 64,110 v 419 c -38,22 -64,63 -64,110 0,71 57,128 128,128 71,0 128,-57 128,-128 0,-47 -26,-88 -64,-110 V 328 C 358,306 384,265 384,218 384,147 327,90 256,90 Z m 0,832 c -35,0 -64,-29 -64,-64 0,-35 29,-64 64,-64 35,0 64,29 64,64 0,35 -29,64 -64,64 z m 0,-640 c -35,0 -64,-29 -64,-64 0,-35 29,-64 64,-64 35,0 64,29 64,64 0,35 -29,64 -64,64 z"
+            id="path30"
+            inkscape:connector-curvature="0"/>
+</svg>

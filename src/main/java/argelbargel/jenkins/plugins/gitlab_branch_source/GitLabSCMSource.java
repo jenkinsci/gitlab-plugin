@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB_LOGO;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.BRANCHES;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.MERGE_REQUESTS;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMRefSpec.TAGS;
@@ -254,7 +254,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
-        return actions.retrieveSourceActions();
+        return actions.retrieveActions(event, listener);
     }
 
     @Nonnull
@@ -365,7 +365,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
 
         @Override
         public String getIconClassName() {
-            return ICON_GITLAB_LOGO;
+            return ICON_GITLAB;
         }
 
         @Nonnull

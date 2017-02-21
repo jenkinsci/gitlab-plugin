@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabGroup;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
@@ -49,12 +50,22 @@ public final class GitLabSCMIcons {
         }
     }
 
-    static final String ICON_GITLAB_LOGO = "icon-gitlab-logo";
+    static final String ICON_GITLAB = "icon-gitlab";
+    static final String ICON_PROJECT = "icon-project";
+    static final String ICON_BRANCH = "icon-branch";
+    static final String ICON_COMMIT = "icon-commit";
+    static final String ICON_MERGE_REQUEST = "icon-merge-request";
+    static final String ICON_TAG = "icon-tag";
     private static final String ICON_PATH = "plugin/gitlab-branch-source/images/";
 
     @Initializer
     public static void initialize() {
-        addIcon(ICON_GITLAB_LOGO);
+        addIcon(ICON_GITLAB);
+        addIcon(ICON_PROJECT);
+        addIcon(ICON_BRANCH);
+        addIcon(ICON_COMMIT);
+        addIcon(ICON_MERGE_REQUEST);
+        addIcon(ICON_TAG);
     }
 
     static String iconfilePathPattern(String name) {
@@ -80,9 +91,9 @@ public final class GitLabSCMIcons {
             if (avatarUrl == null) {
                 avatarUrl = groupAvatarUrl(project, connectionName);
             }
-            return avatarUrl != null ? avatarUrl : iconFileName(GitLabSCMIcons.ICON_GITLAB_LOGO, size);
+            return avatarUrl != null ? avatarUrl : iconFileName(ICON_GITLAB, size);
         } catch (GitLabAPIException e) {
-            return iconFileName(GitLabSCMIcons.ICON_GITLAB_LOGO, size);
+            return iconFileName(ICON_GITLAB, size);
         }
 
     }

@@ -14,7 +14,7 @@ public final class GitLabSCMBranchHead extends GitLabSCMHeadImpl {
         this.hasMergeRequest = hasMergeRequest;
     }
 
-    boolean hasMergeRequest() {
+    public boolean hasMergeRequest() {
         return hasMergeRequest;
     }
 }
