@@ -75,7 +75,9 @@ class SourceActions {
 
         if (revision instanceof SCMRevisionImpl) {
             String hash = ((SCMRevisionImpl) revision).getHash();
-            actions.add(GitLabLinkAction.toCommit(source.getProject(), hash));
+            Action linkAction = GitLabLinkAction.toCommit(source.getProject(), hash);
+            actions.add(new ObjectMetadataAction(hash, "", linkAction.getUrlName()));
+            actions.add(linkAction);
             actions.addAll(retrieveRevisionActions((SCMRevisionImpl) revision, event, listener));
         }
 
