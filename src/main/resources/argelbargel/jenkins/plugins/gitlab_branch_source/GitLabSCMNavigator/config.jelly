@@ -129,7 +129,7 @@
             <f:block>
                 <table style="width: 100%">
                     <f:optionalBlock name="registerWebHooks" title="Auto-Register Web-Hooks" field="registerWebHooks" inline="true" negative="true">
-                        <f:entry title="${%Register this URL manually}:">
+                        <f:entry title="${%Register this URL manually as system-hook}:">
                             <f:readOnlyTextbox value="${instance.hookUrl}"/><br/>
                             (<strong>Push Events:</strong> false)
                         </f:entry>

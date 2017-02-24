@@ -10,8 +10,8 @@ import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.NONE;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.STAGES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.no;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.stages;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
 
 
@@ -42,11 +42,11 @@ class SourceSettings {
         this.credentialsId = credentialsId;
         this.includes = DEFAULT_INCLUDES;
         this.excludes = DEFAULT_EXCLUDES;
-        this.branchMonitorStrategy = new MonitorStrategy(true, false, STAGES);
+        this.branchMonitorStrategy = new MonitorStrategy(true, false, stages);
         this.buildBranchesWithMergeRequests = false;
-        this.originMonitorStrategy = new MonitorStrategy(true, true, STAGES);
-        this.forksMonitorStrategy = new MonitorStrategy(false, true, STAGES);
-        this.tagMonitorStrategy = new MonitorStrategy(false, false, NONE);
+        this.originMonitorStrategy = new MonitorStrategy(true, true, stages);
+        this.forksMonitorStrategy = new MonitorStrategy(false, true, stages);
+        this.tagMonitorStrategy = new MonitorStrategy(false, false, no);
         this.registerWebHooks = true;
         this.updateBuildDescription = true;
         this.publisherName = Jenkins.getInstance().getDisplayName();

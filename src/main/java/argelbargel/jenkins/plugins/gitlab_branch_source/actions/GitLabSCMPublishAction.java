@@ -27,8 +27,8 @@ import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.RESULT;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.STAGES;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.result;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode.stages;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.canceled;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.failed;
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState.running;
@@ -65,9 +65,9 @@ public final class GitLabSCMPublishAction extends InvisibleAction implements Ser
     }
 
     public void publishStarted(Run<?, ?> build, GitLabSCMHeadMetadataAction metadata, String description) {
-        if (build instanceof WorkflowRun && mode == STAGES) {
+        if (build instanceof WorkflowRun && mode == stages) {
             attachGraphListener((WorkflowRun) build, new GitLabSCMGraphListener(build, metadata));
-        } else if (mode == RESULT) {
+        } else if (mode == result) {
             build.addAction(new RunningContextsAction(publisherName));
             publishBuildStatus(build, metadata, publisherName, running, description);
         }
