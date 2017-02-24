@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry title="${%Show only default branch(es)}" field="defaultBranchOnly">
+        <f:checkbox default="false"/>
+    </f:entry>
     <f:entry title="${%Show Branches with Merge Requests}" field="allowMergeRequests">
         <f:checkbox default="true"/>
     </f:entry>

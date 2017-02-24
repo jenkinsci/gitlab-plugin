@@ -38,6 +38,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.util.List;
 
 
+@SuppressWarnings("unused")
 public class GitLabTagFilter extends ViewJobFilter {
     @DataBoundConstructor
     public GitLabTagFilter() { /* NOOP */ }

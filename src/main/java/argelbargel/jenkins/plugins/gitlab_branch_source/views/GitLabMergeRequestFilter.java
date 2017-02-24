@@ -39,6 +39,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.util.List;
 
 
+@SuppressWarnings("unused")
 public class GitLabMergeRequestFilter extends ViewJobFilter {
     private boolean originOnly = false;
 

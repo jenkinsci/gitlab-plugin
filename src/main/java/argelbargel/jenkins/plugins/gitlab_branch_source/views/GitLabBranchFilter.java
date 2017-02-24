@@ -28,19 +28,24 @@ package argelbargel.jenkins.plugins.gitlab_branch_source.views;
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMBranchHead;
 import argelbargel.jenkins.plugins.gitlab_branch_source.Messages;
 import hudson.Extension;
+import hudson.model.Actionable;
 import hudson.model.Descriptor;
+import hudson.model.Item;
 import hudson.model.TopLevelItem;
 import hudson.model.View;
 import hudson.views.ViewJobFilter;
 import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.metadata.PrimaryInstanceMetadataAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.util.List;
 
 
+@SuppressWarnings("unused")
 public class GitLabBranchFilter extends ViewJobFilter {
     private boolean allowMergeRequests = true;
+    private boolean defaultBranchOnly = false;
 
     @DataBoundConstructor
     public GitLabBranchFilter() { /* NOOP */ }
@@ -54,6 +59,16 @@ public class GitLabBranchFilter extends ViewJobFilter {
         return allowMergeRequests;
     }
 
+    @DataBoundSetter
+    public void setDefaultBranchOnly(boolean value) {
+        defaultBranchOnly = value;
+    }
+
+    public boolean getDefaultBranchOnly() {
+        return defaultBranchOnly;
+    }
+
+
     @Override
     public List<TopLevelItem> filter(List<TopLevelItem> added, List<TopLevelItem> all, View filteringView) {
         for (TopLevelItem item : all) {
@@ -62,11 +77,19 @@ public class GitLabBranchFilter extends ViewJobFilter {
             }
 
             SCMHead head = SCMHead.HeadByItem.findHead(item);
-            if (head instanceof GitLabSCMBranchHead && (allowMergeRequests || !((GitLabSCMBranchHead) head).hasMergeRequest())) {
+            if (head instanceof GitLabSCMBranchHead && filter(item) && filter((GitLabSCMBranchHead) head)) {
                 added.add(item);
             }
         }
         return added;
+    }
+
+    private boolean filter(Item item) {
+        return !(item instanceof Actionable) || !defaultBranchOnly || ((Actionable) item).getAction(PrimaryInstanceMetadataAction.class) != null;
+    }
+
+    private boolean filter(GitLabSCMBranchHead head) {
+        return allowMergeRequests || !head.hasMergeRequest();
     }
 
     @Extension(optional = true)
