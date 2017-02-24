@@ -1,6 +1,7 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabLinkAction;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility;
 import argelbargel.jenkins.plugins.gitlab_branch_source.hooks.GitLabSCMWebHook;
@@ -38,7 +39,7 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnection;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnectionId;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconfilePathPattern;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconFilePathPattern;
 
 
 // TODO: extract common interface for GitLabSCMSource, GitLabSCMNavigator and SourceSettings
@@ -433,7 +434,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
         @Override
         public String getIconFilePathPattern() {
-            return iconfilePathPattern(getIconClassName());
+            return iconFilePathPattern(getIconClassName());
         }
 
         @Override

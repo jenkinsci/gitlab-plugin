@@ -74,7 +74,7 @@ public final class GitLabSCMMergeRequestHead extends GitLabSCMHeadImpl implement
 
     @Nonnull
     @Override
-    String getRef() {
+    public String getRef() {
         return getRefSpec().destinationRef(sourceBranch.getName());
     }
 

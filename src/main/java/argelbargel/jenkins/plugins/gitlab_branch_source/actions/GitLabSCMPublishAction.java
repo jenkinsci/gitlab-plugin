@@ -1,6 +1,7 @@
-package argelbargel.jenkins.plugins.gitlab_branch_source;
+package argelbargel.jenkins.plugins.gitlab_branch_source.actions;
 
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.BuildStatusPublishMode;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import hudson.model.InvisibleAction;
 import hudson.model.Result;
@@ -38,7 +39,7 @@ import static hudson.model.Result.UNSTABLE;
 import static java.util.logging.Level.SEVERE;
 
 
-class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
+public final class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMPublishAction.class.getName());
 
     private final String publisherName;
@@ -46,29 +47,29 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
     private final boolean updateBuildDescription;
     private final BuildStatusPublishMode mode;
 
-    GitLabSCMPublishAction(boolean updateBuildDescription, BuildStatusPublishMode mode, boolean markUnstableAsSuccess, String publisherName) {
+    public GitLabSCMPublishAction(boolean updateBuildDescription, BuildStatusPublishMode mode, boolean markUnstableAsSuccess, String publisherName) {
         this.publisherName = publisherName;
         this.markUnstableAsSuccess = markUnstableAsSuccess;
         this.updateBuildDescription = updateBuildDescription;
         this.mode = mode;
     }
 
-    void updateBuildDescription(Run<?, ?> build, GitLabSCMCauseAction action, TaskListener listener) {
-        if (updateBuildDescription && !StringUtils.isBlank(action.getDescription())) {
+    public void updateBuildDescription(Run<?, ?> build, String description, TaskListener listener) {
+        if (updateBuildDescription && !StringUtils.isBlank(description)) {
             try {
-                build.setDescription(action.getDescription());
+                build.setDescription(description);
             } catch (IOException e) {
                 listener.getLogger().println("Failed to set build description");
             }
         }
     }
 
-    void publishStarted(Run<?, ?> build, GitLabSCMCauseAction cause) {
+    public void publishStarted(Run<?, ?> build, GitLabSCMHeadMetadataAction metadata, String description) {
         if (build instanceof WorkflowRun && mode == STAGES) {
-            attachGraphListener((WorkflowRun) build, new GitLabSCMGraphListener(build, cause));
+            attachGraphListener((WorkflowRun) build, new GitLabSCMGraphListener(build, metadata));
         } else if (mode == RESULT) {
             build.addAction(new RunningContextsAction(publisherName));
-            publishBuildStatus(build, cause, publisherName, running, cause.getDescription());
+            publishBuildStatus(build, metadata, publisherName, running, description);
         }
     }
 
@@ -89,45 +90,45 @@ class GitLabSCMPublishAction extends InvisibleAction implements Serializable {
                 Executors.newSingleThreadExecutor());
     }
 
-    void publishResult(Run<?, ?> build, GitLabSCMCauseAction cause) {
+    public void publishResult(Run<?, ?> build, GitLabSCMHeadMetadataAction metadata) {
         Result buildResult = build.getResult();
         if ((buildResult == SUCCESS) || ((buildResult == UNSTABLE) && markUnstableAsSuccess)) {
-            updateRunningContexts(build, cause, success);
+            updateRunningContexts(build, metadata, success);
         } else if (buildResult == ABORTED) {
-            updateRunningContexts(build, cause, canceled);
+            updateRunningContexts(build, metadata, canceled);
         } else {
-            updateRunningContexts(build, cause, failed);
+            updateRunningContexts(build, metadata, failed);
         }
     }
 
-    private void updateRunningContexts(Run<?, ?> build, GitLabSCMCauseAction cause, BuildState state) {
+    private void updateRunningContexts(Run<?, ?> build, GitLabSCMHeadMetadataAction metadata, BuildState state) {
         for (String context : build.getAction(RunningContextsAction.class).clear()) {
-            publishBuildStatus(build, cause, context, state, "");
+            publishBuildStatus(build, metadata, context, state, "");
         }
     }
 
-    private void publishBuildStatus(Run<?, ?> build, GitLabSCMCauseAction cause, String context, BuildState state, String description) {
+    private void publishBuildStatus(Run<?, ?> build, GitLabSCMHeadMetadataAction metadata, String context, BuildState state, String description) {
         GitLabSCMBuildStatusPublisher.instance()
-                .publish(build, context, cause.getProjectId(), cause.getRef(), cause.getHash(), state, description);
+                .publish(build, context, metadata.getProjectId(), metadata.getRef(), metadata.getHash(), state, description);
     }
 
 
     private final class GitLabSCMGraphListener implements GraphListener {
         private final Run<?, ?> build;
-        private final GitLabSCMCauseAction cause;
+        private final GitLabSCMHeadMetadataAction metadata;
 
 
-        GitLabSCMGraphListener(Run<?, ?> build, GitLabSCMCauseAction cause) {
+        GitLabSCMGraphListener(Run<?, ?> build, GitLabSCMHeadMetadataAction metadata) {
             this.build = build;
-            this.cause = cause;
+            this.metadata = metadata;
         }
 
         @Override
         public void onNewHead(FlowNode node) {
             if (isNamedStageStartNode(node)) {
-                publishBuildStatus(build, cause, getRunningContexts().push(node), running, "");
+                publishBuildStatus(build, metadata, getRunningContexts().push(node), running, "");
             } else if (isStageEndNode(node, getRunningContexts().peekNodeId())) {
-                publishBuildStatus(build, cause, getRunningContexts().pop(), success, "");
+                publishBuildStatus(build, metadata, getRunningContexts().pop(), success, "");
             }
         }
 

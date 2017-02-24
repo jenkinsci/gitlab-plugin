@@ -254,7 +254,7 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     @Nonnull
     @Override
     protected List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
-        return actions.retrieveActions(event, listener);
+        return actions.retrieve(event, listener);
     }
 
     @Nonnull

@@ -57,13 +57,13 @@ abstract class GitLabSCMHeadImpl extends GitLabSCMHead {
     }
 
     @Override
-    final int getProjectId() {
+    public final int getProjectId() {
         return projectId;
     }
 
     @Nonnull
     @Override
-    String getRef() {
+    public String getRef() {
         return refSpec.destinationRef(getName());
     }
 

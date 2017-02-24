@@ -1,4 +1,4 @@
-package argelbargel.jenkins.plugins.gitlab_branch_source;
+package argelbargel.jenkins.plugins.gitlab_branch_source.actions;
 
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
@@ -21,7 +21,7 @@ import static java.util.logging.Level.WARNING;
  * Publishes Build-Status to GitLab using separate threads so it does not block while sending messages
  * TODO: Multi-Threading is easy to get wrong and wreak havoc. Check if there is no better way to do this built into Jenkins
  */
-public class GitLabSCMBuildStatusPublisher {
+class GitLabSCMBuildStatusPublisher {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMBuildStatusPublisher.class.getName());
 
     private static final Object instanceLock = new Object();

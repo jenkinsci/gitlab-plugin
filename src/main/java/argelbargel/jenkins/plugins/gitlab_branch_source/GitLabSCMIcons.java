@@ -23,13 +23,13 @@ import static org.jenkins.ui.icon.IconSet.icons;
 
 
 public final class GitLabSCMIcons {
-    enum Size {
+    public enum Size {
         SMALL("icon-sm", "16x16", ICON_SMALL_STYLE),
         MEDIUM("icon-md", "24x24", ICON_MEDIUM_STYLE),
         LARGE("icon-lg", "32x32", ICON_LARGE_STYLE),
         XLARGE("icon-xlg", "48x48", ICON_XLARGE_STYLE);
 
-        static Size byDimensions(String dimensions) {
+        public static Size byDimensions(String dimensions) {
             for (Size s : values()) {
                 if (s.dimensions.equals(dimensions)) {
                     return s;
@@ -50,12 +50,13 @@ public final class GitLabSCMIcons {
         }
     }
 
+    public static final String ICON_PROJECT = "icon-project";
+    public static final String ICON_BRANCH = "icon-branch";
+    public static final String ICON_COMMIT = "icon-commit";
+    public static final String ICON_MERGE_REQUEST = "icon-merge-request";
+    public static final String ICON_TAG = "icon-tag";
+
     static final String ICON_GITLAB = "icon-gitlab";
-    static final String ICON_PROJECT = "icon-project";
-    static final String ICON_BRANCH = "icon-branch";
-    static final String ICON_COMMIT = "icon-commit";
-    static final String ICON_MERGE_REQUEST = "icon-merge-request";
-    static final String ICON_TAG = "icon-tag";
     private static final String ICON_PATH = "plugin/gitlab-branch-source/images/";
 
     @Initializer
@@ -68,11 +69,7 @@ public final class GitLabSCMIcons {
         addIcon(ICON_TAG);
     }
 
-    static String iconfilePathPattern(String name) {
-        return ICON_PATH + ":size/" + name + ".png";
-    }
-
-    static String iconFileName(String name, Size size) {
+    public static String iconFileName(String name, Size size) {
         Icon icon = icons.getIconByClassSpec(classSpec(name, size));
         if (icon == null) {
             return null;
@@ -83,7 +80,7 @@ public final class GitLabSCMIcons {
         return icon.getQualifiedUrl(ctx);
     }
 
-    static String avatarFileName(int projectId, String connectionName, Size size) {
+    public static String avatarFileName(int projectId, String connectionName, Size size) {
         // TODO: size!
         try {
             GitLabProject project = gitLabAPI(connectionName).getProject(projectId);
@@ -96,6 +93,10 @@ public final class GitLabSCMIcons {
             return iconFileName(ICON_GITLAB, size);
         }
 
+    }
+
+    static String iconFilePathPattern(String name) {
+        return ICON_PATH + ":size/" + name + ".png";
     }
 
     private static String groupAvatarUrl(GitlabProject project, String connectionName) throws GitLabAPIException {

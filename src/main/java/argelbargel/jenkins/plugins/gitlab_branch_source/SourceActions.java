@@ -1,6 +1,12 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabLinkAction;
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabProjectAvatarMetadataAction;
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabSCMAcceptMergeRequestAction;
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabSCMCauseAction;
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabSCMHeadMetadataAction;
+import argelbargel.jenkins.plugins.gitlab_branch_source.actions.GitLabSCMPublishAction;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabMergeRequest;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
@@ -25,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
 
 class SourceActions {
@@ -37,76 +43,78 @@ class SourceActions {
     }
 
     @Nonnull
-    List<Action> retrieveActions(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
+    List<Action> retrieve(@CheckForNull SCMSourceEvent event, @Nonnull TaskListener listener) throws IOException {
         GitLabProject project = source.getProject();
         return asList(
-                new ObjectMetadataAction(null, project.getDescription(), project.getWebUrl()),
+                new ObjectMetadataAction(project.getNameWithNamespace(), project.getDescription(), project.getWebUrl()),
                 new GitLabProjectAvatarMetadataAction(project.getId(), source.getConnectionName()),
                 GitLabLinkAction.toProject(project));
     }
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+        if (head instanceof GitLabSCMHead) {
+            return retrieve((GitLabSCMHead) head, event, listener);
+        }
+
+        return emptyList();
+    }
+
+    @Nonnull
+    private List<Action> retrieve(@Nonnull GitLabSCMHead head, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         List<Action> actions = new ArrayList<>();
 
+        actions.add(new GitLabSCMPublishAction(
+                source.getUpdateBuildDescription(),
+                buildStatusPublishMode(head),
+                source.getPublishUnstableBuildsAsSuccess(),
+                source.getPublisherName()
+        ));
+
+        Action linkAction;
+
         if (head instanceof ChangeRequestSCMHead) {
+            linkAction = GitLabLinkAction.toMergeRequest(source.getProject(), ((ChangeRequestSCMHead) head).getId());
+
             GitLabMergeRequest mr = retrieveMergeRequest((ChangeRequestSCMHead) head, listener);
-            Action linkAction = GitLabLinkAction.toMergeRequest(source.getProject(), ((ChangeRequestSCMHead) head).getId());
-            actions.add(new ObjectMetadataAction(mr.getTitle(), mr.getDescription(), linkAction.getUrlName()));
-            actions.add(linkAction);
+            if (acceptMergeRequest(head)) {
+                boolean removeSourceBranch = mr.getRemoveSourceBranch() || removeSourceBranch(head);
+                actions.add(new GitLabSCMAcceptMergeRequestAction(mr.getProjectId(), mr.getId(), source.getMergeCommitMessage(), removeSourceBranch));
+            }
         } else {
-            Action linkAction = (head instanceof TagSCMHead) ? GitLabLinkAction.toTag(source.getProject(), head.getName()) : GitLabLinkAction.toBranch(source.getProject(), head.getName());
-            actions.add(new ObjectMetadataAction(head.getName(), "", linkAction.getUrlName()));
-            actions.add(linkAction);
+            linkAction = (head instanceof TagSCMHead) ? GitLabLinkAction.toTag(source.getProject(), head.getName()) : GitLabLinkAction.toBranch(source.getProject(), head.getName());
             if (head instanceof GitLabSCMBranchHead && StringUtils.equals(source.getProject().getDefaultBranch(), head.getName())) {
                 actions.add(new PrimaryInstanceMetadataAction());
             }
         }
 
-        SCMRevisionImpl rev = (head instanceof GitLabSCMHead) ? ((GitLabSCMHead) head).getRevision() : new SCMRevisionImpl(head, REVISION_HEAD);
-        actions.addAll(retrieveRevisionActions(rev, event, listener)); // TODO: why is this neccessary? Would be nicer if those actions were added to the run
-
+        actions.add(new GitLabSCMHeadMetadataAction(head, linkAction.getUrlName()));
+        actions.add(linkAction);
         return actions;
     }
+
 
     @Nonnull
     List<Action> retrieve(@Nonnull SCMRevision revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
-        List<Action> actions = new ArrayList<>();
-
         if (revision instanceof SCMRevisionImpl) {
-            String hash = ((SCMRevisionImpl) revision).getHash();
-            Action linkAction = GitLabLinkAction.toCommit(source.getProject(), hash);
-            actions.add(new ObjectMetadataAction(hash, "", linkAction.getUrlName()));
-            actions.add(linkAction);
-            actions.addAll(retrieveRevisionActions((SCMRevisionImpl) revision, event, listener));
+            return retrieve((SCMRevisionImpl) revision, event, listener);
         }
 
-        return actions;
+        return emptyList();
     }
 
     @Nonnull
-    private List<Action> retrieveRevisionActions(@Nonnull SCMRevisionImpl revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    private List<Action> retrieve(@Nonnull SCMRevisionImpl revision, @CheckForNull SCMHeadEvent event, @Nonnull TaskListener listener) throws IOException, InterruptedException {
         List<Action> actions = new ArrayList<>();
 
-        actions.add(new GitLabSCMPublishAction(
-                source.getUpdateBuildDescription(),
-                buildStatusPublishMode(revision.getHead()),
-                source.getPublishUnstableBuildsAsSuccess(),
-                source.getPublisherName()
-        ));
+        String hash = revision.getHash();
+        Action linkAction = GitLabLinkAction.toCommit(source.getProject(), hash);
+        actions.add(new GitLabSCMHeadMetadataAction((GitLabSCMHead) revision.getHead(), linkAction.getUrlName(), hash));
+        actions.add(linkAction);
 
-        if (revision.getHead() instanceof ChangeRequestSCMHead) {
-            if (acceptMergeRequest(revision.getHead())) {
-                GitLabMergeRequest mr = retrieveMergeRequest((ChangeRequestSCMHead) revision.getHead(), listener);
-                boolean removeSourceBranch = mr.getRemoveSourceBranch() || removeSourceBranch(revision.getHead());
-                actions.add(new GitLabSCMAcceptMergeRequestAction(mr.getProjectId(), mr.getId(), source.getMergeCommitMessage(), removeSourceBranch));
-            }
+        if (event instanceof GitLabSCMEvent) {
+            actions.add(new GitLabSCMCauseAction(revision, ((GitLabSCMEvent) event).getCause()));
         }
-
-        actions.add(
-                (event instanceof GitLabSCMEvent)
-                        ? new GitLabSCMCauseAction(revision, ((GitLabSCMEvent) event).getCause())
-                        : new GitLabSCMCauseAction(revision));
 
         return actions;
     }

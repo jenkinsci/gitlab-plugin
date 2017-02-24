@@ -1,4 +1,4 @@
-package argelbargel.jenkins.plugins.gitlab_branch_source;
+package argelbargel.jenkins.plugins.gitlab_branch_source.actions;
 
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.Size;
@@ -9,14 +9,15 @@ import java.util.Objects;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.avatarFileName;
 
-class GitLabProjectAvatarMetadataAction extends AvatarMetadataAction {
+
+public final class GitLabProjectAvatarMetadataAction extends AvatarMetadataAction {
     private static final long serialVersionUID = 1L;
 
     private final int projectId;
     private final String connectionName;
     private transient String avatarUrlCache;
 
-    GitLabProjectAvatarMetadataAction(int projectId, String connectionName) {
+    public GitLabProjectAvatarMetadataAction(int projectId, String connectionName) {
         this.projectId = projectId;
         this.connectionName = connectionName;
         this.avatarUrlCache = null;

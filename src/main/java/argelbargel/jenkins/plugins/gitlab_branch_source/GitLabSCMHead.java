@@ -40,10 +40,10 @@ public abstract class GitLabSCMHead extends SCMHead implements SCMHeadMixin {
     @Nonnull
     public abstract SCMRevisionImpl getRevision();
 
-    abstract int getProjectId();
+    public abstract int getProjectId();
 
     @Nonnull
-    abstract String getRef();
+    public abstract String getRef();
 
     @Nonnull
     abstract GitLabSCMRefSpec getRefSpec();
