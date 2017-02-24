@@ -20,59 +20,49 @@ import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.Si
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.iconFileName;
 
 
-// TODO: remove duplicate check for pronoun != null
 class GitLabLinkAction implements Action, IconSpec {
-    static GitLabLinkAction create(@Nonnull String displayName, String iconFileName, @Nonnull String url) {
+    @Nonnull
+    static GitLabLinkAction create(@CheckForNull String displayName, @Nonnull String iconFileName, @Nonnull String url) {
+        if (displayName == null) {
+            return create("", iconFileName, url);
+        }
+        
         return new GitLabLinkAction(displayName, iconFileName, url);
     }
 
+    @Nonnull
     static GitLabLinkAction toProject(GitlabProject project) {
         return create(Messages.GitLabLink_DisplayName_Project(), ICON_PROJECT, project.getWebUrl());
     }
 
+    @Nonnull
     static GitLabLinkAction toBranch(GitlabProject project, String branchName) {
-        return create(project, Messages.GitLabLink_DisplayName_Branch(), ICON_BRANCH, "tree/" + branchName);
+        return create(Messages.GitLabLink_DisplayName_Branch(), ICON_BRANCH, project, "tree/" + branchName);
     }
 
-
+    @Nonnull
     static GitLabLinkAction toTag(GitLabProject project, String tagName) {
-        return create(project, Messages.GitLabLink_DisplayName_Tag(), ICON_TAG, "tree/" + tagName);
+        return create(Messages.GitLabLink_DisplayName_Tag(), ICON_TAG, project, "tree/" + tagName);
     }
 
-
+    @Nonnull
     static GitLabLinkAction toCommit(GitlabProject project, String hash) {
-        return create(project,
-                Messages.GitLabLink_DisplayName_Commit(),
-                ICON_COMMIT,
+        return create(Messages.GitLabLink_DisplayName_Commit(), ICON_COMMIT, project,
                 "commits/" + hash);
     }
 
+    @Nonnull
     static GitLabLinkAction toMergeRequest(GitlabProject project, String id) {
-        return create(project,
-                Messages.GitLabLink_DisplayName_MergeRequest(),
-                ICON_MERGE_REQUEST,
+        return create(Messages.GitLabLink_DisplayName_MergeRequest(), ICON_MERGE_REQUEST, project,
                 "merge_requests/" + String.valueOf(id));
     }
 
-    private static GitLabLinkAction create(@Nonnull GitlabProject project, @CheckForNull String displayName, @Nonnull String iconName, String path) {
+    @Nonnull
+    private static GitLabLinkAction create(@CheckForNull String displayName, @Nonnull String iconName, @Nonnull GitlabProject project, String path) {
         return new GitLabLinkAction(
                 displayName == null ? "" : displayName,
                 iconName,
                 project.getWebUrl() + "/" + path);
-    }
-
-    private static GitLabLinkAction toTree(GitlabProject project, String path) {
-        return create(project, "", ICON_BRANCH, "tree/" + path);
-    }
-
-    static String treeUrl(GitlabProject project, String path) {
-        return toTree(project, path).getUrlName();
-    }
-
-    static String mergeRequestUrl(GitlabProject project, String id) {
-        return create(project,
-                "",
-                "merge_requests", id).getUrlName();
     }
 
 
@@ -80,7 +70,7 @@ class GitLabLinkAction implements Action, IconSpec {
     private final String iconName;
     private final String url;
 
-    private GitLabLinkAction(@Nonnull String displayName, String iconName, @Nonnull String url) {
+    private GitLabLinkAction(@Nonnull String displayName, @Nonnull String iconName, @Nonnull String url) {
         this.displayName = displayName.startsWith(Messages.GitLabLink_DisplayName_Prefix()) ? displayName : Messages.GitLabLink_DisplayName_Prefix() + " " + displayName;
         this.iconName = iconName;
         this.url = url;
@@ -88,8 +78,9 @@ class GitLabLinkAction implements Action, IconSpec {
 
     @Override
     public String getIconFileName() {
+        String iconFileName = iconFileName(iconName, MEDIUM);
         // TODO: why do we have to remove the context-path (e.g. /jenkins) here?
-        return iconFileName(iconName, MEDIUM).replaceFirst("^" + Stapler.getCurrentRequest().getContextPath(), "");
+        return iconFileName != null ? iconFileName.replaceFirst("^" + Stapler.getCurrentRequest().getContextPath(), "") : null;
     }
 
     @Override

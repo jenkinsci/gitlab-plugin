@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabAPI;
-import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabLinkAction.mergeRequestUrl;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMHead.REVISION_HEAD;
 import static java.util.Arrays.asList;
 
@@ -52,8 +51,9 @@ class SourceActions {
 
         if (head instanceof ChangeRequestSCMHead) {
             GitLabMergeRequest mr = retrieveMergeRequest((ChangeRequestSCMHead) head, listener);
-            actions.add(new ObjectMetadataAction(mr.getTitle(), mr.getDescription(), mergeRequestUrl(source.getProject(), ((GitLabSCMMergeRequestHead) head).getId())));
-            actions.add(GitLabLinkAction.toMergeRequest(source.getProject(), ((ChangeRequestSCMHead) head).getId()));
+            Action linkAction = GitLabLinkAction.toMergeRequest(source.getProject(), ((ChangeRequestSCMHead) head).getId());
+            actions.add(new ObjectMetadataAction(mr.getTitle(), mr.getDescription(), linkAction.getUrlName()));
+            actions.add(linkAction);
         } else {
             Action linkAction = (head instanceof TagSCMHead) ? GitLabLinkAction.toTag(source.getProject(), head.getName()) : GitLabLinkAction.toBranch(source.getProject(), head.getName());
             actions.add(new ObjectMetadataAction(head.getName(), "", linkAction.getUrlName()));
