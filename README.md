@@ -60,7 +60,7 @@ This plugin uses the [GitLab Plugin](https://wiki.jenkins-ci.org/display/JENKINS
 for communication with GitLab. Thus before creating a GitLab Branch Source you'll have to setup a appropriate [GitLab
 Connection](https://github.com/jenkinsci/gitlab-plugin#configuring-access-to-gitlab). The user used to communicate with
  GitLab must have at least the developer role. To automatically register webhooks etc. the user must currently have 
- administrator rights (to register the required system-hook). IT IS NOT RECOMMENDED TO USE THIS WHEN COMMUNICATIONG WITH
+ administrator rights (to register the required system-hook). IT IS NOT RECOMMENDED TO USE THIS WHEN COMMUNICATING WITH
  YOUR GITLAB-SERVER VIA A PUBLIC NETWORK - REGISTER THE WEBHOOKS MANUALLY IN THIS CASE (see the configuration of the 
  projects for the required webhook-urls).
  
