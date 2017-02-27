@@ -43,7 +43,8 @@ for communication with GitLab. Thus before creating a GitLab Branch Source you'l
 Connection](https://github.com/jenkinsci/gitlab-plugin#configuring-access-to-gitlab). The user used to communicate with
  GitLab must have at least the developer role. To automatically register webhooks etc. the user must currently have 
  administrator rights (to register the required system-hook). IT IS NOT RECOMMENDED TO USE THIS WHEN COMMUNICATIONG WITH
- YOUR GITLAB-SERVER VIA A PUBLIC NETWORK.
+ YOUR GITLAB-SERVER VIA A PUBLIC NETWORK - REGISTER THE WEBHOOKS MANUALLY IN THIS CASE (see the configuration of the 
+ projects for the required webhook-urls).
  
 Having created a working GitLab connection, simply create a new branch source via `New Item > GitLab Projects`.
  ![New Project](./docs/New-Item.png)
