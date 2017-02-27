@@ -1,6 +1,4 @@
 markdown: kramdown
 highlighter: rouge
 
-repository: https://github.com/Argelbargel/gitlab-branch-source
-
 theme: jekyll-theme-minimal
