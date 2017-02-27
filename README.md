@@ -61,11 +61,11 @@ To see the imported projects click on "Status".
 
 To see the imported branches/merge requests/tags and their build status, drill down by clicking on the appropriate links
 
-### Projects
+### Project-Details
 ![Project Details](./docs/Project-Details.png)
 
-### Branches
+### Details of Branches
 ![Branch Details](./docs/Branch-Details.png)
 
-### Build
+### Build-Details
 ![Build Details](./docs/Build-Details.png)
