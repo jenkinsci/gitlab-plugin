@@ -2,7 +2,9 @@
 
 ##Introduction
 The GitLab Branch Source Plugin allows you to create a new project based on the repository structure based on your GitLab
- projects. It is heavily inspired by the [GitHub Branch Source Plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Branch+Source+Plugin).
+ projects. It is heavily inspired by the [GitHub Branch Source Plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Branch+Source+Plugin),
+  builds upon the [GitLab Plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin) and uses the
+ [Gitlab Java API Wrapper](https://github.com/timols/java-gitlab-api) for communication with GitLab.
 
 The GitLab Branch Source Plugin scans your GitLab server for projects according to criteria you can specify. 
 The only restriction is that your projects must contain a `Jenkinsfile` with the definition of the pipeline used to
