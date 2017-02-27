@@ -37,6 +37,24 @@ are included:
 - when Jenkins is allowed to do so you can configure the plugin so that it automatically accepts merge requests on when
  the build succeeds and optionally remove the merge requests's source branch.
 
+## Installation
+This plugin is still under development. Thus you cannot install it via the Jenkins Update manager yet. Simply download the
+[latest release](https://github.com/Argelbargel/gitlab-branch-source-plugin/releases) into the plugins directory of your
+Jenkins. I'm not sure if the dependencies get installed automatically. If that is not the case, make sure to install these
+dependencies:
+- [branch-api 2.0.7](https://wiki.jenkins-ci.org/display/JENKINS/Branch+API+Plugin)
+- [cloudbees-folder 5.18](https://wiki.jenkins-ci.org/display/JENKINS/CloudBees+Folders+Plugin)
+- [credentials 2.1.2](https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin)
+- [git 3.0.5](https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin)
+- [git-client 2.2.1](https://wiki.jenkins-ci.org/display/JENKINS/Git+Client+Plugin)
+- [gitlab-plugin 1.4.5](https://wiki.jenkins-ci.org/display/JENKINS/Gitlab+Plugin)
+- [scm-api 2.0.7](https://wiki.jenkins-ci.org/display/JENKINS/SCM+API+Plugin)
+- [workflow-api 2.11](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+API+Plugin) 
+- [workflow-cps 2.28](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Groovy+Plugin) 
+- [workflow-job 2.10](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Job+Plugin) 
+- [workflow-multibranch 2.12](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Multibranch+Plugin) 
+
+
 ## Creating a project
 This plugin uses the [GitLab Plugin](https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin)
 for communication with GitLab. Thus before creating a GitLab Branch Source you'll have to setup a appropriate [GitLab
