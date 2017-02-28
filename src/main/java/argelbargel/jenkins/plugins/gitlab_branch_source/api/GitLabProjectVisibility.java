@@ -52,5 +52,7 @@ public enum GitLabProjectVisibility {
         return id;
     }
 
-    public int level() { return level; }
+    private int level() {
+        return level;
+    }
 }

@@ -35,6 +35,7 @@ import hudson.views.ViewJobFilter;
 import jenkins.scm.api.SCMHead;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 
@@ -59,6 +60,7 @@ public class GitLabTagFilter extends ViewJobFilter {
 
     @Extension(optional = true)
     public static class DescriptorImpl extends Descriptor<ViewJobFilter> {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.GitLabSCMViewFilter_Tag_DisplayName();

@@ -30,7 +30,7 @@ public enum GitLabHookEventType {
         this.header = header;
     }
 
-    public String header() {
+    private String header() {
         return header;
     }
 }

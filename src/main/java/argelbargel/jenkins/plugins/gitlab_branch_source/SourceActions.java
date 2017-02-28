@@ -113,7 +113,7 @@ class SourceActions {
         actions.add(linkAction);
 
         if (event instanceof GitLabSCMEvent) {
-            actions.add(new GitLabSCMCauseAction(revision, ((GitLabSCMEvent) event).getCause()));
+            actions.add(new GitLabSCMCauseAction(((GitLabSCMEvent) event).getCause()));
         }
 
         return actions;

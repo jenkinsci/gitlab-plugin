@@ -36,6 +36,7 @@ import jenkins.scm.api.SCMHead;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 
@@ -72,6 +73,7 @@ public class GitLabMergeRequestFilter extends ViewJobFilter {
 
     @Extension(optional = true)
     public static class DescriptorImpl extends Descriptor<ViewJobFilter> {
+        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.GitLabSCMViewFilter_MergeRequest_DisplayName();

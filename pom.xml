@@ -12,6 +12,8 @@
 
     <properties>
         <jenkins.version>2.7.1</jenkins.version>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
     <groupId>argelbargel.jenkins.plugins</groupId>
