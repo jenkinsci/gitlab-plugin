@@ -2,8 +2,6 @@ package argelbargel.jenkins.plugins.gitlab_branch_source;
 
 
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProject;
-import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector;
-import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility;
 import jenkins.scm.api.SCMSourceObserver;
 
 import java.io.IOException;
@@ -24,17 +22,14 @@ class SourceVisitor {
     }
 
     void visitSources() throws IOException, InterruptedException {
-        visitSources(navigator.getConnectionName(),
-                GitLabProjectSelector.byId(navigator.getProjectSelectorId()),
-                GitLabProjectVisibility.byId(navigator.getProjectVisibilityId()),
-                navigator.getProjectSearchPattern());
+        visitSources(navigator.getConnectionName(), ProjectQuery.create(navigator));
     }
 
-    private void visitSources(String connectionName, GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws InterruptedException, IOException {
+    private void visitSources(String connectionName, ProjectQuery projectQuery) throws InterruptedException, IOException {
         log(Messages.GitLabSCMNavigator_visitSources(connectionName));
 
         try {
-            for (GitLabProject project : gitLabAPI(connectionName).findProjects(selector, visibility, searchPattern)) {
+            for (GitLabProject project : projectQuery.execute(connectionName)) {
                 checkInterrupt();
                 visitProject(project);
             }

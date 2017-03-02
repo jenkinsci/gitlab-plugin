@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import static argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectSelector.VISIBLE;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabProjectVisibility.ALL;
+
+
 public final class GitLabAPI {
     private static final String PATH_SEP = "/";
 
@@ -138,6 +142,18 @@ public final class GitLabAPI {
             throw new GitLabAPIException(e);
         }
     }
+
+    public List<GitLabProject> findProjects(String group, GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
+        LOGGER.fine("finding projects for group" + group + ", " + selector + ", " + visibility + ", " + searchPattern + "...");
+        try {
+            return delegate
+                    .retrieve()
+                    .getAll(projectUrl(group, selector, visibility, searchPattern), GitLabProject[].class);
+        } catch (Exception e) {
+            throw new GitLabAPIException(e);
+        }
+    }
+
 
     public List<GitLabProject> findProjects(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) throws GitLabAPIException {
         LOGGER.fine("finding projects for " + selector + ", " + visibility + ", " + searchPattern + "...");
@@ -264,16 +280,35 @@ public final class GitLabAPI {
         return false;
     }
 
+    private String projectUrl(String group, GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) {
+        StringBuilder urlBuilder = new StringBuilder(GitlabGroup.URL).append(PATH_SEP).append(group).append(GitLabProject.URL);
+
+        if (!VISIBLE.equals(selector)) {
+            urlBuilder.append("?").append(selector.id()).append("=true");
+        }
+
+        if (!ALL.equals(visibility)) {
+            urlBuilder.append(VISIBLE.equals(selector) ? "?" : "&").append("visibility=").append(visibility.id());
+        }
+
+        if (!StringUtils.isEmpty(searchPattern)) {
+            urlBuilder.append(VISIBLE.equals(selector) && ALL.equals(visibility) ? "?" : "&").append("search=").append(searchPattern);
+        }
+
+        return urlBuilder.toString();
+    }
+
+
     private String projectUrl(GitLabProjectSelector selector, GitLabProjectVisibility visibility, String searchPattern) {
         StringBuilder urlBuilder = new StringBuilder(GitlabProject.URL)
                 .append(PATH_SEP).append(selector.id());
 
-        if (!GitLabProjectVisibility.ALL.equals(visibility)) {
+        if (!ALL.equals(visibility)) {
             urlBuilder.append("?visibility=").append(visibility.id());
         }
 
         if (!StringUtils.isEmpty(searchPattern)) {
-            urlBuilder.append(GitLabProjectVisibility.ALL.equals(visibility) ? "?" : "&").append("search=").append(searchPattern);
+            urlBuilder.append(ALL.equals(visibility) ? "?" : "&").append("search=").append(searchPattern);
         }
 
         return urlBuilder.toString();

@@ -53,6 +53,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
     private String projectSearchPattern;
     private String projectSelectorId;
     private String projectVisibilityId;
+    private String projectGroup;
 
     @DataBoundConstructor
     public GitLabSCMNavigator(String connectionName) {
@@ -65,6 +66,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
         this.projectSearchPattern = DEFAULT_SEARCH_PATTERN;
         this.projectSelectorId = GitLabProjectSelector.VISIBLE.id();
         this.projectVisibilityId = GitLabProjectVisibility.ALL.id();
+        this.projectGroup = null;
     }
 
     SourceSettings getSourceSettings() {
@@ -79,6 +81,15 @@ public class GitLabSCMNavigator extends SCMNavigator {
     @CheckForNull
     public String getCheckoutCredentialsId() {
         return sourceSettings.getCredentialsId();
+    }
+
+    public String getProjectGroup() {
+        return (projectGroup != null) ? projectGroup : "";
+    }
+
+    @DataBoundSetter
+    public void setProjectGroup(String group) {
+        projectGroup = group;
     }
 
     public String getProjectSearchPattern() {
