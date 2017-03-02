@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static argelbargel.jenkins.plugins.gitlab_branch_source.DescriptorHelper.CHECKOUT_CREDENTIALS_ANONYMOUS;
+import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.defaultGitLabConnectionName;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnection;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabHelper.gitLabConnectionId;
 import static argelbargel.jenkins.plugins.gitlab_branch_source.GitLabSCMIcons.ICON_GITLAB;
@@ -55,8 +55,12 @@ public class GitLabSCMNavigator extends SCMNavigator {
     private String projectVisibilityId;
 
     @DataBoundConstructor
-    public GitLabSCMNavigator(String connectionName, String checkoutCredentialsId) {
-        this.sourceSettings = new SourceSettings(connectionName, checkoutCredentialsId);
+    public GitLabSCMNavigator(String connectionName) {
+        this(new SourceSettings(connectionName));
+    }
+
+    private GitLabSCMNavigator(SourceSettings settings) {
+        this.sourceSettings = settings;
         this.hookListener = GitLabSCMWebHook.createListener(this);
         this.projectSearchPattern = DEFAULT_SEARCH_PATTERN;
         this.projectSelectorId = GitLabProjectSelector.VISIBLE.id();
@@ -439,7 +443,7 @@ public class GitLabSCMNavigator extends SCMNavigator {
 
         @Override
         public SCMNavigator newInstance(String name) {
-            return new GitLabSCMNavigator("", CHECKOUT_CREDENTIALS_ANONYMOUS);
+            return new GitLabSCMNavigator(defaultGitLabConnectionName());
         }
 
         @Nonnull

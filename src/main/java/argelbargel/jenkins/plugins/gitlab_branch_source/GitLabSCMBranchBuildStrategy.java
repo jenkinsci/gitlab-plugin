@@ -59,9 +59,12 @@ public class GitLabSCMBranchBuildStrategy extends BranchBuildStrategy {
     }
 
     boolean isApplicable(BranchSource branchSource) {
-        return getDescriptor().isApplicable(branchSource.getSource().getDescriptor());
+        return branchSource.getSource() instanceof GitLabSCMSource;
     }
 
+    private GitLabSCMBranchBuildStrategy() { /* singleton */ }
+
+    
     @Extension
     public static class DescriptorImpl extends BranchBuildStrategyDescriptor {
         @Nonnull
@@ -72,7 +75,9 @@ public class GitLabSCMBranchBuildStrategy extends BranchBuildStrategy {
 
         @Override
         public boolean isApplicable(@Nonnull SCMSourceDescriptor sourceDescriptor) {
-            return sourceDescriptor instanceof GitLabSCMSource.DescriptorImpl;
+            // TODO: HACK ALERT! the source configuration will not be displayed correctly (it hangs)
+            // when the strategy is listed in the sources configuration. thus we have to disable it here
+            return false;
         }
 
         @Override

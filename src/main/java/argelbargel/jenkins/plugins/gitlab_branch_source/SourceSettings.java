@@ -37,9 +37,9 @@ class SourceSettings {
     private String mergeCommitMessage;
 
 
-    SourceSettings(String connectionName, String credentialsId) {
+    SourceSettings(String connectionName) {
         this.connectionName = connectionName;
-        this.credentialsId = credentialsId;
+        this.credentialsId = CHECKOUT_CREDENTIALS_ANONYMOUS;
         this.includes = DEFAULT_INCLUDES;
         this.excludes = DEFAULT_EXCLUDES;
         this.branchMonitorStrategy = new MonitorStrategy(true, false, stages);

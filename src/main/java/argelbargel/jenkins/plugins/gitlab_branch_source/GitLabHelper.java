@@ -1,5 +1,6 @@
 package argelbargel.jenkins.plugins.gitlab_branch_source;
 
+
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPI;
 import argelbargel.jenkins.plugins.gitlab_branch_source.api.GitLabAPIException;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -13,8 +14,9 @@ import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
@@ -37,9 +39,15 @@ public final class GitLabHelper {
         throw new NoSuchElementException("unknown gitlab-connection: " + connectionName);
     }
 
-    static Collection<String> gitLabConnectionNames() {
+    @Nonnull
+    static String defaultGitLabConnectionName() {
+        List<String> connections = GitLabHelper.gitLabConnectionNames();
+        return (!connections.isEmpty()) ? connections.get(0) : "";
+    }
+
+    static List<String> gitLabConnectionNames() {
         GitLabConnectionConfig config = connectionConfig();
-        Collection<String> names = new ArrayList<>();
+        List<String> names = new ArrayList<>();
 
         for (GitLabConnection conn : config.getConnections()) {
             names.add(conn.getName());

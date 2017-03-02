@@ -65,7 +65,7 @@ class SourceVisitor {
 
         log(Messages.GitLabSCMNavigator_visitProject(project.getPathWithNamespace()));
         SCMSourceObserver.ProjectObserver projectObserver = observer.observe(project.getPathWithNamespace());
-        GitLabSCMSource source = new GitLabSCMSource(project, navigator.getSourceSettings());
+        GitLabSCMSource source = new GitLabSCMSource(navigator.getSourceSettings(), project);
         projectObserver.addSource(source);
         projectObserver.complete();
         source.afterSave();

@@ -56,13 +56,12 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     private static final Logger LOGGER = Logger.getLogger(GitLabSCMSource.class.getName());
 
     private final SourceSettings settings;
-    private final GitLabProject project;
-    private final GitLabSCMWebHookListener hookListener;
     private final SourceHeads heads;
     private final SourceActions actions;
+    private final GitLabSCMWebHookListener hookListener;
+    private GitLabProject project;
 
-
-    GitLabSCMSource(GitLabProject project, SourceSettings settings) {
+    GitLabSCMSource(@Nonnull SourceSettings settings, GitLabProject project) {
         super(project.getPathWithNamespace());
         this.settings = settings;
         this.project = project;
@@ -179,19 +178,19 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
         return settings.originMonitorStrategy().getRemoveSourceBranch();
     }
 
-    BuildStatusPublishMode getBranchBuildStatusPublishMode() {
+    public BuildStatusPublishMode getBranchBuildStatusPublishMode() {
         return settings.branchMonitorStrategy().getBuildStatusPublishMode();
     }
 
-    BuildStatusPublishMode getOriginBuildStatusPublishMode() {
+    public BuildStatusPublishMode getOriginBuildStatusPublishMode() {
         return settings.originMonitorStrategy().getBuildStatusPublishMode();
     }
 
-    BuildStatusPublishMode getForkBuildStatusPublishMode() {
+    public BuildStatusPublishMode getForkBuildStatusPublishMode() {
         return settings.forksMonitorStrategy().getBuildStatusPublishMode();
     }
 
-    BuildStatusPublishMode getTagBuildStatusPublishMode() {
+    public BuildStatusPublishMode getTagBuildStatusPublishMode() {
         return settings.tagMonitorStrategy().getBuildStatusPublishMode();
     }
 
@@ -200,7 +199,11 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
     }
 
     public int getProjectId() {
-        return project.getId();
+        return (project != null) ? project.getId() : -1;
+    }
+
+    public String getProjectPath() {
+        return (project != null) ? project.getPathWithNamespace() : "";
     }
 
     public String getHookUrl() {
@@ -368,6 +371,11 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
             return ICON_GITLAB;
         }
 
+        @Override
+        public boolean isApplicable(Class<? extends SCMSourceOwner> owner) {
+            return false; // GitLabSCMSource can only be created via GitLabSCMNavigator for now...
+        }
+
         @Nonnull
         @Override
         protected SCMHeadCategory[] createCategories() {
@@ -389,13 +397,29 @@ public class GitLabSCMSource extends AbstractGitSCMSource {
             return DescriptorHelper.doFillConnectionNameItems();
         }
 
-        public ListBoxModel doFillProjectPathItems(@AncestorInPath SCMSourceOwner context, @QueryParameter String connectionName) {
-            return DescriptorHelper.doFillProjectPathItems(connectionName);
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillCheckoutCredentialsIdItems(@AncestorInPath SCMSourceOwner context, @QueryParameter String connectionName, @QueryParameter String credentialsId) {
+            return DescriptorHelper.doFillCheckoutCredentialsIdItems(context, connectionName, credentialsId);
         }
 
         @Restricted(NoExternalUse.class)
-        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath SCMSourceOwner context, @QueryParameter String connectionName, @QueryParameter String credentialsId) {
-            return DescriptorHelper.doFillCheckoutCredentialsIdItems(context, connectionName, credentialsId);
+        public ListBoxModel doFillBranchBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillOriginBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillForkBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
+        }
+
+        @Restricted(NoExternalUse.class)
+        public ListBoxModel doFillTagBuildStatusPublishModeItems() {
+            return DescriptorHelper.doBuildStatusPublishModeItems();
         }
     }
 }
