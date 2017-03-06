@@ -8,6 +8,13 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,12 +23,9 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.socket.PortFactory;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,16 +56,31 @@ public class GitLabConnectionConfigSSLTest {
     public static void startJetty() throws Exception {
         port = PortFactory.findFreePort();
         server = new Server();
-        SslSocketConnector sslSocketConnector = new SslSocketConnector();
-        sslSocketConnector.setKeystore("src/test/resources/keystore");
-        sslSocketConnector.setKeyPassword("password");
-        sslSocketConnector.setPort(port);
-        server.setConnectors(new Connector[]{sslSocketConnector});
-        server.addHandler(new AbstractHandler() {
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
+
+        HttpConfiguration http_config = new HttpConfiguration();
+        http_config.setSecureScheme("https");
+        http_config.setSecurePort(port);
+
+        SslContextFactory context = new SslContextFactory();
+        context.setKeyStorePath("src/test/resources/keystore");
+        context.setKeyStorePassword("password");
+
+        HttpConfiguration https_config = new HttpConfiguration(http_config);
+        https_config.addCustomizer(new SecureRequestCustomizer());
+
+        ServerConnector https = new ServerConnector(server,
+            new SslConnectionFactory(context,"http/1.1"),
+            new HttpConnectionFactory(https_config));
+        https.setPort(port);
+        https.setIdleTimeout(500000);
+
+        server.setConnectors(new Connector[] { https });
+
+        server.setHandler(new AbstractHandler() {
+            @Override
+            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
                 response.setStatus(Response.Status.OK.getStatusCode());
-                Request base_request = request instanceof Request ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
-                base_request.setHandled(true);
+                ((Request) request).setHandled(true);
             }
         });
         server.start();

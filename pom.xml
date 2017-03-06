@@ -12,7 +12,7 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <hpi-plugin.version>1.115</hpi-plugin.version>
-    <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
+    <jenkins-test-harness.version>2.15</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
   </properties>
 
@@ -121,7 +121,7 @@
             </goals>
             <configuration>
               <inputDir>src/main/images</inputDir>
-              <destDir>src/main/webapp/images</destDir>
+              <destDir>${project.build.directory}/${project.build.finalName}/images</destDir>
               <defaults>
                 <path>{width}x{height}/{name}{ext}</path>
                 <format>png</format>
@@ -330,6 +330,12 @@
     </dependency>
 
     <!-- test dependencies -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-auth</artifactId>
+      <version>1.4</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

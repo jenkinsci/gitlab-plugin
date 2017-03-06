@@ -24,6 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -196,6 +197,16 @@ public abstract class BuildStatusActionTest {
             @Override
             public void write(int b) throws IOException {
                 out.write(b);
+            }
+
+            @Override
+            public boolean isReady() {
+                return false;
+            }
+
+            @Override
+            public void setWriteListener(WriteListener writeListener) {
+                // noop
             }
         };
         when(response.getOutputStream()).thenReturn(servletOutputStream);
