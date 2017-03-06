@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .idea/
 *.iml
 target/
@@ -11,3 +12,4 @@ work
 .project
 .settings
 .DS_Store
+bin/

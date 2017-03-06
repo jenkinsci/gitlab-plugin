@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        height="1024"
+        width="1024"
+        version="1.1"
+        id="svg23"
+        sodipodi:docname="icon-project.svg"
+        inkscape:version="0.92.0 r15299">
+    <metadata
+            id="metadata29">
+        <rdf:RDF>
+            <cc:Work
+                    rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <dc:title></dc:title>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <defs
+            id="defs27"/>
+    <sodipodi:namedview
+            pagecolor="#ffffff"
+            bordercolor="#666666"
+            borderopacity="1"
+            objecttolerance="10"
+            gridtolerance="10"
+            guidetolerance="10"
+            inkscape:pageopacity="0"
+            inkscape:pageshadow="2"
+            inkscape:window-width="1920"
+            inkscape:window-height="1028"
+            id="namedview25"
+            showgrid="false"
+            inkscape:zoom="0.23046875"
+            inkscape:cx="384"
+            inkscape:cy="512"
+            inkscape:window-x="-8"
+            inkscape:window-y="-8"
+            inkscape:window-maximized="1"
+            inkscape:current-layer="svg23"/>
+    <path
+            d="m 450,256 h -64 v 64 h 64 z m 0,-128 h -64 v 64 h 64 z M 834,0 c -32,0 -608,0 -640,0 -32,0 -64,32 -64,64 0,32 0,736 0,768 0,32 32,64 64,64 32,0 128,0 128,0 v 128 l 96,-96 96,96 V 896 c 0,0 288,0 320,0 32,0 64,-32 64,-64 0,-32 0,-736 0,-768 C 898,32 866,0 834,0 Z m 0,800 c 0,16 -15,32 -32,32 -17,0 -288,0 -288,0 V 768 H 322 v 64 c 0,0 -79,0 -96,0 -17,0 -32,-17 -32,-32 0,-15 0,-96 0,-96 h 640 c 0,0 0,80 0,96 z m 0,-160 H 322 V 64 H 835 Z M 450,512 h -64 v 64 h 64 z m 0,-128 h -64 v 64 h 64 z"
+            id="path21"
+            inkscape:connector-curvature="0"/>
+</svg>

@@ -2,5 +2,5 @@
 <div>
   This plugin integrates
   <a href="http://gitlab.com/">GitLab</a>
-  to Jenkins by faking a GitLab CI Server.
+  to Jenkins
 </div>

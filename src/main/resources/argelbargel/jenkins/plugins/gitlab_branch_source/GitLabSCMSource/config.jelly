@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:section title="GitLab Project &amp; Branch Selection">
+        <f:block>
+            <table style="width: 100%">
+                <f:entry title="${%Connection}" field="connectionName">
+                    <f:select/>
+                </f:entry>
+                <f:entry title="${%Project path}" field="projectPath">
+                    <f:textbox/>
+                </f:entry>
+                <f:entry title="${%Include branches}" field="includes">
+                    <f:textbox/>
+                </f:entry>
+                <f:entry title="${%Exclude branches}" field="excludes">
+                    <f:textbox/>
+                </f:entry>
+                <f:entry title="${%Checkout credentials}" field="checkoutCredentialsId">
+                    <c:select/>
+                </f:entry>
+            </table>
+        </f:block>
+    </f:section>
+    <f:advanced>
+        <f:section title="Monitoring &amp; Build-Strategy">
+            <f:block>
+                <table>
+                    <f:optionalBlock title="${%Monitor &amp; Build Origin Branches}" field="monitorAndBuildBranches"
+                                     inline="true">
+                        <f:nested>
+                            <table>
+                                <f:entry title="${%Publish build status}" field="branchBuildStatusPublishMode">
+                                    <f:select/>
+                                </f:entry>
+                                <f:entry title="${%Build Branches also filed as Merge Requests}"
+                                         field="buildBranchesWithMergeRequests">
+                                    <f:checkbox default="false"/>
+                                </f:entry>
+                            </table>
+                        </f:nested>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+            <f:block>
+                <table>
+                    <f:optionalBlock title="${%Monitor &amp; Build Merge Requests from Origin}"
+                                     field="monitorAndBuildMergeRequestsFromOrigin" inline="true">
+                        <f:nested>
+                            <table>
+                                <f:entry title="${%Publish build status}" field="originBuildStatusPublishMode">
+                                    <f:select/>
+                                </f:entry>
+                                <f:entry title="${%Ignore Work In Progress}" field="ignoreWorkInProgressFromOrigin">
+                                    <f:checkbox default="true"/>
+                                </f:entry>
+                                <f:entry title="${%Build unmerged head}" field="buildMergeRequestsFromOriginUnmerged">
+                                    <f:checkbox/>
+                                </f:entry>
+                                <f:optionalBlock title="${%Build merged with base branch}"
+                                                 field="buildMergeRequestsFromOriginMerged" inline="true">
+                                    <f:entry title="${%Build only mergeable requests}"
+                                             field="buildOnlyMergeableRequestsFromOriginMerged">
+                                        <f:checkbox/>
+                                    </f:entry>
+                                    <f:entry title="${%Accept merge-request when build succeeds}"
+                                             field="acceptMergeRequestsFromOrigin">
+                                        <f:checkbox/>
+                                    </f:entry>
+                                    <f:entry title="${%Remove source branch when build succeeds}"
+                                             field="removeSourceBranchFromOrigin">
+                                        <f:checkbox/>
+                                    </f:entry>
+                                </f:optionalBlock>
+                            </table>
+                        </f:nested>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+            <f:block>
+                <table>
+                    <f:optionalBlock title="Monitor &amp; Build Merge Requests from Forks"
+                                     field="monitorAndBuildMergeRequestsFromForks" inline="true">
+                        <f:nested>
+                            <table>
+                                <f:entry title="${%Publish build status}" field="forkBuildStatusPublishMode">
+                                    <f:select/>
+                                </f:entry>
+                                <f:entry title="${%Ignore Work In Progress}" field="ignoreWorkInProgressFromForks">
+                                    <f:checkbox default="true"/>
+                                </f:entry>
+                                <f:entry title="${%Build unmerged head}" field="buildMergeRequestsFromForksUnmerged">
+                                    <f:checkbox/>
+                                </f:entry>
+                                <f:optionalBlock title="${%Build merged with base branch}"
+                                                 field="buildMergeRequestsFromForksMerged" inline="true">
+                                    <f:entry title="${%Build only mergeable requests}"
+                                             field="buildOnlyMergeableRequestsFromForksMerged">
+                                        <f:checkbox/>
+                                    </f:entry>
+                                    <f:entry title="${%Accept merge-request when build succeeds}"
+                                             field="acceptMergeRequestsFromForks">
+                                        <f:checkbox/>
+                                    </f:entry>
+                                </f:optionalBlock>
+                            </table>
+                        </f:nested>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+            <f:block>
+                <table>
+                    <f:optionalBlock title="${%Monitor Tags}" field="monitorTags" inline="true">
+                        <f:nested>
+                            <table>
+                                <f:optionalBlock title="${%Build Tags}" field="buildTags" inline="true">
+                                    <f:entry title="${%Publish build status}" field="tagBuildStatusPublishMode">
+                                        <f:select/>
+                                    </f:entry>
+                                </f:optionalBlock>
+                            </table>
+                        </f:nested>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+        </f:section>
+        <f:section title="Webhooks">
+            <f:block>
+                <table style="width: 100%">
+                    <f:optionalBlock name="registerWebHooks" title="Auto-Register Web-Hooks" field="registerWebHooks"
+                                     inline="true" negative="true">
+                        <f:entry title="${%Register this URL manually}:">
+                            <f:readOnlyTextbox value="${instance.hookUrl}"/>
+                            <br/>
+                            (<strong>Push Events:</strong> true, <strong>Tag Push Events:</strong> true)
+                        </f:entry>
+                    </f:optionalBlock>
+                </table>
+            </f:block>
+        </f:section>
+        <f:section title="Miscellaneous">
+            <f:block>
+                <table style="width: 100%">
+                    <f:entry title="${%Update Build Descriptions}" field="updateBuildDescription">
+                        <f:checkbox/>
+                    </f:entry>
+                    <f:entry title="${%Publisher Name}" field="publisherName">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="${%Merge Commit Message}" field="mergeCommitMessage">
+                        <f:textbox/>
+                    </f:entry>
+                    <f:entry title="${%Publish unstable builds as success}" field="publishUnstableBuildsAsSuccess">
+                        <f:checkbox/>
+                    </f:entry>
+                </table>
+            </f:block>
+        </f:section>
+    </f:advanced>
+</j:jelly>

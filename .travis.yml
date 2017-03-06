@@ -1,0 +1,23 @@
+language: java
+jdk:
+  - oraclejdk7
+
+install: true
+script: ./travis.sh
+
+cache:
+  directories:
+  - $HOME/.m2/repository
+  - $HOME/.m2/wrapper
+before_cache:
+  - rm -rf $HOME/.m2/repository/argelbargel/jenkins/plugins/gitlab-branch-source
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_API_TOKEN"
+  skip_cleanup: true
+  on:
+    tags: true
+  file:
+    - "./target/gitlab-branch-source.hpi"
+    - "./target/gitlab-branch-source.jar"

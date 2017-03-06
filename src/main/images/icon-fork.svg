@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        height="1024"
+        width="1024"
+        version="1.1"
+        id="svg22"
+        sodipodi:docname="icon-fork.svg"
+        inkscape:version="0.92.0 r15299">
+    <metadata
+            id="metadata28">
+        <rdf:RDF>
+            <cc:Work
+                    rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <dc:title></dc:title>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <defs
+            id="defs26"/>
+    <sodipodi:namedview
+            pagecolor="#ffffff"
+            bordercolor="#666666"
+            borderopacity="1"
+            objecttolerance="10"
+            gridtolerance="10"
+            guidetolerance="10"
+            inkscape:pageopacity="0"
+            inkscape:pageshadow="2"
+            inkscape:window-width="1920"
+            inkscape:window-height="1028"
+            id="namedview24"
+            showgrid="false"
+            inkscape:zoom="0.23046875"
+            inkscape:cx="384"
+            inkscape:cy="512"
+            inkscape:window-x="-8"
+            inkscape:window-y="-8"
+            inkscape:window-maximized="1"
+            inkscape:current-layer="svg22"/>
+    <path
+            d="M 888,128 C 888,57 831,0 760,0 689,0 632,57 632,128 c 0,47 26,89 64,111 V 345 L 504,557 312,345 V 239 C 350,217 376,176 376,128 376,57 319,0 248,0 177,0 120,57 120,128 c 0,47 26,89 64,111 v 156 l 256,282 v 109 c -38,22 -64,63 -64,111 0,71 57,128 128,128 71,0 128,-57 128,-128 0,-47 -26,-89 -64,-111 V 677 L 824,395 V 239 c 38,-22 64,-63 64,-111 z M 248,65 c 34,0 62,28 62,62 0,34 -28,62 -62,62 -34,0 -62,-28 -62,-62 0,-34 28,-62 62,-62 z m 256,891 c -34,0 -62,-28 -62,-62 0,-34 28,-62 62,-62 34,0 62,28 62,62 0,34 -28,62 -62,62 z M 760,65 c 34,0 62,28 62,62 0,34 -28,62 -62,62 -34,0 -62,-28 -62,-62 0,-34 28,-62 62,-62 z"
+            id="path20"
+            inkscape:connector-curvature="0"/>
+</svg>
