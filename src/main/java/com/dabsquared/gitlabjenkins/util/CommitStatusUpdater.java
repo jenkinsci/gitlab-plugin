@@ -10,6 +10,7 @@ import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.BuildData;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
@@ -108,7 +109,7 @@ public class CommitStatusUpdater {
     }
 
     private static String getBuildUrl(Run<?, ?> build) {
-        return Jenkins.getInstance().getRootUrl() + build.getUrl();
+        return DisplayURLProvider.get().getRunURL(build);
     }
 
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
