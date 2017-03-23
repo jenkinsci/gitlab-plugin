@@ -141,9 +141,16 @@ The plugin supports the new [declarative pipeline syntax](https://github.com/jen
 ```
 pipeline {
     agent any
+    post {
+      failure {
+        updateGitlabCommitStatus name: 'build', state: 'failed'
+      }
+      success {
+        updateGitlabCommitStatus name: 'build', state: 'success'
+      }
+    }
     options {
       gitLabConnection('<your-gitlab-connection-name')
-      gitlabCommitStatus(name: 'jenkins')
     }
     triggers {
         gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
