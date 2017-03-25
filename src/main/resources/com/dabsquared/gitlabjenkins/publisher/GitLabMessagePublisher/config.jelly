@@ -20,5 +20,10 @@
         <f:textarea name="abortNoteText" field="abortNoteText"/>
       </f:entry>
     </f:optionalBlock>
+    <f:optionalBlock name="replaceUnstableNote" checked="${instance.replaceUnstableNote}" title="Custom message on unstable" inline="true">
+      <f:entry>
+        <f:textarea name="unstableNoteText" field="unstableNoteText"/>
+      </f:entry>
+    </f:optionalBlock>
   </f:advanced>
 </j:jelly>
