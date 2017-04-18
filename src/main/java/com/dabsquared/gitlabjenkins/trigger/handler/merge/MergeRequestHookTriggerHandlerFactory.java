@@ -14,21 +14,32 @@ public final class MergeRequestHookTriggerHandlerFactory {
     private MergeRequestHookTriggerHandlerFactory() {}
 
     public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(boolean triggerOnMergeRequest,
+    		                                                                       boolean triggerOnAcceptedMergeRequest,
+    		                                                                       boolean triggerOnClosedMergeRequest,
                                                                                    TriggerOpenMergeRequest triggerOpenMergeRequest,
                                                                                    boolean skipWorkInProgressMergeRequest) {
-        if (triggerOnMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
-            return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOpenMergeRequest),
+        if (triggerOnMergeRequest || triggerOnAcceptedMergeRequest || triggerOnClosedMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
+            return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequest),
                                                           skipWorkInProgressMergeRequest);
         } else {
             return new NopMergeRequestHookTriggerHandler();
         }
     }
 
-    private static List<State> retrieveAllowedStates(boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequest) {
+	private static List<State> retrieveAllowedStates(boolean triggerOnMergeRequest, 
+			                                         boolean triggerOnAcceptedMergeRequest, 
+			                                         boolean triggerOnClosedMergeRequest,
+			                                         TriggerOpenMergeRequest triggerOpenMergeRequest) {
         List<State> result = new ArrayList<>();
         if (triggerOnMergeRequest) {
             result.add(State.opened);
             result.add(State.reopened);
+        }
+        if (triggerOnAcceptedMergeRequest)  {
+        	result.add(State.merged);
+        }
+        if (triggerOnClosedMergeRequest) {
+        	result.add(State.closed);
         }
         if (triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
             result.add(State.updated);

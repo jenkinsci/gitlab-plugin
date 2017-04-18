@@ -6,8 +6,14 @@
       <f:entry title="Push Events" field="triggerOnPush">
         <f:checkbox default="true"/>
       </f:entry>
-      <f:entry title="Merge Request Events" field="triggerOnMergeRequest">
+      <f:entry title="Opened Merge Request Events" field="triggerOnMergeRequest">
         <f:checkbox default="true"/>
+      </f:entry>
+      <f:entry title="Accepted Merge Request Events" field="triggerOnAcceptedMergeRequest">
+        <f:checkbox default="false"/>
+      </f:entry>
+      <f:entry title="Closed Merge Request Events" field="triggerOnClosedMergeRequest">
+        <f:checkbox default="false"/>
       </f:entry>
       <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
         <f:select/>
