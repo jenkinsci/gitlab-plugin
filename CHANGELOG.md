@@ -1,5 +1,8 @@
 ChangeLog
 =====================
+1.4.6
+=====================
+* #461: Can the gitlab plugin handle the gitlab's pipeline event？
 
 1.4.5
 =====================
