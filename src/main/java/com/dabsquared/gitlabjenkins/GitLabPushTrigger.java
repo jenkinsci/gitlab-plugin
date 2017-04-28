@@ -419,5 +419,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             String secretToken = Util.toHexString(random);
             response.setHeader("script", "document.getElementById('secretToken').value='" + secretToken + "'");
         }
+
+        public void doClearSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse response) {;
+            response.setHeader("script", "document.getElementById('secretToken').value=''");
+        }
     }
 }
