@@ -199,6 +199,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return triggerOnMergeRequest;
     }
 
+    public boolean isTriggerOnAcceptedMergeRequest() {
+        return triggerOnAcceptedMergeRequest;
+    }
+
+    public boolean isTriggerOnClosedMergeRequest() {
+        return triggerOnClosedMergeRequest;
+    }
+
     public boolean getTriggerOnNoteRequest() {
         return triggerOnNoteRequest;
     }
