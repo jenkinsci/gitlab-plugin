@@ -1,31 +1,34 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
+import com.google.common.collect.ImmutableSet;
+
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
 @ExportedBean
-public class GitLabCommitStatusStep extends AbstractStepImpl {
+public class GitLabCommitStatusStep extends Step {
 
     private String name;
 
@@ -33,6 +36,11 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
     public GitLabCommitStatusStep(String name) {
         this.name = StringUtils.isEmpty(name) ? null : name;
     }
+    
+	@Override
+	public StepExecution start(StepContext context) throws Exception {
+		return new GitLabCommitStatusStepExecution(context, this);
+	}
 
     public String getName() {
         return name;
@@ -43,17 +51,21 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
         this.name = StringUtils.isEmpty(name) ? null : name;
     }
 
-    public static class Execution extends AbstractStepExecutionImpl {
+    public static class GitLabCommitStatusStepExecution extends StepExecution {
         private static final long serialVersionUID = 1;
 
-        @StepContextParameter
-        private transient Run<?, ?> run;
+        private final transient Run<?, ?> run;
 
-        @Inject
-        private transient GitLabCommitStatusStep step;
+        private final transient GitLabCommitStatusStep step;
 
         private BodyExecution body;
 
+        GitLabCommitStatusStepExecution(StepContext context, GitLabCommitStatusStep step) throws Exception {
+            super(context);
+            this.step = step;
+            run = context.get(Run.class);
+        }
+        
         @Override
         public boolean start() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
@@ -108,10 +120,7 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-        public DescriptorImpl() {
-            super(Execution.class);
-        }
+    public static final class DescriptorImpl extends StepDescriptor {
 
         @Override
         public String getDisplayName() {
@@ -127,5 +136,10 @@ public class GitLabCommitStatusStep extends AbstractStepImpl {
         public boolean takesImplicitBlockArgument() {
             return true;
         }
+
+		@Override
+		public Set<Class<?>> getRequiredContext() {
+			return ImmutableSet.of(TaskListener.class, Run.class);
+		}
     }
 }
