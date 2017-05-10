@@ -274,6 +274,7 @@ These include:
 * gitMergedByUser
 * gitMergeRequestAssignee
 * gitlabMergeRequestLastCommit
+* gitlabMergeRequestTargetProjectId
 * gitlabTargetBranch
 * gitlabTargetRepoName
 * gitlabTargetNamespace

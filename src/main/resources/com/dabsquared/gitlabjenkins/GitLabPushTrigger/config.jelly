@@ -82,6 +82,7 @@
       <table>
         <f:readOnlyTextbox field="secretToken" id="secretToken"/>
         <f:validateButton title="${%Generate}" method="generateSecretToken"/>
+        <f:validateButton title="${%Clear}" method="clearSecretToken"/>
       </table>
     </f:entry>
   </f:advanced>

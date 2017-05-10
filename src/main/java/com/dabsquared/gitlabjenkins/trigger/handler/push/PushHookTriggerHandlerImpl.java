@@ -63,6 +63,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
                 .withMergeRequestState(null)
                 .withMergedByUser("")
                 .withMergeRequestAssignee("")
+                .withMergeRequestTargetProjectId(null)
                 .withTargetBranch(getTargetBranch(hook))
                 .withTargetRepoName("")
                 .withTargetNamespace("")
