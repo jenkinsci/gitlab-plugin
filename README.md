@@ -62,6 +62,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 
 ## Jenkins Job Configuration
 ### Git configuration for Freestyle jobs
+#### GitLab < 8.1
 1. In the *Source Code Management* section:
     1. Click *Git*
     2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
@@ -78,6 +79,22 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
         * Set *Name of repository* to ``origin``
+        * Set *Branch to merge* as ``${gitlabTargetBranch}``
+
+#### GitLab >= 8.1
+1. In the *Source Code Management* section:
+    1. Click *Git*
+    2. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
+      * In the Advanced settings, set its *Name* to ``origin`` and its *refspec* to ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
+    3. To be able to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
+      * Add a second repository with:
+        * *URL*: Your *Repository URL* as in the previous step (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
+    4. In *Branch Specifier* enter:
+      * ``merge-requests/${gitlabMergeRequestIid}``
+    5. In *Additional Behaviours*:
+        * Click the *Add* drop-down button.
+        * Select *Merge before build* from the drop-down.
+        * Set *Name of the repository" to ``origin`` 
         * Set *Branch to merge* as ``${gitlabTargetBranch}``
 
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
