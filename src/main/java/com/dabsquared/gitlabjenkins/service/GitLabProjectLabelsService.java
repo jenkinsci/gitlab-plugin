@@ -65,7 +65,7 @@ public class GitLabProjectLabelsService {
         @Override
         public List<String> call() throws Exception {
             List<String> result = new ArrayList<>();
-            String projectId = ProjectIdUtil.retrieveProjectId(sourceRepository);
+            String projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             for (Label label : client.getLabels(projectId)) {
                 result.add(label.getName());
             }

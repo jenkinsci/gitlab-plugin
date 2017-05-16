@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.dabsquared.gitlabjenkins.connection.GitLabApiToken;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApiClient;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -82,7 +83,7 @@ public class GitLabClientBuilder {
                                  proxyConfiguration.getPassword());
         }
 
-        return builder
+        GitLabApiClient apiClient = builder
             .connectionPoolSize(60)
             .maxPooledPerRoute(30)
             .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
@@ -94,9 +95,10 @@ public class GitLabClientBuilder {
             .register(new RemoveAcceptEncodingFilter())
             .register(new JaxrsFormProvider())
             .build().target(gitlabHostUrl)
-            .proxyBuilder(GitLabApi.class)
-            .classloader(GitLabApi.class.getClassLoader())
+            .proxyBuilder(GitLabApiClient.class)
+            .classloader(GitLabApiClient.class.getClassLoader())
             .build();
+        return new GitLabApiExtension(apiClient, gitlabHostUrl);
     }
 
     public static GitLabApi buildClient(GitLabConnection connection) {
