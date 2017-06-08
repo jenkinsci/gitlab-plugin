@@ -1,26 +1,26 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.CredentialsScope;
-import com.cloudbees.plugins.credentials.CredentialsStore;
-import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.Domain;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import hudson.EnvVars;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.StreamBuildListener;
-import hudson.model.TaskListener;
-import hudson.plugins.git.Revision;
-import hudson.plugins.git.util.Build;
-import hudson.plugins.git.util.BuildData;
-import hudson.util.Secret;
-import jenkins.model.Jenkins;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hamcrest.CoreMatchers;
@@ -39,23 +39,30 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.verify.VerificationTimes;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.CredentialsStore;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
+import hudson.EnvVars;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.StreamBuildListener;
+import hudson.model.TaskListener;
+import hudson.plugins.git.Revision;
+import hudson.plugins.git.util.Build;
+import hudson.plugins.git.util.BuildData;
+import hudson.util.Secret;
+import jenkins.model.Jenkins;
+import jenkins.plugins.git.AbstractGitSCMSource;
+import jenkins.scm.api.SCMRevisionAction;
 
 /**
  * @author Robin Müller
@@ -64,6 +71,7 @@ public class GitLabCommitStatusPublisherTest {
 
     private static final String GIT_LAB_CONNECTION = "GitLab";
     private static final String API_TOKEN = "secret";
+    private static final String SHA1 = "0616d12a3a24068691027a1e113147e3c1cfa2f4";
 
     @ClassRule
     public static MockServerRule mockServer = new MockServerRule(new Object());
@@ -102,10 +110,10 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running() throws UnsupportedEncodingException {
         HttpRequest[] requests = new HttpRequest[] {
-            prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-            prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
+            prepareExistsCommitWithSuccessResponse("test/project", SHA1),
+            prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.prebuild(build, listener);
@@ -117,10 +125,10 @@ public class GitLabCommitStatusPublisherTest {
     public void runningWithDotInProjectId() throws IOException {
         HttpRequest[] requests = new HttpRequest[] {
             prepareGetProjectResponse("test/project.test",1),
-            prepareExistsCommitWithSuccessResponse("1", "123abc"),
-            prepareUpdateCommitStatusWithSuccessResponse("1", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
+            prepareExistsCommitWithSuccessResponse("1", SHA1),
+            prepareUpdateCommitStatusWithSuccessResponse("1", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.test.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, null, "test/project.test.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.prebuild(build, listener);
@@ -131,10 +139,10 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void canceled() throws IOException, InterruptedException {
         HttpRequest[] requests = new HttpRequest[] {
-                prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-                prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.canceled)
+                prepareExistsCommitWithSuccessResponse("test/project", SHA1),
+                prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.canceled)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, Result.ABORTED, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.perform(build, null, listener);
@@ -145,10 +153,10 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void success() throws IOException, InterruptedException {
         HttpRequest[] requests = new HttpRequest[] {
-                prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-                prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.success)
+                prepareExistsCommitWithSuccessResponse("test/project", SHA1),
+                prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.success)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.perform(build, null, listener);
@@ -159,10 +167,10 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void failed() throws IOException, InterruptedException {
         HttpRequest[] requests = new HttpRequest[] {
-                prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-                prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.failed)
+                prepareExistsCommitWithSuccessResponse("test/project", SHA1),
+                prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.failed)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, Result.FAILURE, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.perform(build, null, listener);
@@ -173,10 +181,10 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void unstable() throws IOException, InterruptedException {
         HttpRequest[] requests = new HttpRequest[] {
-            prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-            prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.failed)
+            prepareExistsCommitWithSuccessResponse("test/project", SHA1),
+            prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.failed)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.UNSTABLE, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, Result.UNSTABLE, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.perform(build, null, listener);
@@ -187,10 +195,10 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void unstableAsSuccess() throws IOException, InterruptedException {
         HttpRequest[] requests = new HttpRequest[] {
-            prepareExistsCommitWithSuccessResponse("test/project", "123abc"),
-            prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.success)
+            prepareExistsCommitWithSuccessResponse("test/project", SHA1),
+            prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.success)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, Result.UNSTABLE, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, Result.UNSTABLE, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", true);
         publisher.perform(build, null, listener);
@@ -201,12 +209,12 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_multipleRepos() throws UnsupportedEncodingException {
         HttpRequest[] requests = new HttpRequest[] {
-                prepareExistsCommitWithSuccessResponse("test/project-1", "123abc"),
-                prepareUpdateCommitStatusWithSuccessResponse("test/project-1", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running),
-                prepareExistsCommitWithSuccessResponse("test/project-2", "123abc"),
-                prepareUpdateCommitStatusWithSuccessResponse("test/project-2", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
+                prepareExistsCommitWithSuccessResponse("test/project-1", SHA1),
+                prepareUpdateCommitStatusWithSuccessResponse("test/project-1", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running),
+                prepareExistsCommitWithSuccessResponse("test/project-2", SHA1),
+                prepareUpdateCommitStatusWithSuccessResponse("test/project-2", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running)
         };
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project-1.git", "test/project-2.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, null, "test/project-1.git", "test/project-2.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.prebuild(build, listener);
@@ -216,8 +224,8 @@ public class GitLabCommitStatusPublisherTest {
 
     @Test
     public void running_commitNotExists() throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
+        HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
 
         GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
         publisher.prebuild(build, listener);
@@ -227,10 +235,10 @@ public class GitLabCommitStatusPublisherTest {
 
     @Test
     public void running_failToUpdate() throws UnsupportedEncodingException {
-        prepareExistsCommitWithSuccessResponse("test/project", "123abc");
-        HttpRequest updateCommitStatus = prepareUpdateCommitStatus("test/project", "123abc", jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
+        prepareExistsCommitWithSuccessResponse("test/project", SHA1);
+        HttpRequest updateCommitStatus = prepareUpdateCommitStatus("test/project", SHA1, jenkins.getInstance().getRootUrl() + "/build/123", BuildState.running);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(403));
-        AbstractBuild build = mockBuild("123abc", "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
+        AbstractBuild build = mockBuild(SHA1, "/build/123", GIT_LAB_CONNECTION, null, "test/project.git");
         BuildListener buildListener = mock(BuildListener.class);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         when(buildListener.getLogger()).thenReturn(new PrintStream(outputStream));
@@ -286,17 +294,33 @@ public class GitLabCommitStatusPublisherTest {
 
     private AbstractBuild mockBuild(String sha, String buildUrl, String gitLabConnection, Result result, String... remoteUrls) {
         AbstractBuild build = mock(AbstractBuild.class);
+        List<BuildData> buildDatas = new ArrayList<BuildData>();
         BuildData buildData = mock(BuildData.class);
+        SCMRevisionAction scmRevisionAction = mock(SCMRevisionAction.class);
+        AbstractGitSCMSource.SCMRevisionImpl revisionImpl = mock(AbstractGitSCMSource.SCMRevisionImpl.class);
+        
+        when(build.getAction(SCMRevisionAction.class)).thenReturn(scmRevisionAction);
+        when(scmRevisionAction.getRevision()).thenReturn(revisionImpl);
+        when(revisionImpl.getHash()).thenReturn(sha);
+        
         Revision revision = mock(Revision.class);
         when(revision.getSha1String()).thenReturn(sha);
         when(buildData.getLastBuiltRevision()).thenReturn(revision);
         when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
+
         Build gitBuild = mock(Build.class);
+
         when(gitBuild.getMarked()).thenReturn(revision);
+        when(gitBuild.getSHA1()).thenReturn(ObjectId.fromString(sha));
         when(buildData.getLastBuild(any(ObjectId.class))).thenReturn(gitBuild);
-        when(build.getAction(BuildData.class)).thenReturn(buildData);
+        Map<String, Build> buildsByBranchName = new HashMap<>();
+        buildsByBranchName.put("develop", gitBuild);
+        when(buildData.getBuildsByBranchName()).thenReturn(buildsByBranchName);
+        buildDatas.add(buildData);
+        when(build.getActions(BuildData.class)).thenReturn(buildDatas);
         when(build.getResult()).thenReturn(result);
         when(build.getUrl()).thenReturn(buildUrl);
+
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         when(project.getProperty(GitLabConnectionProperty.class)).thenReturn(new GitLabConnectionProperty(gitLabConnection));
         when(build.getProject()).thenReturn(project);
