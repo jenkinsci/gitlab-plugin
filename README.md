@@ -160,7 +160,19 @@ pipeline {
 ```
 
 ### Matrix/Multi-configuration jobs
-**The Jenkins Matrix/Multi-configuration job type is not supported.**
+
+This plugin can be used on Matrix/Multi-configuration jobs together with the [Flexible Publish](https://plugins.jenkins.io/flexible-publish) plugin which allows to run publishers after all axis jobs are done.
+
+To use GitLab with Flexible Publish, configure the *Post-build Actions* as follows:
+
+1. Add a *Flexible publish* action
+2. In the *Flexible publish* section:
+      1. *Add conditional action*
+      2. In the *Conditional action* section:
+          1. Set *Run?* to *Never*
+          2. Select *Condition for Matrix Aggregation*
+          3. Set *Run on Parent?* to *Always*
+          4. Add GitLab actions as required
 
 ## Gitlab Configuration
 
