@@ -9,6 +9,10 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import hudson.EnvVars;
+import hudson.Launcher;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -45,6 +49,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -105,12 +110,29 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, null, null, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, false, null, null, null, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
 
         mockServerClient.verify(requests);
+    }
+
+    @Test
+    public void matrixAggregatable() throws UnsupportedEncodingException, InterruptedException, IOException {
+        AbstractBuild build = mock(AbstractBuild.class);
+        AbstractProject project = mock(MatrixConfiguration.class);
+        GitLabCommitStatusPublisher publisher = mock(GitLabCommitStatusPublisher.class);
+        MatrixBuild parentBuild = mock(MatrixBuild.class);
+
+        when(build.getParent()).thenReturn(project);
+        when(publisher.createAggregator(any(MatrixBuild.class), any(Launcher.class), any(BuildListener.class))).thenCallRealMethod();
+        when(publisher.perform(any(AbstractBuild.class), any(Launcher.class), any(BuildListener.class))).thenReturn(true);
+
+        MatrixAggregator aggregator = publisher.createAggregator(parentBuild, null, listener);
+        aggregator.startBuild();
+        aggregator.endBuild();
+        verify(publisher).perform(parentBuild, null, listener);
     }
 
     @Test
@@ -127,7 +149,7 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, null, null, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, false, null, null, null, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
@@ -142,7 +164,7 @@ public class GitLabMessagePublisherTest {
         Integer mergeRequestId = 1;
         AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.SUCCESS, buildNumber);
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(true, false, false, false, null, null, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(true, false, false, false, false, null, null, null, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
@@ -164,7 +186,7 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, null, null, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, false, null, null, null, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
@@ -186,7 +208,7 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(true, false, false, false, null, null, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(true, false, false, false, false, null, null, null, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
@@ -206,7 +228,7 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, true, null, null, defaultNote));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, true, false, null, null, defaultNote, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
@@ -226,7 +248,7 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, true, false, false, defaultNote, null, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, true, false, false, false, defaultNote, null, null, null));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
@@ -246,7 +268,27 @@ public class GitLabMessagePublisherTest {
             prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
         };
 
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, true, false, null, defaultNote, null));
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, true, false, false, null, defaultNote, null, null));
+        doReturn(projectId).when(publisher).getProjectId(build);
+        doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
+        publisher.perform(build, null, listener);
+
+        mockServerClient.verify(requests);
+    }
+
+    @Test
+    public void unstableWithCustomNote() throws IOException, InterruptedException {
+        Integer buildNumber = 1;
+        Integer projectId = 3;
+        Integer mergeRequestId = 1;
+        AbstractBuild build = mockBuild("/build/123", GIT_LAB_CONNECTION, Result.UNSTABLE, buildNumber);
+        String defaultNote = "unstable";
+
+        HttpRequest[] requests = new HttpRequest[] {
+            prepareSendMessageWithSuccessResponse(projectId, mergeRequestId, defaultNote)
+        };
+
+        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(false, false, false, false, true, null, null, null, defaultNote));
         doReturn(projectId).when(publisher).getProjectId(build);
         doReturn(mergeRequestId).when(publisher).getMergeRequestId(build);
         publisher.perform(build, null, listener);
