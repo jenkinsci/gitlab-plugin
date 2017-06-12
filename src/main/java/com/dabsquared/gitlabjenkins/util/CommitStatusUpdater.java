@@ -1,19 +1,7 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import hudson.EnvVars;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.git.Revision;
-import hudson.plugins.git.util.BuildData;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +10,24 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+
+import hudson.EnvVars;
+import hudson.model.Cause;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.model.Cause.UpstreamCause;
+import hudson.plugins.git.Revision;
+import hudson.plugins.git.util.BuildData;
+import jenkins.model.Jenkins;
 
 /**
  * @author Robin Müller
@@ -114,9 +119,20 @@ public class CommitStatusUpdater {
     private static List<String> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
         LOGGER.log(Level.INFO, "Retrieving gitlab project ids");
 
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        if (cause != null) {
-            return Collections.singletonList(cause.getData().getSourceProjectId().toString());
+        GitLabWebHookCause gitlabCause = build.getCause(GitLabWebHookCause.class);
+        if (gitlabCause != null) {
+            return Collections.singletonList(gitlabCause.getData().getSourceProjectId().toString());
+        }
+        
+        // Check upstream causes for GitLabWebHookCause
+        for (Cause cause : build.getCauses()) {
+        	if (cause instanceof UpstreamCause) {
+        		for (Cause upCause : ((UpstreamCause) cause).getUpstreamCauses()) {
+        			if (upCause instanceof GitLabWebHookCause) {
+        			    return Collections.singletonList(((GitLabWebHookCause) upCause).getData().getSourceProjectId().toString());
+        			}
+        		}
+        	}
         }
 
         List<String> result = new ArrayList<>();
