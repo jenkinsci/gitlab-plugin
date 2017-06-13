@@ -57,7 +57,8 @@ public class CommitStatusUpdaterTest {
 	@Mock Build lastBuild;
 	@Mock Revision revision;
 	@Mock EnvVars environment;
-	@Mock UpstreamCause upCause;
+	@Mock UpstreamCause upCauseLevel1;
+	@Mock UpstreamCause upCauseLevel2;
 	@Mock Jenkins jenkins;
 	
 	CauseData causeData;
@@ -77,8 +78,9 @@ public class CommitStatusUpdaterTest {
 	    when(revision.getSha1String()).thenReturn(REVISION);
 	    when(build.getUrl()).thenReturn(BUILD_URL);
 	    when(build.getEnvironment(any(TaskListener.class))).thenReturn(environment);
-	    when(build.getCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCause)));
-	    when(upCause.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(gitlabCause)));
+	    when(build.getCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel1)));
+	    when(upCauseLevel1.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel2)));
+	    when(upCauseLevel2.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(gitlabCause)));
 	    
 	    causeData = causeData()
                 .withActionType(CauseData.ActionType.NOTE)
