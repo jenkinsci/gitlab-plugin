@@ -39,13 +39,14 @@ import jenkins.model.Jenkins;
  * @author Daumantas Stulgis
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(GitLabConnectionProperty.class)
+@PrepareForTest({GitLabConnectionProperty.class, Jenkins.class})
 public class CommitStatusUpdaterTest {
 	
 	private static final int PROJECT_ID = 1;
     private static final String BUILD_URL = "job/Test-Job";
     private static final String STAGE = "test";
     private static final String REVISION = "1111111";
+    private static final String JENKINS_URL = "https://gitlab.org/jenkins/";
 	
     @Mock Run<?, ?> build;
 	@Mock TaskListener taskListener;
@@ -57,6 +58,7 @@ public class CommitStatusUpdaterTest {
 	@Mock Revision revision;
 	@Mock EnvVars environment;
 	@Mock UpstreamCause upCause;
+	@Mock Jenkins jenkins;
 	
 	CauseData causeData;
 
@@ -64,6 +66,9 @@ public class CommitStatusUpdaterTest {
 	public void setUp() throws Exception {
 	    MockitoAnnotations.initMocks(this);
 	    PowerMockito.mockStatic(GitLabConnectionProperty.class);
+	    PowerMockito.mockStatic(Jenkins.class);
+	    when(Jenkins.getInstance()).thenReturn(jenkins);
+	    when(jenkins.getRootUrl()).thenReturn(JENKINS_URL);
 	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
 //	    when(build.getCause(GitLabWebHookCause.class)).thenReturn(gitlabCause);
 	    when(build.getAction(BuildData.class)).thenReturn(action);
@@ -103,7 +108,6 @@ public class CommitStatusUpdaterTest {
                 .build();
 	    
 	    when(gitlabCause.getData()).thenReturn(causeData);
-	    when(causeData.getSourceProjectId()).thenReturn(PROJECT_ID);
 	    PowerMockito.spy(client);
 	}
 
@@ -111,7 +115,7 @@ public class CommitStatusUpdaterTest {
 	public void test() {
 		CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
 		
-		verify(client).changeBuildStatus(PROJECT_ID, REVISION, BuildState.success, null, STAGE, Jenkins.getInstance().getRootUrl() + BUILD_URL, null);
+		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, Jenkins.getInstance().getRootUrl() + BUILD_URL, null);
 	}
 
 }
