@@ -70,7 +70,6 @@ public class CommitStatusUpdaterTest {
 	    when(Jenkins.getInstance()).thenReturn(jenkins);
 	    when(jenkins.getRootUrl()).thenReturn(JENKINS_URL);
 	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
-//	    when(build.getCause(GitLabWebHookCause.class)).thenReturn(gitlabCause);
 	    when(build.getAction(BuildData.class)).thenReturn(action);
 	    when(action.getLastBuiltRevision()).thenReturn(lastBuiltRevision);
 	    when(action.getLastBuild(any(ObjectId.class))).thenReturn(lastBuild);

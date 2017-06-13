@@ -125,14 +125,9 @@ public class CommitStatusUpdater {
         }
         
         // Check upstream causes for GitLabWebHookCause
-        for (Cause cause : build.getCauses()) {
-        	if (cause instanceof UpstreamCause) {
-        		for (Cause upCause : ((UpstreamCause) cause).getUpstreamCauses()) {
-        			if (upCause instanceof GitLabWebHookCause) {
-        			    return Collections.singletonList(((GitLabWebHookCause) upCause).getData().getSourceProjectId().toString());
-        			}
-        		}
-        	}
+        List<String> projectIds = findProjectIdFromUpstreamCauses(build.getCauses());
+        if (!projectIds.isEmpty()) {
+            return projectIds;
         }
 
         List<String> result = new ArrayList<>();
@@ -165,10 +160,28 @@ public class CommitStatusUpdater {
                     result.add(projectId);
                 }
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
-                // nothing to do
+                LOGGER.log(Level.WARNING, "Did not match project id in remote url.");
             }
         }
         return result;
+    }
+
+    private static List<String> findProjectIdFromUpstreamCauses(List<Cause> causes) {
+        for (Cause cause : causes) {
+        	if (cause instanceof UpstreamCause) {
+        	    List<Cause> upCauses = ((UpstreamCause) cause).getUpstreamCauses();    // Non null, returns empty list when none are set
+        		for (Cause upCause : upCauses) {
+        			if (upCause instanceof GitLabWebHookCause) {
+        			    return Collections.singletonList(((GitLabWebHookCause) upCause).getData().getSourceProjectId().toString());
+        			}
+        		}
+        		List<String> projectIds = findProjectIdFromUpstreamCauses(upCauses);
+        		if (!projectIds.isEmpty()) {
+        		    return projectIds;
+        		}
+        	}
+        }
+        return Collections.emptyList();
     }
 
 }
