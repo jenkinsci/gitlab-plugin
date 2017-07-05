@@ -104,7 +104,7 @@ public class CommitStatusUpdaterTest {
                 .withTargetRepoSshUrl("git@gitlab.org:test.git")
                 .withTargetRepoHttpUrl("https://gitlab.org/test.git")
                 .withTriggeredByUser("test")
-                .withLastCommit("123")
+                .withLastCommit(REVISION)
                 .withTargetProjectUrl("https://gitlab.org/test")
                 .build();
 	    
