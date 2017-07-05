@@ -51,7 +51,7 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 
 # Supported GitLab versions
 
-* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab commit status API which supports with external CI services like Jenkins
+* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab [commit status API](https://docs.gitlab.com/ce/api/commits.html#commit-status) which supports with external CI services like Jenkins
 * Versions older than 8.1.x may work but are no longer officially supported
 
 # Configuring access to GitLab
@@ -73,7 +73,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
         * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
       * For single-repository workflows: ``origin/${gitlabSourceBranch}``
-      * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
+      * For forked repository workflows: ``merge-requests/${gitlabMergeRequestId}``
     5. In *Additional Behaviours*:
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
@@ -278,7 +278,6 @@ These include:
 * gitlabMergeRequestTitle
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
-* gitlabMergeRequestIid
 * gitMergeRequestState
 * gitMergedByUser
 * gitMergeRequestAssignee
