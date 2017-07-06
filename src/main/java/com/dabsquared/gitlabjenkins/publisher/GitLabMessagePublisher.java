@@ -122,11 +122,11 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
         if (result == Result.SUCCESS) {
             return ":white_check_mark:";
         } else if (result == Result.ABORTED) {
-            return ":point_up:";
+            return "";
         } else if (result == Result.UNSTABLE) {
             return ":warning:";
         } else {
-            return ":negative_squared_cross_mark:";
+            return ":x:";
         }
     }
 
