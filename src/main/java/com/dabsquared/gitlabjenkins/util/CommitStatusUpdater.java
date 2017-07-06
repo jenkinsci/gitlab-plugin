@@ -137,7 +137,7 @@ public class CommitStatusUpdater {
                     for (String remoteUrl : remoteUrls) {
                         try {
                             LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
-                            final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
+                            final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(gitLabClient, environment.expand(remoteUrl));
                             if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
                                 String projectId = projectNameWithNameSpace;
                                 if (projectNameWithNameSpace.contains(".")) {
