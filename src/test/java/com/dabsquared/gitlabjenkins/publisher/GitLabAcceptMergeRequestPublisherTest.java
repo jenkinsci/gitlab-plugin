@@ -8,6 +8,10 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import hudson.Launcher;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -34,9 +38,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -81,6 +87,23 @@ public class GitLabAcceptMergeRequestPublisherTest {
     @After
     public void cleanup() {
         mockServerClient.reset();
+    }
+
+    @Test
+    public void matrixAggregatable() throws UnsupportedEncodingException, InterruptedException, IOException {
+        AbstractBuild build = mock(AbstractBuild.class);
+        AbstractProject project = mock(MatrixConfiguration.class);
+        GitLabCommitStatusPublisher publisher = mock(GitLabCommitStatusPublisher.class);
+        MatrixBuild parentBuild = mock(MatrixBuild.class);
+
+        when(build.getParent()).thenReturn(project);
+        when(publisher.createAggregator(any(MatrixBuild.class), any(Launcher.class), any(BuildListener.class))).thenCallRealMethod();
+        when(publisher.perform(any(AbstractBuild.class), any(Launcher.class), any(BuildListener.class))).thenReturn(true);
+
+        MatrixAggregator aggregator = publisher.createAggregator(parentBuild, null, listener);
+        aggregator.startBuild();
+        aggregator.endBuild();
+        verify(publisher).perform(parentBuild, null, listener);
     }
 
     @Test

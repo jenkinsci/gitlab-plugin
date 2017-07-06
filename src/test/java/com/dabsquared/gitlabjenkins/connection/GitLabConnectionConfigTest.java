@@ -34,6 +34,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -149,5 +150,27 @@ public class GitLabConnectionConfigTest {
         CloseableHttpResponse response = client.execute(request);
 
         assertThat(response.getStatusLine().getStatusCode(), is(200));
+    }
+
+    @Test
+    public void setConnectionsTest() {
+        GitLabConnection connection1 = new GitLabConnection("1", "http://localhost", null, false, 10, 10);
+        GitLabConnection connection2 = new GitLabConnection("2", "http://localhost", null, false, 10, 10);
+        GitLabConnectionConfig config = jenkins.get(GitLabConnectionConfig.class);
+        List<GitLabConnection> connectionList1 = new ArrayList<>();
+        connectionList1.add(connection1);
+
+        config.setConnections(connectionList1);
+        assertThat(config.getConnections(), is(connectionList1));
+
+        List<GitLabConnection> connectionList2 = new ArrayList<>();
+        connectionList2.add(connection1);
+        connectionList2.add(connection1);
+
+        config.setConnections(connectionList2);
+        assertThat(config.getConnections(), is(connectionList2));
+
+        config.setConnections(connectionList1);
+        assertThat(config.getConnections(), is(connectionList1));
     }
 }

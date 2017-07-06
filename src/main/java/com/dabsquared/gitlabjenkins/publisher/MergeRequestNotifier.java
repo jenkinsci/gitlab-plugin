@@ -3,6 +3,9 @@ package com.dabsquared.gitlabjenkins.publisher;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Run;
@@ -17,7 +20,7 @@ import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.g
 /**
  * @author Robin Müller
  */
-public abstract class MergeRequestNotifier extends Notifier {
+public abstract class MergeRequestNotifier extends Notifier implements MatrixAggregatable {
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
@@ -35,6 +38,16 @@ public abstract class MergeRequestNotifier extends Notifier {
             perform(build, listener, client, projectId, mergeRequestId);
         }
         return true;
+    }
+
+    public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
+        return new MatrixAggregator(build, launcher, listener) {
+            @Override
+            public boolean endBuild() throws InterruptedException, IOException {
+                perform(build, launcher, listener);
+                return super.endBuild();
+            }
+        };
     }
 
     protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId);

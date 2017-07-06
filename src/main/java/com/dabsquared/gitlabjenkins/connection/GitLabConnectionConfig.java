@@ -72,6 +72,14 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         connectionMap.put(connection.getName(), connection);
     }
 
+    public void setConnections(List<GitLabConnection> newConnections) {
+        connections = new ArrayList<>();
+        connectionMap = new HashMap<>();
+        for (GitLabConnection connection: newConnections){
+            addConnection(connection);
+        }
+    }
+
     public GitLabApi getClient(String connectionName) {
         if (!clients.containsKey(connectionName) && connectionMap.containsKey(connectionName)) {
             clients.put(connectionName, GitLabClientBuilder.buildClient(connectionMap.get(connectionName)));

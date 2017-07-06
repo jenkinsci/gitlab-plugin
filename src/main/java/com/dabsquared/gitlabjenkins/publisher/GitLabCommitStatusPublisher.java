@@ -4,6 +4,9 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -22,7 +25,7 @@ import java.io.IOException;
 /**
  * @author Robin Müller
  */
-public class GitLabCommitStatusPublisher extends Notifier {
+public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggregatable {
 
     private String name;
     private boolean markUnstableAsSuccess;
@@ -69,6 +72,16 @@ public class GitLabCommitStatusPublisher extends Notifier {
             name = "jenkins";
         }
         return this;
+    }
+
+    public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
+        return new MatrixAggregator(build, launcher, listener) {
+            @Override
+            public boolean endBuild() throws InterruptedException, IOException {
+                perform(build, launcher, listener);
+                return super.endBuild();
+            }
+        };
     }
 
     @Extension
