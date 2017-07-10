@@ -19,10 +19,6 @@
 
 This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and/or after an existing merge request was merged/closed, and report build status back to GitLab.
 
-# Seeking maintainers
-
-We are seeking new maintainers for the plugin! The existing codebase is clean and well-tested thanks to a lot of hard work done by former lead maintainer [coder-hugo,](https://github.com/coder-hugo) but he is no longer using GitLab and does not have spare time to keep working on the plugin. We're looking for an active GitLab user and experienced Java programmer to take over as lead maintainer. The main work necessary at this point is resolving minor bugs and maintaining support for new versions of GitLab. If you're interested, reach out to [Owen](https://github.com/omehegan) - email address in the project's commit log.
-
 # User support
 
 If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
@@ -51,7 +47,7 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 
 # Supported GitLab versions
 
-* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab commit status API which supports with external CI services like Jenkins
+* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab [commit status API](https://docs.gitlab.com/ce/api/commits.html#commit-status) which supports with external CI services like Jenkins
 * Versions older than 8.1.x may work but are no longer officially supported
 
 # Configuring access to GitLab
@@ -65,15 +61,15 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 1. In the *Source Code Management* section:
     1. Click *Git*
     2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
-      * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
+       * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
         ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
     3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
-      * Click *Add Repository* to specify the merge request source repository.  Then specify:
-        * *URL*: ``${gitlabSourceRepoURL}``
-        * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
+       * Click *Add Repository* to specify the merge request source repository.  Then specify:
+         * *URL*: ``${gitlabSourceRepoURL}``
+         * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
-      * For single-repository workflows: ``origin/${gitlabSourceBranch}``
-      * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
+       * For single-repository workflows: ``origin/${gitlabSourceBranch}``
+       * For forked repository workflows: ``merge-requests/${gitlabMergeRequestId}``
     5. In *Additional Behaviours*:
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
@@ -160,7 +156,19 @@ pipeline {
 ```
 
 ### Matrix/Multi-configuration jobs
-**The Jenkins Matrix/Multi-configuration job type is not supported.**
+
+This plugin can be used on Matrix/Multi-configuration jobs together with the [Flexible Publish](https://plugins.jenkins.io/flexible-publish) plugin which allows to run publishers after all axis jobs are done.
+
+To use GitLab with Flexible Publish, configure the *Post-build Actions* as follows:
+
+1. Add a *Flexible publish* action
+2. In the *Flexible publish* section:
+      1. *Add conditional action*
+      2. In the *Conditional action* section:
+          1. Set *Run?* to *Never*
+          2. Select *Condition for Matrix Aggregation*
+          3. Set *Run on Parent?* to *Always*
+          4. Add GitLab actions as required
 
 ## Gitlab Configuration
 
@@ -266,11 +274,11 @@ These include:
 * gitlabMergeRequestTitle
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
-* gitlabMergeRequestIid
 * gitMergeRequestState
 * gitMergedByUser
 * gitMergeRequestAssignee
 * gitlabMergeRequestLastCommit
+* gitlabMergeRequestTargetProjectId
 * gitlabTargetBranch
 * gitlabTargetRepoName
 * gitlabTargetNamespace

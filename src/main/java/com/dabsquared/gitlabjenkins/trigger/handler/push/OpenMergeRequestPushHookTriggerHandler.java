@@ -20,8 +20,12 @@ import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
+import hudson.triggers.Trigger;
+import hudson.triggers.TriggerDescriptor;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
+import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
+
 import org.eclipse.jgit.transport.URIish;
 
 import javax.ws.rs.ProcessingException;
@@ -30,6 +34,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,20 +56,27 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     @Override
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-        try {
-            if (job instanceof AbstractProject<?, ?>) {
-                AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
+    	try {
+            if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+                ParameterizedJob project = (ParameterizedJobMixIn.ParameterizedJob) job;
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
-                final GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                Integer projectId = hook.getProjectId();
-                if (property != null && property.getClient() != null && projectId != null && trigger != null) {
-                    GitLabApi client = property.getClient();
-                    for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
-                        if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                            handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                for (Trigger t : project.getTriggers().values()) {
+                	if (t instanceof GitLabPushTrigger) {
+                		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
+                        Integer projectId = hook.getProjectId();
+                        if (property != null && property.getClient() != null && projectId != null && trigger != null) {
+                            GitLabApi client = property.getClient();
+                            for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
+                                if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
+                                	handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                }
+                            }
                         }
-                    }
+                	}
                 }
+                
+            } else {
+            	LOGGER.log(Level.FINE, "Not a ParameterizedJob: {0}",LoggerUtil.toArray(job.getClass().getName()));
             }
         } catch (WebApplicationException | ProcessingException e) {
             LOGGER.log(Level.WARNING, "Failed to communicate with gitlab server to determine if this is an update for a merge request: " + e.getMessage(), e);
@@ -83,7 +95,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabApi client, MergeRequest mergeRequest) {
-        if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
+    	if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
             LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
         }
@@ -130,6 +142,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withMergeRequestDescription(mergeRequest.getDescription())
                 .withMergeRequestId(mergeRequest.getId())
                 .withMergeRequestIid(mergeRequest.getIid())
+                .withMergeRequestTargetProjectId(mergeRequest.getTargetProjectId())
                 .withTargetBranch(mergeRequest.getTargetBranch())
                 .withTargetRepoName(hook.getRepository().getName())
                 .withTargetNamespace(hook.getProject().getNamespace())

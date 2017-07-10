@@ -14,7 +14,7 @@
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.4.6-SNAPSHOT</version>
+  <version>1.4.7-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -28,19 +28,14 @@
 
   <developers>
     <developer>
-      <id>coderhugo</id>
-      <name>Robin Müller</name>
-      <email>coderhugo@googlemail.com</email>
-    </developer>
-    <developer>
       <id>owenmehegan</id>
       <name>Owen Mehegan</name>
       <email>owen@nerdnetworks.org</email>
     </developer>
     <developer>
-      <id>omorillo</id>
-      <name>Oscar Salvador Morillo Victoria</name>
-      <email>omorillovictoria@googlemail.com</email>
+      <id>milena</id>
+      <name>Milena Reichel</name>
+      <email>milena.reichel@gmail.com</email>
     </developer>
   </developers>
 
@@ -191,6 +186,11 @@
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
       <version>3.5.2.201411120430-r</version>
+    </dependency>
+    <dependency>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>matrix-project</artifactId>
+        <version>1.10</version>
     </dependency>
 
     <!-- REST client dependencies -->
