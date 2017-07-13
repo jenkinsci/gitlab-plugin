@@ -128,6 +128,11 @@ public class CommitStatusUpdater {
 		} else {
 	        final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
 
+			if (scmRevisionAction == null) {
+				LOGGER.log(Level.INFO, "Build does not contain SCM revision action.");
+				return result;
+			}
+
 	        final SCMRevision scmRevision = scmRevisionAction.getRevision();
 
 	        String scmRevisionHash = null;
