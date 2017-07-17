@@ -1,6 +1,21 @@
 ChangeLog
 =====================
 
+1.4.7
+=====================
+* #584: Fixes commit status exception found in issue #583
+
+1.4.6
+=====================
+* #508 and #542: Trigger build when merge request has been merged or closed
+* #510: Add gitlabMergeRequestTargetProjectId to available variables in builds
+* #516: Fix: Trigger for pushes to the destination branch of open merge requests does not work in pipeline scripts
+* #532: Allow publishing a comment to the GitLab MR if the build result is 'unstable'
+* #543: Matrix/multi-configuration project support
+* #544: Add a button to clear the security token in build configuration
+* #559: Add a function to (re)set the Gitlab connections for bootstrapping new Jenkins installs
+* #562: Fix issue #523 - Build result sent to Pipeline library repo instead of project repo
+
 1.4.5
 =====================
 * #488: Support Declarative Pipeline job syntax
