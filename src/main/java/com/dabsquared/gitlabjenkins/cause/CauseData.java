@@ -376,12 +376,12 @@ public final class CauseData {
         PUSH {
             @Override
             String getShortDescription(CauseData data) {
-                String pushedBy = data.getTriggeredByUser();
-                if (pushedBy == null) {
-                    return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
-                } else {
-                    return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
-                }
+                return getShortDescriptionPush(data);
+            }
+        }, TAG_PUSH {
+            @Override
+            String getShortDescription(CauseData data) {
+                return getShortDescriptionPush(data);
             }
         }, MERGE {
             @Override
@@ -417,6 +417,15 @@ public final class CauseData {
                 }
             }
         };
+
+        private static String getShortDescriptionPush(CauseData data) {
+            String pushedBy = data.getTriggeredByUser();
+            if (pushedBy == null) {
+                return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
+            } else {
+                return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
+            }
+        }
 
         abstract String getShortDescription(CauseData data);
     }
