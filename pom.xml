@@ -188,9 +188,14 @@
       <version>3.5.2.201411120430-r</version>
     </dependency>
     <dependency>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>matrix-project</artifactId>
-        <version>1.10</version>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-project</artifactId>
+      <version>1.10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>display-url-api</artifactId>
+      <version>1.1.1</version>
     </dependency>
 
     <!-- REST client dependencies -->
