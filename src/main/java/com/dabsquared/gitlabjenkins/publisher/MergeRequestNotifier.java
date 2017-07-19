@@ -53,12 +53,25 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId);
 
     Integer getProjectId(Run<?, ?> build) {
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        GitLabWebHookCause cause = getCauseRecursive(build.getCauses());
         return cause == null ? null : cause.getData().getTargetProjectId();
     }
 
     Integer getMergeRequestId(Run<?, ?> build) {
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        GitLabWebHookCause cause = getCauseRecursive(build.getCauses());
         return cause == null ? null : cause.getData().getMergeRequestId();
+    }
+    
+    GitLabWebHookCause getCauseRecursive(List<Cause> causes) {
+        for (Cause cause : causes) {
+            if (cause instanceof GitLabWebHookCause) {
+                return cause;
+            }
+            if (cause instanceof Cause.UpstreamCause) {
+                Cause.UpstreamCause upstreamCause = (Cause.UpstreamCause) cause;
+                return getCauseRecursive(upstreamCause.getUpstreamCauses());
+            }
+        }
+        return null;
     }
 }
