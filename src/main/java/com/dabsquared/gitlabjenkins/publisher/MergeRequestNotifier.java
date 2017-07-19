@@ -67,7 +67,7 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     GitLabWebHookCause getCauseRecursive(List<Cause> causes) {
         for (Cause cause : causes) {
             if (cause instanceof GitLabWebHookCause) {
-                return cause;
+                return (GitLabWebHookCause) cause;
             }
             if (cause instanceof Cause.UpstreamCause) {
                 Cause.UpstreamCause upstreamCause = (Cause.UpstreamCause) cause;
