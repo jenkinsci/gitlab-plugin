@@ -7,6 +7,8 @@ import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
+import hudson.model.Cause;
+import hudson.model.Cause.UpstreamCause;
 import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.model.TaskListener;
