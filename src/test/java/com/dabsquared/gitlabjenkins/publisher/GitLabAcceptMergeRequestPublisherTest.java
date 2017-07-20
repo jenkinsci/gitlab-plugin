@@ -148,7 +148,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
 
     private HttpRequest prepareAcceptMergeRequest(Integer projectId, Integer mergeRequestId) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/v3/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/merge")
+                .withPath("/gitlab/api/v4/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/merge")
                 .withMethod("PUT")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withBody("merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&should_remove_source_branch=false");

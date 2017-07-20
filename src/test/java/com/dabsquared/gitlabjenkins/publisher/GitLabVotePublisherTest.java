@@ -160,7 +160,7 @@ public class GitLabVotePublisherTest {
 
     private HttpRequest prepareSendMessageStatus(Integer projectId, Integer mergeRequestId, String body) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/v3/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/notes")
+                .withPath("/gitlab/api/v4/projects/" + projectId + "/merge_requests/" + mergeRequestId + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withBody("body=" + URLEncoder.encode(body, "UTF-8"));

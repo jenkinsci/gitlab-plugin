@@ -352,7 +352,7 @@ public class GitLabCommitStatusPublisherTest {
 
     private HttpRequest prepareUpdateCommitStatus(String projectId, String sha, String targetUrl, BuildState state) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/statuses/" + sha)
+                .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/statuses/" + sha)
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url=" + URLEncoder.encode(targetUrl, "UTF-8"));
@@ -366,14 +366,14 @@ public class GitLabCommitStatusPublisherTest {
 
     private HttpRequest prepareExistsCommit(String projectId, String sha) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/repository/commits/" + sha)
+                .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode(projectId, "UTF-8") + "/repository/commits/" + sha)
                 .withMethod("GET")
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
     private HttpRequest prepareGetProjectResponse(String projectName, int projectId) throws IOException {
         HttpRequest request= request()
-                     .withPath("/gitlab/api/v3/projects/" + URLEncoder.encode(projectName, "UTF-8"))
+                     .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode(projectName, "UTF-8"))
                      .withMethod("GET")
                    .  withHeader("PRIVATE-TOKEN", "secret");
 
