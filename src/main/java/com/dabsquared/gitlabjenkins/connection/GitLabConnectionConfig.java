@@ -55,11 +55,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return super.configure(req, json);
     }
 
-    public Boolean getUseAuthenticatedEndpoint() {
+    public boolean isUseAuthenticatedEndpoint() {
         return useAuthenticatedEndpoint;
     }
 
-    void setUseAuthenticatedEndpoint(Boolean useAuthenticatedEndpoint) {
+    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
     }
 
