@@ -71,6 +71,8 @@ jenkins:
   container_name: docker-jenkins
   restart: always
   image: jenkins/jenkins:lts
+  links:
+    - gitlab
   ports:
     - "8080:8080"
     - "50000:50000"

@@ -10,9 +10,7 @@
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
-- [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
-    - [Access GitLab](#access-gitlab)
-    - [Access Jenkins](#access-jenkins)
+- [Testing With Docker](#testing-with-docker)
 - [Release Workflow](#release-workflow)
 
 # Introduction
@@ -316,29 +314,9 @@ Before submitting your change make sure that:
 * you updated the README
 * you have used findbugs to see if you haven't introduced any new warnings.
 
-# Quick test environment setup using Docker
+# Testing With Docker
 
-In order to test the plugin on different versions of `GitLab` and `Jenkins` you may want to use `Docker` containers.
-
-A example docker-compose file is available at `gitlab-plugin/src/docker` which allows to set up instances of the latest `GitLab` and `Jenkins` versions.
-
-To start the containers, run below command from the `docker` folder:
-
-```bash
-docker-compose up -d
-```
-
-## Access GitLab
-
-To access `GitLab`, point your browser to `http://172.17.0.1:10080` and set a password for the `root` user account.
-
-For more information on the supported `GitLab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
-
-## Access Jenkins
-
-To see `Jenkins`, point your browser to `http://localhost:8080`.
-
-For more information on the supported `Jenkins` tags and how to configure the containers, visit https://hub.docker.com/r/library/jenkins.
+See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md
 
 # Release Workflow
 
