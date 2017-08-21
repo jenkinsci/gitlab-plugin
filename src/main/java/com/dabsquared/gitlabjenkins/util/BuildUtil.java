@@ -12,13 +12,12 @@ import hudson.plugins.git.util.MergeRecord;
 public class BuildUtil {
     public static Run<?, ?> getBuildByBranch(Job<?, ?> project, String branchName) {
         for (Run<?, ?> build : project.getBuilds()) {
+            BuildData data = build.getAction(BuildData.class);
             MergeRecord merge = build.getAction(MergeRecord.class);
-            for(BuildData data : build.getActions(BuildData.class)) {
-                if (hasLastBuild(data) && isNoMergeBuild(data, merge)) {
-                    for (Branch branch : data.lastBuild.getRevision().getBranches()) {
-                        if (branch.getName().endsWith("/" + branchName)) {
-                            return build;
-                        }
+            if (hasLastBuild(data) && isNoMergeBuild(data, merge)) {    
+                for (Branch branch : data.lastBuild.getRevision().getBranches()) {
+                    if (branch.getName().endsWith("/" + branchName)) {
+                        return build;
                     }
                 }
             }
