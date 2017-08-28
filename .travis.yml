@@ -11,7 +11,7 @@ env:
     - DOCKER_CACHE_DIR=$HOME/.docker-images
   matrix:
     - TEST_PROFILE=all-tests
-    - TEST_PROFILE=integration-test,skip-findbugs-with-tests,skip-javadoc-with-tests
+    - TEST_PROFILE=integration-test,skip-findbugs-with-tests
 
 matrix:
   fast_finish: true
