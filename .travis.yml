@@ -6,6 +6,8 @@ services:
 language: java
 
 env:
+  - TEST_PROFILE=all-tests
+  - TEST_PROFILE=integration-test
   global:
     - DOCKER_CACHE_DIR=$HOME/.docker-images
 
