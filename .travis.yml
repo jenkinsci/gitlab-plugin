@@ -23,14 +23,6 @@ install: true
 script:
   - travis/install.sh
 
-cache:
-  directories:
-  - $DOCKER_CACHE_DIR
-  - $HOME/.m2/repository
-  - $HOME/.m2/wrapper
-before_cache:
-  - travis/before_cache.sh
-
 deploy:
   provider: releases
   api_key: "$GITHUB_API_TOKEN"
@@ -40,6 +32,14 @@ deploy:
     condition: $TRAVIS_PULL_REQUEST = false
   file:
     - "./target/gitlab-plugin-${TRAVIS_TAG}.hpi"
+
+cache:
+  directories:
+  - $DOCKER_CACHE_DIR
+  - $HOME/.m2/repository
+  - $HOME/.m2/wrapper
+before_cache:
+  - travis/before_cache.sh
 
 git:
   depth: 5
