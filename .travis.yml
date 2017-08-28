@@ -5,14 +5,22 @@ services:
 
 language: java
 
+env:
+  global:
+    - DOCKER_CACHE_FILE=$HOME/.docker/cache.tar.gz
+
 before_install:
+  - if [ -f ${DOCKER_CACHE_FILE} ]; then gunzip -c ${DOCKER_CACHE_FILE} | docker load; fi
   - chmod +x travis/*.sh
 
 install: true
-script: travis/install.sh
+script:
+  - travis/install.sh
+  - if [[ ${TRAVIS_BRANCH} == "travis-support" ]] && [[ ${TRAVIS_PULL_REQUEST} == "false" ]]; then mkdir -p $(dirname ${DOCKER_CACHE_FILE}) ; docker save $(docker history -q ${DOCKER_REPOSITORY}:${TRAVIS_COMMIT} | grep -v '<missing>') | gzip > ${DOCKER_CACHE_FILE}; fi
 
 cache:
   directories:
+  - $HMOE/.docker
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
