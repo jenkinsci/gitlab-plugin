@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -63,7 +63,7 @@ public class AddGitLabMergeRequestCommentStep extends AbstractStepImpl {
                 Integer projectId = cause.getData().getTargetProjectId();
                 Integer mergeRequestId = cause.getData().getMergeRequestId();
                 if (projectId != null && mergeRequestId != null) {
-                    GitLabApi client = getClient(run);
+                    GitLabClient client = getClient(run);
                     if (client == null) {
                         println("No GitLab connection configured");
                     } else {

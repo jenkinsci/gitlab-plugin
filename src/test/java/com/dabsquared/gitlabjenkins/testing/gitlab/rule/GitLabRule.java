@@ -1,12 +1,11 @@
 package com.dabsquared.gitlabjenkins.testing.gitlab.rule;
 
-import com.dabsquared.gitlabjenkins.gitlab.JacksonConfig;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -27,20 +26,14 @@ import java.util.UUID;
  */
 public class GitLabRule implements TestRule {
 
-    private final GitLabApi client;
+    private final GitLabClient client;
     private final String username;
     private final String password;
 
     private List<String> projectIds = new ArrayList<>();
 
     public GitLabRule(String url, int postgresPort) {
-        client = new ResteasyClientBuilder()
-            .httpEngine(new ApacheHttpClient4Engine())
-            .register(new JacksonJsonProvider())
-            .register(new JacksonConfig())
-            .register(new ApiHeaderTokenFilter(getApiToken(postgresPort))).build().target(url)
-            .proxyBuilder(GitLabApi.class)
-            .build();
+        client = new V3GitLabClientBuilder().buildClient(url, getApiToken(postgresPort), false, -1, -1);
         User user = client.getCurrentUser();
         username = user.getUsername();
         password = "integration-test";
@@ -69,11 +62,15 @@ public class GitLabRule implements TestRule {
         return project.getHttpUrlToRepo();
     }
 
-    public void createMergeRequest(final Integer projectId,
-                                   final String sourceBranch,
-                                   final String targetBranch,
-                                   final String title) {
-        client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+    public MergeRequest createMergeRequest(final Integer projectId,
+                                           final String sourceBranch,
+                                           final String targetBranch,
+                                           final String title) {
+        return client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+    }
+
+    public void createMergeRequestNote(Integer projectId, int mergeRequestId, String note) {
+        client.createMergeRequestNote(projectId, mergeRequestId, note);
     }
 
     public String getUsername() {

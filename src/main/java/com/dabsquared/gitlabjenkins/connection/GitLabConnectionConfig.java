@@ -1,13 +1,14 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.GitLabClientBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Item;
@@ -29,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
+
+
 /**
  * @author Robin Müller
  */
@@ -38,7 +42,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     private boolean useAuthenticatedEndpoint;
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
-    private transient Map<String, GitLabApi> clients = new HashMap<>();
 
     public GitLabConnectionConfig() {
         load();
@@ -50,7 +53,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         connections = req.bindJSONToList(GitLabConnection.class, json.get("connections"));
         useAuthenticatedEndpoint = json.getBoolean("useAuthenticatedEndpoint");
         refreshConnectionMap();
-        clients.clear();
         save();
         return super.configure(req, json);
     }
@@ -80,11 +82,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public GitLabApi getClient(String connectionName) {
-        if (!clients.containsKey(connectionName) && connectionMap.containsKey(connectionName)) {
-            clients.put(connectionName, GitLabClientBuilder.buildClient(connectionMap.get(connectionName)));
+    public GitLabClient getClient(String connectionName) {
+        if (!connectionMap.containsKey(connectionName)) {
+            return null;
         }
-        return clients.get(connectionName);
+        return connectionMap.get(connectionName).getClient();
     }
 
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
@@ -131,11 +133,12 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     public FormValidation doTestConnection(@QueryParameter String url,
                                            @QueryParameter String apiTokenId,
+                                           @QueryParameter String clientBuilderId,
                                            @QueryParameter boolean ignoreCertificateErrors,
                                            @QueryParameter int connectionTimeout,
                                            @QueryParameter int readTimeout) {
         try {
-            GitLabClientBuilder.buildClient(url, apiTokenId, ignoreCertificateErrors, connectionTimeout, readTimeout).headCurrentUser();
+            new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient().headCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
@@ -165,6 +168,15 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
             return options;
         }
         return new StandardListBoxModel();
+    }
+
+    public ListBoxModel doFillClientBuilderIdItems() {
+        ListBoxModel model = new ListBoxModel();
+        for (GitLabClientBuilder builder : getAllGitLabClientBuilders()) {
+            model.add(builder.id());
+        }
+
+        return model;
     }
 
     private void refreshConnectionMap() {

@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractProject;
@@ -107,7 +108,7 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, Integer projectId, Integer mergeRequestId) {
         try {
             if (!onlyForFailure || build.getResult() == Result.FAILURE) {
                 client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));

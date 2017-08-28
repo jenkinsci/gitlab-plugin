@@ -1,28 +1,9 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -33,6 +14,23 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMRevisionAction;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author Robin Müller
@@ -42,7 +40,7 @@ public class CommitStatusUpdater {
     private final static Logger LOGGER = Logger.getLogger(CommitStatusUpdater.class.getName());
 
     public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state, String name) {
-        GitLabApi client = getClient(build);
+        GitLabClient client = getClient(build);
         if (client == null) {
             println(listener, "No GitLab connection configured");
             return;
@@ -82,7 +80,7 @@ public class CommitStatusUpdater {
         }
     }
 
-    private static boolean existsCommit(GitLabApi client, String gitlabProjectId, String commitHash) {
+    private static boolean existsCommit(GitLabClient client, String gitlabProjectId, String commitHash) {
         try {
             client.getCommit(gitlabProjectId, commitHash);
             return true;
@@ -111,9 +109,9 @@ public class CommitStatusUpdater {
 					cause.getData().getLastCommit()));
 		}
 
-		final GitLabApi gitLabClient = getClient(build);
-		if (gitLabClient == null) {
-			LOGGER.log(Level.WARNING, "No gitlab client found.");
+        final GitLabClient gitLabClient = getClient(build);
+        if (gitLabClient == null) {
+            LOGGER.log(Level.WARNING, "No gitlab client found.");
 			return result;
 		}
 
@@ -172,9 +170,9 @@ public class CommitStatusUpdater {
 	}
 
 	private static void addGitLabBranchBuild(List<GitLabBranchBuild> result, String scmRevisionHash,
-			Set<String> remoteUrls, EnvVars environment, GitLabApi gitLabClient) {
-		for (String remoteUrl : remoteUrls) {
-			try {
+                                             Set<String> remoteUrls, EnvVars environment, GitLabClient gitLabClient) {
+        for (String remoteUrl : remoteUrls) {
+            try {
 				LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
 				final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
 				if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
