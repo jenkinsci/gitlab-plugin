@@ -31,5 +31,15 @@ cache:
 before_cache:
   - travis/before_cache.sh
 
+deploy:
+  provider: releases
+  api_key: "$GITHUB_API_TOKEN"
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_PULL_REQUEST = false
+  file:
+    - "./target/gitlab-plugin-${TRAVIS_TAG}.hpi"
+
 git:
   depth: 5

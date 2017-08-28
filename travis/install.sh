@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "$TRAVIS_TAG" != "" ]; then
+if [ "$TRAVIS_TAG" != "" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     ./mvnw versions::set -DnewVersion=${TRAVIS_TAG}
 fi
 
