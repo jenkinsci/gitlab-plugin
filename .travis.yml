@@ -1,3 +1,7 @@
+env:
+  - TEST_PROFILE=all-tests
+  - TEST_PROFILE=integration-test
+
 sudo: required
 
 services:
@@ -6,11 +10,12 @@ services:
 language: java
 
 env:
-  - TEST_PROFILE=all-tests
-  - TEST_PROFILE=integration-test
   global:
     - DOCKER_CACHE_DIR=$HOME/.docker-images
 
+matrix:
+  fast_finish: true
+  
 before_install:
   - if [[ -d $DOCKER_CACHE_DIR ]]; then ls $DOCKER_CACHE_DIR/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - chmod +x travis/*.sh
