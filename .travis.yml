@@ -25,6 +25,7 @@ script:
 
 deploy:
   provider: releases
+  prelease: true
   api_key: "$GITHUB_API_TOKEN"
   skip_cleanup: true
   on:
