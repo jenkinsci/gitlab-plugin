@@ -1,6 +1,3 @@
-env:
-  - TEST_PROFILE=all-tests
-  - TEST_PROFILE=integration-test
 
 sudo: required
 
@@ -12,6 +9,9 @@ language: java
 env:
   global:
     - DOCKER_CACHE_DIR=$HOME/.docker-images
+  matrix:
+    - TEST_PROFILE=all-tests
+    - TEST_PROFILE=integration-test
 
 matrix:
   fast_finish: true
