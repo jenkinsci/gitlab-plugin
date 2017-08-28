@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.testing.gitlab.rule;
 
 import com.dabsquared.gitlabjenkins.gitlab.JacksonConfig;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -69,11 +70,15 @@ public class GitLabRule implements TestRule {
         return project.getHttpUrlToRepo();
     }
 
-    public void createMergeRequest(final Integer projectId,
-                                   final String sourceBranch,
-                                   final String targetBranch,
-                                   final String title) {
-        client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+    public MergeRequest createMergeRequest(final Integer projectId,
+                                           final String sourceBranch,
+                                           final String targetBranch,
+                                           final String title) {
+        return client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+    }
+
+    public void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body) {
+        client.createMergeRequestNote(projectId, mergeRequestId, body);
     }
 
     public String getUsername() {

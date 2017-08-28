@@ -38,7 +38,7 @@ public interface GitLabApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests")
-    void createMergeRequest(
+    MergeRequest createMergeRequest(
         @PathParam("projectId") Integer projectId,
         @FormParam("source_branch") String sourceBranch,
         @FormParam("target_branch") String targetBranch,
