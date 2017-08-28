@@ -30,3 +30,6 @@ cache:
   - $HOME/.m2/wrapper
 before_cache:
   - travis/before_cache.sh
+
+git:
+  depth: 5
