@@ -71,7 +71,7 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void doCheckConnection_success() {
-        HttpRequest request = request().withPath("/gitlab/api/v3/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
+        HttpRequest request = request().withPath("/gitlab/api/v4/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
         mockServerClient.when(request).respond(response().withStatusCode(Response.Status.OK.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
@@ -83,7 +83,7 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void doCheckConnection_forbidden() throws IOException {
-        HttpRequest request = request().withPath("/gitlab/api/v3/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
+        HttpRequest request = request().withPath("/gitlab/api/v4/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
         mockServerClient.when(request).respond(response().withStatusCode(Response.Status.FORBIDDEN.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);

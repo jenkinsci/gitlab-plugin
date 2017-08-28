@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * @author Robin Müller
  */
-@Path("/api/v3")
+@Path("/api/v4")
 public interface GitLabApi {
 
     @POST
@@ -104,18 +104,18 @@ public interface GitLabApi {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/merge")
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/merge")
     void acceptMergeRequest(@PathParam("projectId") Integer projectId,
-                            @PathParam("mergeRequestId") Integer mergeRequestId,
+                            @PathParam("mergeRequestIid") Integer mergeRequestIid,
                             @FormParam("merge_commit_message") String mergeCommitMessage,
                             @FormParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/notes")
     void createMergeRequestNote(@PathParam("projectId") Integer projectId,
-                                @PathParam("mergeRequestId") Integer mergeRequestId,
+                                @PathParam("mergeRequestIid") Integer mergeRequestIid,
                                 @FormParam("body") String body);
 
     @GET
