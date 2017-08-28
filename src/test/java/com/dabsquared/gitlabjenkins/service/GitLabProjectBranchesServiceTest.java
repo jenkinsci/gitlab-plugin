@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,15 +29,15 @@ public class GitLabProjectBranchesServiceTest {
     private GitLabProjectBranchesService branchesService;
 
     @Mock
-    private GitLabApi gitlabApi;
+    private GitLabClient gitlabClient;
 
     @Before
     public void setUp() throws IOException {
         List<Branch> branchNamesProjectA = convert(asList("master", "A-branch-1"));
 
         // mock the gitlab factory
-        when(gitlabApi.getBranches("groupOne/A")).thenReturn(branchNamesProjectA);
-        when(gitlabApi.getBranches("groupOne/B")).thenReturn(convert(BRANCH_NAMES_PROJECT_B));
+        when(gitlabClient.getBranches("groupOne/A")).thenReturn(branchNamesProjectA);
+        when(gitlabClient.getBranches("groupOne/B")).thenReturn(convert(BRANCH_NAMES_PROJECT_B));
 
         // never expire cache for tests
         branchesService = new GitLabProjectBranchesService();
@@ -45,7 +46,7 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldReturnBranchNamesFromGitlabApi() {
         // when
-        List<String> actualBranchNames = branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/B.git");
+        List<String> actualBranchNames = branchesService.getBranches(gitlabClient, "git@git.example.com:groupOne/B.git");
 
         // then
         assertThat(actualBranchNames, is(BRANCH_NAMES_PROJECT_B));
@@ -54,11 +55,11 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldNotMakeUnnecessaryCallsToGitlabApiGetBranches() {
         // when
-        branchesService.getBranches(gitlabApi, "git@git.example.com:groupOne/A.git");
+        branchesService.getBranches(gitlabClient, "git@git.example.com:groupOne/A.git");
 
         // then
-        verify(gitlabApi, times(1)).getBranches("groupOne/A");
-        verify(gitlabApi, times(0)).getBranches("groupOne/B");
+        verify(gitlabClient, times(1)).getBranches("groupOne/A");
+        verify(gitlabClient, times(0)).getBranches("groupOne/B");
     }
 
     private List<Branch> convert(List<String> branchNames) {

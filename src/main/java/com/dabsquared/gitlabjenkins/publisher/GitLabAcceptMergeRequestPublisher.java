@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -44,7 +45,7 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, Integer projectId, Integer mergeRequestId) {
         try {
             if (build.getResult() == Result.SUCCESS) {
                 client.acceptMergeRequest(projectId, mergeRequestId, "Merge Request accepted by jenkins build success", false);

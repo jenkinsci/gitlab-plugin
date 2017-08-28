@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,15 +29,15 @@ public class GitLabProjectLabelsServiceTest {
     private GitLabProjectLabelsService labelsService;
 
     @Mock
-    private GitLabApi gitlabApi;
+    private GitLabClient gitlabClient;
 
     @Before
     public void setUp() throws IOException {
         List<Label> labelsProjectA = convert(asList("label1", "label2"));
 
         // mock the gitlab factory
-        when(gitlabApi.getLabels("groupOne/A")).thenReturn(labelsProjectA);
-        when(gitlabApi.getLabels("groupOne/B")).thenReturn(convert(LABELS_PROJECT_B));
+        when(gitlabClient.getLabels("groupOne/A")).thenReturn(labelsProjectA);
+        when(gitlabClient.getLabels("groupOne/B")).thenReturn(convert(LABELS_PROJECT_B));
 
         // never expire cache for tests
         labelsService = new GitLabProjectLabelsService();
@@ -45,7 +46,7 @@ public class GitLabProjectLabelsServiceTest {
     @Test
     public void shouldReturnLabelsFromGitlabApi() {
         // when
-        List<String> actualLabels = labelsService.getLabels(gitlabApi, "git@git.example.com:groupOne/B.git");
+        List<String> actualLabels = labelsService.getLabels(gitlabClient, "git@git.example.com:groupOne/B.git");
 
         // then
         assertThat(actualLabels, is(LABELS_PROJECT_B));
@@ -54,11 +55,11 @@ public class GitLabProjectLabelsServiceTest {
     @Test
     public void shouldNotMakeUnnecessaryCallsToGitlabApiGetLabels() {
         // when
-        labelsService.getLabels(gitlabApi, "git@git.example.com:groupOne/A.git");
+        labelsService.getLabels(gitlabClient, "git@git.example.com:groupOne/A.git");
 
         // then
-        verify(gitlabApi, times(1)).getLabels("groupOne/A");
-        verify(gitlabApi, times(0)).getLabels("groupOne/B");
+        verify(gitlabClient, times(1)).getLabels("groupOne/A");
+        verify(gitlabClient, times(0)).getLabels("groupOne/B");
     }
 
     private List<Label> convert(List<String> labels) {

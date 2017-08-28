@@ -1,11 +1,14 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
@@ -33,9 +36,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertSame;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -75,7 +80,7 @@ public class GitLabConnectionConfigTest {
         mockServerClient.when(request).respond(response().withStatusCode(Response.Status.OK.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, false, 10, 10);
+        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
 
         assertThat(formValidation.getMessage(), is(Messages.connection_success()));
         mockServerClient.verify(request);
@@ -87,7 +92,7 @@ public class GitLabConnectionConfigTest {
         mockServerClient.when(request).respond(response().withStatusCode(Response.Status.FORBIDDEN.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, false, 10, 10);
+        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
 
         assertThat(formValidation.getMessage(), is(Messages.connection_error("HTTP 403 Forbidden")));
         mockServerClient.verify(request);
@@ -154,8 +159,8 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void setConnectionsTest() {
-        GitLabConnection connection1 = new GitLabConnection("1", "http://localhost", null, false, 10, 10);
-        GitLabConnection connection2 = new GitLabConnection("2", "http://localhost", null, false, 10, 10);
+        GitLabConnection connection1 = new GitLabConnection("1", "http://localhost", null, new V3GitLabClientBuilder(), false, 10, 10);
+        GitLabConnection connection2 = new GitLabConnection("2", "http://localhost", null, new V3GitLabClientBuilder(), false, 10, 10);
         GitLabConnectionConfig config = jenkins.get(GitLabConnectionConfig.class);
         List<GitLabConnection> connectionList1 = new ArrayList<>();
         connectionList1.add(connection1);
@@ -165,12 +170,25 @@ public class GitLabConnectionConfigTest {
 
         List<GitLabConnection> connectionList2 = new ArrayList<>();
         connectionList2.add(connection1);
-        connectionList2.add(connection1);
+        connectionList2.add(connection2);
 
         config.setConnections(connectionList2);
         assertThat(config.getConnections(), is(connectionList2));
 
         config.setConnections(connectionList1);
         assertThat(config.getConnections(), is(connectionList1));
+    }
+
+    @Test
+    public void getClient_is_cached() {
+        GitLabConnection connection = new GitLabConnection("test", "http://localhost", API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
+        GitLabConnectionConfig config = jenkins.get(GitLabConnectionConfig.class);
+        List<GitLabConnection> connectionList1 = new ArrayList<>();
+        connectionList1.add(connection);
+        config.setConnections(connectionList1);
+
+        GitLabClient client = config.getClient(connection.getName());
+        assertNotNull(client);
+        assertSame(client, config.getClient(connection.getName()));
     }
 }

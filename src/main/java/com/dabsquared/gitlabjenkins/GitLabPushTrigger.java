@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins;
 
+
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
@@ -142,9 +143,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
         if (!oldConfig.jobsMigrated) {
             GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            gitLabConfig.getConnections().add(new GitLabConnection(oldConfig.gitlabHostUrl,
+            gitLabConfig.getConnections().add(new GitLabConnection(
+                oldConfig.gitlabHostUrl,
                     oldConfig.gitlabHostUrl,
                     oldConfig.gitlabApiToken,
+                "autodetect",
                     oldConfig.ignoreCertificateErrors,
                     10,
                     10));
