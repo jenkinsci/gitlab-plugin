@@ -7,21 +7,21 @@ language: java
 
 env:
   global:
-    - DOCKER_CACHE_FILE=$HOME/.docker/cache.tar.gz
+    - DOCKER_CACHE_DIR=$HOME/.docker-images
 
 before_install:
-  - if [ -f ${DOCKER_CACHE_FILE} ]; then gunzip -c ${DOCKER_CACHE_FILE} | docker load; fi
+  - if [[ -d $DOCKER_CACHE_DIR ]]; then ls $DOCKER_CACHE_DIR/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - chmod +x travis/*.sh
 
 install: true
 script:
   - travis/install.sh
-  - if [[ ${TRAVIS_BRANCH} == "travis-support" ]] && [[ ${TRAVIS_PULL_REQUEST} == "false" ]]; then mkdir -p $(dirname ${DOCKER_CACHE_FILE}) ; docker save $(docker history -q ${DOCKER_REPOSITORY}:${TRAVIS_COMMIT} | grep -v '<missing>') | gzip > ${DOCKER_CACHE_FILE}; fi
 
 cache:
   directories:
-  - $HOME/.docker
+  - $DOCKER_CACHE_DIR
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
   - rm -rf $HOME/.m2/repository/com/dabsquared/gitlabjenkins
+  - mkdir -p $DOCKER_CACHE_DIR && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $DOCKER_CACHE_DIR/$1.tar.gz || docker save $0 | gzip -2 > $DOCKER_CACHE_DIR/$1.tar.gz'
