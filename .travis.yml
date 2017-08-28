@@ -17,8 +17,8 @@ matrix:
   fast_finish: true
   
 before_install:
-  - if [[ -d $DOCKER_CACHE_DIR ]]; then ls $DOCKER_CACHE_DIR/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - chmod +x travis/*.sh
+  - travis/before_install.sh
 
 install: true
 script:
@@ -30,5 +30,4 @@ cache:
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
-  - rm -rf $HOME/.m2/repository/com/dabsquared/gitlabjenkins
-  - mkdir -p $DOCKER_CACHE_DIR && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $DOCKER_CACHE_DIR/$1.tar.gz || docker save $0 | gzip -2 > $DOCKER_CACHE_DIR/$1.tar.gz'
+  - travis/before_cache.sh
