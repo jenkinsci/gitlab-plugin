@@ -20,7 +20,7 @@ script:
 
 cache:
   directories:
-  - $HMOE/.docker
+  - $HOME/.docker
   - $HOME/.m2/repository
   - $HOME/.m2/wrapper
 before_cache:
