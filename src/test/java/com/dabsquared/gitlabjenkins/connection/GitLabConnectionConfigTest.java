@@ -76,27 +76,28 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void doCheckConnection_success() {
-        HttpRequest request = request().withPath("/gitlab/api/v4/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
-        mockServerClient.when(request).respond(response().withStatusCode(Response.Status.OK.getStatusCode()));
-
-        GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
-
-        assertThat(formValidation.getMessage(), is(Messages.connection_success()));
-        mockServerClient.verify(request);
+        String expected = Messages.connection_success();
+        assertThat(doCheckConnection("v3", Response.Status.OK), is(expected));
+        assertThat(doCheckConnection("v4", Response.Status.OK), is(expected));
     }
 
     @Test
     public void doCheckConnection_forbidden() throws IOException {
-        HttpRequest request = request().withPath("/gitlab/api/v4/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
-        mockServerClient.when(request).respond(response().withStatusCode(Response.Status.FORBIDDEN.getStatusCode()));
+        String expected = Messages.connection_error("HTTP 403 Forbidden");
+        assertThat(doCheckConnection("v3", Response.Status.FORBIDDEN), is(expected));
+        assertThat(doCheckConnection("v4", Response.Status.FORBIDDEN), is(expected));
+    }
+
+    private String doCheckConnection(String clientBuilderId, Response.Status status) {
+        HttpRequest request = request().withPath("/gitlab/api/" + clientBuilderId + "/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
+        mockServerClient.when(request).respond(response().withStatusCode(status.getStatusCode()));
 
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
-
-        assertThat(formValidation.getMessage(), is(Messages.connection_error("HTTP 403 Forbidden")));
+        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 10);
         mockServerClient.verify(request);
+        return formValidation.getMessage();
     }
+
 
     @Test
     public void authenticationEnabled_anonymous_forbidden() throws IOException, URISyntaxException {
