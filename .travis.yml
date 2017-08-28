@@ -1,10 +1,9 @@
-
 sudo: required
+
+language: java
 
 services:
   - docker
-
-language: java
 
 env:
   global:
