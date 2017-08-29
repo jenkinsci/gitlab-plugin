@@ -69,8 +69,8 @@ public class GitLabRule implements TestRule {
         return client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
     }
 
-    public void createMergeRequestNote(Integer projectId, int mergeRequestId, String note) {
-        client.createMergeRequestNote(projectId, mergeRequestId, note);
+    public void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body) {
+        client.createMergeRequestNote(projectId, mergeRequestId, body);
     }
 
     public String getUsername() {
