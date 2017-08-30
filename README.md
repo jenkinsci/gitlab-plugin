@@ -125,6 +125,9 @@ node {
     * If you selected *Rebuild open Merge Requests* other than *None*, check *Comments*, and specify the
       *Comment for triggering a build*.  A new build will be triggered when this phrase appears in a
       commit comment.  In addition to a literal phrase, you can also specify a Java regular expression.
+    * You can use *Build on successful pipeline events* to trigger on a successful pipeline run in Gitlab. Note that 
+      this build trigger will only trigger a build if the commit is not already built and does not set the Gitlab status.
+      Otherwise you might end up in a loop.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
 
