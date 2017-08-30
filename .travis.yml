@@ -1,0 +1,46 @@
+sudo: required
+
+language: java
+
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_CACHE_DIR=$HOME/.docker-images
+  matrix:
+    - TEST_PROFILE=all-tests
+    - TEST_PROFILE=integration-test,skip-findbugs-with-tests
+
+matrix:
+  fast_finish: true
+  
+before_install:
+  - chmod +x travis/*.sh
+  - travis/before_install.sh
+
+install: true
+script:
+  - travis/install.sh
+
+deploy:
+  provider: releases
+  prelease: true
+  api_key: "$GITHUB_API_TOKEN"
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_PULL_REQUEST = false
+  file:
+    - "./target/gitlab-plugin-${TRAVIS_TAG}.hpi"
+
+cache:
+  directories:
+  - $DOCKER_CACHE_DIR
+  - $HOME/.m2/repository
+  - $HOME/.m2/wrapper
+before_cache:
+  - travis/before_cache.sh
+
+git:
+  depth: 5
