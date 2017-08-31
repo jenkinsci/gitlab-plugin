@@ -35,7 +35,7 @@ import java.util.Map;
 @Extension
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
-    private boolean useAuthenticatedEndpoint;
+    private Boolean useAuthenticatedEndpoint = true;
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
     private transient Map<String, GitLabApi> clients = new HashMap<>();
@@ -55,11 +55,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return super.configure(req, json);
     }
 
-    public boolean isUseAuthenticatedEndpoint() {
+    public Boolean getUseAuthenticatedEndpoint() {
         return useAuthenticatedEndpoint;
     }
 
-    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
+    void setUseAuthenticatedEndpoint(Boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
     }
 
@@ -183,5 +183,12 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
                 return false;
             }
         }
+    }
+    //For backwards compatibility. ReadResolve is called on startup
+    protected GitLabConnectionConfig readResolve() {
+        if (useAuthenticatedEndpoint == null) {
+            setUseAuthenticatedEndpoint(false);
+        }
+        return this;
     }
 }

@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.testing.integration;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.testing.gitlab.rule.GitLabRule;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
@@ -176,9 +177,10 @@ public class GitLabIT {
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
-        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnNoteRequest(true).withBranchFilterType(BranchFilterType.All).build();
-        project.addTrigger(trigger);
-        trigger.start(project, true);
+        GitLabPushTrigger trigger = gitLabPushTrigger()
+            .withTriggerOnNoteRequest(true)
+            .withNoteRegex(".*test.*")
+            .withBranchFilterType(BranchFilterType.All).build();
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -211,9 +213,16 @@ public class GitLabIT {
         git.push().setRemote("origin").add("feature").setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
             .call();
 
-        gitlab.createMergeRequest(projectId, "feature", "master", "Merge feature branch to master.");
+        // create merge-request
+        MergeRequest mr = gitlab.createMergeRequest(projectId, "feature", "master", "Merge feature branch to master.");
 
-        buildTriggered.block(10000);
+        // add trigger after push/merge-request so it may only receive the note-hook
+        project.addTrigger(trigger);
+        trigger.start(project, true);
+
+        gitlab.createMergeRequestNote(projectId, mr.getId(), "this is a test note");
+
+        buildTriggered.block(20000);
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 

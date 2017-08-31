@@ -39,8 +39,8 @@ class GitLabApiExtension implements GitLabApi {
     }
 
     @Override
-    public void createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title) {
-        client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+    public MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title) {
+        return client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
     }
 
     @Override

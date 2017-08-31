@@ -1,5 +1,8 @@
 ChangeLog
+
+1.4.7
 =====================
+* #584: Fixes commit status exception found in issue #583
 
 1.4.6
 =====================
