@@ -80,7 +80,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         }
     }
 
-    private Action[] createActions(Job<?, ?> job, H hook) {
+    protected Action[] createActions(Job<?, ?> job, H hook) {
         ArrayList<Action> actions = new ArrayList<>();
         actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook))));
         try {
@@ -113,7 +113,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         return null;
     }
 
-    private void scheduleBuild(Job<?, ?> job, Action[] actions) {
+    protected void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob) job;

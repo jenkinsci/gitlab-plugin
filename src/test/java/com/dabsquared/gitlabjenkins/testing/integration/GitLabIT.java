@@ -213,8 +213,10 @@ public class GitLabIT {
         git.push().setRemote("origin").add("feature").setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
             .call();
 
+        // create merge-request
         MergeRequest mr = gitlab.createMergeRequest(projectId, "feature", "master", "Merge feature branch to master.");
 
+        // add trigger after push/merge-request so it may only receive the note-hook
         project.addTrigger(trigger);
         trigger.start(project, true);
 
