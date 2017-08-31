@@ -50,7 +50,7 @@ public class CommitStatusUpdater {
 
         try {
             final String buildUrl = getBuildUrl(build);
-            		
+                    
             for (final GitLabBranchBuild gitLabBranchBuild : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
                     if (existsCommit(client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
@@ -101,114 +101,114 @@ public class CommitStatusUpdater {
         return Jenkins.getInstance().getRootUrl() + build.getUrl();
     }
 
-	private static List<GitLabBranchBuild> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
-		LOGGER.log(Level.INFO, "Retrieving gitlab project ids");
-		final List<GitLabBranchBuild> result = new ArrayList<>();
+    private static List<GitLabBranchBuild> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
+        LOGGER.log(Level.INFO, "Retrieving gitlab project ids");
+        final List<GitLabBranchBuild> result = new ArrayList<>();
 
-		GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-		if (cause != null) {
-			return Collections.singletonList(new GitLabBranchBuild(cause.getData().getSourceProjectId().toString(),
-					cause.getData().getLastCommit()));
-		}
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        if (cause != null) {
+            return Collections.singletonList(new GitLabBranchBuild(cause.getData().getSourceProjectId().toString(),
+                    cause.getData().getLastCommit()));
+        }
 
-		final GitLabApi gitLabClient = getClient(build);
-		if (gitLabClient == null) {
-			LOGGER.log(Level.WARNING, "No gitlab client found.");
-			return result;
-		}
+        final GitLabApi gitLabClient = getClient(build);
+        if (gitLabClient == null) {
+            LOGGER.log(Level.WARNING, "No gitlab client found.");
+            return result;
+        }
 
-		final List<BuildData> buildDatas = build.getActions(BuildData.class);
-		if (CollectionUtils.isEmpty(buildDatas)) {
-			LOGGER.log(Level.INFO, "Build does not contain build data.");
-			return result;
-		}
+        final List<BuildData> buildDatas = build.getActions(BuildData.class);
+        if (CollectionUtils.isEmpty(buildDatas)) {
+            LOGGER.log(Level.INFO, "Build does not contain build data.");
+            return result;
+        }
 
-		if (buildDatas.size() == 1) {
-			addGitLabBranchBuild(result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
-		} else {
-	        final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
+        if (buildDatas.size() == 1) {
+            addGitLabBranchBuild(result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
+        } else {
+            final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
 
-			if (scmRevisionAction == null) {
-				LOGGER.log(Level.INFO, "Build does not contain SCM revision action.");
-				return result;
-			}
+            if (scmRevisionAction == null) {
+                LOGGER.log(Level.INFO, "Build does not contain SCM revision action.");
+                return result;
+            }
 
-	        final SCMRevision scmRevision = scmRevisionAction.getRevision();
+            final SCMRevision scmRevision = scmRevisionAction.getRevision();
 
-	        String scmRevisionHash = null;
-	        if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl) {
-	        	scmRevisionHash = ((AbstractGitSCMSource.SCMRevisionImpl) scmRevision).getHash();
-	        }
+            String scmRevisionHash = null;
+            if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl) {
+                scmRevisionHash = ((AbstractGitSCMSource.SCMRevisionImpl) scmRevision).getHash();
+            }
 
-			for (final BuildData buildData : buildDatas) {
-				for (final Entry<String, Build> buildByBranchName : buildData.getBuildsByBranchName().entrySet()) {
-					if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
-						addGitLabBranchBuild(result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
-					}
-				}
-			}
-		}
+            for (final BuildData buildData : buildDatas) {
+                for (final Entry<String, Build> buildByBranchName : buildData.getBuildsByBranchName().entrySet()) {
+                    if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
+                        addGitLabBranchBuild(result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
+                    }
+                }
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	private static String getBuildRevision(Run<?, ?> build) {
-		GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-		if (cause != null) {
-			return cause.getData().getLastCommit();
-		}
+    private static String getBuildRevision(Run<?, ?> build) {
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        if (cause != null) {
+            return cause.getData().getLastCommit();
+        }
 
-		BuildData action = build.getAction(BuildData.class);
-		if (action == null) {
-			throw new IllegalStateException("No (git-plugin) BuildData associated to current build");
-		}
-		Revision lastBuiltRevision = action.getLastBuiltRevision();
+        BuildData action = build.getAction(BuildData.class);
+        if (action == null) {
+            throw new IllegalStateException("No (git-plugin) BuildData associated to current build");
+        }
+        Revision lastBuiltRevision = action.getLastBuiltRevision();
 
-		if (lastBuiltRevision == null) {
-			throw new IllegalStateException("Last build has no associated commit");
-		}
+        if (lastBuiltRevision == null) {
+            throw new IllegalStateException("Last build has no associated commit");
+        }
 
-		return action.getLastBuild(lastBuiltRevision.getSha1()).getMarked().getSha1String();
-	}
+        return action.getLastBuild(lastBuiltRevision.getSha1()).getMarked().getSha1String();
+    }
 
-	private static void addGitLabBranchBuild(List<GitLabBranchBuild> result, String scmRevisionHash,
-			Set<String> remoteUrls, EnvVars environment, GitLabApi gitLabClient) {
-		for (String remoteUrl : remoteUrls) {
-			try {
-				LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
-				final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
-				if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
-					String projectId = projectNameWithNameSpace;
-					if (projectNameWithNameSpace.contains(".")) {
-						try {
-							projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
-						} catch (WebApplicationException | ProcessingException e) {
-							LOGGER.log(Level.SEVERE, String.format("Failed to retrieve projectId for project '%s'",
-									projectNameWithNameSpace), e);
-						}
-					}
-					result.add(new GitLabBranchBuild(projectId, scmRevisionHash));
-				}
-			} catch (ProjectIdUtil.ProjectIdResolutionException e) {
-			}
-		}
-	}
+    private static void addGitLabBranchBuild(List<GitLabBranchBuild> result, String scmRevisionHash,
+            Set<String> remoteUrls, EnvVars environment, GitLabApi gitLabClient) {
+        for (String remoteUrl : remoteUrls) {
+            try {
+                LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
+                final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(gitLabClient, environment.expand(remoteUrl));
+                if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
+                    String projectId = projectNameWithNameSpace;
+                    if (projectNameWithNameSpace.contains(".")) {
+                        try {
+                            projectId = gitLabClient.getProject(projectNameWithNameSpace).getId().toString();
+                        } catch (WebApplicationException | ProcessingException e) {
+                            LOGGER.log(Level.SEVERE, String.format("Failed to retrieve projectId for project '%s'",
+                                    projectNameWithNameSpace), e);
+                        }
+                    }
+                    result.add(new GitLabBranchBuild(projectId, scmRevisionHash));
+                }
+            } catch (ProjectIdUtil.ProjectIdResolutionException e) {
+            }
+        }
+    }
 
     public static class GitLabBranchBuild {
-    	private final String projectId;
-    	private final String revisionHash;
-    	
-    	public GitLabBranchBuild(final String projectId, final String revisionHash) {
-    		this.projectId = projectId;
-    		this.revisionHash = revisionHash;
-    	}
-    	
-    	public String getProjectId() {
-    		return this.projectId;
-    	}
-    	
-    	public String getRevisionHash() {
-    		return this.revisionHash;
-    	}
+        private final String projectId;
+        private final String revisionHash;
+        
+        public GitLabBranchBuild(final String projectId, final String revisionHash) {
+            this.projectId = projectId;
+            this.revisionHash = revisionHash;
+        }
+        
+        public String getProjectId() {
+            return this.projectId;
+        }
+        
+        public String getRevisionHash() {
+            return this.revisionHash;
+        }
     }
 }
