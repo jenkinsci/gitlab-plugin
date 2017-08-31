@@ -60,8 +60,8 @@ final class TestUtility {
                     new StringCredentialsImpl(CredentialsScope.SYSTEM, apiTokenId, "GitLab API Token", Secret.fromString(TestUtility.API_TOKEN)));
             }
         }
-        connectionConfig.addConnection(new GitLabConnection(TestUtility.GITLAB_CONNECTION_V3, "http://localhost:" + mockServer.getPort() + "/gitlab", apiTokenId, new V3GitLabClientBuilder(), false, 10, 10));
-        connectionConfig.addConnection(new GitLabConnection(TestUtility.GITLAB_CONNECTION_V4, "http://localhost:" + mockServer.getPort() + "/gitlab", apiTokenId, new V4GitLabClientBuilder(), false, 10, 10));
+        connectionConfig.addConnection(new GitLabConnection(TestUtility.GITLAB_CONNECTION_V3, "http://localhost:" + mockServer.getPort() + "/gitlab", "", apiTokenId, new V3GitLabClientBuilder(), false, 10, 10));
+        connectionConfig.addConnection(new GitLabConnection(TestUtility.GITLAB_CONNECTION_V4, "http://localhost:" + mockServer.getPort() + "/gitlab", "", apiTokenId, new V4GitLabClientBuilder(), false, 10, 10));
 
     }
 

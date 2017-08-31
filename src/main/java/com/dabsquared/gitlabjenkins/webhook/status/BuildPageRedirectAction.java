@@ -19,6 +19,7 @@ abstract class BuildPageRedirectAction implements WebHookAction {
         this.build = build;
     }
 
+    @Override
     public void execute(StaplerResponse response) {
         if (build != null) {
             try {
@@ -31,5 +32,10 @@ abstract class BuildPageRedirectAction implements WebHookAction {
                 }
             }
         }
+    }
+
+    @Override
+    public void executeNoResponse(StaplerResponse response) {
+        execute(response);
     }
 }

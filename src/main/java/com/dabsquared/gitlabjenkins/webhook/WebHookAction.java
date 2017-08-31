@@ -7,4 +7,5 @@ import org.kohsuke.stapler.StaplerResponse;
  */
 public interface WebHookAction {
     void execute(StaplerResponse response);
+    void executeNoResponse(StaplerResponse response);
 }

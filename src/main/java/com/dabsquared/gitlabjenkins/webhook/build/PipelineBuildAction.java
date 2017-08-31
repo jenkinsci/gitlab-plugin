@@ -48,6 +48,7 @@ public class PipelineBuildAction extends BuildWebHookAction {
         this.secretToken = secretToken;
     }
 
+    @Override
     void processForCompatibility() {
         //if no project is defined, set it here
         if (this.pipelineBuildHook.getProject() == null && this.pipelineBuildHook.getRepository() != null) {
@@ -66,6 +67,7 @@ public class PipelineBuildAction extends BuildWebHookAction {
         }
     }
 
+    @Override
     void execute() {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Pipeline Hook is not supported for this project");
@@ -79,5 +81,16 @@ public class PipelineBuildAction extends BuildWebHookAction {
         throw HttpResponses.ok();
     }
 
+    @Override
+    void executeNoResponse() {
+        if (!(project instanceof Job<?, ?>)) {
+            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
+                @Override
+                protected void performOnPost(GitLabPushTrigger trigger) {
+                    trigger.onPost(pipelineBuildHook);
+                }
+            });
+        }
+    }
 }
 

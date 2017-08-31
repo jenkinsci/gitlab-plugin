@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import com.dabsquared.gitlabjenkins.webhook.ActionResolver.NoopAction;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
@@ -45,8 +48,9 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.hasParameter("ref")).thenReturn(true);
         when(request.getMethod()).thenReturn("GET");
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("empty.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(BranchBuildPageRedirectAction.class));
     }
@@ -57,8 +61,9 @@ public class ActionResolverTest {
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/1234abcd/status.json");
         when(request.getMethod()).thenReturn("GET");
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("empty.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(StatusJsonAction.class));
     }
@@ -69,8 +74,9 @@ public class ActionResolverTest {
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/1234abcd");
         when(request.getMethod()).thenReturn("GET");
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("empty.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(CommitBuildPageRedirectAction.class));
     }
@@ -81,8 +87,9 @@ public class ActionResolverTest {
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("commits/7890efab");
         when(request.getMethod()).thenReturn("GET");
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("empty.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(CommitBuildPageRedirectAction.class));
     }
@@ -94,8 +101,9 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("builds/status.png");
         when(request.hasParameter("ref")).thenReturn(true);
         when(request.getMethod()).thenReturn("GET");
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("empty.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(BranchStatusPngAction.class));
     }
@@ -107,8 +115,9 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("builds/status.png");
         when(request.hasParameter("ref")).thenReturn(false);
         when(request.getMethod()).thenReturn("GET");
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("empty.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(CommitStatusPngAction.class));
     }
@@ -121,8 +130,9 @@ public class ActionResolverTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Merge Request Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("ActionResolverTest_postMergeRequest.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
     }
@@ -135,8 +145,9 @@ public class ActionResolverTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("ActionResolverTest_postSystemHook_MergeRequest.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
     }
@@ -149,8 +160,9 @@ public class ActionResolverTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("ActionResolverTest_postSystemHook_Push.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -163,8 +175,9 @@ public class ActionResolverTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("ActionResolverTest_postSystemHook_PushTag.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -177,8 +190,9 @@ public class ActionResolverTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Note Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postNote.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("ActionResolverTest_postNote.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(NoteBuildAction.class));
     }
@@ -190,9 +204,10 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Push Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("../postPush.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("../postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -205,8 +220,9 @@ public class ActionResolverTest {
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Tag Push Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("ActionResolverTest_postPushTag.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -218,9 +234,11 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn(null);
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("../postPush.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("../postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
@@ -232,9 +250,10 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("__Not Supported Header__");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("../postPush.json"));
+        when(request.getReader()).thenReturn(new ResourceBufferedReader("../postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver(request).resolve(projectName, request);
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
@@ -265,6 +284,17 @@ public class ActionResolverTest {
 
         @Override
         public void setReadListener(ReadListener var1){
+        }
+    }
+
+    private static class ResourceBufferedReader extends BufferedReader {
+
+        private ResourceBufferedReader (Reader in) {
+            super (in);
+        }
+
+        private ResourceBufferedReader (String classResourceName) {
+            this(new InputStreamReader(new ResourceServletInputStream(classResourceName)));
         }
     }
 }
