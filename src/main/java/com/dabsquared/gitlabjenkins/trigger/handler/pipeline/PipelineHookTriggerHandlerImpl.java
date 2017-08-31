@@ -1,10 +1,11 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.pipeline;
 
+
 import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineEventObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -46,7 +47,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
 
                 if (property != null && property.getClient() != null) {
-                    GitLabApi client = property.getClient();
+                    GitLabClient client = property.getClient();
                     com.dabsquared.gitlabjenkins.gitlab.api.model.Project projectForName = client.getProject(hook.getProject().getPathWithNamespace());
                     hook.setProjectId(projectForName.getId());
                 }
