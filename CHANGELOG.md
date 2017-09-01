@@ -1,5 +1,14 @@
 ChangeLog
 
+1.4.8
+=====================
+* #483: If 'Add message for failed builds' feature is used, send the message for both failed and 'unstable' builds
+* #514: Fix branch name comparison to avoid spurious builds, fixes issue #512
+* #540: Allow jobs to be triggered by GitLab 'Pipeline' event
+* #552: Use GitLab's host url to calculate project's ID - allows Jenkins to work with GitLab projects that are in subgroups (issue #538)
+* #567: Plugin should have secure defaults - first-time installs will now have plugin endpoint require auth by default
+* #604: Recursively retrieve all BuildData - prevents Jenkins from rebuilding when MR assignee changes (issue #603)
+
 1.4.7
 =====================
 * #584: Fixes commit status exception found in issue #583
