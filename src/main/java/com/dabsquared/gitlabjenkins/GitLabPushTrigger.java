@@ -48,6 +48,7 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
@@ -76,9 +77,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
-    private final TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
+    private TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean triggerOnNoteRequest = true;
-    private final String noteRegex;
+    private String noteRegex = "";
     private boolean ciSkip = true;
     private boolean skipWorkInProgressMergeRequest;
     private boolean setBuildDescription = true;
@@ -91,7 +92,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private String includeBranchesSpec;
     private String excludeBranchesSpec;
     private String targetBranchRegex;
-    private final MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
+    private MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
     private volatile Secret secretToken;
 
     private transient BranchFilter branchFilter;
@@ -101,11 +102,13 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient boolean acceptMergeRequestOnSuccess;
     private transient MergeRequestLabelFilter mergeRequestLabelFilter;
 
-
-    @DataBoundConstructor
+    /**
+     * @deprecated use {@link #GitLabPushTrigger()} with setters to configure an instance of this class.
+     */
+    @Deprecated
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest, 
-    						 TriggerOpenMergeRequest triggerOpenMergeRequestOnPush, boolean triggerOnNoteRequest, String noteRegex, 
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest,
+    						 TriggerOpenMergeRequest triggerOpenMergeRequestOnPush, boolean triggerOnNoteRequest, String noteRegex,
     						 boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
@@ -136,6 +139,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         initializeBranchFilter();
         initializeMergeRequestLabelFilter();
     }
+
+    @DataBoundConstructor
+    public GitLabPushTrigger() { }
 
     @Initializer(after = InitMilestone.JOB_LOADED)
     public static void migrateJobs() throws IOException {
@@ -249,18 +255,150 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return secretToken == null ? null : secretToken.getPlainText();
     }
 
+    @DataBoundSetter
+    public void setTriggerOnPush(boolean triggerOnPush) {
+        this.triggerOnPush = triggerOnPush;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnMergeRequest(boolean triggerOnMergeRequest) {
+        this.triggerOnMergeRequest = triggerOnMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnAcceptedMergeRequest(boolean triggerOnAcceptedMergeRequest) {
+        this.triggerOnAcceptedMergeRequest = triggerOnAcceptedMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnClosedMergeRequest(boolean triggerOnClosedMergeRequest) {
+        this.triggerOnClosedMergeRequest = triggerOnClosedMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOpenMergeRequestOnPush(TriggerOpenMergeRequest triggerOpenMergeRequestOnPush) {
+        this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnNoteRequest(boolean triggerOnNoteRequest) {
+        this.triggerOnNoteRequest = triggerOnNoteRequest;
+    }
+
+    @DataBoundSetter
+    public void setNoteRegex(String noteRegex) {
+        this.noteRegex = noteRegex;
+    }
+
+    @DataBoundSetter
+    public void setCiSkip(boolean ciSkip) {
+        this.ciSkip = ciSkip;
+    }
+
+    @DataBoundSetter
+    public void setSkipWorkInProgressMergeRequest(boolean skipWorkInProgressMergeRequest) {
+        this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setSetBuildDescription(boolean setBuildDescription) {
+        this.setBuildDescription = setBuildDescription;
+    }
+
+    @DataBoundSetter
+    public void setAddNoteOnMergeRequest(boolean addNoteOnMergeRequest) {
+        this.addNoteOnMergeRequest = addNoteOnMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setAddCiMessage(boolean addCiMessage) {
+        this.addCiMessage = addCiMessage;
+    }
+
+    @DataBoundSetter
+    public void setAddVoteOnMergeRequest(boolean addVoteOnMergeRequest) {
+        this.addVoteOnMergeRequest = addVoteOnMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setBranchFilterName(String branchFilterName) {
+        this.branchFilterName = branchFilterName;
+    }
+
+    @DataBoundSetter
+    public void setBranchFilterType(BranchFilterType branchFilterType) {
+        this.branchFilterType = branchFilterType;
+    }
+
+    @DataBoundSetter
+    public void setIncludeBranchesSpec(String includeBranchesSpec) {
+        this.includeBranchesSpec = includeBranchesSpec;
+    }
+
+    @DataBoundSetter
+    public void setExcludeBranchesSpec(String excludeBranchesSpec) {
+        this.excludeBranchesSpec = excludeBranchesSpec;
+    }
+
+    @DataBoundSetter
+    public void setTargetBranchRegex(String targetBranchRegex) {
+        this.targetBranchRegex = targetBranchRegex;
+    }
+
+    @DataBoundSetter
+    public void setMergeRequestLabelFilterConfig(MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig) {
+        this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
+    }
+
+    @DataBoundSetter
+    public void setSecretToken(String secretToken) {
+        this.secretToken = Secret.fromString(secretToken);
+    }
+
+    @DataBoundSetter
+    public void setAcceptMergeRequestOnSuccess(boolean acceptMergeRequestOnSuccess) {
+        this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
+    }
+
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (pushHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
         pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a merge request
     public void onPost(final MergeRequestHook hook) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (mergeRequestHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
         mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a note request
     public void onPost(final NoteHook hook) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (noteHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
         noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 

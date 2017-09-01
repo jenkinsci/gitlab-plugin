@@ -11,6 +11,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -35,7 +36,10 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     private String abortNoteText;
     private String unstableNoteText;
 
-    @DataBoundConstructor
+    /**
+     * @deprecated use {@link #GitLabMessagePublisher()} with setters to configure an instance of this class.
+     */
+    @Deprecated
     public GitLabMessagePublisher(boolean onlyForFailure, boolean replaceSuccessNote, boolean replaceFailureNote, boolean replaceAbortNote, boolean replaceUnstableNote,
                                   String successNoteText, String failureNoteText, String abortNoteText, String unstableNoteText) {
         this.onlyForFailure = onlyForFailure;
@@ -49,6 +53,7 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
         this.unstableNoteText = unstableNoteText;
     }
 
+    @DataBoundConstructor
     public GitLabMessagePublisher() { }
 
     public boolean isOnlyForFailure() {
@@ -85,6 +90,51 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
 
     public String getUnstableNoteText() {
         return this.unstableNoteText == null ? "" : this.unstableNoteText;
+    }
+
+    @DataBoundSetter
+    public void setOnlyForFailure(boolean onlyForFailure) {
+        this.onlyForFailure = onlyForFailure;
+    }
+
+    @DataBoundSetter
+    public void setReplaceSuccessNote(boolean replaceSuccessNote) {
+        this.replaceSuccessNote = replaceSuccessNote;
+    }
+
+    @DataBoundSetter
+    public void setReplaceFailureNote(boolean replaceFailureNote) {
+        this.replaceFailureNote = replaceFailureNote;
+    }
+
+    @DataBoundSetter
+    public void setReplaceAbortNote(boolean replaceAbortNote) {
+        this.replaceAbortNote = replaceAbortNote;
+    }
+
+    @DataBoundSetter
+    public void setReplaceUnstableNote(boolean replaceUnstableNote) {
+        this.replaceUnstableNote = replaceUnstableNote;
+    }
+
+    @DataBoundSetter
+    public void setSuccessNoteText(String successNoteText) {
+        this.successNoteText = successNoteText;
+    }
+
+    @DataBoundSetter
+    public void setFailureNoteText(String failureNoteText) {
+        this.failureNoteText = failureNoteText;
+    }
+
+    @DataBoundSetter
+    public void setAbortNoteText(String abortNoteText) {
+        this.abortNoteText = abortNoteText;
+    }
+
+    @DataBoundSetter
+    public void setUnstableNoteText(String unstableNoteText) {
+        this.unstableNoteText = unstableNoteText;
     }
 
     @Extension
