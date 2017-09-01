@@ -323,12 +323,4 @@ See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md
 
 # Release Workflow
 
-GitLab-Plugin admins should adhere to the following rules when releasing a new plugin version:
-
-* Ensure codestyle conformity
-* Run unit tests
-* Run manual tests on both, oldest and latest GitLab versions
-* Update documentation
-* Create change log
-* Create release tag
-* Create release notes (on github)
+To perform a full plugin release, maintainers can run ``mvn release:prepare release:perform`` To release a snapshot, e.g. with a bug fix for users to test, just run ``mvn deploy``
