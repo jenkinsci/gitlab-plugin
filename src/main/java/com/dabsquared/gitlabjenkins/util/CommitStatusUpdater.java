@@ -52,7 +52,7 @@ public class CommitStatusUpdater {
 
         try {
             final String buildUrl = getBuildUrl(build);
-            		
+                    
             for (final GitLabBranchBuild gitLabBranchBuild : retrieveGitlabProjectIds(build, build.getEnvironment(listener))) {
                 try {
                     if (existsCommit(client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
@@ -132,7 +132,6 @@ public class CommitStatusUpdater {
         }
 
         if (buildDatas.size() == 1) {
-            // Why revision parsing differs when single and multiple buildDatas exists?
             addGitLabBranchBuild(result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
         } else {
             final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
@@ -162,10 +161,13 @@ public class CommitStatusUpdater {
     }
 
     private static String getBuildRevision(Run<?, ?> build) {
-        // At this point we don't have GitLabWebHookCause
+        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
+        if (cause != null) {
+            return cause.getData().getLastCommit();
+        }
+
         BuildData action = build.getAction(BuildData.class);
         if (action == null) {
-            // At this point only single BuildData exists and this null check is redundant
             throw new IllegalStateException("No (git-plugin) BuildData associated to current build");
         }
         Revision lastBuiltRevision = action.getLastBuiltRevision();
@@ -174,7 +176,6 @@ public class CommitStatusUpdater {
             throw new IllegalStateException("Last build has no associated commit");
         }
 
-        // Doesn't lastBuiltRevision.getSha1() produce same result?
         return action.getLastBuild(lastBuiltRevision.getSha1()).getMarked().getSha1String();
     }
 
@@ -183,7 +184,7 @@ public class CommitStatusUpdater {
         for (String remoteUrl : remoteUrls) {
             try {
                 LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
-                final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(environment.expand(remoteUrl));
+                final String projectNameWithNameSpace = ProjectIdUtil.retrieveProjectId(gitLabClient, environment.expand(remoteUrl));
                 if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
                     String projectId = projectNameWithNameSpace;
                     if (projectNameWithNameSpace.contains(".")) {
@@ -226,16 +227,16 @@ public class CommitStatusUpdater {
     public static class GitLabBranchBuild {
         private final String projectId;
         private final String revisionHash;
-
+        
         public GitLabBranchBuild(final String projectId, final String revisionHash) {
             this.projectId = projectId;
             this.revisionHash = revisionHash;
         }
-
+        
         public String getProjectId() {
             return this.projectId;
         }
-
+        
         public String getRevisionHash() {
             return this.revisionHash;
         }

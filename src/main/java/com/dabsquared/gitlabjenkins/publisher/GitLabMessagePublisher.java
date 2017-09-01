@@ -109,7 +109,7 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     @Override
     protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId) {
         try {
-            if (!onlyForFailure || build.getResult() == Result.FAILURE) {
+            if (!onlyForFailure || build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
                 client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));
             }
         } catch (WebApplicationException | ProcessingException e) {

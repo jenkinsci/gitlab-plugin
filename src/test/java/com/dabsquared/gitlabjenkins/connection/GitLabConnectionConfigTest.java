@@ -38,6 +38,7 @@ import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -95,7 +96,8 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void authenticationEnabled_anonymous_forbidden() throws IOException, URISyntaxException {
-        jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
+        Boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
+        assertTrue(defaultValue);
         jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
@@ -115,7 +117,6 @@ public class GitLabConnectionConfigTest {
     @Test
     public void authenticationEnabled_registered_success() throws Exception {
         String username = "test-user";
-        jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
         jenkins.getInstance().setSecurityRealm(jenkins.createDummySecurityRealm());
         GlobalMatrixAuthorizationStrategy authorizationStrategy = new GlobalMatrixAuthorizationStrategy();
         authorizationStrategy.add(Item.BUILD, username);
