@@ -3,6 +3,8 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 
 import hudson.ExtensionPoint;
 import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
@@ -12,7 +14,7 @@ import java.util.NoSuchElementException;
 
 import static java.util.Collections.sort;
 
-
+@Restricted(NoExternalUse.class)
 public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuilder>, ExtensionPoint, Serializable {
     public static GitLabClientBuilder getGitLabClientBuilderById(String id) {
         for (GitLabClientBuilder provider : getAllGitLabClientBuilders()) {

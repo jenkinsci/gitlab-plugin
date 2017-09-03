@@ -19,6 +19,8 @@ import hudson.security.ACL;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -34,7 +36,6 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGit
  * @author Robin Müller
  */
 public class GitLabConnection {
-
     private final String name;
     private final String url;
     private transient String apiToken;
@@ -46,7 +47,21 @@ public class GitLabConnection {
     private final Integer readTimeout;
     private transient GitLabClient apiCache;
 
+    @Deprecated
+    public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+        this(
+            name,
+            url,
+            apiTokenId,
+            new AutodetectGitLabClientBuilder(),
+            ignoreCertificateErrors,
+            connectionTimeout,
+            readTimeout
+        );
+    }
+
     @DataBoundConstructor
+    @Restricted(NoExternalUse.class)
     public GitLabConnection(String name, String url, String apiTokenId, String clientBuilderId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
@@ -59,6 +74,7 @@ public class GitLabConnection {
         );
     }
 
+    @Restricted(NoExternalUse.class)
     public GitLabConnection(String name, String url, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this.name = name;
         this.url = url;

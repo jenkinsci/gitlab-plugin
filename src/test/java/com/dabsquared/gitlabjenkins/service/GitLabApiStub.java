@@ -1,6 +1,7 @@
-package com.dabsquared.gitlabjenkins.gitlab.api;
+package com.dabsquared.gitlabjenkins.service;
 
 
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
@@ -8,118 +9,152 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
-public final class GitLabClient implements GitLabApi {
-    private final String hostUrl;
-    private final GitLabApi api;
+class GitLabApiStub implements GitLabApi {
+    private final Map<Pair<String, Class>, List<?>> data;
+    private final Map<Pair<String, Class>, Integer> calls;
 
-    @Restricted(NoExternalUse.class)
-    public GitLabClient(String hostUrl, GitLabApi api) {
-        this.hostUrl = hostUrl;
-        this.api = api;
+    GitLabApiStub() {
+        data = new HashMap<>();
+        calls = new HashMap<>();
     }
 
-    public final String getHostUrl() {
-        return hostUrl;
+    void addBranches(String project, List<Branch> branches) {
+        addData(project, Branch.class, branches);
     }
 
-    @Override
-    public Project createProject(String projectName) {
-        return api.createProject(projectName);
+    void addLabels(String project, List<Label> labels) {
+        addData(project, Label.class, labels);
     }
 
-    @Override
-    public MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title) {
-        return api.createMergeRequest(projectId, sourceBranch, targetBranch, title);
-    }
-
-    @Override
-    public Project getProject(String projectName) {
-        return api.getProject(projectName);
-    }
-
-    @Override
-    public Project updateProject(String projectId, String name, String path) {
-        return api.updateProject(projectId, name, path);
-    }
-
-    @Override
-    public void deleteProject(String projectId) {
-        api.deleteProject(projectId);
-    }
-
-    @Override
-    public void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
-        api.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
-    }
-
-    @Override
-    public void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
-        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
-    }
-
-    @Override
-    public void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
-        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
-    }
-
-    @Override
-    public void getCommit(String projectId, String sha) {
-        api.getCommit(projectId, sha);
-    }
-
-    @Override
-    public void acceptMergeRequest(Integer projectId, Integer mergeRequestId, String mergeCommitMessage, boolean shouldRemoveSourceBranch) {
-        api.acceptMergeRequest(projectId, mergeRequestId, mergeCommitMessage, shouldRemoveSourceBranch);
-    }
-
-    @Override
-    public void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body) {
-        api.createMergeRequestNote(projectId, mergeRequestId, body);
-    }
-
-    @Override
-    public List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage) {
-        return api.getMergeRequests(projectId, state, page, perPage);
+    int calls(String projectId, Class dataClass) {
+        Pair<String, Class> key = createKey(projectId, dataClass);
+        return calls.containsKey(key) ? calls.get(key) : 0;
     }
 
     @Override
     public List<Branch> getBranches(String projectId) {
-        return api.getBranches(projectId);
-    }
-
-    @Override
-    public Branch getBranch(String projectId, String branch) {
-        return api.getBranch(projectId, branch);
-    }
-
-    @Override
-    public void headCurrentUser() {
-        api.headCurrentUser();
-    }
-
-    @Override
-    public User getCurrentUser() {
-        return api.getCurrentUser();
-    }
-
-    @Override
-    public User addUser(String email, String username, String name, String password) {
-        return api.addUser(email, username, name, password);
-    }
-
-    @Override
-    public User updateUser(String userId, String email, String username, String name, String password) {
-        return api.updateUser(userId, email, username, name, password);
+        return getData(projectId, Branch.class);
     }
 
     @Override
     public List<Label> getLabels(String projectId) {
-        return api.getLabels(projectId);
+        return getData(projectId, Label.class);
     }
+
+    private void addData(String projectId, Class dataClass, List<?> datas) {
+        data.put(createKey(projectId, dataClass), datas);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> getData(String projectId, Class dataClass) {
+        Pair<String, Class> key = createKey(projectId, dataClass);
+        if (!calls.containsKey(key)) {
+            calls.put(key, 0);
+        }
+
+        calls.put(key, calls.get(key) + 1);
+
+        return (List<T>) data.get(key);
+    }
+
+    private Pair<String, Class> createKey(String projectId, Class dataClass) {
+        return new ImmutablePair<>(projectId, dataClass);
+    }
+
+
+    /************** no implementation below ********************************/
+
+    @Override
+    public Project createProject(String projectName) {
+        return null;
+    }
+
+    @Override
+    public MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title) {
+        return null;
+    }
+
+    @Override
+    public Project getProject(String projectName) {
+        return null;
+    }
+
+    @Override
+    public Project updateProject(String projectId, String name, String path) {
+        return null;
+    }
+
+    @Override
+    public void deleteProject(String projectId) {
+
+    }
+
+    @Override
+    public void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
+
+    }
+
+    @Override
+    public void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
+
+    }
+
+    @Override
+    public void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
+
+    }
+
+    @Override
+    public void getCommit(String projectId, String sha) {
+
+    }
+
+    @Override
+    public void acceptMergeRequest(Integer projectId, Integer mergeRequestId, String mergeCommitMessage, boolean shouldRemoveSourceBranch) {
+
+    }
+
+    @Override
+    public void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body) {
+
+    }
+
+    @Override
+    public List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage) {
+        return null;
+    }
+
+    @Override
+    public Branch getBranch(String projectId, String branch) {
+        return null;
+    }
+
+    @Override
+    public void headCurrentUser() {
+
+    }
+
+    @Override
+    public User getCurrentUser() {
+        return null;
+    }
+
+    @Override
+    public User addUser(String email, String username, String name, String password) {
+        return null;
+    }
+
+    @Override
+    public User updateUser(String userId, String email, String username, String name, String password) {
+        return null;
+    }
+
 }

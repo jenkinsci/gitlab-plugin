@@ -19,8 +19,6 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.buildClie
 import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.responseNotFound;
 import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.responseOk;
 import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.versionRequest;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 
 
@@ -47,17 +45,17 @@ public class AutodetectGitLabClientBuilderTest {
     }
 
     @Test
-    public void buildClient_success_v3() {
+    public void buildClient_success_v3() throws Exception {
         mockServerClient.when(v3Request).respond(responseOk());
-        assertThat(buildClientWithDefaults(clientBuilder, gitLabUrl), instanceOf(V3GitLabClientProxy.class));
+        TestUtility.assertApiImpl(buildClientWithDefaults(clientBuilder, gitLabUrl),V3GitLabApiProxy.class);
         mockServerClient.verify(v3Request);
     }
 
     @Test
-    public void buildClient_success_v4() {
+    public void buildClient_success_v4() throws Exception {
         mockServerClient.when(v3Request).respond(responseNotFound());
         mockServerClient.when(v4Request).respond(responseOk());
-        assertThat(buildClientWithDefaults(clientBuilder, gitLabUrl), instanceOf(V4GitLabClientProxy.class));
+        TestUtility.assertApiImpl(buildClientWithDefaults(clientBuilder, gitLabUrl),V4GitLabApiProxy.class);
         mockServerClient.verify(v3Request, v4Request);
     }
 
@@ -72,4 +70,5 @@ public class AutodetectGitLabClientBuilderTest {
             mockServerClient.verify(v3Request, v4Request);
         }
     }
+
 }

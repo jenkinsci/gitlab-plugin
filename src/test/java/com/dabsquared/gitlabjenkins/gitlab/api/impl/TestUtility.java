@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import hudson.util.Secret;
@@ -16,12 +17,15 @@ import org.mockserver.model.HttpResponse;
 
 import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static javax.ws.rs.HttpMethod.HEAD;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -65,6 +69,12 @@ class TestUtility {
 
     static GitLabClient buildClientWithDefaults(GitLabClientBuilder clientBuilder, String url) {
         return clientBuilder.buildClient(url, API_TOKEN, IGNORE_CERTIFICATE_ERRORS, CONNECTION_TIMEOUT, READ_TIMEOUT);
+    }
+
+    static void assertApiImpl(GitLabClient client, Class<? extends GitLabApi> apiImplClass) throws Exception {
+        Field apiField = client.getClass().getDeclaredField("api");
+        apiField.setAccessible(true);
+        assertThat(apiField.get(client), instanceOf(apiImplClass));
     }
 
     private TestUtility() { /* utility class */ }

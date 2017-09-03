@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
@@ -24,14 +24,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder.ID;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder.ID;
 
 
 /**
  * @author Robin Müller
  */
 @Path("/api/" + ID)
-interface V3GitLabClientProxy extends GitLabClient {
+interface V4GitLabApiProxy extends GitLabApi {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -117,20 +117,20 @@ interface V3GitLabClientProxy extends GitLabClient {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/merge")
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/merge")
     @Override
     void acceptMergeRequest(@PathParam("projectId") Integer projectId,
-                            @PathParam("mergeRequestId") Integer mergeRequestId,
+                            @PathParam("mergeRequestIid") Integer mergeRequestIid,
                             @FormParam("merge_commit_message") String mergeCommitMessage,
                             @FormParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/notes")
     @Override
     void createMergeRequestNote(@PathParam("projectId") Integer projectId,
-                                @PathParam("mergeRequestId") Integer mergeRequestId,
+                                @PathParam("mergeRequestIid") Integer mergeRequestIid,
                                 @FormParam("body") String body);
 
     @GET

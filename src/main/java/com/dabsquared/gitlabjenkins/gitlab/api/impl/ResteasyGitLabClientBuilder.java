@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.JacksonConfig;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
@@ -25,6 +26,8 @@ import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.JaxrsFormProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+@Restricted(NoExternalUse.class)
 public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     private static final Logger LOGGER = Logger.getLogger(ResteasyGitLabClientBuilder.class.getName());
     private static final String PRIVATE_TOKEN = "PRIVATE-TOKEN";
@@ -59,21 +62,20 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         RuntimeDelegate.setInstance(new ResteasyProviderFactory());
     }
 
-    private final Class<? extends GitLabClient> clientProxyClass;
+    private final Class<? extends GitLabApi> apiProxyClass;
 
-    ResteasyGitLabClientBuilder(String id, Class<? extends GitLabClient> clientProxyClass) {
+    ResteasyGitLabClientBuilder(String id, Class<? extends GitLabApi> apiProxyClass) {
         super(id);
-        this.clientProxyClass = clientProxyClass;
+        this.apiProxyClass = apiProxyClass;
     }
 
     @Nonnull
     @Override
     public final GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
-        return buildClient(url, token, clientProxyClass, ignoreCertificateErrors, connectionTimeout, readTimeout);
+        return buildClient(url, token, apiProxyClass, ignoreCertificateErrors, connectionTimeout, readTimeout);
     }
 
-
-    private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabClient> proxyClass, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+    private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabApi> proxyClass, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         Jenkins jenkins = Jenkins.getInstance();
         ProxyConfiguration proxy = (jenkins != null) ? jenkins.proxy : null;
         return buildClient(
@@ -87,7 +89,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         );
     }
 
-    private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabClient> proxyClass, ProxyConfiguration httpProxyConfig, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+    private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabApi> proxyClass, ProxyConfiguration httpProxyConfig, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         if (ignoreCertificateErrors) {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
@@ -103,7 +105,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 httpProxyConfig.getPassword());
         }
 
-        GitLabApiClient apiClient = builder
+        GitLabApi apiProxy = builder
             .connectionPoolSize(60)
             .maxPooledPerRoute(30)
             .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
@@ -118,7 +120,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             .proxyBuilder(proxyClass)
             .classloader(proxyClass.getClassLoader())
             .build();
-        return new GitLabApiExtension(apiClient, gitlabHostUrl);
+        return new GitLabClient(url, apiProxy);
     }
 
     private String getHost(String url) {
