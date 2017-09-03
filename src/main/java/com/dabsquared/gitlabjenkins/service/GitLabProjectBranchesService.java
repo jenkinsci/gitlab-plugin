@@ -66,7 +66,7 @@ public class GitLabProjectBranchesService {
         @Override
         public List<String> call() throws Exception {
             List<String> result = new ArrayList<>();
-            String projectId = ProjectIdUtil.retrieveProjectId(sourceRepository);
+            String projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             for (Branch branch : client.getBranches(projectId)) {
                 result.add(branch.getName());
             }

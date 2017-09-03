@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins.util;
 
 import org.eclipse.jgit.transport.URIish;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,13 +13,23 @@ import java.util.regex.Pattern;
  */
 public final class ProjectIdUtil {
 
-    private static final Pattern PROJECT_ID_PATTERN = Pattern.compile("^/?(.*/)?(?<projectId>.*/.*)(\\.git)$");
+    private static final Pattern PROJECT_ID_PATTERN = Pattern.compile("^/?(?<projectId>.*)(\\.git)$");
 
     private ProjectIdUtil() { }
 
-    public static String retrieveProjectId(String remoteUrl) throws ProjectIdResolutionException {
+    public static String retrieveProjectId(GitLabApi client, String remoteUrl) throws ProjectIdResolutionException {
         try {
-            String projectId = new URIish(remoteUrl).getPath();
+            String projectId = null;
+            String baseUri = client.getGitLabHostUrl();
+            if (baseUri != null && remoteUrl.startsWith(baseUri)) {
+                projectId = new URIish(remoteUrl.substring(baseUri.length(), remoteUrl.length())).getPath();
+            } else {
+                projectId = new URIish(remoteUrl).getPath();
+            }
+            if (projectId.startsWith(":")) {
+                projectId = projectId.substring(1);
+            }
+            
             Matcher matcher = PROJECT_ID_PATTERN.matcher(projectId);
             if (matcher.matches()) {
                 return matcher.group("projectId");

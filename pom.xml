@@ -14,7 +14,7 @@
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.4.8-SNAPSHOT</version>
+  <version>1.4.9-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>

@@ -103,7 +103,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 httpProxyConfig.getPassword());
         }
 
-        return builder
+        GitLabApiClient apiClient = builder
             .connectionPoolSize(60)
             .maxPooledPerRoute(30)
             .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
@@ -118,6 +118,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             .proxyBuilder(proxyClass)
             .classloader(proxyClass.getClassLoader())
             .build();
+        return new GitLabApiExtension(apiClient, gitlabHostUrl);
     }
 
     private String getHost(String url) {
@@ -147,7 +148,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         public void filter(ClientRequestContext context) throws IOException {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.log(Level.FINEST, "Call GitLab:\nHTTP method: {0}\nURL: {1}\nRequest headers: [\n{2}\n]",
-                    LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getHeaders())));
+                        LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getHeaders())));
             }
         }
 
@@ -155,17 +156,17 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         public void filter(ClientRequestContext request, ClientResponseContext response) throws IOException {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.log(Level.FINEST, "Got response from GitLab:\nURL: {0}\nStatus: {1} {2}\nResponse headers: [\n{3}\n]\nResponse body: {4}",
-                    LoggerUtil.toArray(request.getUri(), response.getStatus(), response.getStatusInfo(), toString(response.getHeaders()),
-                        getPrettyPrintResponseBody(response)));
+                        LoggerUtil.toArray(request.getUri(), response.getStatus(), response.getStatusInfo(), toString(response.getHeaders()),
+                                getPrettyPrintResponseBody(response)));
             }
         }
 
         private String toFilteredString(MultivaluedMap<String, Object> headers) {
-            return FluentIterable.from(headers.entrySet()).transform(new LoggingFilter.HeaderToFilteredString()).join(Joiner.on(",\n"));
+            return FluentIterable.from(headers.entrySet()).transform(new HeaderToFilteredString()).join(Joiner.on(",\n"));
         }
 
         private String toString(MultivaluedMap<String, String> headers) {
-            return FluentIterable.from(headers.entrySet()).transform(new LoggingFilter.HeaderToString()).join(Joiner.on(",\n"));
+            return FluentIterable.from(headers.entrySet()).transform(new HeaderToString()).join(Joiner.on(",\n"));
         }
 
         private String getPrettyPrintResponseBody(ClientResponseContext responseContext) {
