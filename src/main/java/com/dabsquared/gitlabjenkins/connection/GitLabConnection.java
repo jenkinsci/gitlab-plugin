@@ -47,7 +47,6 @@ public class GitLabConnection {
     private final Integer readTimeout;
     private transient GitLabClient apiCache;
 
-    @Deprecated
     public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
@@ -61,7 +60,6 @@ public class GitLabConnection {
     }
 
     @DataBoundConstructor
-    @Restricted(NoExternalUse.class)
     public GitLabConnection(String name, String url, String apiTokenId, String clientBuilderId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
