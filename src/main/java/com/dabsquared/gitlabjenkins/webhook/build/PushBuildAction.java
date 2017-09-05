@@ -1,13 +1,18 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
+import jenkins.branch.MultiBranchProject;
 import jenkins.model.Jenkins;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.scm.api.SCMSource;
@@ -15,9 +20,13 @@ import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -102,7 +111,64 @@ public class PushBuildAction extends BuildWebHookAction {
                     }
                 }
             }
+
+            // TODO configuration can be done via "trigger" like the existing GitlabPushTrigger or similar object
+            // TODO should be replaced with getClass comparison to prevent the dependency to the branch api
+            if (project instanceof MultiBranchProject) {
+                // TODO should be extracted
+                String targetBranch = pushHook.getRef().replaceFirst("^refs/heads/", "");
+                // just for getting a gitlab connection
+                Job targetJob = ((MultiBranchProject)project).getItemByBranchName(targetBranch);
+
+                if (targetJob != null) {
+                    GitLabConnectionProperty property = ((Job<?, ?>) targetJob).getProperty(GitLabConnectionProperty.class);
+
+                    if (property != null && property.getClient() != null && pushHook.getProjectId() != null) {
+                        for (MergeRequest mergeRequest : getOpenMergeRequests(property.getClient(), pushHook.getProjectId())) {
+                            // no forks supported yet
+                            if (mergeRequest.getTargetProjectId().equals(pushHook.getProjectId())
+                                    && mergeRequest.getSourceProjectId().equals(pushHook.getProjectId())
+                                    && mergeRequest.getTargetBranch().equals(targetBranch)) {
+                                String sourceBranch = mergeRequest.getSourceBranch();
+                                Job job = ((MultiBranchProject)project).getItemByBranchName(sourceBranch);
+
+                                if (job != null) {
+                                    LOGGER.log(Level.FINE, "Found branch for merge request {0}, triggering {1}",
+                                        toArray(mergeRequest.getIid(), sourceBranch));
+                                    try {
+                                        // use reflection to prevent another dependency to the workflow-job api
+                                        // TODO pass action object to get some cause data of the build
+                                        Method method = job.getClass().getDeclaredMethod("scheduleBuild");
+                                        method.invoke(this);
+                                    } catch (NoSuchMethodException e) {
+                                        LOGGER.log(Level.FINE, "No scheduleBuild method found for job class {0}", job.getClass());
+                                    } catch (IllegalAccessException | InvocationTargetException e) {
+                                        LOGGER.log(Level.FINE, "Execution of scheduleBuild failed", e);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        LOGGER.log(Level.FINE, "No gitlab connection configured or system configuration is wrong for {0} of {1}.",
+                            toArray(targetBranch, project.getName()));
+                    }
+                } else {
+                    LOGGER.log(Level.FINE, "Job for target branch {0} does not exist in MultiBranchProject {1}",
+                        toArray(targetBranch, project.getName()));
+                }
+            }
         }
     }
 
+    // TODO should be extracted
+    private List<MergeRequest> getOpenMergeRequests(GitLabApi client, Integer projectId) {
+        List<MergeRequest> result = new ArrayList<>();
+        Integer page = 1;
+        do {
+            List<MergeRequest> mergeRequests = client.getMergeRequests(projectId.toString(), State.opened, page, 100);
+            result.addAll(mergeRequests);
+            page = mergeRequests.isEmpty() ? null : page + 1;
+        } while (page != null);
+        return result;
+    }
 }
