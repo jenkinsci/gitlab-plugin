@@ -82,7 +82,17 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
 
 * Use the Snippet generator, General SCM step, to generate sample Groovy code for the git checkout/merge etc.
-* Example that performs merge before build: `checkout changelog: true, poll: true, scm: [$class: 'GitSCM', branches: [[name: "origin/${env.gitlabSourceBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]], submoduleCfg: [], userRemoteConfigs: [[name: 'origin', url: 'git@mygitlab:foo/testrepo.git']]]`
+* Example that performs merge before build:
+```
+checkout changelog: true, poll: true, scm: [
+    $class: 'GitSCM',
+    branches: [[name: "origin/${env.gitlabSourceBranch}"]],
+    doGenerateSubmoduleConfigurations: false,
+    extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]],
+    submoduleCfg: [],
+    userRemoteConfigs: [[name: 'origin', url: 'git@gitlab.example.com:foo/testrepo.git']]
+    ]
+```
 
 ### Git configuration for Multibranch Pipeline/Workflow jobs
 **Note:** none of the GitLab environment variables are available for mulitbranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
