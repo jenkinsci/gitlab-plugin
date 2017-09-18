@@ -182,6 +182,29 @@ If you make use of the "Merge When Pipeline Succeeds" option for Merge Requests 
     }
 ```
 
+If you want to configure any of the optional job triggers that the plugin supports in a Declarative build, use a `triggers` block. The full list of configurable trigger options is as follows:
+
+```
+triggers {
+    gitlab(
+      triggerOnPush: false,
+      triggerOnMergeRequest: true, triggerOpenMergeRequestOnPush: "never",
+      triggerOnNoteRequest: true,
+      noteRegex: "Jenkins please retry a build",
+      skipWorkInProgressMergeRequest: true,
+      ciSkip: false,
+      setBuildDescription: true,
+      addNoteOnMergeRequest: true,
+      addCiMessage: true,
+      addVoteOnMergeRequest: true,
+      acceptMergeRequestOnSuccess: false,
+      branchFilterType: "NameBasedFilter",
+      includeBranchesSpec: "release/qat",
+      excludeBranchesSpec: "",
+      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+}
+```
+
 ### Matrix/Multi-configuration jobs
 
 This plugin can be used on Matrix/Multi-configuration jobs together with the [Flexible Publish](https://plugins.jenkins.io/flexible-publish) plugin which allows to run publishers after all axis jobs are done.
