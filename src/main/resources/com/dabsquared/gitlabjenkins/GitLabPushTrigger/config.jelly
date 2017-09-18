@@ -21,7 +21,7 @@
       <f:entry title="Comments" field="triggerOnNoteRequest">
         <f:checkbox default="true"/>
       </f:entry>
-      <f:entry title="Comment for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
+      <f:entry title="Comment (regex) for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
         <f:textbox field="noteRegex" default="Jenkins please retry a build"/>
       </f:entry>
     </table>
