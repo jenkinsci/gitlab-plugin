@@ -173,6 +173,15 @@ pipeline {
 }
 ```
 
+If you make use of the "Merge When Pipeline Succeeds" option for Merge Requests in GitLab, and your Declarative Pipeline jobs have more than one stage, you will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
+
+```
+    options {
+      gitLabConnection('<your-gitlab-connection-name')
+      gitlabBuilds(builds: ['build', 'test', 'deploy'])
+    }
+```
+
 ### Matrix/Multi-configuration jobs
 
 This plugin can be used on Matrix/Multi-configuration jobs together with the [Flexible Publish](https://plugins.jenkins.io/flexible-publish) plugin which allows to run publishers after all axis jobs are done.
