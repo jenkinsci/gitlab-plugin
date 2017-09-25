@@ -25,9 +25,9 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (isNoRemoveBranchPush(hook)) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            super.handle(job, hook, ciSkip, fileFilter, branchFilter, mergeRequestLabelFilter);
         }
     }
 

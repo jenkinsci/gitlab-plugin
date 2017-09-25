@@ -39,7 +39,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
 
     @Override
-    public void handle(Job<?, ?> job, H hook, boolean ciSkip, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, H hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (ciSkip && isCiSkip(hook)) {
             LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
             return;

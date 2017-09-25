@@ -100,7 +100,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private volatile Secret secretToken;
 
     private transient Filter branchFilter;
-    private transient Filter filesFilter;
+    private transient Filter fileFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
@@ -140,7 +140,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
         this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
         this.secretToken = Secret.fromString(secretToken);
-        filesFilter = FilterFactory.newFilesFilter(includeFilesRegex);
+        fileFilter = FilterFactory.newFilesFilter(includeFilesRegex);
 
         initializeTriggerHandler();
         initializeBranchFilter();
@@ -263,22 +263,22 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
-        pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        pushHookTriggerHandler.handle(job, hook, ciSkip, fileFilter, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a merge request
     public void onPost(final MergeRequestHook hook) {
-        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, fileFilter, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a note request
     public void onPost(final NoteHook hook) {
-        noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        noteHookTriggerHandler.handle(job, hook, ciSkip, fileFilter, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a pipeline event
     public void onPost(final PipelineHook hook) {
-        pipelineTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        pipelineTriggerHandler.handle(job, hook, ciSkip, fileFilter, branchFilter, mergeRequestLabelFilter);
     }
 
     private void initializeTriggerHandler() {

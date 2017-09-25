@@ -10,7 +10,7 @@ import hudson.model.Job;
  */
 class NopMergeRequestHookTriggerHandler implements MergeRequestHookTriggerHandler {
     @Override
-    public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         // nothing to do
     }
 }

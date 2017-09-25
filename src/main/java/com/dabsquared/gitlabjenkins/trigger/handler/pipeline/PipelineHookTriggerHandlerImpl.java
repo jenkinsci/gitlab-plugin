@@ -38,7 +38,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     }
 
     @Override
-    public void handle(Job<?, ?> job, PipelineHook hook, boolean ciSkip, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, PipelineHook hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         PipelineEventObjectAttributes objectAttributes = hook.getObjectAttributes();
         try {
             if (job instanceof AbstractProject<?, ?>) {

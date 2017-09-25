@@ -31,6 +31,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFilesFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -62,6 +63,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
                 .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                                              newFilesFilter(""),
                                               newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
@@ -160,7 +162,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withWebUrl("https://gitlab.org/test.git")
                     .build()
                 )
-                .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, newFilesFilter(""), FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
             newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);

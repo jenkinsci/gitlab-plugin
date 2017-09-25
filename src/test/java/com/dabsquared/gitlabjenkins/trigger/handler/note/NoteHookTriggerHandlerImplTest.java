@@ -33,6 +33,8 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.N
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newBranchFilter;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFilesFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -79,7 +81,8 @@ public class NoteHookTriggerHandlerImplTest {
                     .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
                     .build())
                 .withMergeRequest(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
-                .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, newFilesFilter(""),
+                                      newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
@@ -146,7 +149,8 @@ public class NoteHookTriggerHandlerImplTest {
                         .withWebUrl("https://gitlab.org/test.git")
                         .build())
                     .build())
-                .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, newFilesFilter(""),
+                                      newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);

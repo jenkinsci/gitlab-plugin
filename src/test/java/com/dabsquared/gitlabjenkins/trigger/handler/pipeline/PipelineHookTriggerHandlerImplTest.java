@@ -31,6 +31,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.P
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newBranchFilter;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFilesFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -108,7 +109,8 @@ public class PipelineHookTriggerHandlerImplTest {
             }
         });
         project.setQuietPeriod(0);
-        pipelineHookTriggerHandler.handle(project, pipelineHook , true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+        pipelineHookTriggerHandler.handle(project, pipelineHook , true, newFilesFilter(""),
+            newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
             newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
@@ -129,7 +131,8 @@ public class PipelineHookTriggerHandlerImplTest {
         });
         project.setQuietPeriod(0);
 
-        pipelineHookTriggerHandler.handle(project, pipelineHook, false, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+        pipelineHookTriggerHandler.handle(project, pipelineHook, false, newFilesFilter(""),
+                                      newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);

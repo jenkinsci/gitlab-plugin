@@ -11,7 +11,7 @@ import hudson.model.Job;
 class NopPipelineHookTriggerHandler implements PipelineHookTriggerHandler {
 
     @Override
-    public void handle(Job<?, ?> job, PipelineHook hook, boolean ciSkip, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, PipelineHook hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
 
     }
 }
