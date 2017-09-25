@@ -95,10 +95,12 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private String includeBranchesSpec;
     private String excludeBranchesSpec;
     private String targetBranchRegex;
+    private String includeFilesRegex;
     private final MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
     private volatile Secret secretToken;
 
     private transient Filter branchFilter;
+    private transient Filter filesFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
@@ -114,7 +116,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     						 boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
-                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex,
+                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex, String includeFilesRegex,
                              MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -134,9 +136,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.includeBranchesSpec = includeBranchesSpec;
         this.excludeBranchesSpec = excludeBranchesSpec;
         this.targetBranchRegex = targetBranchRegex;
+        this.includeFilesRegex = includeFilesRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
         this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
         this.secretToken = Secret.fromString(secretToken);
+        filesFilter = FilterFactory.newFilesFilter(includeFilesRegex);
 
         initializeTriggerHandler();
         initializeBranchFilter();
