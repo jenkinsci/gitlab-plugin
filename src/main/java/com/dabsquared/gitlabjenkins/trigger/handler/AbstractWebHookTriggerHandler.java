@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
@@ -28,6 +29,8 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +56,10 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         } else {
             LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
         }
+    }
+
+    protected List<Commit> getCommits(H hook) {
+        return Collections.emptyList();
     }
 
     protected abstract String getTriggerType();

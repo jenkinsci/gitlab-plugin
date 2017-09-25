@@ -73,6 +73,11 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     }
 
     @Override
+    protected List<Commit> getCommits(PipelineHook hook) {
+        return hook.getCommits();
+    }
+
+    @Override
     protected boolean isCiSkip(PipelineHook hook) {
         //we don't get a commit message or suchlike that could contain ci-skip
         return false;

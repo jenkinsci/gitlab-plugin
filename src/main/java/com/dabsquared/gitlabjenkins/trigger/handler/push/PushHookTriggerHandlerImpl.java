@@ -12,6 +12,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import org.eclipse.jgit.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
@@ -75,6 +76,11 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
                 .withLastCommit(hook.getAfter())
                 .withTargetProjectUrl(hook.getProject().getWebUrl())
                 .build();
+    }
+
+    @Override
+    protected List<Commit> getCommits(PushHook hook) {
+        return hook.getCommits();
     }
 
     @Override
