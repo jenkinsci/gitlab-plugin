@@ -83,9 +83,11 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     }
 
     private boolean hasMatchingFile(Filter fileFilter, List<String> files) {
-        for (String file : files) {
-            if (fileFilter.accept(file)) {
-                return true;
+        if (!isEmpty(files)) {
+            for (String file : files) {
+                if (fileFilter.accept(file)) {
+                    return true;
+                }
             }
         }
         return false;
