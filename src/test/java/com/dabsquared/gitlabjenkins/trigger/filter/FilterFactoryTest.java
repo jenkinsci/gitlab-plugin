@@ -44,4 +44,20 @@ public class FilterFactoryTest {
 
         assertThat(branchFilter, instanceOf(RegexBasedFilter.class));
     }
+
+    @Test
+    public void getAllFilesFilter() {
+        Filter branchFilter = FilterFactory.newFilesFilter("");
+        assertThat(branchFilter, instanceOf(AcceptAllFilter.class));
+
+        branchFilter = FilterFactory.newFilesFilter(null);
+        assertThat(branchFilter, instanceOf(AcceptAllFilter.class));
+    }
+
+    @Test
+    public void getFilesFilter() {
+        Filter branchFilter = FilterFactory.newFilesFilter(".*");
+
+        assertThat(branchFilter, instanceOf(RegexBasedFilter.class));
+    }
 }
