@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+
 /**
  * @author Robin Müller
  */
@@ -50,12 +52,43 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
         String targetBranch = getTargetBranch(hook);
         if (branchFilter.accept(targetBranch)) {
-            LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
-            setCommitStatusPendingIfNecessary(job, hook);
-            scheduleBuild(job, createActions(job, hook));
+            if (processingAllowed(hook, fileFilter)) {
+                LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+                setCommitStatusPendingIfNecessary(job, hook);
+                scheduleBuild(job, createActions(job, hook));
+            } else {
+                LOGGER.log(Level.INFO, "No matching files found", targetBranch);
+            }
         } else {
             LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
         }
+    }
+
+    private boolean processingAllowed(H hook, Filter fileFilter) {
+        List<Commit> commits = getCommits(hook);
+        if (!isEmpty(commits)) {
+            for (Commit commit : commits) {
+                if (hasMatchingFile(fileFilter, commit.getAdded()) ||
+                    hasMatchingFile(fileFilter, commit.getModified()) ||
+                    hasMatchingFile(fileFilter, commit.getRemoved())) {
+                    return true;
+                }
+            }
+
+            // No file found which matches "includeFilesRegex"
+            return false;
+        }
+        // If the commit list was empty allow further processing
+        return true;
+    }
+
+    private boolean hasMatchingFile(Filter fileFilter, List<String> files) {
+        for (String file : files) {
+            if (fileFilter.accept(file)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected List<Commit> getCommits(H hook) {
