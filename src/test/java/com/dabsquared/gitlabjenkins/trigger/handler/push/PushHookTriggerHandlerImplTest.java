@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
@@ -24,6 +25,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,6 +40,7 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFiles
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -85,6 +89,15 @@ public class PushHookTriggerHandlerImplTest {
         project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(testBuilder);
         project.setQuietPeriod(0);
+    }
+
+    @Test
+    public void getCommits() {
+        final List<Commit> commits = new ArrayList<>();
+        PushHook hook = new PushHook();
+        hook.setCommits(commits);
+        PushHookTriggerHandlerImpl handler = new PushHookTriggerHandlerImpl();
+        assertSame(commits, handler.getCommits(hook));
     }
 
     @Test

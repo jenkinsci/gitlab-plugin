@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.pipeline;
 
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
@@ -34,6 +35,7 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newBranc
 import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFilesFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -92,6 +94,15 @@ public class PipelineHookTriggerHandlerImplTest {
                 .build())
 
             .build();
+    }
+
+    @Test
+    public void getCommits() {
+        final List<Commit> commits = new ArrayList<>();
+        PipelineHook hook = new PipelineHook();
+        hook.setCommits(commits);
+        PipelineHookTriggerHandlerImpl handler = new PipelineHookTriggerHandlerImpl(new ArrayList<String>());
+        assertSame(commits, handler.getCommits(hook));
     }
 
     @Test

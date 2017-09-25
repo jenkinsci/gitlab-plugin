@@ -79,7 +79,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected List<Commit> getCommits(PushHook hook) {
+    public List<Commit> getCommits(PushHook hook) {
         return hook.getCommits();
     }
 

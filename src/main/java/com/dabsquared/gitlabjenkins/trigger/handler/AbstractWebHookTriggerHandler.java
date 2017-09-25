@@ -93,7 +93,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         return false;
     }
 
-    protected List<Commit> getCommits(H hook) {
+    public List<Commit> getCommits(H hook) {
         return Collections.emptyList();
     }
 

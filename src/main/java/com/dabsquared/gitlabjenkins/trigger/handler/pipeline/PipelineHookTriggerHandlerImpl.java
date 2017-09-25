@@ -73,7 +73,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     }
 
     @Override
-    protected List<Commit> getCommits(PipelineHook hook) {
+    public List<Commit> getCommits(PipelineHook hook) {
         return hook.getCommits();
     }
 
