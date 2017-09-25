@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.note;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
+import com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -79,7 +79,7 @@ public class NoteHookTriggerHandlerImplTest {
                     .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
                     .build())
                 .withMergeRequest(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
@@ -146,7 +146,7 @@ public class NoteHookTriggerHandlerImplTest {
                         .withWebUrl("https://gitlab.org/test.git")
                         .build())
                     .build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);

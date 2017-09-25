@@ -25,13 +25,13 @@ public class RegexBasedFilterTest {
     public void isRegexBranchAllowed(@FromDataPoints("matching-branches") String branchName) {
         RegexBasedFilter featureBranches = new RegexBasedFilter("feature/.*");
 
-        assertThat(featureBranches.isBranchAllowed(branchName), is(true));
+        assertThat(featureBranches.accept(branchName), is(true));
     }
 
     @Theory
     public void isRegexBranchNotAllowed(@FromDataPoints("not-matching-branches") String branchName) {
         RegexBasedFilter featureBranches = new RegexBasedFilter("feature/.*");
 
-        assertThat(featureBranches.isBranchAllowed(branchName), is(false));
+        assertThat(featureBranches.accept(branchName), is(false));
     }
 }

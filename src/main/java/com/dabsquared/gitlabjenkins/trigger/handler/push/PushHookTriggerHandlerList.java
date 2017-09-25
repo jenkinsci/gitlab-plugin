@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.Filter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import hudson.model.Job;
 
@@ -19,7 +19,7 @@ class PushHookTriggerHandlerList implements PushHookTriggerHandler {
     }
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         for (PushHookTriggerHandler handler : handlers) {
             handler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
         }

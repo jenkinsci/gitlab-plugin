@@ -1,20 +1,23 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author Robin Müller
+ * @author Roland Hauser
  */
-public final class BranchFilterFactory {
+public final class FilterFactory {
 
-    private BranchFilterFactory() { }
+    private FilterFactory() { }
 
-    public static BranchFilter newBranchFilter(BranchFilterConfig config) {
+    public static Filter newBranchFilter(BranchFilterConfig config) {
         switch (config.getType()) {
             case NameBasedFilter:
                 return new NameBasedFilter(config.getIncludeBranchesSpec(), config.getExcludeBranchesSpec());
             case RegexBasedFilter:
                 return new RegexBasedFilter(config.getTargetBranchRegex());
             default:
-                return new AllBranchesFilter();
+                return new AcceptAllFilter();
         }
     }
 }

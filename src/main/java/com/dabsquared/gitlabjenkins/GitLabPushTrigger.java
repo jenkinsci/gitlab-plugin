@@ -13,8 +13,8 @@ import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabVotePublisher;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
+import com.dabsquared.gitlabjenkins.trigger.filter.Filter;
+import com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterConfig;
@@ -98,7 +98,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private final MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
     private volatile Secret secretToken;
 
-    private transient BranchFilter branchFilter;
+    private transient Filter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
@@ -287,7 +287,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     private void initializeBranchFilter() {
-        branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+        branchFilter = FilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec(includeBranchesSpec)
                 .withExcludeBranchesSpec(excludeBranchesSpec)
                 .withTargetBranchRegex(targetBranchRegex)

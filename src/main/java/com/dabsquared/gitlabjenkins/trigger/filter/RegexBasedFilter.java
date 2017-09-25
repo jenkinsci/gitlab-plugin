@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 /**
  * @author Robin Müller
  */
-class RegexBasedFilter implements BranchFilter {
+class RegexBasedFilter implements Filter {
 
     private final String regex;
 
@@ -14,7 +14,7 @@ class RegexBasedFilter implements BranchFilter {
     }
 
     @Override
-    public boolean isBranchAllowed(String branchName) {
-        return StringUtils.isEmpty(branchName) || StringUtils.isEmpty(regex) || branchName.matches(regex);
+    public boolean accept(String token) {
+        return StringUtils.isEmpty(token) || StringUtils.isEmpty(regex) || token.matches(regex);
     }
 }

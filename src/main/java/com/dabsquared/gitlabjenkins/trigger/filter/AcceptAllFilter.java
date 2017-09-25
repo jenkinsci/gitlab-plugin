@@ -2,10 +2,11 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
 
 /**
  * @author Robin Müller
+ * @author Roland Hauser
  */
-class AllBranchesFilter implements BranchFilter {
+class AcceptAllFilter implements Filter {
     @Override
-    public boolean isBranchAllowed(String branchName) {
+    public boolean accept(String unused) {
         return true;
     }
 }

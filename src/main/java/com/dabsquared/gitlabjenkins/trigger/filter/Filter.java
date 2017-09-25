@@ -2,8 +2,9 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
 
 /**
  * @author Robin Müller
+ * @author Roland Hauser
  */
-public interface BranchFilter {
+public interface Filter {
 
-    boolean isBranchAllowed(String branchName);
+    boolean accept(String token);
 }
