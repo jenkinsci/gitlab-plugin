@@ -78,6 +78,9 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
             // No file found which matches "includeFilesRegex"
             return false;
         }
+
+        LOGGER.fine("Commit list is empty, processingAllowed = false");
+
         // If the commit list was empty allow further processing
         return true;
     }
@@ -86,10 +89,14 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         if (!isEmpty(files)) {
             for (String file : files) {
                 if (fileFilter.accept(file)) {
+                    LOGGER.finer("Matching filter found, hasMatchingFile = true");
                     return true;
                 }
             }
         }
+
+        LOGGER.finer("File list is empty, hasMatchingFile = false");
+
         return false;
     }
 

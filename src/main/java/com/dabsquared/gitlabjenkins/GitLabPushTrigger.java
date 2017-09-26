@@ -253,6 +253,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return targetBranchRegex;
     }
 
+    public String getIncludeFilesRegex() {
+        return includeFilesRegex;
+    }
+
     public MergeRequestLabelFilterConfig getMergeRequestLabelFilterConfig() {
         return mergeRequestLabelFilterConfig;
     }
