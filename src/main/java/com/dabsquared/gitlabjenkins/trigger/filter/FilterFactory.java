@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
  * @author Roland Hauser
  */
 public final class FilterFactory {
-    public static Filter ACCEPT_ALL_FILTER = new AcceptAllFilter();
+    public static final Filter ACCEPT_ALL_FILTER = new AcceptAllFilter();
 
     private FilterFactory() { }
 
