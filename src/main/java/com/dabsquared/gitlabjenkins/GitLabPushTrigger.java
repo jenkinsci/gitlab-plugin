@@ -140,10 +140,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
         this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
         this.secretToken = Secret.fromString(secretToken);
-        fileFilter = FilterFactory.newFilesFilter(includeFilesRegex);
 
         initializeTriggerHandler();
         initializeBranchFilter();
+        initializeFileFilter();
         initializeMergeRequestLabelFilter();
     }
 
@@ -294,6 +294,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
     }
 
+    private void initializeFileFilter() {
+        fileFilter = FilterFactory.newFilesFilter(includeFilesRegex);
+    }
+
     private void initializeBranchFilter() {
         branchFilter = FilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec(includeBranchesSpec)
@@ -312,6 +316,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             branchFilterType = StringUtils.isNotBlank(branchFilterName) ? BranchFilterType.valueOf(branchFilterName) : BranchFilterType.All;
         }
         initializeTriggerHandler();
+        initializeFileFilter();
         initializeBranchFilter();
         initializeMergeRequestLabelFilter();
         return super.readResolve();
