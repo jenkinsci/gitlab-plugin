@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.ACCEPT_ALL_FILTER;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 /**
@@ -65,6 +66,11 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     }
 
     private boolean processingAllowed(H hook, Filter fileFilter) {
+        // No pattern has been specified, processing is always allowed
+        if (ACCEPT_ALL_FILTER.equals(fileFilter)) {
+            return true;
+        }
+
         List<Commit> commits = getCommits(hook);
         if (!isEmpty(commits)) {
             for (Commit commit : commits) {
@@ -74,15 +80,12 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                     return true;
                 }
             }
-
-            // No file found which matches "includeFilesRegex"
-            return false;
         }
 
         LOGGER.fine("Commit list is empty, processingAllowed = false");
 
-        // If the commit list was empty allow further processing
-        return true;
+        // No file found which matches "includeFilesRegex"
+        return false;
     }
 
     private boolean hasMatchingFile(Filter fileFilter, List<String> files) {

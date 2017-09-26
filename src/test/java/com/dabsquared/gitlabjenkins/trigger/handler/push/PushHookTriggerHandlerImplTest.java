@@ -45,6 +45,7 @@ import static org.junit.Assert.assertThat;
 
 /**
  * @author Robin Müller
+ * @author Roland Hauser
  */
 public class PushHookTriggerHandlerImplTest {
 
@@ -213,6 +214,45 @@ public class PushHookTriggerHandlerImplTest {
                 .withCommits(asList(matching))
                 .build(), true,
             newFilesFilter("foo/bar/.*"),
+            newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+            newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void push_build_filesRegexIsNull() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        Commit matching = new Commit();
+        matching.setAdded(asList("foo/bar/resource"));
+        pushHookTriggerHandler.handle(project, createPushHookBuilder()
+                .withCommits(asList(matching))
+                .build(), true,
+            newFilesFilter("foo/bar/.*"),
+            newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+            newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+
+        matching = new Commit();
+        matching.setModified(asList("foo/bar/resource"));
+        pushHookTriggerHandler.handle(project, createPushHookBuilder()
+                .withCommits(asList(matching))
+                .build(), true,
+            newFilesFilter("foo/bar/.*"),
+            newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+            newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+
+        matching = new Commit();
+        matching.setRemoved(asList("foo/bar/resource"));
+        pushHookTriggerHandler.handle(project, createPushHookBuilder()
+                .withCommits(asList(matching))
+                .build(), true,
+            newFilesFilter(null),
             newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
             newMergeRequestLabelFilter(null));
 

@@ -7,12 +7,13 @@ import org.apache.commons.lang.StringUtils;
  * @author Roland Hauser
  */
 public final class FilterFactory {
+    public static Filter ACCEPT_ALL_FILTER = new AcceptAllFilter();
 
     private FilterFactory() { }
 
     public static Filter newFilesFilter(String includeFilesRegex) {
         if (StringUtils.isEmpty(includeFilesRegex)) {
-            return new AcceptAllFilter();
+            return ACCEPT_ALL_FILTER;
         }
         return new RegexBasedFilter(includeFilesRegex);
     }
@@ -24,7 +25,7 @@ public final class FilterFactory {
             case RegexBasedFilter:
                 return new RegexBasedFilter(config.getTargetBranchRegex());
             default:
-                return new AcceptAllFilter();
+                return ACCEPT_ALL_FILTER;
         }
     }
 }
