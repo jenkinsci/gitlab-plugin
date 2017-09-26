@@ -80,9 +80,9 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                     return true;
                 }
             }
+        } else {
+            LOGGER.fine("Commit list is empty, processingAllowed = false");
         }
-
-        LOGGER.fine("Commit list is empty, processingAllowed = false");
 
         // No file found which matches "includeFilesRegex"
         return false;
