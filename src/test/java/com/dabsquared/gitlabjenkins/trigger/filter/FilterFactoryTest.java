@@ -8,23 +8,24 @@ import static org.junit.Assert.assertThat;
 
 /**
  * @author Robin Müller
+ * @author Roland Hauser
  */
-public class BranchFilterFactoryTest {
+public class FilterFactoryTest {
 
     @Test
     public void getAllBranchesFilter() {
-        BranchFilter branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+        Filter branchFilter = FilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec("master")
                 .withExcludeBranchesSpec("develop")
                 .withTargetBranchRegex(".*")
                 .build(BranchFilterType.All));
 
-        assertThat(branchFilter, instanceOf(AllBranchesFilter.class));
+        assertThat(branchFilter, instanceOf(AcceptAllFilter.class));
     }
 
     @Test
     public void getNameBasedFilterFilter() {
-        BranchFilter branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+        Filter branchFilter = FilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec("master")
                 .withExcludeBranchesSpec("develop")
                 .withTargetBranchRegex(".*")
@@ -35,11 +36,27 @@ public class BranchFilterFactoryTest {
 
     @Test
     public void getRegexBasedFilterFilter() {
-        BranchFilter branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+        Filter branchFilter = FilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec("master")
                 .withExcludeBranchesSpec("develop")
                 .withTargetBranchRegex(".*")
                 .build(BranchFilterType.RegexBasedFilter));
+
+        assertThat(branchFilter, instanceOf(RegexBasedFilter.class));
+    }
+
+    @Test
+    public void getAllFilesFilter() {
+        Filter branchFilter = FilterFactory.newFilesFilter("");
+        assertThat(branchFilter, instanceOf(AcceptAllFilter.class));
+
+        branchFilter = FilterFactory.newFilesFilter(null);
+        assertThat(branchFilter, instanceOf(AcceptAllFilter.class));
+    }
+
+    @Test
+    public void getFilesFilter() {
+        Filter branchFilter = FilterFactory.newFilesFilter(".*");
 
         assertThat(branchFilter, instanceOf(RegexBasedFilter.class));
     }

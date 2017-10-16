@@ -12,7 +12,7 @@ import java.util.List;
  * @author Milena Zachow
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-public class PipelineHook extends WebHook {
+public class PipelineHook extends WebHook implements CommitSource {
 
     private User user;
     public Integer projectId;
@@ -36,6 +36,7 @@ public class PipelineHook extends WebHook {
         this.user = user;
     }
 
+    @Override
     public List<Commit> getCommits() {
         return commits;
     }

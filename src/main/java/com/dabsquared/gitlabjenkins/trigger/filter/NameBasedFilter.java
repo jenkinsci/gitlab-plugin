@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Robin Müller
  */
-class NameBasedFilter implements BranchFilter {
+class NameBasedFilter implements Filter {
 
     private final List<String> includedBranches;
     private final List<String> excludedBranches;
@@ -20,7 +20,7 @@ class NameBasedFilter implements BranchFilter {
     }
 
     @Override
-    public boolean isBranchAllowed(String branchName) {
+    public boolean accept(String branchName) {
         return hasNoBranchSpecs() || (isBranchNotExcluded(branchName) && isBranchIncluded(branchName));
     }
 

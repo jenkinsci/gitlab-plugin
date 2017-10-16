@@ -9,12 +9,12 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Robin Müller
  */
-public class AllBranchesFilterTest {
+public class AcceptAllFilterTest {
 
     @Test
     public void isRandomBranchNameAllowed() {
         String randomBranchName = RandomStringUtils.random(10, true, false);
 
-        assertThat(new AllBranchesFilter().isBranchAllowed(randomBranchName), is(true));
+        assertThat(new AcceptAllFilter().accept(randomBranchName), is(true));
     }
 }

@@ -1,8 +1,11 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -22,7 +25,10 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
@@ -31,8 +37,10 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFilesFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -45,6 +53,13 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
+
+    @Test
+    public void getCommits() {
+        MergeRequestHook hook = new MergeRequestHook();
+        MergeRequestHookTriggerHandlerImpl handler = new MergeRequestHookTriggerHandlerImpl(new ArrayList<State>(), false);
+        assertSame(Collections.<Commit>emptyList(), handler.getCommits(hook));
+    }
 
     @Test
     public void mergeRequest_ciSkip() throws IOException, InterruptedException {
@@ -61,7 +76,8 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                                              newFilesFilter(""),
                                               newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
@@ -160,7 +176,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .withWebUrl("https://gitlab.org/test.git")
                     .build()
                 )
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, newFilesFilter(""), FilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
             newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);

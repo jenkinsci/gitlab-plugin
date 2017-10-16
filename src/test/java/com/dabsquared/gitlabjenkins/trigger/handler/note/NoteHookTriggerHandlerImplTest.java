@@ -1,7 +1,9 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.note;
 
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -23,7 +25,10 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
@@ -33,8 +38,11 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.N
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newBranchFilter;
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.newFilesFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -53,6 +61,13 @@ public class NoteHookTriggerHandlerImplTest {
     @Before
     public void setup() {
         noteHookTriggerHandler = new NoteHookTriggerHandlerImpl("ci-run");
+    }
+
+    @Test
+    public void getCommits() {
+        NoteHook hook = new NoteHook();
+        NoteHookTriggerHandlerImpl handler = new NoteHookTriggerHandlerImpl(".*");
+        assertSame(Collections.<Commit>emptyList(), handler.getCommits(hook));
     }
 
     @Test
@@ -79,7 +94,8 @@ public class NoteHookTriggerHandlerImplTest {
                     .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
                     .build())
                 .withMergeRequest(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, newFilesFilter(""),
+                                      newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
@@ -146,7 +162,8 @@ public class NoteHookTriggerHandlerImplTest {
                         .withWebUrl("https://gitlab.org/test.git")
                         .build())
                     .build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                .build(), true, newFilesFilter(""),
+                                      newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                                       newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);

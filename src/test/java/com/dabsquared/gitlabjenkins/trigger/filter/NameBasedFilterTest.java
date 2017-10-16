@@ -14,25 +14,25 @@ public class NameBasedFilterTest {
     public void includeBranches() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("master, develop", "");
 
-        assertThat(nameBasedFilter.isBranchAllowed("master"), is(true));
-        assertThat(nameBasedFilter.isBranchAllowed("develop"), is(true));
+        assertThat(nameBasedFilter.accept("master"), is(true));
+        assertThat(nameBasedFilter.accept("develop"), is(true));
     }
 
     @Test
     public void excludeBranches() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("", "master, develop");
 
-        assertThat(nameBasedFilter.isBranchAllowed("master"), is(false));
-        assertThat(nameBasedFilter.isBranchAllowed("develop"), is(false));
-        assertThat(nameBasedFilter.isBranchAllowed("not-excluded-branch"), is(true));
+        assertThat(nameBasedFilter.accept("master"), is(false));
+        assertThat(nameBasedFilter.accept("develop"), is(false));
+        assertThat(nameBasedFilter.accept("not-excluded-branch"), is(true));
     }
 
     @Test
     public void includeAndExcludeBranches() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("master", "develop");
 
-        assertThat(nameBasedFilter.isBranchAllowed("master"), is(true));
-        assertThat(nameBasedFilter.isBranchAllowed("develop"), is(false));
-        assertThat(nameBasedFilter.isBranchAllowed("not-excluded-and-not-included-branch"), is(false));
+        assertThat(nameBasedFilter.accept("master"), is(true));
+        assertThat(nameBasedFilter.accept("develop"), is(false));
+        assertThat(nameBasedFilter.accept("not-excluded-and-not-included-branch"), is(false));
     }
 }

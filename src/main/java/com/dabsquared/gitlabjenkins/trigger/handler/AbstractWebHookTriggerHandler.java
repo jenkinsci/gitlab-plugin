@@ -5,10 +5,11 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.Filter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
@@ -28,8 +29,13 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.dabsquared.gitlabjenkins.trigger.filter.FilterFactory.ACCEPT_ALL_FILTER;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 /**
  * @author Robin Müller
@@ -39,20 +45,66 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
 
     @Override
-    public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, H hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (ciSkip && isCiSkip(hook)) {
             LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
             return;
         }
 
         String targetBranch = getTargetBranch(hook);
-        if (branchFilter.isBranchAllowed(targetBranch)) {
-            LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
-            setCommitStatusPendingIfNecessary(job, hook);
-            scheduleBuild(job, createActions(job, hook));
+        if (branchFilter.accept(targetBranch)) {
+            if (processingAllowed(hook, fileFilter)) {
+                LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+                setCommitStatusPendingIfNecessary(job, hook);
+                scheduleBuild(job, createActions(job, hook));
+            } else {
+                LOGGER.log(Level.INFO, "No matching files found", targetBranch);
+            }
         } else {
             LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
         }
+    }
+
+    private boolean processingAllowed(H hook, Filter fileFilter) {
+        // No pattern has been specified, processing is always allowed
+        if (ACCEPT_ALL_FILTER.equals(fileFilter)) {
+            return true;
+        }
+
+        List<Commit> commits = getCommits(hook);
+        if (!isEmpty(commits)) {
+            for (Commit commit : commits) {
+                if (hasMatchingFile(fileFilter, commit.getAdded()) ||
+                    hasMatchingFile(fileFilter, commit.getModified()) ||
+                    hasMatchingFile(fileFilter, commit.getRemoved())) {
+                    return true;
+                }
+            }
+        } else {
+            LOGGER.fine("Commit list is empty, processingAllowed = false");
+        }
+
+        // No file found which matches "includeFilesRegex"
+        return false;
+    }
+
+    private boolean hasMatchingFile(Filter fileFilter, List<String> files) {
+        if (!isEmpty(files)) {
+            for (String file : files) {
+                if (fileFilter.accept(file)) {
+                    LOGGER.finer("Matching filter found, hasMatchingFile = true");
+                    return true;
+                }
+            }
+        }
+
+        LOGGER.finer("File list is empty, hasMatchingFile = false");
+
+        return false;
+    }
+
+    public List<Commit> getCommits(H hook) {
+        return Collections.emptyList();
     }
 
     protected abstract String getTriggerType();

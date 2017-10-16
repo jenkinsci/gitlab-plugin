@@ -11,7 +11,7 @@ import java.util.List;
  * @author Robin Müller
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-public class PushHook extends WebHook {
+public class PushHook extends WebHook implements CommitSource {
 
     private String before;
     private String after;
@@ -97,6 +97,7 @@ public class PushHook extends WebHook {
         this.project = project;
     }
 
+    @Override
     public List<Commit> getCommits() {
         return commits;
     }

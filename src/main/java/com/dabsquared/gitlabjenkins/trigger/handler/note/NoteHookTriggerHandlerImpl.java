@@ -3,7 +3,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.note;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.Filter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Job;
@@ -31,10 +31,10 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     }
 
     @Override
-    public void handle(Job<?, ?> job, NoteHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, NoteHook hook, boolean ciSkip, Filter fileFilter, Filter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (isValidTriggerPhrase(hook.getObjectAttributes().getNote())
             && mergeRequestLabelFilter.isMergeRequestAllowed(hook.getMergeRequest().getLabels())) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            super.handle(job, hook, ciSkip, fileFilter, branchFilter, mergeRequestLabelFilter);
         }
     }
 
