@@ -2,12 +2,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 import javax.ws.rs.Consumes;
@@ -193,4 +188,10 @@ interface V4GitLabApiProxy extends GitLabApi {
     @Path("/projects/{projectId}/labels")
     @Override
     List<Label> getLabels(@PathParam("projectId") String projectId);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/pipelines")
+    @Override
+    List<Pipeline> getPipelines(@PathParam("projectId") String projectId);
 }

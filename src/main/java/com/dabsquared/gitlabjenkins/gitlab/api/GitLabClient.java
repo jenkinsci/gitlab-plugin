@@ -1,12 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab.api;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -121,5 +116,10 @@ public final class GitLabClient implements GitLabApi {
     @Override
     public List<Label> getLabels(String projectId) {
         return api.getLabels(projectId);
+    }
+
+    @Override
+    public List<Pipeline> getPipelines(String projectName) {
+        return api.getPipelines(projectName);
     }
 }

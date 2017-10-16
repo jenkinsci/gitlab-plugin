@@ -2,12 +2,7 @@ package com.dabsquared.gitlabjenkins.service;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,6 +10,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.emptyList;
 
 
 class GitLabApiStub implements GitLabApi {
@@ -157,4 +154,8 @@ class GitLabApiStub implements GitLabApi {
         return null;
     }
 
+    @Override
+    public List<Pipeline> getPipelines(String projectName) {
+        return emptyList();
+    }
 }

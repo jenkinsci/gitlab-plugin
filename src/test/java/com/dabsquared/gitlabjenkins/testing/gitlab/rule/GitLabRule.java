@@ -1,11 +1,23 @@
 package com.dabsquared.gitlabjenkins.testing.gitlab.rule;
 
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.CredentialsStore;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import hudson.util.Secret;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -25,7 +37,10 @@ import java.util.UUID;
  * @author Robin Müller
  */
 public class GitLabRule implements TestRule {
+    private static final String API_TOKEN_ID = "apiTokenId";
 
+    private final String url;
+    private final int postgresPort;
     private final GitLabClient client;
     private final String username;
     private final String password;
@@ -33,7 +48,9 @@ public class GitLabRule implements TestRule {
     private List<String> projectIds = new ArrayList<>();
 
     public GitLabRule(String url, int postgresPort) {
-        client = new V3GitLabClientBuilder().buildClient(url, getApiToken(postgresPort), false, -1, -1);
+        this.url = url;
+        this.postgresPort = postgresPort;
+        client = new V3GitLabClientBuilder().buildClient(url, getApiToken(), false, -1, -1);
         User user = client.getCurrentUser();
         username = user.getUsername();
         password = "integration-test";
@@ -49,6 +66,10 @@ public class GitLabRule implements TestRule {
         return client.getProject(projectName);
     }
 
+    public List<Pipeline> getPipelines(int projectId) {
+        return client.getPipelines(String.valueOf(projectId));
+    }
+
     public List<String> getProjectIds() {
         return projectIds;
     }
@@ -60,6 +81,22 @@ public class GitLabRule implements TestRule {
             client.addProjectHook(project.getId().toString(), request.getWebHookUrl(), request.isPushHook(), request.isMergeRequestHook(), request.isNoteHook());
         }
         return project.getHttpUrlToRepo();
+    }
+
+    public GitLabConnectionProperty createGitLabConnectionProperty() throws IOException {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+            if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
+                List<Domain> domains = credentialsStore.getDomains();
+                credentialsStore.addCredentials(domains.get(0),
+                    new StringCredentialsImpl(CredentialsScope.SYSTEM, API_TOKEN_ID, "GitLab API Token", Secret.fromString(getApiToken())));
+            }
+        }
+
+        GitLabConnectionConfig config = Jenkins.getInstance().getDescriptorByType(GitLabConnectionConfig.class);
+        GitLabConnection connection = new GitLabConnection("test", url, API_TOKEN_ID, new V3GitLabClientBuilder(), true,10, 10);
+        config.addConnection(connection);
+        config.save();
+        return new GitLabConnectionProperty(connection.getName());
     }
 
     public MergeRequest createMergeRequest(final Integer projectId,
@@ -90,7 +127,7 @@ public class GitLabRule implements TestRule {
         }
     }
 
-    private String getApiToken(int postgresPort) {
+    private String getApiToken() {
         try {
             Class.forName("org.postgresql.Driver");
             try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + postgresPort + "/gitlabhq_production", "gitlab", "password")) {

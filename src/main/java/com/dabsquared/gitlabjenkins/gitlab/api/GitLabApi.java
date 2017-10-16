@@ -1,16 +1,12 @@
 package com.dabsquared.gitlabjenkins.gitlab.api;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+import javax.ws.rs.PathParam;
 import java.util.List;
 
 
@@ -53,4 +49,6 @@ public interface GitLabApi {
     User updateUser(String userId, String email, String username, String name, String password);
 
     List<Label> getLabels(String projectId);
+
+    List<Pipeline> getPipelines(@PathParam("projectId") String projectName);
 }
