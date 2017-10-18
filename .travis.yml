@@ -16,7 +16,7 @@ before_install:
   - chmod +x travis/*.sh
   - travis/before_install.sh
 
-script: ./travis/test.sh
+install: true
 
 jobs:
   include:
