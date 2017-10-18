@@ -288,7 +288,8 @@
     <profile>
       <id>integration-test</id>
       <properties>
-        <gitlab.version>8.5.8</gitlab.version>
+        <gitlab.version>8.17.4</gitlab.version>
+        <postgres.version>9.4-15</postgres.version>
       </properties>
       <build>
         <plugins>
@@ -359,7 +360,7 @@
               <verbose>true</verbose>
               <images>
                 <image>
-                  <name>sameersbn/postgresql:9.4-15</name>
+                  <name>sameersbn/postgresql:${postgres.version}</name>
                   <alias>it-gitlab-postgres</alias>
                   <run>
                     <namingStrategy>alias</namingStrategy>

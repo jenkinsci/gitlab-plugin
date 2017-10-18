@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.testing.integration;
 
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
@@ -42,7 +43,10 @@ import static com.dabsquared.gitlabjenkins.testing.gitlab.rule.builder.generated
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Robin Müller
@@ -160,7 +164,7 @@ public class GitLabIT {
                 return true;
             }
         });
-        project.getBuildersList().add(new SleepBuilder(10000));
+        project.getBuildersList().add(new SleepBuilder(20000));
 
         DescribableList<Publisher, Descriptor<Publisher>> publishers = project.getPublishersList();
         publishers.add(new GitLabCommitStatusPublisher("integration-test", false));
@@ -182,7 +186,7 @@ public class GitLabIT {
         assertThat(buildTriggered.isSignaled(), is(true));
         assertPipelineStatus(gitlabData, "running");
 
-        buildReported.block(20000);
+        buildReported.block(40000);
         assertThat(buildReported.isSignaled(), is(true));
 
         Thread.sleep(5000); // wait for gitlab to update
