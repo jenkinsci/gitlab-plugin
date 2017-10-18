@@ -1,7 +1,6 @@
-sudo: required
-
 language: java
 
+sudo: required
 services:
   - docker
 
@@ -21,18 +20,31 @@ jobs:
   include:
   - stage: test
     script: ./travis/test.sh
+
+
   - stage: integration-test
-    script: ./travis/integration-test.sh
+    sudo: required
+    services:
+      - docker
     env:
       - GITLAB_VERSION=8.17.4
-  - stage: integration-test
     script: ./travis/integration-test.sh
+
+  - stage: integration-test
+    sudo: required
+    services:
+      - docker
     env:
       - GITLAB_VERSION=9.5.5
-  - stage: integration-test
     script: ./travis/integration-test.sh
+
+  - stage: integration-test
+    sudo: required
+    services:
+      - docker
     env:
       - GITLAB_VERSION=latest
+    script: ./travis/integration-test.sh
 
 
 cache:
