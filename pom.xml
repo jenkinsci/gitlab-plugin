@@ -403,7 +403,6 @@
                       <GITLAB_SECRETS_SECRET_KEY_BASE>long-and-random-alphanumeric-string</GITLAB_SECRETS_SECRET_KEY_BASE>
                       <GITLAB_SECRETS_OTP_KEY_BASE>long-and-random-alpha-numeric-string</GITLAB_SECRETS_OTP_KEY_BASE>
                       <GITLAB_HOST>172.17.0.1</GITLAB_HOST>
-                      <GITLAB_RELATIVE_URL_ROOT></GITLAB_RELATIVE_URL_ROOT>
                     </env>
                     <wait>
                       <http>
