@@ -384,7 +384,9 @@
                 </image>
                 <image>
                   <name>sameersbn/gitlab:${gitlab.version}</name>
+                  <alias>it-gitlab-gitlab</alias>
                   <run>
+                    <namingStrategy>alias</namingStrategy>
                     <links>
                       <link>it-gitlab-postgres:postgresql</link>
                       <link>it-gitlab-redis:redisio</link>
