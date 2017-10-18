@@ -20,6 +20,8 @@ script: ./travis/test.sh
 
 jobs:
   include:
+  - stage: test
+    script: ./travis/test.sh
   - stage: integration-test
     script: ./travis/integration-test.sh
     env:
