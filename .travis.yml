@@ -11,14 +11,15 @@ env:
 
 matrix:
   fast_finish: true
-  
+
 before_install:
   - chmod +x travis/*.sh
   - travis/before_install.sh
 
+script: ./travis/test.sh
+
 jobs:
-  - stage: verify
-    script: ./travis/verify.sh
+  include:
   - stage: integration-test
     script: ./travis/integration-test.sh
     env:
