@@ -14,7 +14,6 @@ matrix:
 
 before_install:
   - chmod +x travis/*.sh
-  - travis/before_install.sh
 
 install: true
 
