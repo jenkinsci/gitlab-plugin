@@ -1,9 +1,5 @@
 language: java
 
-sudo: required
-services:
-  - docker
-
 env:
   global:
     - DOCKER_CACHE_DIR=$HOME/.docker-images
