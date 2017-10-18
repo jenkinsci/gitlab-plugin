@@ -1,7 +1,7 @@
 postgresql:
   container_name: docker-postgresql
   restart: always
-  image: sameersbn/postgresql:9.4-15
+  image: sameersbn/postgresql:9.5-1
   ports:
     - "5432:5432"
   environment:

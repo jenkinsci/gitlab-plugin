@@ -289,7 +289,7 @@
       <id>integration-test</id>
       <properties>
         <gitlab.version>8.17.4</gitlab.version>
-        <postgres.version>9.4-15</postgres.version>
+        <postgres.version>9.5-1</postgres.version>
       </properties>
       <build>
         <plugins>
