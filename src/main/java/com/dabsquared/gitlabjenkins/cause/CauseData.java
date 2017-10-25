@@ -57,6 +57,7 @@ public final class CauseData {
     private final String createdAt;
     private final String finishedAt;
     private final String buildDuration;
+    private final List<String> labels;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
@@ -65,7 +66,7 @@ public final class CauseData {
               Integer mergeRequestIid, Integer mergeRequestTargetProjectId, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
               String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
               String triggerPhrase, String mergeRequestState, String mergedByUser, String mergeRequestAssignee, String ref, String isTag,
-	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration) {
+	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration, List<String> labels) {
         this.actionType = checkNotNull(actionType, "actionType must not be null.");
         this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
@@ -107,6 +108,7 @@ public final class CauseData {
         this.createdAt = createdAt;
         this.finishedAt = finishedAt;
         this.buildDuration = buildDuration;
+        this.labels = labels;
     }
 
     public Map<String, String> getBuildVariables() {
@@ -147,7 +149,8 @@ public final class CauseData {
         variables.put("createdAt", createdAt);
         variables.put("finishedAt", finishedAt);
         variables.put("duration", buildDuration);
-        variables.pufIfNotNull("gitlabTriggerPhrase", triggerPhrase);
+        variables.pufIfNotNull("gitlabTriggerPhrase", triggerPhrase);        
+        if (labels != null) variables.put("gitlabLabels", String.join(" ",labels));
         return variables;
     }
 
