@@ -1,5 +1,9 @@
 ChangeLog
 
+1.5.0
+=====================
+* #614: Add optional support for GitLab API v4
+
 1.4.8
 =====================
 * #483: If 'Add message for failed builds' feature is used, send the message for both failed and 'unstable' builds
