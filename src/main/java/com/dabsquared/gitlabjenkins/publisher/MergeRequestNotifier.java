@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -27,7 +27,7 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        GitLabApi client = getClient(build);
+        GitLabClient client = getClient(build);
         if (client == null) {
             listener.getLogger().println("No GitLab connection configured");
             return true;
@@ -50,7 +50,7 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
         };
     }
 
-    protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, Integer projectId, Integer mergeRequestId);
+    protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, Integer projectId, Integer mergeRequestId);
 
     Integer getProjectId(Run<?, ?> build) {
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);

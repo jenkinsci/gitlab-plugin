@@ -1,8 +1,8 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import org.eclipse.jgit.transport.URIish;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import org.eclipse.jgit.transport.URIish;
 
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
@@ -17,10 +17,10 @@ public final class ProjectIdUtil {
 
     private ProjectIdUtil() { }
 
-    public static String retrieveProjectId(GitLabApi client, String remoteUrl) throws ProjectIdResolutionException {
+    public static String retrieveProjectId(GitLabClient client, String remoteUrl) throws ProjectIdResolutionException {
         try {
-            String projectId = null;
-            String baseUri = client.getGitLabHostUrl();
+            String baseUri = client.getHostUrl();
+            String projectId;
             if (baseUri != null && remoteUrl.startsWith(baseUri)) {
                 projectId = new URIish(remoteUrl.substring(baseUri.length(), remoteUrl.length())).getPath();
             } else {

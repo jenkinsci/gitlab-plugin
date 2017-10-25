@@ -1,14 +1,54 @@
 package com.dabsquared.gitlabjenkins.gitlab.api;
 
-/**
- * Extends REST-client interface to provide additional methods for plugin's code.
- * 
- * @author Alexander Leshkin
- *
- */
-public interface GitLabApi extends GitLabApiClient {
-    /**
-     * Returns GitLab host base url from plugin confugruation.
-     */
-    String getGitLabHostUrl();
+
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+
+import javax.ws.rs.PathParam;
+import java.util.List;
+
+
+@Restricted(NoExternalUse.class)
+public interface GitLabApi {
+    Project createProject(String projectName);
+
+    MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title);
+
+    Project getProject(String projectName);
+
+    Project updateProject(String projectId, String name, String path);
+
+    void deleteProject(String projectId);
+
+    void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
+
+    void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
+
+    void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
+
+    void getCommit(String projectId, String sha);
+
+    void acceptMergeRequest(Integer projectId, Integer mergeRequestId, String mergeCommitMessage, boolean shouldRemoveSourceBranch);
+
+    void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body);
+
+    List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage);
+
+    List<Branch> getBranches(String projectId);
+
+    Branch getBranch(String projectId, String branch);
+
+    void headCurrentUser();
+
+    User getCurrentUser();
+
+    User addUser(String email, String username, String name, String password);
+
+    User updateUser(String userId, String email, String username, String name, String password);
+
+    List<Label> getLabels(String projectId);
+
+    List<Pipeline> getPipelines(@PathParam("projectId") String projectName);
 }

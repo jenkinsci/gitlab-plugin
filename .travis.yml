@@ -1,0 +1,52 @@
+language: java
+
+env:
+  global:
+    - DOCKER_CACHE_DIR=$HOME/.docker-images
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - chmod +x travis/*.sh
+
+install: true
+
+jobs:
+  include:
+  - stage: test
+    script: ./travis/test.sh
+
+
+  - stage: integration-test
+    sudo: required
+    services:
+      - docker
+    env:
+      - GITLAB_VERSION=8.17.4
+    script: ./travis/integration-test.sh
+
+  - stage: integration-test
+    sudo: required
+    services:
+      - docker
+    env:
+      - GITLAB_VERSION=9.5.5
+    script: ./travis/integration-test.sh
+
+  - stage: integration-test
+    sudo: required
+    services:
+      - docker
+    env:
+      - GITLAB_VERSION=latest
+    script: ./travis/integration-test.sh
+
+
+cache:
+  directories:
+  - $DOCKER_CACHE_DIR
+  - $HOME/.m2/repository
+  - $HOME/.m2/wrapper
+before_cache:
+  - travis/before_cache.sh

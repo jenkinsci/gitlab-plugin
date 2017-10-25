@@ -59,7 +59,7 @@ public abstract class BuildPageRedirectActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);
         QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
-        FreeStyleBuild build = future.get(5, TimeUnit.SECONDS);
+        FreeStyleBuild build = future.get(15, TimeUnit.SECONDS);
 
         getBuildPageRedirectAction(testProject).execute(response);
 

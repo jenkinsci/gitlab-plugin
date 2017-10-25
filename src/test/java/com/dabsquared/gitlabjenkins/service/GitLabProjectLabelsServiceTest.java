@@ -1,12 +1,10 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,30 +12,28 @@ import java.util.List;
 
 import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.LabelBuilder.label;
 import static java.util.Arrays.asList;
+import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+
 public class GitLabProjectLabelsServiceTest {
 
     private final static List<String> LABELS_PROJECT_B = asList("label1", "label2", "label3");
 
     private GitLabProjectLabelsService labelsService;
 
-    @Mock
-    private GitLabApi gitlabApi;
+    private GitLabApiStub apiStub;
+    private GitLabClient gitlabClient;
 
     @Before
     public void setUp() throws IOException {
-        List<Label> labelsProjectA = convert(asList("label1", "label2"));
+        apiStub = new GitLabApiStub();
+        apiStub.addLabels("groupOne/A", convert(asList("label1", "label2")));
+        apiStub.addLabels("groupOne/B", convert(LABELS_PROJECT_B));
 
-        // mock the gitlab factory
-        when(gitlabApi.getLabels("groupOne/A")).thenReturn(labelsProjectA);
-        when(gitlabApi.getLabels("groupOne/B")).thenReturn(convert(LABELS_PROJECT_B));
-
+        gitlabClient = new GitLabClient("", apiStub);
+        
         // never expire cache for tests
         labelsService = new GitLabProjectLabelsService();
     }
@@ -45,7 +41,7 @@ public class GitLabProjectLabelsServiceTest {
     @Test
     public void shouldReturnLabelsFromGitlabApi() {
         // when
-        List<String> actualLabels = labelsService.getLabels(gitlabApi, "git@git.example.com:groupOne/B.git");
+        List<String> actualLabels = labelsService.getLabels(gitlabClient, "git@git.example.com:groupOne/B.git");
 
         // then
         assertThat(actualLabels, is(LABELS_PROJECT_B));
@@ -54,11 +50,11 @@ public class GitLabProjectLabelsServiceTest {
     @Test
     public void shouldNotMakeUnnecessaryCallsToGitlabApiGetLabels() {
         // when
-        labelsService.getLabels(gitlabApi, "git@git.example.com:groupOne/A.git");
+        labelsService.getLabels(gitlabClient, "git@git.example.com:groupOne/A.git");
 
         // then
-        verify(gitlabApi, times(1)).getLabels("groupOne/A");
-        verify(gitlabApi, times(0)).getLabels("groupOne/B");
+        assertEquals(1, apiStub.calls("groupOne/A", Label.class));
+        assertEquals(0, apiStub.calls("groupOne/B", Label.class));
     }
 
     private List<Label> convert(List<String> labels) {
