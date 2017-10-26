@@ -25,7 +25,7 @@ final class AutodetectingGitlabApi implements GitLabApi {
     private final boolean ignoreCertificateErrors;
     private final int connectionTimeout;
     private final int readTimeout;
-    private GitLabApi delegateCache;
+    private GitLabApi delegate;
 
     
     AutodetectingGitlabApi(Iterable<GitLabClientBuilder> builders, String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
@@ -246,12 +246,12 @@ final class AutodetectingGitlabApi implements GitLabApi {
     }
 
 
-    GitLabApi delegate(boolean reset) {
-        if (reset || delegateCache == null) {
-            delegateCache = autodetectOrDie();
+    private GitLabApi delegate(boolean reset) {
+        if (reset || delegate == null) {
+            delegate = autodetectOrDie();
         }
 
-        return delegateCache;
+        return delegate;
     }
 
     private GitLabClient autodetectOrDie() {

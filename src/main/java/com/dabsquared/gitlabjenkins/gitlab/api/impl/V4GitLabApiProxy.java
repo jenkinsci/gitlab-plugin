@@ -19,7 +19,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder.ID;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabApiProxy.ID;
 
 
 /**
@@ -27,6 +27,8 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder
  */
 @Path("/api/" + ID)
 interface V4GitLabApiProxy extends GitLabApi {
+    String ID = "v4";
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
