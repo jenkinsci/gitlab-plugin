@@ -45,12 +45,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.net.Proxy.NO_PROXY;
+
 
 @Restricted(NoExternalUse.class)
 public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
@@ -76,13 +80,11 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     }
 
     private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabApi> proxyClass, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
-        Jenkins jenkins = Jenkins.getInstance();
-        ProxyConfiguration proxy = (jenkins != null) ? jenkins.proxy : null;
         return buildClient(
             url,
             apiToken,
             proxyClass,
-            proxy,
+            Jenkins.getActiveInstance().proxy,
             ignoreCertificateErrors,
             connectionTimeout,
             readTimeout
@@ -96,8 +98,9 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             builder.disableTrustManager();
         }
 
-        if (httpProxyConfig != null) {
-            InetSocketAddress address = (InetSocketAddress) httpProxyConfig.createProxy(getHost(url)).address();
+        Proxy proxy = httpProxyConfig != null ? httpProxyConfig.createProxy(getHost(url)) : NO_PROXY;
+        if (proxy != NO_PROXY) {
+            InetSocketAddress address = (InetSocketAddress) proxy.address();
             builder.defaultProxy(address.getHostName().replaceFirst("^.*://", ""),
                 address.getPort(),
                 address.getHostName().startsWith("https") ? "https" : "http",
