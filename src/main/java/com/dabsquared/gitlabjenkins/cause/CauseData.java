@@ -3,7 +3,7 @@ package com.dabsquared.gitlabjenkins.cause;
 import hudson.markup.EscapedMarkupFormatter;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -150,7 +150,7 @@ public final class CauseData {
         variables.put("finishedAt", finishedAt);
         variables.put("duration", buildDuration);
         variables.pufIfNotNull("gitlabTriggerPhrase", triggerPhrase);        
-        if (labels != null) variables.put("gitlabLabels", String.join(" ",labels));
+        if (labels != null) variables.put("gitlabLabels", StringUtils.join(labels,' '));
         return variables;
     }
 
