@@ -16,7 +16,7 @@ import java.util.Collection;
 @Restricted(NoExternalUse.class)
 public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
     public AutodetectGitLabClientBuilder() {
-        super("autodetect");
+        super("autodetect", 0);
     }
 
     @Override

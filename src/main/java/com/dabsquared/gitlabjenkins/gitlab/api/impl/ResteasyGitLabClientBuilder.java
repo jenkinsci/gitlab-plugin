@@ -64,8 +64,8 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
 
     private final Class<? extends GitLabApi> apiProxyClass;
 
-    ResteasyGitLabClientBuilder(String id, Class<? extends GitLabApi> apiProxyClass) {
-        super(id);
+    ResteasyGitLabClientBuilder(String id, int ordinal, Class<? extends GitLabApi> apiProxyClass) {
+        super(id, ordinal);
         this.apiProxyClass = apiProxyClass;
     }
 
