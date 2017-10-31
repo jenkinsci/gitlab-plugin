@@ -1,5 +1,10 @@
 ChangeLog
 
+1.5.1
+=====================
+* #648: Fix NPE when an MR build is triggered
+* #650: Improve GitLab API version autodetection
+
 1.5.0
 =====================
 * #614: Add optional support for GitLab API v4
