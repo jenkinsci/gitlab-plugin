@@ -21,7 +21,7 @@ public class ResteasyGitLabClientBuilderTest {
 
     @Test
     public void buildClient() throws Exception {
-        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", V3GitLabApiProxy.class);
+        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class);
         assertApiImpl(buildClientWithDefaults(clientBuilder, "http://localhost/"), V3GitLabApiProxy.class);
     }
 

@@ -32,10 +32,10 @@ import static org.mockserver.model.HttpResponse.response;
 
 class TestUtility {
     static final String API_TOKEN = "secret";
-    static final String API_TOKEN_ID = "apiTokenId";
-    static final boolean IGNORE_CERTIFICATE_ERRORS = true;
-    static final int CONNECTION_TIMEOUT = 10;
-    static final int READ_TIMEOUT = 10;
+    private static final String API_TOKEN_ID = "apiTokenId";
+    private static final boolean IGNORE_CERTIFICATE_ERRORS = true;
+    private static final int CONNECTION_TIMEOUT = 10;
+    private static final int READ_TIMEOUT = 10;
 
     static void addGitLabApiToken() throws IOException {
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
@@ -59,11 +59,7 @@ class TestUtility {
         return responseWithStatus(NOT_FOUND);
     }
 
-    static HttpResponse responseUnauthorized() {
-        return responseWithStatus(UNAUTHORIZED);
-    }
-
-    static HttpResponse responseWithStatus(Status status) {
+    private static HttpResponse responseWithStatus(Status status) {
         return response().withStatusCode(status.getStatusCode());
     }
 
@@ -75,6 +71,12 @@ class TestUtility {
         Field apiField = client.getClass().getDeclaredField("api");
         apiField.setAccessible(true);
         assertThat(apiField.get(client), instanceOf(apiImplClass));
+    }
+
+    static void assertApiImpl(AutodetectingGitlabApi api, Class<? extends GitLabApi> apiImplClass) throws Exception {
+        Field delegate = api.getClass().getDeclaredField("delegate");
+        delegate.setAccessible(true);
+        assertApiImpl((GitLabClient) delegate.get(api), apiImplClass);
     }
 
     private TestUtility() { /* utility class */ }

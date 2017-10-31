@@ -9,9 +9,9 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 @Extension
 @Restricted(NoExternalUse.class)
 public final class V4GitLabClientBuilder extends ResteasyGitLabClientBuilder {
-    static final String ID = "v4";
+    private static final int ORDINAL = 1;
 
     public V4GitLabClientBuilder() {
-        super(ID, V4GitLabApiProxy.class);
+        super(V4GitLabApiProxy.ID, ORDINAL, V4GitLabApiProxy.class);
     }
 }

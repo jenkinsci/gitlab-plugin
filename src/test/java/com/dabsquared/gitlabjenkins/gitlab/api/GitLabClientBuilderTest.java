@@ -22,11 +22,11 @@ public class GitLabClientBuilderTest {
     public JenkinsRule jenkins = new JenkinsRule();
 
     @Test
-    public void getAllGitLabClientBuilders_list_is_sorted_by_id() {
+    public void getAllGitLabClientBuilders_list_is_sorted_by_ordinal() {
         List<GitLabClientBuilder> builders = getAllGitLabClientBuilders();
         assertThat(builders.get(0), instanceOf(AutodetectGitLabClientBuilder.class));
-        assertThat(builders.get(1), instanceOf(V3GitLabClientBuilder.class));
-        assertThat(builders.get(2), instanceOf(V4GitLabClientBuilder.class));
+        assertThat(builders.get(1), instanceOf(V4GitLabClientBuilder.class));
+        assertThat(builders.get(2), instanceOf(V3GitLabClientBuilder.class));
     }
 
     @Test

@@ -19,7 +19,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder.ID;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabApiProxy.ID;
 
 
 /**
@@ -27,6 +27,8 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder
  */
 @Path("/api/" + ID)
 interface V3GitLabApiProxy extends GitLabApi {
+    String ID = "v3";
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

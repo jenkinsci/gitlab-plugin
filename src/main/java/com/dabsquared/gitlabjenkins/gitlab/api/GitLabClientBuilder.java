@@ -33,9 +33,11 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
     }
 
     private final String id;
+    private final int ordinal;
 
-    protected GitLabClientBuilder(String id) {
+    protected GitLabClientBuilder(String id, int ordinal) {
         this.id = id;
+        this.ordinal = ordinal;
     }
 
     @Nonnull
@@ -48,6 +50,7 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
 
     @Override
     public final int compareTo(@Nonnull GitLabClientBuilder other) {
-        return id().compareTo(other.id());
+        int o = ordinal - other.ordinal;
+        return o != 0 ? o : id().compareTo(other.id());
     }
 }
