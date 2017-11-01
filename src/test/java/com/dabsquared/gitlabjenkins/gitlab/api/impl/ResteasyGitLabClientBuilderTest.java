@@ -28,7 +28,7 @@ public class ResteasyGitLabClientBuilderTest {
     @Test
     public void buildClientWithProxy() throws Exception {
         jenkins.getInstance().proxy = new ProxyConfiguration("example.com", 8080, "test", "test", "*localhost*");
-        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", V3GitLabApiProxy.class);
+        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class);
         assertNotNull(buildClientWithDefaults(clientBuilder, "http://localhost"));
     }
 
