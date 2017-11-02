@@ -13,7 +13,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.buildClie
 import static junit.framework.TestCase.assertNotNull;
 
 
-public class ResteasyGitLabClientImplBuilderTest {
+public class ResteasyGitLabClientBuilderTest {
     @Rule
     public MockServerRule mockServer = new MockServerRule(this);
     @Rule

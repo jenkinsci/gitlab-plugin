@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
 import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.matchers.Times.once;
 
-public class AutodetectingGitLabApiTest {
+public class AutodetectingGitLabClientTest {
     @Rule
     public MockServerRule mockServer = new MockServerRule(this);
     @Rule
