@@ -40,6 +40,7 @@ import java.util.List;
 
 import static com.dabsquared.gitlabjenkins.builder.generated.GitLabPushTriggerBuilder.gitLabPushTrigger;
 import static com.dabsquared.gitlabjenkins.testing.gitlab.rule.builder.generated.ProjectRequestBuilder.projectRequest;
+import static java.lang.Integer.parseInt;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -55,8 +56,7 @@ public class GitLabIT {
     private static final String GITLAB_URL = "http://localhost:" + System.getProperty("gitlab.http.port", "10080");
 
     @Rule
-    public GitLabRule gitlab = new GitLabRule(GITLAB_URL,
-        Integer.parseInt(System.getProperty("postgres.port", "5432")));
+    public GitLabRule gitlab = new GitLabRule(GITLAB_URL, parseInt(System.getProperty("postgres.port", "5432")));
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -224,7 +224,7 @@ public class GitLabIT {
         // Once the issue is resolved, replace this implementation.
         List<String> projectIds = gitlab.getProjectIds();
         assertSame(projectIds.size(), 1);
-        return new ImmutablePair<>(Integer.parseInt(projectIds.get(0)), sha);
+        return new ImmutablePair<>(parseInt(projectIds.get(0)), sha);
     }
 
     private String initGitLabProject(String url, boolean addFeatureBranch) throws GitAPIException, IOException {

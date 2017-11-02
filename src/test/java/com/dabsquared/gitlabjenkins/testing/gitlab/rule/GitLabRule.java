@@ -38,23 +38,18 @@ import java.util.UUID;
  */
 public class GitLabRule implements TestRule {
     private static final String API_TOKEN_ID = "apiTokenId";
+    private static final String PASSWORD = "integration-test";
 
     private final String url;
     private final int postgresPort;
-    private final GitLabClient client;
-    private final String username;
-    private final String password;
+
+    private GitLabClient clientCache;
 
     private List<String> projectIds = new ArrayList<>();
 
     public GitLabRule(String url, int postgresPort) {
         this.url = url;
         this.postgresPort = postgresPort;
-        client = new V3GitLabClientBuilder().buildClient(url, getApiToken(), false, -1, -1);
-        User user = client.getCurrentUser();
-        username = user.getUsername();
-        password = "integration-test";
-        client.updateUser(user.getId().toString(), user.getEmail(), user.getUsername(), user.getName(), password);
     }
 
     @Override
@@ -63,11 +58,11 @@ public class GitLabRule implements TestRule {
     }
 
     public Project getProject(final String projectName) {
-        return client.getProject(projectName);
+        return client().getProject(projectName);
     }
 
     public List<Pipeline> getPipelines(int projectId) {
-        return client.getPipelines(String.valueOf(projectId));
+        return client().getPipelines(String.valueOf(projectId));
     }
 
     public List<String> getProjectIds() {
@@ -75,10 +70,10 @@ public class GitLabRule implements TestRule {
     }
 
     public String createProject(ProjectRequest request) {
-        Project project = client.createProject(request.getName());
+        Project project = client().createProject(request.getName());
         projectIds.add(project.getId().toString());
         if (request.getWebHookUrl() != null && (request.isPushHook() || request.isMergeRequestHook() || request.isNoteHook())) {
-            client.addProjectHook(project.getId().toString(), request.getWebHookUrl(), request.isPushHook(), request.isMergeRequestHook(), request.isNoteHook());
+            client().addProjectHook(project.getId().toString(), request.getWebHookUrl(), request.isPushHook(), request.isMergeRequestHook(), request.isNoteHook());
         }
         return project.getHttpUrlToRepo();
     }
@@ -103,27 +98,27 @@ public class GitLabRule implements TestRule {
                                            final String sourceBranch,
                                            final String targetBranch,
                                            final String title) {
-        return client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+        return client().createMergeRequest(projectId, sourceBranch, targetBranch, title);
     }
 
     public void createMergeRequestNote(MergeRequest mr, String body) {
-        client.createMergeRequestNote(mr, body);
+        client().createMergeRequestNote(mr, body);
     }
 
     public String getUsername() {
-        return username;
+        return client().getCurrentUser().getUsername();
     }
 
     public String getPassword() {
-        return password;
+        return PASSWORD;
     }
 
     private void cleanup() {
         for (String projectId : projectIds) {
             String randomProjectName = UUID.randomUUID().toString();
             // rename the project before deleting as the deletion will take a while
-            client.updateProject(projectId, randomProjectName, randomProjectName);
-            client.deleteProject(projectId);
+            client().updateProject(projectId, randomProjectName, randomProjectName);
+            client().deleteProject(projectId);
         }
     }
 
@@ -140,6 +135,15 @@ public class GitLabRule implements TestRule {
         }
     }
 
+    private GitLabClient client() {
+        if (clientCache == null) {
+            clientCache = new V3GitLabClientBuilder().buildClient(url, getApiToken(), false, -1, -1);
+            User user = clientCache.getCurrentUser();
+            client().updateUser(user.getId().toString(), user.getEmail(), user.getUsername(), user.getName(), PASSWORD);
+        }
+        return clientCache;
+    }
+
     private class GitlabStatement extends Statement {
         private final Statement next;
 
@@ -154,18 +158,6 @@ public class GitLabRule implements TestRule {
             } finally {
                 GitLabRule.this.cleanup();
             }
-        }
-    }
-
-    private static class ApiHeaderTokenFilter implements ClientRequestFilter {
-        private final String gitlabApiToken;
-
-        ApiHeaderTokenFilter(String gitlabApiToken) {
-            this.gitlabApiToken = gitlabApiToken;
-        }
-
-        public void filter(ClientRequestContext requestContext) throws IOException {
-            requestContext.getHeaders().putSingle("PRIVATE-TOKEN", gitlabApiToken);
         }
     }
 }
