@@ -24,6 +24,6 @@ public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
     public GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         Collection<GitLabClientBuilder> candidates = new ArrayList<>(getAllGitLabClientBuilders());
         candidates.remove(this);
-        return new GitLabClient(url, new AutodetectingGitlabApi(candidates, url, token, ignoreCertificateErrors, connectionTimeout, readTimeout));
+        return new AutodetectingGitLabClient(candidates, url, token, ignoreCertificateErrors, connectionTimeout, readTimeout);
     }
 }

@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 
-public class GitLabClientBuilderTest {
+public class GitLabClientImplBuilderTest {
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 

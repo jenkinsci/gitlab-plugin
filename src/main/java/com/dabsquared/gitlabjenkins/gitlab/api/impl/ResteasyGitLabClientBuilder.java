@@ -2,9 +2,9 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.JacksonConfig;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -66,24 +66,21 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         RuntimeDelegate.setInstance(new ResteasyProviderFactory());
     }
 
-    private final Class<? extends GitLabApi> apiProxyClass;
+    private final Class<? extends GitLabApiProxy> apiProxyClass;
+    private final Function<MergeRequest, Integer> mergeRequestIdProvider;
 
-    ResteasyGitLabClientBuilder(String id, int ordinal, Class<? extends GitLabApi> apiProxyClass) {
+    ResteasyGitLabClientBuilder(String id, int ordinal, Class<? extends GitLabApiProxy> apiProxyClass, Function<MergeRequest, Integer> mergeRequestIdProvider) {
         super(id, ordinal);
         this.apiProxyClass = apiProxyClass;
+        this.mergeRequestIdProvider = mergeRequestIdProvider;
     }
 
     @Nonnull
     @Override
-    public final GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
-        return buildClient(url, token, apiProxyClass, ignoreCertificateErrors, connectionTimeout, readTimeout);
-    }
-
-    private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabApi> proxyClass, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+    public final GitLabClient buildClient(String url, String apiToken, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         return buildClient(
             url,
             apiToken,
-            proxyClass,
             Jenkins.getActiveInstance().proxy,
             ignoreCertificateErrors,
             connectionTimeout,
@@ -91,7 +88,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         );
     }
 
-    private GitLabClient buildClient(String url, String apiToken, Class<? extends GitLabApi> proxyClass, ProxyConfiguration httpProxyConfig, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+    private GitLabClient buildClient(String url, String apiToken, ProxyConfiguration httpProxyConfig, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
         if (ignoreCertificateErrors) {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
@@ -108,7 +105,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 httpProxyConfig.getPassword());
         }
 
-        GitLabApi apiProxy = builder
+        GitLabApiProxy apiProxy = builder
             .connectionPoolSize(60)
             .maxPooledPerRoute(30)
             .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
@@ -120,10 +117,10 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             .register(new RemoveAcceptEncodingFilter())
             .register(new JaxrsFormProvider())
             .build().target(url)
-            .proxyBuilder(proxyClass)
-            .classloader(proxyClass.getClassLoader())
+            .proxyBuilder(apiProxyClass)
+            .classloader(apiProxyClass.getClassLoader())
             .build();
-        return new GitLabClient(url, apiProxy);
+        return new ResteasyGitLabClient(url, apiProxy, mergeRequestIdProvider);
     }
 
     private String getHost(String url) {
@@ -231,6 +228,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     private static class ResteasyClientBuilder extends org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder {
         private CredentialsProvider proxyCredentials;
 
+        @SuppressWarnings("UnusedReturnValue")
         ResteasyClientBuilder defaultProxy(String hostname, int port, final String scheme, String username, String password) {
             super.defaultProxy(hostname, port, scheme);
             if (username != null && password != null) {

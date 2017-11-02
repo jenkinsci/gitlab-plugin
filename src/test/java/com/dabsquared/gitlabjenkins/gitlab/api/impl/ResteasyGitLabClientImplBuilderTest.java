@@ -13,7 +13,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.buildClie
 import static junit.framework.TestCase.assertNotNull;
 
 
-public class ResteasyGitLabClientBuilderTest {
+public class ResteasyGitLabClientImplBuilderTest {
     @Rule
     public MockServerRule mockServer = new MockServerRule(this);
     @Rule
@@ -21,14 +21,14 @@ public class ResteasyGitLabClientBuilderTest {
 
     @Test
     public void buildClient() throws Exception {
-        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class);
+        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class, null);
         assertApiImpl(buildClientWithDefaults(clientBuilder, "http://localhost/"), V3GitLabApiProxy.class);
     }
 
     @Test
     public void buildClientWithProxy() throws Exception {
         jenkins.getInstance().proxy = new ProxyConfiguration("example.com", 8080, "test", "test", "*localhost*");
-        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class);
+        GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class, null);
         assertNotNull(buildClientWithDefaults(clientBuilder, "http://localhost"));
     }
 

@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.markup.EscapedMarkupFormatter;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -298,6 +299,15 @@ public final class CauseData {
 		return mergeRequestAssignee;
 	}
 
+	public MergeRequest getMergeRequest() {
+        if (mergeRequestId == null) {
+            return null;
+        }
+
+        return new MergeRequest(mergeRequestId, mergeRequestIid, sourceBranch, targetBranch, mergeRequestTitle,
+            sourceProjectId, targetProjectId, mergeRequestDescription, mergeRequestState);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -506,7 +516,7 @@ public final class CauseData {
 
         private final Map<K, V> map;
 
-        public MapWrapper(Map<K, V> map) {
+        MapWrapper(Map<K, V> map) {
             this.map = map;
         }
 
@@ -520,7 +530,7 @@ public final class CauseData {
             return map.entrySet();
         }
 
-        public void pufIfNotNull(K key, V value) {
+        void pufIfNotNull(K key, V value) {
             if (value != null) {
                 map.put(key, value);
             }

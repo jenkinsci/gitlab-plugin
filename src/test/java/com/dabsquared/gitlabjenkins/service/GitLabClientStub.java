@@ -1,7 +1,7 @@
 package com.dabsquared.gitlabjenkins.service;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -14,13 +14,18 @@ import java.util.Map;
 import static java.util.Collections.emptyList;
 
 
-class GitLabApiStub implements GitLabApi {
+class GitLabClientStub implements GitLabClient {
     private final Map<Pair<String, Class>, List<?>> data;
     private final Map<Pair<String, Class>, Integer> calls;
 
-    GitLabApiStub() {
+    GitLabClientStub() {
         data = new HashMap<>();
         calls = new HashMap<>();
+    }
+
+    @Override
+    public String getHostUrl() {
+        return "";
     }
 
     void addBranches(String project, List<Branch> branches) {
@@ -115,12 +120,12 @@ class GitLabApiStub implements GitLabApi {
     }
 
     @Override
-    public void acceptMergeRequest(Integer projectId, Integer mergeRequestId, String mergeCommitMessage, boolean shouldRemoveSourceBranch) {
+    public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, boolean shouldRemoveSourceBranch) {
 
     }
 
     @Override
-    public void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body) {
+    public void createMergeRequestNote(MergeRequest mr, String body) {
 
     }
 

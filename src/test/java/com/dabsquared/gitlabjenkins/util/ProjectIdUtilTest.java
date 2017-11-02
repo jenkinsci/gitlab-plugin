@@ -32,7 +32,7 @@ public class ProjectIdUtilTest {
 
     @Theory
     public void retrieveProjectId(TestData testData) throws ProjectIdUtil.ProjectIdResolutionException {
-        GitLabClient client = new GitLabClient(testData.hostUrl, null);
+        GitLabClient client = new GitLabClientStub(testData.hostUrl);
 
         String projectId = ProjectIdUtil.retrieveProjectId(client, testData.remoteUrl);
 

@@ -19,15 +19,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.mockSimpleBuild;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -71,8 +63,8 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
         mockServerClient.verify(
-            prepareAcceptMergeRequestWithSuccessResponse("v3"),
-            prepareAcceptMergeRequestWithSuccessResponse("v4"));
+            prepareAcceptMergeRequestWithSuccessResponse("v3", MERGE_REQUEST_ID),
+            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID));
     }
 
     @Test
@@ -84,21 +76,19 @@ public class GitLabAcceptMergeRequestPublisherTest {
     }
 
     private void publish(AbstractBuild build) throws InterruptedException, IOException {
-        GitLabAcceptMergeRequestPublisher publisher = spy(new GitLabAcceptMergeRequestPublisher());
-        doReturn(PROJECT_ID).when(publisher).getProjectId(build);
-        doReturn(MERGE_REQUEST_ID).when(publisher).getMergeRequestId(build);
+        GitLabAcceptMergeRequestPublisher publisher = preparePublisher(new GitLabAcceptMergeRequestPublisher(), build);
         publisher.perform(build, null, listener);
     }
 
-    private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(String apiLevel) throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel);
+    private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(String apiLevel, int mergeRequestId) throws UnsupportedEncodingException {
+        HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareAcceptMergeRequest(String apiLevel) throws UnsupportedEncodingException {
+    private HttpRequest prepareAcceptMergeRequest(String apiLevel, int mergeRequestId) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + MERGE_REQUEST_ID + "/merge")
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/merge")
                 .withMethod("PUT")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withBody("merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&should_remove_source_branch=false");

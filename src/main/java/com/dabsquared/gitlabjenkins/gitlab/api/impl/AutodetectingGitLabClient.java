@@ -1,16 +1,9 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 import javax.ws.rs.NotFoundException;
@@ -18,17 +11,17 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 
-final class AutodetectingGitlabApi implements GitLabApi {
+final class AutodetectingGitLabClient implements GitLabClient {
     private final Iterable<GitLabClientBuilder> builders;
     private final String url;
     private final String token;
     private final boolean ignoreCertificateErrors;
     private final int connectionTimeout;
     private final int readTimeout;
-    private GitLabApi delegate;
+    private GitLabClient delegate;
 
 
-    AutodetectingGitlabApi(Iterable<GitLabClientBuilder> builders, String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+    AutodetectingGitLabClient(Iterable<GitLabClientBuilder> builders, String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         this.builders = builders;
         this.url = url;
         this.token = token;
@@ -38,12 +31,17 @@ final class AutodetectingGitlabApi implements GitLabApi {
     }
 
     @Override
+    public String getHostUrl() {
+        return url;
+    }
+
+    @Override
     public Project createProject(final String projectName) {
         return execute(
             new GitLabOperation<Project>() {
                 @Override
-                Project execute(GitLabApi api) {
-                    return api.createProject(projectName);
+                Project execute(GitLabClient client) {
+                    return client.createProject(projectName);
                 }
             });
     }
@@ -53,8 +51,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<MergeRequest>() {
                 @Override
-                MergeRequest execute(GitLabApi api) {
-                    return api.createMergeRequest(projectId, sourceBranch, targetBranch, title);
+                MergeRequest execute(GitLabClient client) {
+                    return client.createMergeRequest(projectId, sourceBranch, targetBranch, title);
                 }
             });
     }
@@ -64,8 +62,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<Project>() {
                 @Override
-                Project execute(GitLabApi api) {
-                    return api.getProject(projectName);
+                Project execute(GitLabClient client) {
+                    return client.getProject(projectName);
                 }
             });
     }
@@ -75,8 +73,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<Project>() {
                 @Override
-                Project execute(GitLabApi api) {
-                    return api.updateProject(projectId, name, path);
+                Project execute(GitLabClient client) {
+                    return client.updateProject(projectId, name, path);
                 }
             });
     }
@@ -86,8 +84,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.deleteProject(projectId);
+                Void execute(GitLabClient client) {
+                    client.deleteProject(projectId);
                     return null;
                 }
             });
@@ -98,8 +96,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
+                Void execute(GitLabClient client) {
+                    client.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
                     return null;
                 }
             });
@@ -110,8 +108,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
+                Void execute(GitLabClient client) {
+                    client.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
                     return null;
                 }
             });
@@ -122,8 +120,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
+                Void execute(GitLabClient client) {
+                    client.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
                     return null;
                 }
             });
@@ -134,35 +132,37 @@ final class AutodetectingGitlabApi implements GitLabApi {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.getCommit(projectId, sha);
+                Void execute(GitLabClient client) {
+                    client.getCommit(projectId, sha);
                     return null;
                 }
             });
     }
 
     @Override
-    public void acceptMergeRequest(final Integer projectId, final Integer mergeRequestId, final String mergeCommitMessage, final boolean shouldRemoveSourceBranch) {
+    public void acceptMergeRequest(final MergeRequest mr, final String mergeCommitMessage, final boolean shouldRemoveSourceBranch) {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.acceptMergeRequest(projectId, mergeRequestId, mergeCommitMessage, shouldRemoveSourceBranch);
+                Void execute(GitLabClient client) {
+                    client.acceptMergeRequest(mr, mergeCommitMessage, shouldRemoveSourceBranch);
                     return null;
                 }
-            });
+            }
+        );
     }
 
     @Override
-    public void createMergeRequestNote(final Integer projectId, final Integer mergeRequestId, final String body) {
+    public void createMergeRequestNote(final MergeRequest mr, final String body) {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.createMergeRequestNote(projectId, mergeRequestId, body);
+                Void execute(GitLabClient client) {
+                    client.createMergeRequestNote(mr, body);
                     return null;
                 }
-            });
+            }
+        );
     }
 
     @Override
@@ -170,8 +170,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<List<MergeRequest>>() {
                 @Override
-                List<MergeRequest> execute(GitLabApi api) {
-                    return api.getMergeRequests(projectId, state, page, perPage);
+                List<MergeRequest> execute(GitLabClient client) {
+                    return client.getMergeRequests(projectId, state, page, perPage);
                 }
             });
     }
@@ -181,8 +181,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<List<Branch>>() {
                 @Override
-                List<Branch> execute(GitLabApi api) {
-                    return api.getBranches(projectId);
+                List<Branch> execute(GitLabClient client) {
+                    return client.getBranches(projectId);
                 }
             });
     }
@@ -192,8 +192,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<Branch>() {
                 @Override
-                Branch execute(GitLabApi api) {
-                    return api.getBranch(projectId, branch);
+                Branch execute(GitLabClient client) {
+                    return client.getBranch(projectId, branch);
                 }
             });
     }
@@ -203,8 +203,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         execute(
             new GitLabOperation<Void>() {
                 @Override
-                Void execute(GitLabApi api) {
-                    api.headCurrentUser();
+                Void execute(GitLabClient client) {
+                    client.headCurrentUser();
                     return null;
                 }
             });
@@ -215,8 +215,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<User>() {
                 @Override
-                User execute(GitLabApi api) {
-                    return api.getCurrentUser();
+                User execute(GitLabClient client) {
+                    return client.getCurrentUser();
                 }
             });
     }
@@ -226,8 +226,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<User>() {
                 @Override
-                User execute(GitLabApi api) {
-                    return api.addUser(email, username, name, password);
+                User execute(GitLabClient client) {
+                    return client.addUser(email, username, name, password);
                 }
             });
     }
@@ -237,8 +237,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<User>() {
                 @Override
-                User execute(GitLabApi api) {
-                    return api.updateUser(userId, email, username, name, password);
+                User execute(GitLabClient client) {
+                    return client.updateUser(userId, email, username, name, password);
                 }
             });
     }
@@ -248,8 +248,8 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<List<Label>>() {
                 @Override
-                List<Label> execute(GitLabApi api) {
-                    return api.getLabels(projectId);
+                List<Label> execute(GitLabClient client) {
+                    return client.getLabels(projectId);
                 }
             });
     }
@@ -259,14 +259,14 @@ final class AutodetectingGitlabApi implements GitLabApi {
         return execute(
             new GitLabOperation<List<Pipeline>>() {
                 @Override
-                List<Pipeline> execute(GitLabApi api) {
-                    return api.getPipelines(projectName);
+                List<Pipeline> execute(GitLabClient client) {
+                    return client.getPipelines(projectName);
                 }
             });
     }
 
 
-    private GitLabApi delegate(boolean reset) {
+    private GitLabClient delegate(boolean reset) {
         if (reset || delegate == null) {
             delegate = autodetectOrDie();
         }
@@ -316,6 +316,6 @@ final class AutodetectingGitlabApi implements GitLabApi {
         }
 
 
-        abstract R execute(GitLabApi api);
+        abstract R execute(GitLabClient client);
     }
 }

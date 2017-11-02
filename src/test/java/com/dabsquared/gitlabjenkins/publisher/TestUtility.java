@@ -11,6 +11,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -35,9 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 final class TestUtility {
@@ -47,6 +46,7 @@ final class TestUtility {
     static final int BUILD_NUMBER = 1;
     static final int PROJECT_ID = 3;
     static final int MERGE_REQUEST_ID = 1;
+    static final int MERGE_REQUEST_IID = 2;
 
     private static final String API_TOKEN = "secret";
 
@@ -101,6 +101,13 @@ final class TestUtility {
     static String formatNote(AbstractBuild build, String note) {
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
         return MessageFormat.format(note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
+    }
+
+    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build) {
+        P spyPublisher = spy(publisher);
+        MergeRequest mergeRequest = new MergeRequest(MERGE_REQUEST_ID, MERGE_REQUEST_IID, "", "", "", PROJECT_ID, PROJECT_ID, "", "");
+        doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
+        return spyPublisher;
     }
 
     private TestUtility() { /* contains only static utility-methods */ }

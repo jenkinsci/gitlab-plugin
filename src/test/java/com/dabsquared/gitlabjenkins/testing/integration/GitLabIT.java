@@ -137,7 +137,7 @@ public class GitLabIT {
         project.addTrigger(trigger);
         trigger.start(project, true);
 
-        gitlab.createMergeRequestNote(gitlabData.getLeft(), mr.getId(), "this is a test note");
+        gitlab.createMergeRequestNote(mr, "this is a test note");
 
         buildTriggered.block(20000);
         assertThat(buildTriggered.isSignaled(), is(true));

@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.service;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,17 +22,14 @@ public class GitLabProjectLabelsServiceTest {
 
     private GitLabProjectLabelsService labelsService;
 
-    private GitLabApiStub apiStub;
-    private GitLabClient gitlabClient;
+    private GitLabClientStub clientStub;
 
     @Before
     public void setUp() throws IOException {
-        apiStub = new GitLabApiStub();
-        apiStub.addLabels("groupOne/A", convert(asList("label1", "label2")));
-        apiStub.addLabels("groupOne/B", convert(LABELS_PROJECT_B));
+        clientStub = new GitLabClientStub();
+        clientStub.addLabels("groupOne/A", convert(asList("label1", "label2")));
+        clientStub.addLabels("groupOne/B", convert(LABELS_PROJECT_B));
 
-        gitlabClient = new GitLabClient("", apiStub);
-        
         // never expire cache for tests
         labelsService = new GitLabProjectLabelsService();
     }
@@ -41,7 +37,7 @@ public class GitLabProjectLabelsServiceTest {
     @Test
     public void shouldReturnLabelsFromGitlabApi() {
         // when
-        List<String> actualLabels = labelsService.getLabels(gitlabClient, "git@git.example.com:groupOne/B.git");
+        List<String> actualLabels = labelsService.getLabels(clientStub, "git@git.example.com:groupOne/B.git");
 
         // then
         assertThat(actualLabels, is(LABELS_PROJECT_B));
@@ -50,11 +46,11 @@ public class GitLabProjectLabelsServiceTest {
     @Test
     public void shouldNotMakeUnnecessaryCallsToGitlabApiGetLabels() {
         // when
-        labelsService.getLabels(gitlabClient, "git@git.example.com:groupOne/A.git");
+        labelsService.getLabels(clientStub, "git@git.example.com:groupOne/A.git");
 
         // then
-        assertEquals(1, apiStub.calls("groupOne/A", Label.class));
-        assertEquals(0, apiStub.calls("groupOne/B", Label.class));
+        assertEquals(1, clientStub.calls("groupOne/A", Label.class));
+        assertEquals(0, clientStub.calls("groupOne/B", Label.class));
     }
 
     private List<Label> convert(List<String> labels) {

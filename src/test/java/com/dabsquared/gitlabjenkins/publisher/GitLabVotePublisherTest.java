@@ -20,15 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.formatNote;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -68,43 +60,41 @@ public class GitLabVotePublisherTest {
 
     @Test
     public void success_v3() throws IOException, InterruptedException {
-        performAndVerify(TestUtility.mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", ":+1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", MERGE_REQUEST_ID, ":+1:");
     }
 
     @Test
     public void success_v4() throws IOException, InterruptedException {
-        performAndVerify(TestUtility.mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", ":+1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", MERGE_REQUEST_IID, ":+1:");
     }
 
     @Test
     public void failed_v3() throws IOException, InterruptedException {
-        performAndVerify(TestUtility.mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", ":-1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", MERGE_REQUEST_ID, ":-1:");
     }
 
     @Test
     public void failed_v4() throws IOException, InterruptedException {
-        performAndVerify(TestUtility.mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", ":-1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, ":-1:");
     }
 
 
-    private void performAndVerify(AbstractBuild build, String apiLevel, String defaultNote) throws InterruptedException, IOException {
-        GitLabVotePublisher publisher = spy(new GitLabVotePublisher());
-        doReturn(PROJECT_ID).when(publisher).getProjectId(build);
-        doReturn(MERGE_REQUEST_ID).when(publisher).getMergeRequestId(build);
+    private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote) throws InterruptedException, IOException {
+        GitLabVotePublisher publisher = preparePublisher(new GitLabVotePublisher(), build);
         publisher.perform(build, null, listener);
 
-        mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, apiLevel, defaultNote));
+        mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, apiLevel, mergeRequestId, defaultNote));
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(AbstractBuild build, String apiLevel, String body) throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, formatNote(build, body));
+    private HttpRequest prepareSendMessageWithSuccessResponse(AbstractBuild build, String apiLevel, int mergeRequestId, String body) throws UnsupportedEncodingException {
+        HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, formatNote(build, body));
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String body) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + MERGE_REQUEST_ID + "/notes")
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withBody("body=" + URLEncoder.encode(body, "UTF-8"));

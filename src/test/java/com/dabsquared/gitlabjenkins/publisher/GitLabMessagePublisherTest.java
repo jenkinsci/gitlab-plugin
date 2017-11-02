@@ -29,20 +29,10 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.BUILD_NUMBER;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.BUILD_URL;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.formatNote;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -88,7 +78,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v3", defaultNote));
+            prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -98,7 +88,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
 
@@ -109,18 +99,18 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v3", defaultNote));
+            prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
     }
 
 
     @Test
-    public void success() throws IOException, InterruptedException {
+    public void success_v4() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
         String defaultNote = formatNote(build, ":white_check_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -137,7 +127,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v3", defaultNote));
+            prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -147,7 +137,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
 
@@ -158,7 +148,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, true, false, false, false, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -168,7 +158,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, true, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -178,7 +168,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, true, false, false, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -188,7 +178,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, true, false, false,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -198,7 +188,7 @@ public class GitLabMessagePublisherTest {
 
         performAndVerify(
             build, defaultNote, false, false, false, false, true,
-            prepareSendMessageWithSuccessResponse("v4", defaultNote));
+            prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
     }
 
     private void performAndVerify(AbstractBuild build, String note, boolean onlyForFailure, boolean replaceSuccessNote, boolean replaceFailureNote, boolean replaceAbortNote, boolean replaceUnstableNote, HttpRequest... requests) throws InterruptedException, IOException {
@@ -206,9 +196,7 @@ public class GitLabMessagePublisherTest {
         String failureNoteText = replaceFailureNote ? note : null;
         String abortNoteText = replaceAbortNote ? note : null;
         String unstableNoteText = replaceUnstableNote ? note : null;
-        GitLabMessagePublisher publisher = spy(new GitLabMessagePublisher(onlyForFailure, replaceSuccessNote, replaceFailureNote, replaceAbortNote, replaceUnstableNote, successNoteText, failureNoteText, abortNoteText, unstableNoteText));
-        doReturn(PROJECT_ID).when(publisher).getProjectId(build);
-        doReturn(MERGE_REQUEST_ID).when(publisher).getMergeRequestId(build);
+        GitLabMessagePublisher publisher = preparePublisher(new GitLabMessagePublisher(onlyForFailure, replaceSuccessNote, replaceFailureNote, replaceAbortNote, replaceUnstableNote, successNoteText, failureNoteText, abortNoteText, unstableNoteText), build);
         publisher.perform(build, null, listener);
 
         if (requests.length > 0) {
@@ -218,15 +206,15 @@ public class GitLabMessagePublisherTest {
         }
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(String apiLevel, String body) throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, body);
+    private HttpRequest prepareSendMessageWithSuccessResponse(String apiLevel, int mergeRequestId, String body) throws UnsupportedEncodingException {
+        HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, body);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String body) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + MERGE_REQUEST_ID + "/notes")
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withBody("body=" + URLEncoder.encode(body, "UTF-8"));
