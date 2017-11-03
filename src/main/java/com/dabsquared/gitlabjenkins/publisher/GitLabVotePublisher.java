@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.publisher;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -45,12 +46,12 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, Integer projectId, Integer mergeRequestId) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest) {
         try {
-            client.createMergeRequestNote(projectId, mergeRequestId, getResultIcon(build.getResult()));
+            client.createMergeRequestNote(mergeRequest, getResultIcon(build.getResult()));
         } catch (WebApplicationException | ProcessingException e) {
-            listener.getLogger().printf("Failed to add vote on Merge Request for project '%s': %s%n", projectId, e.getMessage());
-            LOGGER.log(Level.SEVERE, String.format("Failed to add vote on Merge Request for project '%s'", projectId), e);
+            listener.getLogger().printf("Failed to add vote on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
+            LOGGER.log(Level.SEVERE, String.format("Failed to add vote on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
         }
     }
 

@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
@@ -26,7 +25,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabApiProxy.ID;
  * @author Robin Müller
  */
 @Path("/api/" + ID)
-interface V4GitLabApiProxy extends GitLabApi {
+interface V4GitLabApiProxy extends GitLabApiProxy {
     String ID = "v4";
 
     @POST

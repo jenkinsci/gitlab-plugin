@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.service;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,16 +21,14 @@ public class GitLabProjectBranchesServiceTest {
 
     private GitLabProjectBranchesService branchesService;
 
-    private GitLabApiStub apiStub;
-    private GitLabClient gitlabClient;
+    private GitLabClientStub clientStub;
 
     @Before
     public void setUp() throws IOException {
-        apiStub = new GitLabApiStub();
-        apiStub.addBranches("groupOne/A", convert(asList("master", "A-branch-1")));
-        apiStub.addBranches("groupOne/B", convert(BRANCH_NAMES_PROJECT_B));
+        clientStub = new GitLabClientStub();
+        clientStub.addBranches("groupOne/A", convert(asList("master", "A-branch-1")));
+        clientStub.addBranches("groupOne/B", convert(BRANCH_NAMES_PROJECT_B));
 
-        gitlabClient = new GitLabClient("", apiStub);
 
         // never expire cache for tests
         branchesService = new GitLabProjectBranchesService();
@@ -40,7 +37,7 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldReturnBranchNamesFromGitlabApi() {
         // when
-        List<String> actualBranchNames = branchesService.getBranches(gitlabClient, "git@git.example.com:groupOne/B.git");
+        List<String> actualBranchNames = branchesService.getBranches(clientStub, "git@git.example.com:groupOne/B.git");
 
         // then
         assertThat(actualBranchNames, is(BRANCH_NAMES_PROJECT_B));
@@ -49,11 +46,11 @@ public class GitLabProjectBranchesServiceTest {
     @Test
     public void shouldNotMakeUnnecessaryCallsToGitlabApiGetBranches() {
         // when
-        branchesService.getBranches(gitlabClient, "git@git.example.com:groupOne/A.git");
+        branchesService.getBranches(clientStub, "git@git.example.com:groupOne/A.git");
 
         // then
-        assertEquals(1, apiStub.calls("groupOne/A", Branch.class));
-        assertEquals(0, apiStub.calls("groupOne/B", Branch.class));
+        assertEquals(1, clientStub.calls("groupOne/A", Branch.class));
+        assertEquals(0, clientStub.calls("groupOne/B", Branch.class));
     }
 
     private List<Branch> convert(List<String> branchNames) {

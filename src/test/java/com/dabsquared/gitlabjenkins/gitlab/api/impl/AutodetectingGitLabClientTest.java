@@ -1,14 +1,12 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
-import com.trilead.ssh2.util.TimeoutService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
-import org.mockserver.matchers.Times;
 import org.mockserver.model.HttpRequest;
 
 import java.io.IOException;
@@ -21,7 +19,7 @@ import static org.junit.Assert.fail;
 import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.matchers.Times.once;
 
-public class AutodetectingGitLabApiTest {
+public class AutodetectingGitLabClientTest {
     @Rule
     public MockServerRule mockServer = new MockServerRule(this);
     @Rule
@@ -29,7 +27,7 @@ public class AutodetectingGitLabApiTest {
     private MockServerClient mockServerClient;
     private String gitLabUrl;
     private GitLabClientBuilder clientBuilder;
-    private AutodetectingGitlabApi api;
+    private AutodetectingGitLabClient api;
     private HttpRequest v3Request;
     private HttpRequest v4Request;
 
@@ -39,7 +37,7 @@ public class AutodetectingGitLabApiTest {
         addGitLabApiToken();
 
         List<GitLabClientBuilder> builders = Arrays.<GitLabClientBuilder>asList(new V3GitLabClientBuilder(), new V4GitLabClientBuilder());
-        api = new AutodetectingGitlabApi(builders, gitLabUrl, API_TOKEN, true, 10, 10);
+        api = new AutodetectingGitLabClient(builders, gitLabUrl, API_TOKEN, true, 10, 10);
 
         v3Request = versionRequest(V3GitLabApiProxy.ID);
         v4Request = versionRequest(V4GitLabApiProxy.ID);

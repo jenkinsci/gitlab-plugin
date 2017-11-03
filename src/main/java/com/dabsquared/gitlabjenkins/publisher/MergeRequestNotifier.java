@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.publisher;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -32,10 +33,10 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
             listener.getLogger().println("No GitLab connection configured");
             return true;
         }
-        Integer projectId = getProjectId(build);
-        Integer mergeRequestId = getMergeRequestId(build);
-        if (projectId != null && mergeRequestId != null) {
-            perform(build, listener, client, projectId, mergeRequestId);
+
+        MergeRequest mergeRequest = getMergeRequest(build);
+        if (mergeRequest != null) {
+            perform(build, listener, client, mergeRequest);
         }
         return true;
     }
@@ -50,15 +51,11 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
         };
     }
 
-    protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, Integer projectId, Integer mergeRequestId);
+    protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest);
 
-    Integer getProjectId(Run<?, ?> build) {
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getData().getTargetProjectId();
-    }
+    MergeRequest getMergeRequest(Run<?, ?> run) {
+        GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+        return cause == null ? null : cause.getData().getMergeRequest();
 
-    Integer getMergeRequestId(Run<?, ?> build) {
-        GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getData().getMergeRequestId();
     }
 }

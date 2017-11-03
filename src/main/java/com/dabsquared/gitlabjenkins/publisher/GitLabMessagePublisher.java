@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.publisher;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractProject;
@@ -108,14 +109,14 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, Integer projectId, Integer mergeRequestId) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest) {
         try {
             if (!onlyForFailure || build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
-                client.createMergeRequestNote(projectId, mergeRequestId, getNote(build, listener));
+                client.createMergeRequestNote(mergeRequest, getNote(build, listener));
             }
         } catch (WebApplicationException | ProcessingException e) {
-            listener.getLogger().printf("Failed to add comment on Merge Request for project '%s': %s%n", projectId, e.getMessage());
-            LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", projectId), e);
+            listener.getLogger().printf("Failed to add comment on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
+            LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
         }
     }
 
