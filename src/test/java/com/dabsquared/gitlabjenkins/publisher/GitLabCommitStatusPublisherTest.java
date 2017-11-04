@@ -299,7 +299,7 @@ public class GitLabCommitStatusPublisherTest {
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, "UTF-8") + "/statuses/" + SHA1)
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url=" + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8"));
+                .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url=" + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8") + "&description=" + URLEncoder.encode(state.name(), "UTF-8"));
     }
 
     private HttpRequest prepareExistsCommitWithSuccessResponse(String apiLevel, String projectName) throws UnsupportedEncodingException {

@@ -72,7 +72,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                     String targetUrl =
                         Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
                     client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
-                        BuildState.pending, buildStatusUpdate.getRef(), publisher.getName(), targetUrl, null);
+                        BuildState.pending, buildStatusUpdate.getRef(), publisher.getName(), targetUrl, BuildState.pending.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
