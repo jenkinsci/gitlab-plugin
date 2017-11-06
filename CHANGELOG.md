@@ -4,6 +4,8 @@ ChangeLog
 =====================
 * #648: Fix NPE when an MR build is triggered
 * #650: Improve GitLab API version autodetection
+* #653: Fix unsupported date format in MR trigger
+* #656: Fix 404 error when making v4 API calls for MRs
 
 1.5.0
 =====================
