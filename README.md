@@ -325,9 +325,9 @@ These include:
 * gitlabMergeRequestTitle
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
-* gitMergeRequestState
-* gitMergedByUser
-* gitMergeRequestAssignee
+* gitlabMergeRequestState
+* gitlabMergedByUser
+* gitlabMergeRequestAssignee
 * gitlabMergeRequestLastCommit
 * gitlabMergeRequestTargetProjectId
 * gitlabTargetBranch
