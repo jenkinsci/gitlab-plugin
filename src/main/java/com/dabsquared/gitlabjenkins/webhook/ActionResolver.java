@@ -106,13 +106,18 @@ public class ActionResolver {
         String tokenHeader = request.getHeader("X-Gitlab-Token");
         switch (eventHeader) {
             case "Merge Request Hook":
+            case "Merge Requests Event":
                 return new MergeRequestBuildAction(project, getRequestBody(request), tokenHeader);
             case "Push Hook":
+            case "Push Event":
             case "Tag Push Hook":
+            case "Tag Push Event":
                 return new PushBuildAction(project, getRequestBody(request), tokenHeader);
             case "Note Hook":
+            case "Note Event":
                 return new NoteBuildAction(project, getRequestBody(request), tokenHeader);
             case "Pipeline Hook":
+            case "Pipeline Event":
                 return new PipelineBuildAction(project, getRequestBody(request), tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
