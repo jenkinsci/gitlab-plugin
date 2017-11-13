@@ -96,7 +96,7 @@ checkout changelog: true, poll: true, scm: [
 ```
 
 ### Git configuration for Multibranch Pipeline/Workflow jobs
-**Note:** none of the GitLab environment variables are available for mulitbranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
+**Note:** none of the GitLab environment variables are available for multibranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
 Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; Merge Request hooks are ignored.
 
 1. Click **Add source**
@@ -223,7 +223,7 @@ To use GitLab with Flexible Publish, configure the *Post-build Actions* as follo
 
 ## Gitlab Configuration
 
-GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
+GitLab 8.1 has implemented a commit status API, you need an extra post-build step to support commit status.
 
 * In GitLab go to your repository's project *Settings*
     * Click on *Web Hooks*
