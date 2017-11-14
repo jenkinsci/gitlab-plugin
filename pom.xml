@@ -150,13 +150,6 @@
   </build>
 
   <dependencies>
-
-    <dependency>
-      <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>display-url-api</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-
     <!-- Jenkins dependencies -->
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -199,6 +192,12 @@
         <artifactId>matrix-project</artifactId>
         <version>1.10</version>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>display-url-api</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
 
     <!-- REST client dependencies -->
     <dependency>
