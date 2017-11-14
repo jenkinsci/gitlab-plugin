@@ -17,6 +17,7 @@ import jenkins.scm.api.SCMRevisionAction;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
@@ -96,7 +97,7 @@ public class CommitStatusUpdater {
     }
 
     private static String getBuildUrl(Run<?, ?> build) {
-        return Jenkins.getInstance().getRootUrl() + build.getUrl();
+        return DisplayURLProvider.get().getRunURL(build);
     }
 
     private static List<GitLabBranchBuild> retrieveGitlabProjectIds(Run<?, ?> build, EnvVars environment) {
