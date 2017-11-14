@@ -2,6 +2,8 @@ postgresql:
   container_name: docker-postgresql
   restart: always
   image: sameersbn/postgresql:9.5-1
+  ports:
+    - "5432:5432"
   environment:
     - DB_USER=gitlab
     - DB_PASS=password
@@ -12,7 +14,7 @@ postgresql:
 gitlab:
   container_name: docker-gitlab
   restart: always
-  image: sameersbn/gitlab:9.4.1
+  image: sameersbn/gitlab:8.17.4
   links:
     - redis:redisio
     - postgresql:postgresql

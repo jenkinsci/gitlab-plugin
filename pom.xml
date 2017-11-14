@@ -14,7 +14,7 @@
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.4.8-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -300,7 +300,8 @@
     <profile>
       <id>integration-test</id>
       <properties>
-        <gitlab.version>8.5.8</gitlab.version>
+        <gitlab.version>8.17.4</gitlab.version>
+        <postgres.version>9.5-1</postgres.version>
       </properties>
       <build>
         <plugins>
@@ -371,7 +372,7 @@
               <verbose>true</verbose>
               <images>
                 <image>
-                  <name>sameersbn/postgresql:9.4-15</name>
+                  <name>sameersbn/postgresql:${postgres.version}</name>
                   <alias>it-gitlab-postgres</alias>
                   <run>
                     <namingStrategy>alias</namingStrategy>
@@ -379,6 +380,7 @@
                       <DB_NAME>gitlabhq_production</DB_NAME>
                       <DB_USER>gitlab</DB_USER>
                       <DB_PASS>password</DB_PASS>
+                      <DB_EXTENSION>pg_trgm</DB_EXTENSION>
                     </env>
                     <ports>
                       <port>${postgres.port}:5432</port>
@@ -394,7 +396,9 @@
                 </image>
                 <image>
                   <name>sameersbn/gitlab:${gitlab.version}</name>
+                  <alias>it-gitlab-gitlab</alias>
                   <run>
+                    <namingStrategy>alias</namingStrategy>
                     <links>
                       <link>it-gitlab-postgres:postgresql</link>
                       <link>it-gitlab-redis:redisio</link>
@@ -404,9 +408,15 @@
                       <port>${gitlab.ssh.port}:22</port>
                     </ports>
                     <env>
+                      <DEBUG>false</DEBUG>
+                      <TZ>Asia/Kolkata</TZ>
+                      <GITLAB_TIMEZONE>Kolkata</GITLAB_TIMEZONE>
                       <GITLAB_PORT>${gitlab.http.port}</GITLAB_PORT>
                       <GITLAB_SSH_PORT>${gitlab.ssh.port}</GITLAB_SSH_PORT>
-                      <GITLAB_SECRETS_DB_KEY_BASE>abc123</GITLAB_SECRETS_DB_KEY_BASE>
+                      <GITLAB_SECRETS_DB_KEY_BASE>long-and-random-alpha-numeric-string</GITLAB_SECRETS_DB_KEY_BASE>
+                      <GITLAB_SECRETS_SECRET_KEY_BASE>long-and-random-alphanumeric-string</GITLAB_SECRETS_SECRET_KEY_BASE>
+                      <GITLAB_SECRETS_OTP_KEY_BASE>long-and-random-alpha-numeric-string</GITLAB_SECRETS_OTP_KEY_BASE>
+                      <GITLAB_HOST>172.17.0.1</GITLAB_HOST>
                     </env>
                     <wait>
                       <http>

@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.markup.EscapedMarkupFormatter;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -298,6 +299,15 @@ public final class CauseData {
 		return mergeRequestAssignee;
 	}
 
+	public MergeRequest getMergeRequest() {
+        if (mergeRequestId == null) {
+            return null;
+        }
+
+        return new MergeRequest(mergeRequestId, mergeRequestIid, sourceBranch, targetBranch, mergeRequestTitle,
+            sourceProjectId, targetProjectId, mergeRequestDescription, mergeRequestState);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -447,12 +457,12 @@ public final class CauseData {
         PUSH {
             @Override
             String getShortDescription(CauseData data) {
-                String pushedBy = data.getTriggeredByUser();
-                if (pushedBy == null) {
-                    return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
-                } else {
-                    return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
-                }
+                return getShortDescriptionPush(data);
+            }
+        }, TAG_PUSH {
+            @Override
+            String getShortDescription(CauseData data) {
+                return getShortDescriptionPush(data);
             }
         }, MERGE {
             @Override
@@ -499,6 +509,15 @@ public final class CauseData {
                 }
         };
 
+        private static String getShortDescriptionPush(CauseData data) {
+            String pushedBy = data.getTriggeredByUser();
+            if (pushedBy == null) {
+                return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
+            } else {
+                return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
+            }
+        }
+
         abstract String getShortDescription(CauseData data);
     }
 
@@ -506,7 +525,7 @@ public final class CauseData {
 
         private final Map<K, V> map;
 
-        public MapWrapper(Map<K, V> map) {
+        MapWrapper(Map<K, V> map) {
             this.map = map;
         }
 
@@ -520,7 +539,7 @@ public final class CauseData {
             return map.entrySet();
         }
 
-        public void pufIfNotNull(K key, V value) {
+        void pufIfNotNull(K key, V value) {
             if (value != null) {
                 map.put(key, value);
             }

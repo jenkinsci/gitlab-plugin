@@ -42,6 +42,7 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition < 8.8.3. Subsequent versions work fine.
 * Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
 * [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
+* [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
 
 # Supported GitLab versions
 
@@ -82,10 +83,20 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
 
 * Use the Snippet generator, General SCM step, to generate sample Groovy code for the git checkout/merge etc.
-* Example that performs merge before build: `checkout changelog: true, poll: true, scm: [$class: 'GitSCM', branches: [[name: "origin/${env.gitlabSourceBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]], submoduleCfg: [], userRemoteConfigs: [[name: 'origin', url: 'git@mygitlab:foo/testrepo.git']]]`
+* Example that performs merge before build:
+```
+checkout changelog: true, poll: true, scm: [
+    $class: 'GitSCM',
+    branches: [[name: "origin/${env.gitlabSourceBranch}"]],
+    doGenerateSubmoduleConfigurations: false,
+    extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]],
+    submoduleCfg: [],
+    userRemoteConfigs: [[name: 'origin', url: 'git@gitlab.example.com:foo/testrepo.git']]
+    ]
+```
 
 ### Git configuration for Multibranch Pipeline/Workflow jobs
-**Note:** none of the GitLab environment variables are available for mulitbranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
+**Note:** none of the GitLab environment variables are available for multibranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
 Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; Merge Request hooks are ignored.
 
 1. Click **Add source**
@@ -163,6 +174,38 @@ pipeline {
 }
 ```
 
+If you make use of the "Merge When Pipeline Succeeds" option for Merge Requests in GitLab, and your Declarative Pipeline jobs have more than one stage, you will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
+
+```
+    options {
+      gitLabConnection('<your-gitlab-connection-name')
+      gitlabBuilds(builds: ['build', 'test', 'deploy'])
+    }
+```
+
+If you want to configure any of the optional job triggers that the plugin supports in a Declarative build, use a `triggers` block. The full list of configurable trigger options is as follows:
+
+```
+triggers {
+    gitlab(
+      triggerOnPush: false,
+      triggerOnMergeRequest: true, triggerOpenMergeRequestOnPush: "never",
+      triggerOnNoteRequest: true,
+      noteRegex: "Jenkins please retry a build",
+      skipWorkInProgressMergeRequest: true,
+      ciSkip: false,
+      setBuildDescription: true,
+      addNoteOnMergeRequest: true,
+      addCiMessage: true,
+      addVoteOnMergeRequest: true,
+      acceptMergeRequestOnSuccess: false,
+      branchFilterType: "NameBasedFilter",
+      includeBranchesSpec: "release/qat",
+      excludeBranchesSpec: "",
+      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+}
+```
+
 ### Matrix/Multi-configuration jobs
 
 This plugin can be used on Matrix/Multi-configuration jobs together with the [Flexible Publish](https://plugins.jenkins.io/flexible-publish) plugin which allows to run publishers after all axis jobs are done.
@@ -180,7 +223,7 @@ To use GitLab with Flexible Publish, configure the *Post-build Actions* as follo
 
 ## Gitlab Configuration
 
-GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
+GitLab 8.1 has implemented a commit status API, you need an extra post-build step to support commit status.
 
 * In GitLab go to your repository's project *Settings*
     * Click on *Web Hooks*
@@ -282,9 +325,9 @@ These include:
 * gitlabMergeRequestTitle
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
-* gitMergeRequestState
-* gitMergedByUser
-* gitMergeRequestAssignee
+* gitlabMergeRequestState
+* gitlabMergedByUser
+* gitlabMergeRequestAssignee
 * gitlabMergeRequestLastCommit
 * gitlabMergeRequestTargetProjectId
 * gitlabTargetBranch
@@ -323,12 +366,4 @@ See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md
 
 # Release Workflow
 
-GitLab-Plugin admins should adhere to the following rules when releasing a new plugin version:
-
-* Ensure codestyle conformity
-* Run unit tests
-* Run manual tests on both, oldest and latest GitLab versions
-* Update documentation
-* Create change log
-* Create release tag
-* Create release notes (on github)
+To perform a full plugin release, maintainers can run ``mvn release:prepare release:perform`` To release a snapshot, e.g. with a bug fix for users to test, just run ``mvn deploy``
