@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
@@ -16,7 +17,8 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,18 +33,24 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerImpl.class.getName());
 
-    private final List<State> allowedStates;
+    private final Collection<State> allowedStates;
     private final boolean skipWorkInProgressMergeRequest;
+	private final Collection<Action> allowedActions;
 
-    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest) {
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates,  boolean skipWorkInProgressMergeRequest) {
+    	this(allowedStates, EnumSet.noneOf(Action.class),skipWorkInProgressMergeRequest);
+    }
+	
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest) {
         this.allowedStates = allowedStates;
+        this.allowedActions = allowedActions;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
     }
 
     @Override
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
-        if (allowedStates.contains(objectAttributes.getState())
+        if (isAllowedByConfig(objectAttributes)
             && isLastCommitNotYetBuild(job, hook)
             && isNotSkipWorkInProgressMergeRequest(objectAttributes)
             && mergeRequestLabelFilter.isMergeRequestAllowed(hook.getObjectAttributes().getLabels())) {
@@ -129,6 +137,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
+        if (objectAttributes.getAction() == Action.approved) {
+            LOGGER.log(Level.FINEST, "Skipping LastCommitNotYetBuild check for approve action");
+        	return true;
+        }
+        
         if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
             Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getLastCommit().getId());
             if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
@@ -144,6 +157,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return cause == null ? null : cause.getData().getTargetBranch();
     }
 
+	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
+		return allowedStates.contains(objectAttributes.getState()) 
+        	|| allowedActions.contains(objectAttributes.getAction());
+	}    
+    
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {
         Boolean workInProgress = objectAttributes.getWorkInProgress();
         if (skipWorkInProgressMergeRequest && workInProgress != null && workInProgress) {
