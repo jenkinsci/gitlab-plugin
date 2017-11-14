@@ -192,6 +192,11 @@
         <artifactId>matrix-project</artifactId>
         <version>1.10</version>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>branch-api</artifactId>
+      <version>2.0.11</version>
+    </dependency>
 
     <!-- REST client dependencies -->
     <dependency>
