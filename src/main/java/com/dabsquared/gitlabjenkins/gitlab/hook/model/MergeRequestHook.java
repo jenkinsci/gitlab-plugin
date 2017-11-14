@@ -13,6 +13,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class MergeRequestHook extends WebHook {
 
     private User user;
+    private User assignee;
     private Project project;
     private MergeRequestObjectAttributes objectAttributes;
 
@@ -40,7 +41,15 @@ public class MergeRequestHook extends WebHook {
         this.objectAttributes = objectAttributes;
     }
 
-    @Override
+    public User getAssignee() {
+		return assignee;
+	}
+    
+	public void setAssignee(User assignee) {
+		this.assignee = assignee;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -51,6 +60,7 @@ public class MergeRequestHook extends WebHook {
         MergeRequestHook that = (MergeRequestHook) o;
         return new EqualsBuilder()
                 .append(user, that.user)
+                .append(assignee, that.assignee)
                 .append(project, that.project)
                 .append(objectAttributes, that.objectAttributes)
                 .isEquals();
@@ -60,6 +70,7 @@ public class MergeRequestHook extends WebHook {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(user)
+                .append(assignee)
                 .append(project)
                 .append(objectAttributes)
                 .toHashCode();
@@ -69,6 +80,7 @@ public class MergeRequestHook extends WebHook {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("user", user)
+                .append("assignee", assignee)
                 .append("project", project)
                 .append("objectAttributes", objectAttributes)
                 .toString();

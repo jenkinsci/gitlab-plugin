@@ -1,10 +1,12 @@
 package com.dabsquared.gitlabjenkins;
 
+
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabAcceptMergeRequestPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
@@ -20,6 +22,7 @@ import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterConfig
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
@@ -60,6 +63,7 @@ import java.security.SecureRandom;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandlerFactory.newNoteHookTriggerHandler;
+import static com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandlerFactory.newPipelineHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory.newPushHookTriggerHandler;
 
 
@@ -74,6 +78,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     private boolean triggerOnPush = true;
     private boolean triggerOnMergeRequest = true;
+    private boolean triggerOnPipelineEvent = false;
+    private boolean triggerOnAcceptedMergeRequest = false;
+    private boolean triggerOnClosedMergeRequest = false;
     private final TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean triggerOnNoteRequest = true;
     private final String noteRegex;
@@ -96,23 +103,28 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient PushHookTriggerHandler pushHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
+    private transient PipelineHookTriggerHandler pipelineTriggerHandler;
     private transient boolean acceptMergeRequestOnSuccess;
     private transient MergeRequestLabelFilter mergeRequestLabelFilter;
 
 
     @DataBoundConstructor
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
-                             boolean triggerOnNoteRequest, String noteRegex, boolean skipWorkInProgressMergeRequest, boolean ciSkip,
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest, 
+    						 TriggerOpenMergeRequest triggerOpenMergeRequestOnPush, boolean triggerOnNoteRequest, String noteRegex, 
+    						 boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex,
-                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken) {
+                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
+        this.triggerOnAcceptedMergeRequest = triggerOnAcceptedMergeRequest;
+        this.triggerOnClosedMergeRequest = triggerOnClosedMergeRequest;
         this.triggerOnNoteRequest = triggerOnNoteRequest;
         this.noteRegex = noteRegex;
         this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+        this.triggerOnPipelineEvent = triggerOnPipelineEvent;
         this.ciSkip = ciSkip;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
         this.setBuildDescription = setBuildDescription;
@@ -137,9 +149,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
         if (!oldConfig.jobsMigrated) {
             GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            gitLabConfig.getConnections().add(new GitLabConnection(oldConfig.gitlabHostUrl,
+            gitLabConfig.getConnections().add(new GitLabConnection(
+                oldConfig.gitlabHostUrl,
                     oldConfig.gitlabHostUrl,
                     oldConfig.gitlabApiToken,
+                "autodetect",
                     oldConfig.ignoreCertificateErrors,
                     10,
                     10));
@@ -188,9 +202,19 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return triggerOnMergeRequest;
     }
 
+    public boolean isTriggerOnAcceptedMergeRequest() {
+        return triggerOnAcceptedMergeRequest;
+    }
+
+    public boolean isTriggerOnClosedMergeRequest() {
+        return triggerOnClosedMergeRequest;
+    }
+
     public boolean getTriggerOnNoteRequest() {
         return triggerOnNoteRequest;
     }
+
+    public boolean getTriggerOnPipelineEvent() { return triggerOnPipelineEvent; }
 
     public String getNoteRegex() {
         return this.noteRegex == null ? "" : this.noteRegex;
@@ -251,10 +275,18 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
+    // executes when the Trigger receives a pipeline event
+    public void onPost(final PipelineHook hook) {
+        pipelineTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+    }
+
     private void initializeTriggerHandler() {
-        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
+		mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest,
+				triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequestOnPush,
+				skipWorkInProgressMergeRequest);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
         pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
+        pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
     }
 
     private void initializeBranchFilter() {
@@ -403,6 +435,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             RANDOM.nextBytes(random);
             String secretToken = Util.toHexString(random);
             response.setHeader("script", "document.getElementById('secretToken').value='" + secretToken + "'");
+        }
+
+        public void doClearSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse response) {;
+            response.setHeader("script", "document.getElementById('secretToken').value=''");
         }
     }
 }

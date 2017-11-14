@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
@@ -37,7 +38,7 @@ public class GitLabProjectLabelsService {
         return instance;
     }
 
-    public List<String> getLabels(GitLabApi client, String sourceRepositoryString) {
+    public List<String> getLabels(GitLabClient client, String sourceRepositoryString) {
         synchronized (projectLabelsCache) {
             try {
                 return projectLabelsCache.get(sourceRepositoryString, new LabelNamesLoader(client, sourceRepositoryString));
@@ -54,10 +55,10 @@ public class GitLabProjectLabelsService {
     }
 
     private static class LabelNamesLoader implements Callable<List<String>> {
-        private final GitLabApi client;
+        private final GitLabClient client;
         private final String sourceRepository;
 
-        private LabelNamesLoader(GitLabApi client, String sourceRepository) {
+        private LabelNamesLoader(GitLabClient client, String sourceRepository) {
             this.client = client;
             this.sourceRepository = sourceRepository;
         }
@@ -65,7 +66,7 @@ public class GitLabProjectLabelsService {
         @Override
         public List<String> call() throws Exception {
             List<String> result = new ArrayList<>();
-            String projectId = ProjectIdUtil.retrieveProjectId(sourceRepository);
+            String projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             for (Label label : client.getLabels(projectId)) {
                 result.add(label.getName());
             }

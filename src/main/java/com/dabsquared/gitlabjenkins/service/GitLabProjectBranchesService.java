@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
@@ -37,7 +38,7 @@ public class GitLabProjectBranchesService {
         return gitLabProjectBranchesService;
     }
 
-    public List<String> getBranches(GitLabApi client, String sourceRepositoryString) {
+    public List<String> getBranches(GitLabClient client, String sourceRepositoryString) {
         synchronized (projectBranchCache) {
             try {
                 return projectBranchCache.get(sourceRepositoryString, new BranchNamesLoader(client, sourceRepositoryString));
@@ -54,10 +55,10 @@ public class GitLabProjectBranchesService {
     }
 
     private static class BranchNamesLoader implements Callable<List<String>> {
-        private final GitLabApi client;
+        private final GitLabClient client;
         private final String sourceRepository;
 
-        private BranchNamesLoader(GitLabApi client, String sourceRepository) {
+        private BranchNamesLoader(GitLabClient client, String sourceRepository) {
             this.client = client;
             this.sourceRepository = sourceRepository;
         }
@@ -65,7 +66,7 @@ public class GitLabProjectBranchesService {
         @Override
         public List<String> call() throws Exception {
             List<String> result = new ArrayList<>();
-            String projectId = ProjectIdUtil.retrieveProjectId(sourceRepository);
+            String projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             for (Branch branch : client.getBranches(projectId)) {
                 result.add(branch.getName());
             }

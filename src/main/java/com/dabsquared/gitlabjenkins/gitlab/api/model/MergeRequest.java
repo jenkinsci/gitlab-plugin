@@ -13,7 +13,6 @@ import java.util.List;
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class MergeRequest {
-
     private Integer id;
     private Integer iid;
     private String sourceBranch;
@@ -32,6 +31,22 @@ public class MergeRequest {
     private Boolean workInProgress;
     private Boolean mergeWhenBuildSucceeds;
     private String mergeStatus;
+
+    public MergeRequest() { /* default-constructor for Resteasy-based-api-proxies */ }
+
+    public MergeRequest(int id, int iid, String sourceBranch, String targetBranch, String title,
+                        int sourceProjectId, int targetProjectId,
+                        String description, String mergeStatus) {
+        this.id = id;
+        this.iid= iid;
+        this.sourceBranch = sourceBranch;
+        this.targetBranch = targetBranch;
+        this.title = title;
+        this.sourceProjectId = sourceProjectId;
+        this.projectId = targetProjectId;
+        this.description = description;
+        this.mergeStatus = mergeStatus;
+    }
 
     public Integer getId() {
         return id;

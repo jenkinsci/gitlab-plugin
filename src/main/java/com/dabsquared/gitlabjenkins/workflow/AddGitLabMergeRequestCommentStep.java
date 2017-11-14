@@ -1,7 +1,8 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -60,18 +61,17 @@ public class AddGitLabMergeRequestCommentStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause != null) {
-                Integer projectId = cause.getData().getTargetProjectId();
-                Integer mergeRequestId = cause.getData().getMergeRequestId();
-                if (projectId != null && mergeRequestId != null) {
-                    GitLabApi client = getClient(run);
+                MergeRequest mergeRequest = cause.getData().getMergeRequest();
+                if (mergeRequest != null) {
+                    GitLabClient client = getClient(run);
                     if (client == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            client.createMergeRequestNote(projectId, mergeRequestId, step.getComment());
+                            client.createMergeRequestNote(mergeRequest, step.getComment());
                         } catch (WebApplicationException | ProcessingException e) {
-                            printf("Failed to add comment on Merge Request for project '%s': %s%n", projectId, e.getMessage());
-                            LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", projectId), e);
+                            printf("Failed to add comment on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
+                            LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
                         }
                     }
                 }

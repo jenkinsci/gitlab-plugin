@@ -14,7 +14,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,13 +46,6 @@ public class MergeRequestHookTriggerHandlerImplTest {
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
 
-    private MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
-
-    @Before
-    public void setup() {
-        mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false);
-    }
-
     @Test
     public void mergeRequest_ciSkip() throws IOException, InterruptedException {
         final OneShotEvent buildTriggered = new OneShotEvent();
@@ -66,6 +58,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
             }
         });
         project.setQuietPeriod(0);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
@@ -77,6 +70,45 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_build() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false);
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.opened);
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void mergeRequest_build_when_accepted() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.merged), false);
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.merged);
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void mergeRequest_build_when_closed() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.closed), false);
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.closed);
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void mergeRequest_do_not_build_when_accepted() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.updated), false);
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.merged);
+
+        assertThat(buildTriggered.isSignaled(), is(false));
+    }
+
+    @Test
+    public void mergeRequest_do_not_build_when_closed() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.updated), false);
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.closed);
+
+        assertThat(buildTriggered.isSignaled(), is(false));
+    }
+
+    private OneShotEvent doHandle(MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, State state) throws GitAPIException, IOException, InterruptedException {
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
@@ -98,40 +130,41 @@ public class MergeRequestHookTriggerHandlerImplTest {
         project.setQuietPeriod(0);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(mergeRequestObjectAttributes()
-                        .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
-                        .withState(State.opened)
-                        .withIid(1)
-                        .withTitle("test")
-                        .withTargetProjectId(1)
-                        .withSourceProjectId(1)
-                        .withSourceBranch("feature")
-                        .withTargetBranch("master")
-                        .withLastCommit(commit().withAuthor(user().withName("test").build()).withId(commit.getName()).build())
-                        .withSource(project()
-                                .withName("test")
-                                .withNamespace("test-namespace")
-                                .withHomepage("https://gitlab.org/test")
-                                .withUrl("git@gitlab.org:test.git")
-                                .withSshUrl("git@gitlab.org:test.git")
-                                .withHttpUrl("https://gitlab.org/test.git")
-                                .build())
-                        .withTarget(project()
-                                .withName("test")
-                                .withNamespace("test-namespace")
-                                .withHomepage("https://gitlab.org/test")
-                                .withUrl("git@gitlab.org:test.git")
-                                .withSshUrl("git@gitlab.org:test.git")
-                                .withHttpUrl("https://gitlab.org/test.git")
-                                .build())
+                    .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
+                    .withState(state)
+                    .withIid(1)
+                    .withTitle("test")
+                    .withTargetProjectId(1)
+                    .withSourceProjectId(1)
+                    .withSourceBranch("feature")
+                    .withTargetBranch("master")
+                    .withLastCommit(commit().withAuthor(user().withName("test").build()).withId(commit.getName()).build())
+                    .withSource(project()
+                        .withName("test")
+                        .withNamespace("test-namespace")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withSshUrl("git@gitlab.org:test.git")
+                        .withHttpUrl("https://gitlab.org/test.git")
                         .build())
+                    .withTarget(project()
+                        .withName("test")
+                        .withNamespace("test-namespace")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withSshUrl("git@gitlab.org:test.git")
+                        .withHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                    .build())
                 .withProject(project()
                     .withWebUrl("https://gitlab.org/test.git")
                     .build()
                 )
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-                                              newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
-        assertThat(buildTriggered.isSignaled(), is(true));
+        return buildTriggered;
     }
+
 }

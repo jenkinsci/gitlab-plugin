@@ -42,8 +42,9 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
 
     @Override
     protected CauseData retrieveCauseData(PushHook hook) {
+        CauseData.ActionType actionType = hook.getObjectKind().equals("tag_push") ? CauseData.ActionType.TAG_PUSH : CauseData.ActionType.PUSH;
         return causeData()
-                .withActionType(CauseData.ActionType.PUSH)
+                .withActionType(actionType)
                 .withSourceProjectId(hook.getProjectId())
                 .withTargetProjectId(hook.getProjectId())
                 .withBranch(getTargetBranch(hook))
@@ -60,6 +61,10 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
                 .withMergeRequestDescription("")
                 .withMergeRequestId(null)
                 .withMergeRequestIid(null)
+                .withMergeRequestState(null)
+                .withMergedByUser("")
+                .withMergeRequestAssignee("")
+                .withMergeRequestTargetProjectId(null)
                 .withTargetBranch(getTargetBranch(hook))
                 .withTargetRepoName("")
                 .withTargetNamespace("")

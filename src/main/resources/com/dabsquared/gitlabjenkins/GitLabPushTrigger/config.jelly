@@ -6,8 +6,14 @@
       <f:entry title="Push Events" field="triggerOnPush">
         <f:checkbox default="true"/>
       </f:entry>
-      <f:entry title="Merge Request Events" field="triggerOnMergeRequest">
+      <f:entry title="Opened Merge Request Events" field="triggerOnMergeRequest">
         <f:checkbox default="true"/>
+      </f:entry>
+      <f:entry title="Accepted Merge Request Events" field="triggerOnAcceptedMergeRequest">
+        <f:checkbox default="false"/>
+      </f:entry>
+      <f:entry title="Closed Merge Request Events" field="triggerOnClosedMergeRequest">
+        <f:checkbox default="false"/>
       </f:entry>
       <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
         <f:select/>
@@ -15,7 +21,7 @@
       <f:entry title="Comments" field="triggerOnNoteRequest">
         <f:checkbox default="true"/>
       </f:entry>
-      <f:entry title="Comment for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
+      <f:entry title="Comment (regex) for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
         <f:textbox field="noteRegex" default="Jenkins please retry a build"/>
       </f:entry>
     </table>
@@ -29,6 +35,9 @@
     </f:entry>
     <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
       <f:checkbox default="true"/>
+    </f:entry>
+    <f:entry title="Build on successful pipeline events" field="triggerOnPipelineEvent">
+      <f:checkbox default="false"/>
     </f:entry>
 
     <f:entry title="Allowed branches">
@@ -73,6 +82,7 @@
       <table>
         <f:readOnlyTextbox field="secretToken" id="secretToken"/>
         <f:validateButton title="${%Generate}" method="generateSecretToken"/>
+        <f:validateButton title="${%Clear}" method="clearSecretToken"/>
       </table>
     </f:entry>
   </f:advanced>

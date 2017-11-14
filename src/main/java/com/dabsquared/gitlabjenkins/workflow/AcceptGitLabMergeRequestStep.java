@@ -1,16 +1,13 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -60,18 +57,17 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause != null) {
-                Integer projectId = cause.getData().getTargetProjectId();
-                Integer mergeRequestId = cause.getData().getMergeRequestId();
-                if (projectId != null && mergeRequestId != null) {
-                    GitLabApi client = getClient(run);
+                MergeRequest mergeRequest = cause.getData().getMergeRequest();
+                if (mergeRequest != null) {
+                    GitLabClient client = getClient(run);
                     if (client == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            client.acceptMergeRequest(projectId, mergeRequestId, step.mergeCommitMessage, false);
+                            client.acceptMergeRequest(mergeRequest, step.mergeCommitMessage, false);
                         } catch (WebApplicationException | ProcessingException e) {
-                            printf("Failed to accept merge request for project '%s': %s%n", projectId, e.getMessage());
-                            LOGGER.log(Level.SEVERE, String.format("Failed to accept merge request for project '%s'", projectId), e);
+                            printf("Failed to accept merge request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
+                            LOGGER.log(Level.SEVERE, String.format("Failed to accept merge request for project '%s'", mergeRequest.getProjectId()), e);
                         }
                     }
                 }

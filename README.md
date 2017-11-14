@@ -10,18 +10,12 @@
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
-- [Quick test environment setup using Docker](#quick-test-environment-setup-using-docker)
-    - [Access GitLab](#access-gitlab)
-    - [Access Jenkins](#access-jenkins)
+- [Testing With Docker](#testing-with-docker)
 - [Release Workflow](#release-workflow)
 
 # Introduction
 
-This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and report build status back to GitLab.
-
-# Seeking maintainers
-
-We are seeking new maintainers for the plugin! The existing codebase is clean and well-tested thanks to a lot of hard work done by former lead maintainer [coder-hugo,](https://github.com/coder-hugo) but he is no longer using GitLab and does not have spare time to keep working on the plugin. We're looking for an active GitLab user and experienced Java programmer to take over as lead maintainer. The main work necessary at this point is resolving minor bugs and maintaining support for new versions of GitLab. If you're interested, reach out to [Owen](https://github.com/omehegan) - email address in the project's commit log.
+This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and/or after an existing merge request was merged/closed, and report build status back to GitLab.
 
 # User support
 
@@ -45,13 +39,14 @@ You can also try chatting with us in the #gitlab-plugin channel on the Freenode 
 # Known bugs/issues
 
 This is not an exhaustive list of issues, but rather a place for us to note significant bugs that may impact your use of the plugin in certain circumstances. For most things, please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section and open a new one if you don't find anything.
-* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition < 8.8.3, due to a bug on their side.
+* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition < 8.8.3. Subsequent versions work fine.
 * Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
 * [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
+* [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
 
 # Supported GitLab versions
 
-* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab commit status API which supports with external CI services like Jenkins
+* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab [commit status API](https://docs.gitlab.com/ce/api/commits.html#commit-status) which supports with external CI services like Jenkins
 * Versions older than 8.1.x may work but are no longer officially supported
 
 # Configuring access to GitLab
@@ -65,15 +60,15 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 1. In the *Source Code Management* section:
     1. Click *Git*
     2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
-      * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
+       * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
         ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
     3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
-      * Click *Add Repository* to specify the merge request source repository.  Then specify:
-        * *URL*: ``${gitlabSourceRepoURL}``
-        * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
+       * Click *Add Repository* to specify the merge request source repository.  Then specify:
+         * *URL*: ``${gitlabSourceRepoURL}``
+         * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
-      * For single-repository workflows: ``origin/${gitlabSourceBranch}``
-      * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
+       * For single-repository workflows: ``origin/${gitlabSourceBranch}``
+       * For forked repository workflows: ``merge-requests/${gitlabMergeRequestId}``
     5. In *Additional Behaviours*:
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
@@ -88,10 +83,20 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
 
 * Use the Snippet generator, General SCM step, to generate sample Groovy code for the git checkout/merge etc.
-* Example that performs merge before build: `checkout changelog: true, poll: true, scm: [$class: 'GitSCM', branches: [[name: "origin/${env.gitlabSourceBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]], submoduleCfg: [], userRemoteConfigs: [[name: 'origin', url: 'git@mygitlab:foo/testrepo.git']]]`
+* Example that performs merge before build:
+```
+checkout changelog: true, poll: true, scm: [
+    $class: 'GitSCM',
+    branches: [[name: "origin/${env.gitlabSourceBranch}"]],
+    doGenerateSubmoduleConfigurations: false,
+    extensions: [[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: "${env.gitlabTargetBranch}"]]],
+    submoduleCfg: [],
+    userRemoteConfigs: [[name: 'origin', url: 'git@gitlab.example.com:foo/testrepo.git']]
+    ]
+```
 
 ### Git configuration for Multibranch Pipeline/Workflow jobs
-**Note:** none of the GitLab environment variables are available for mulitbranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
+**Note:** none of the GitLab environment variables are available for multibranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
 Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; Merge Request hooks are ignored.
 
 1. Click **Add source**
@@ -125,12 +130,15 @@ node {
     * Select *Build when a change is pushed to GitLab*
     * Make a note of the *GitLab CI Service URL* appearing on the same line with *Build when a change is
       pushed to GitLab*.  You will later use this URL to define a GitLab web hook.
-    * Use the check boxes to trigger builds on *Push Events* and/or *Merge Request Events*
+    * Use the check boxes to trigger builds on *Push Events* and/or *Created Merge Request Events* and/or *Accepted Merge Request Events* and/or *Closed Merge Request Events*
     * Optionally use *Rebuild open Merge Requests* to enable re-building open merge requests after a
       push to the source branch
     * If you selected *Rebuild open Merge Requests* other than *None*, check *Comments*, and specify the
       *Comment for triggering a build*.  A new build will be triggered when this phrase appears in a
       commit comment.  In addition to a literal phrase, you can also specify a Java regular expression.
+    * You can use *Build on successful pipeline events* to trigger on a successful pipeline run in Gitlab. Note that 
+      this build trigger will only trigger a build if the commit is not already built and does not set the Gitlab status.
+      Otherwise you might end up in a loop.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
 
@@ -141,9 +149,16 @@ The plugin supports the new [declarative pipeline syntax](https://github.com/jen
 ```
 pipeline {
     agent any
+    post {
+      failure {
+        updateGitlabCommitStatus name: 'build', state: 'failed'
+      }
+      success {
+        updateGitlabCommitStatus name: 'build', state: 'success'
+      }
+    }
     options {
       gitLabConnection('<your-gitlab-connection-name')
-      gitlabCommitStatus(name: 'jenkins')
     }
     triggers {
         gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
@@ -159,12 +174,56 @@ pipeline {
 }
 ```
 
+If you make use of the "Merge When Pipeline Succeeds" option for Merge Requests in GitLab, and your Declarative Pipeline jobs have more than one stage, you will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
+
+```
+    options {
+      gitLabConnection('<your-gitlab-connection-name')
+      gitlabBuilds(builds: ['build', 'test', 'deploy'])
+    }
+```
+
+If you want to configure any of the optional job triggers that the plugin supports in a Declarative build, use a `triggers` block. The full list of configurable trigger options is as follows:
+
+```
+triggers {
+    gitlab(
+      triggerOnPush: false,
+      triggerOnMergeRequest: true, triggerOpenMergeRequestOnPush: "never",
+      triggerOnNoteRequest: true,
+      noteRegex: "Jenkins please retry a build",
+      skipWorkInProgressMergeRequest: true,
+      ciSkip: false,
+      setBuildDescription: true,
+      addNoteOnMergeRequest: true,
+      addCiMessage: true,
+      addVoteOnMergeRequest: true,
+      acceptMergeRequestOnSuccess: false,
+      branchFilterType: "NameBasedFilter",
+      includeBranchesSpec: "release/qat",
+      excludeBranchesSpec: "",
+      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+}
+```
+
 ### Matrix/Multi-configuration jobs
-**The Jenkins Matrix/Multi-configuration job type is not supported.**
+
+This plugin can be used on Matrix/Multi-configuration jobs together with the [Flexible Publish](https://plugins.jenkins.io/flexible-publish) plugin which allows to run publishers after all axis jobs are done.
+
+To use GitLab with Flexible Publish, configure the *Post-build Actions* as follows:
+
+1. Add a *Flexible publish* action
+2. In the *Flexible publish* section:
+      1. *Add conditional action*
+      2. In the *Conditional action* section:
+          1. Set *Run?* to *Never*
+          2. Select *Condition for Matrix Aggregation*
+          3. Set *Run on Parent?* to *Always*
+          4. Add GitLab actions as required
 
 ## Gitlab Configuration
 
-GitLab 8.1 has implemented a commit status api, you need an extra post-build step to support commit status.
+GitLab 8.1 has implemented a commit status API, you need an extra post-build step to support commit status.
 
 * In GitLab go to your repository's project *Settings*
     * Click on *Web Hooks*
@@ -266,8 +325,11 @@ These include:
 * gitlabMergeRequestTitle
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
-* gitlabMergeRequestIid
+* gitlabMergeRequestState
+* gitlabMergedByUser
+* gitlabMergeRequestAssignee
 * gitlabMergeRequestLastCommit
+* gitlabMergeRequestTargetProjectId
 * gitlabTargetBranch
 * gitlabTargetRepoName
 * gitlabTargetNamespace
@@ -298,38 +360,10 @@ Before submitting your change make sure that:
 * you updated the README
 * you have used findbugs to see if you haven't introduced any new warnings.
 
-# Quick test environment setup using Docker
+# Testing With Docker
 
-In order to test the plugin on different versions of `GitLab` and `Jenkins` you may want to use `Docker` containers.
-
-A example docker-compose file is available at `gitlab-plugin/src/docker` which allows to set up instances of the latest `GitLab` and `Jenkins` versions.
-
-To start the containers, run below command from the `docker` folder:
-
-```bash
-docker-compose up -d
-```
-
-## Access GitLab
-
-To access `GitLab`, point your browser to `http://172.17.0.1:10080` and set a password for the `root` user account.
-
-For more information on the supported `GitLab` versions and how to configure the containers, visit Sameer Naik's github page at https://github.com/sameersbn/docker-gitlab.
-
-## Access Jenkins
-
-To see `Jenkins`, point your browser to `http://localhost:8080`.
-
-For more information on the supported `Jenkins` tags and how to configure the containers, visit https://hub.docker.com/r/library/jenkins.
+See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md
 
 # Release Workflow
 
-GitLab-Plugin admins should adhere to the following rules when releasing a new plugin version:
-
-* Ensure codestyle conformity
-* Run unit tests
-* Run manual tests on both, oldest and latest GitLab versions
-* Update documentation
-* Create change log
-* Create release tag
-* Create release notes (on github)
+To perform a full plugin release, maintainers can run ``mvn release:prepare release:perform`` To release a snapshot, e.g. with a bug fix for users to test, just run ``mvn deploy``

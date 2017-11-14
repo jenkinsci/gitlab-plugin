@@ -1,10 +1,11 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
@@ -20,8 +21,10 @@ import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
+import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
+import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import org.eclipse.jgit.transport.URIish;
 
 import javax.ws.rs.ProcessingException;
@@ -51,27 +54,34 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     @Override
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-        try {
-            if (job instanceof AbstractProject<?, ?>) {
-                AbstractProject<?, ?> project = (AbstractProject<?, ?>) job;
+    	try {
+            if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+                ParameterizedJob project = (ParameterizedJobMixIn.ParameterizedJob) job;
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
-                final GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                Integer projectId = hook.getProjectId();
-                if (property != null && property.getClient() != null && projectId != null && trigger != null) {
-                    GitLabApi client = property.getClient();
-                    for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
-                        if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                            handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                for (Trigger t : project.getTriggers().values()) {
+                	if (t instanceof GitLabPushTrigger) {
+                		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
+                        Integer projectId = hook.getProjectId();
+                        if (property != null && property.getClient() != null && projectId != null && trigger != null) {
+                            GitLabClient client = property.getClient();
+                            for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
+                                if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
+                                	handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                }
+                            }
                         }
-                    }
+                	}
                 }
+                
+            } else {
+            	LOGGER.log(Level.FINE, "Not a ParameterizedJob: {0}",LoggerUtil.toArray(job.getClass().getName()));
             }
         } catch (WebApplicationException | ProcessingException e) {
             LOGGER.log(Level.WARNING, "Failed to communicate with gitlab server to determine if this is an update for a merge request: " + e.getMessage(), e);
         }
     }
 
-    private List<MergeRequest> getOpenMergeRequests(GitLabApi client, String projectId) {
+    private List<MergeRequest> getOpenMergeRequests(GitLabClient client, String projectId) {
         List<MergeRequest> result = new ArrayList<>();
         Integer page = 1;
         do {
@@ -82,7 +92,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         return result;
     }
 
-    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabApi client, MergeRequest mergeRequest) {
+    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabClient client, MergeRequest mergeRequest) {
         if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
             LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
@@ -96,7 +106,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
         String targetBranch = mergeRequest.getTargetBranch();
         String sourceBranch = mergeRequest.getSourceBranch();
-        if (targetBranch != null && branchFilter.isBranchAllowed(targetBranch) && hook.getRef().endsWith(targetBranch) && sourceBranch != null) {
+        if (targetBranch != null && branchFilter.isBranchAllowed(targetBranch) && hook.getRef().equals("refs/heads/"+targetBranch) && sourceBranch != null) {
             LOGGER.log(Level.INFO, "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
@@ -130,6 +140,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withMergeRequestDescription(mergeRequest.getDescription())
                 .withMergeRequestId(mergeRequest.getId())
                 .withMergeRequestIid(mergeRequest.getIid())
+                .withMergeRequestTargetProjectId(mergeRequest.getTargetProjectId())
                 .withTargetBranch(mergeRequest.getTargetBranch())
                 .withTargetRepoName(hook.getRepository().getName())
                 .withTargetNamespace(hook.getProject().getNamespace())
@@ -145,7 +156,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         if (job instanceof AbstractProject && ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class) != null) {
             GitLabCommitStatusPublisher publisher =
                 (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
-            GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
+            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
                 String targetUrl = Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
                 client.changeBuildStatus(projectId, commit, BuildState.pending, ref, publisher.getName(), targetUrl, null);
