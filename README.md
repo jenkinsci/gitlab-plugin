@@ -68,7 +68,7 @@ To enable this functionality, a user should be set up on GitLab, with GitLab 'De
          * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
     4. In *Branch Specifier* enter:
        * For single-repository workflows: ``origin/${gitlabSourceBranch}``
-       * For forked repository workflows: ``merge-requests/${gitlabMergeRequestId}``
+       * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
     5. In *Additional Behaviours*:
         * Click the *Add* drop-down button
         * Select *Merge before build* from the drop-down
@@ -325,6 +325,7 @@ These include:
 * gitlabMergeRequestTitle
 * gitlabMergeRequestDescription
 * gitlabMergeRequestId
+* gitlabMergeRequestIid
 * gitlabMergeRequestState
 * gitlabMergedByUser
 * gitlabMergeRequestAssignee
