@@ -79,7 +79,7 @@
   </pluginRepositories>
 
   <build>
-    <defaultGoal>clean package</defaultGoal>    
+    <defaultGoal>clean install</defaultGoal>    
     <directory>${project.basedir}/target</directory>
     <outputDirectory>${project.build.directory}/classes</outputDirectory>
     <finalName>${project.artifactId}-${project.version}</finalName>
