@@ -8,6 +8,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.git.Revision;
@@ -18,6 +19,7 @@ import jenkins.scm.api.SCMRevisionAction;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hamcrest.CoreMatchers;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -98,7 +100,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_v3() throws UnsupportedEncodingException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, null, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", BuildState.running);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, BuildState.running);
 
         prebuildAndVerify(build, listener, requests);
     }
@@ -106,7 +108,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_v4() throws UnsupportedEncodingException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.running);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.running);
 
         prebuildAndVerify(build, listener, requests);
     }
@@ -115,7 +117,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void runningWithLibrary() throws UnsupportedEncodingException {
         AbstractBuild build = mockBuildWithLibrary(GITLAB_CONNECTION_V4, null, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.running);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.running);
 
         prebuildAndVerify(build, listener, requests);
     }
@@ -127,7 +129,7 @@ public class GitLabCommitStatusPublisherTest {
         HttpRequest[] requests = new HttpRequest[] {
             prepareGetProjectResponse("test/project.test"),
             prepareExistsCommitWithSuccessResponse("v4", String.valueOf(PROJECT_ID)),
-            prepareUpdateCommitStatusWithSuccessResponse("v4", String.valueOf(PROJECT_ID), BuildState.running)
+            prepareUpdateCommitStatusWithSuccessResponse("v4", String.valueOf(PROJECT_ID), build, BuildState.running)
         };
 
         prebuildAndVerify(build, listener, requests);
@@ -136,7 +138,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void canceled_v3() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.ABORTED, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", BuildState.canceled);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, BuildState.canceled);
 
         performAndVerify(build, false, requests);
     }
@@ -144,7 +146,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void canceled_v4() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.canceled);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.canceled);
 
         performAndVerify(build, false, requests);
     }
@@ -152,7 +154,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void canceledWithLibrary() throws IOException, InterruptedException {
         AbstractBuild build = mockBuildWithLibrary(GITLAB_CONNECTION_V4, Result.ABORTED, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.canceled);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.canceled);
 
         performAndVerify(build, false, requests);
     }
@@ -160,7 +162,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void success_v3() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.SUCCESS, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", BuildState.success);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, BuildState.success);
 
         performAndVerify(build, false, requests);
     }
@@ -169,7 +171,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void success_v4() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.success);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.success);
 
         performAndVerify(build, false, requests);
     }
@@ -177,7 +179,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void successWithLibrary() throws IOException, InterruptedException {
         AbstractBuild build = mockBuildWithLibrary(GITLAB_CONNECTION_V4, Result.SUCCESS, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.success);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.success);
 
         performAndVerify(build, false, requests);
     }
@@ -185,7 +187,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void failed_v3() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.FAILURE, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", BuildState.failed);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, BuildState.failed);
 
         performAndVerify(build, false, requests);
     }
@@ -193,7 +195,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void failed_v4() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.FAILURE, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", BuildState.failed);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, BuildState.failed);
 
         performAndVerify(build, false, requests);
     }
@@ -201,7 +203,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void failedWithLibrary() throws IOException, InterruptedException {
         AbstractBuild build = mockBuildWithLibrary(GITLAB_CONNECTION_V4, Result.FAILURE, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.failed);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.failed);
 
         performAndVerify(build, false, requests);
     }
@@ -209,7 +211,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void unstable() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.UNSTABLE, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.failed);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.failed);
 
         performAndVerify(build, false, requests);
     }
@@ -217,7 +219,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void unstableWithLibrary() throws IOException, InterruptedException {
         AbstractBuild build = mockBuildWithLibrary(GITLAB_CONNECTION_V4, Result.UNSTABLE, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.failed);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.failed);
 
         performAndVerify(build, false, requests);
     }
@@ -225,7 +227,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void unstableAsSuccess() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.UNSTABLE, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", BuildState.success);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.success);
 
         performAndVerify(build, true, requests);
     }
@@ -235,9 +237,9 @@ public class GitLabCommitStatusPublisherTest {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project-1.git", "test/project-2.git");
         HttpRequest[] requests = new HttpRequest[] {
             prepareExistsCommitWithSuccessResponse("v4", "test/project-1"),
-            prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project-1", BuildState.running),
+            prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project-1", build, BuildState.running),
             prepareExistsCommitWithSuccessResponse("v4", "test/project-2"),
-            prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project-2", BuildState.running)
+            prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project-2", build, BuildState.running)
         };
 
         prebuildAndVerify(build, listener, requests);
@@ -246,7 +248,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_commitNotExists() throws UnsupportedEncodingException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project.git");
-        HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project", BuildState.running);
+        HttpRequest updateCommitStatus = prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project", build, BuildState.running);
 
         new GitLabCommitStatusPublisher("jenkins", false).prebuild(build, listener);
         mockServerClient.verify(updateCommitStatus, VerificationTimes.exactly(0));
@@ -261,7 +263,7 @@ public class GitLabCommitStatusPublisherTest {
         when(buildListener.getLogger()).thenReturn(new PrintStream(outputStream));
 
         prepareExistsCommitWithSuccessResponse("v4", "test/project");
-        HttpRequest updateCommitStatus = prepareUpdateCommitStatus("v4", "test/project", BuildState.running);
+        HttpRequest updateCommitStatus = prepareUpdateCommitStatus("v4", "test/project", build, BuildState.running);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(403));
 
         prebuildAndVerify(build, buildListener, updateCommitStatus);
@@ -278,26 +280,26 @@ public class GitLabCommitStatusPublisherTest {
         mockServerClient.verify(requests);
     }
 
-    private HttpRequest[] prepareCheckCommitAndUpdateStatusRequests(String apiLevel, BuildState buildState) throws UnsupportedEncodingException {
+    private HttpRequest[] prepareCheckCommitAndUpdateStatusRequests(String apiLevel, Run<?, ?> build, BuildState buildState) throws UnsupportedEncodingException {
         return new HttpRequest[] {
             prepareExistsCommitWithSuccessResponse(apiLevel, "test/project"),
-            prepareUpdateCommitStatusWithSuccessResponse(apiLevel, "test/project", buildState)
+            prepareUpdateCommitStatusWithSuccessResponse(apiLevel, "test/project", build, buildState)
         };
     }
 
-    private HttpRequest prepareUpdateCommitStatusWithSuccessResponse(String apiLevel, String projectName, BuildState state) throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareUpdateCommitStatus(apiLevel, projectName, state);
+    private HttpRequest prepareUpdateCommitStatusWithSuccessResponse(String apiLevel, String projectName, Run<?, ?> build, BuildState state) throws UnsupportedEncodingException {
+        HttpRequest updateCommitStatus = prepareUpdateCommitStatus(apiLevel, projectName, build, state);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
 
-    private HttpRequest prepareUpdateCommitStatus(final String apiLevel, String projectName, BuildState state) throws UnsupportedEncodingException {
+    private HttpRequest prepareUpdateCommitStatus(final String apiLevel, String projectName, Run<?, ?> build, BuildState state) throws UnsupportedEncodingException {
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, "UTF-8") + "/statuses/" + SHA1)
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url=" + URLEncoder.encode(jenkins.getInstance().getRootUrl() + BUILD_URL, "UTF-8"));
+                .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url=" + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8"));
     }
 
     private HttpRequest prepareExistsCommitWithSuccessResponse(String apiLevel, String projectName) throws UnsupportedEncodingException {
