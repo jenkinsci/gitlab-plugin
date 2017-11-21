@@ -44,6 +44,7 @@ public class CommitStatusUpdaterTest {
 	
 	private static final int PROJECT_ID = 1;
     private static final String BUILD_URL = "job/Test-Job";
+    private static final String BUILD_URL_REDIRECT = "display/redirect";
     private static final String STAGE = "test";
     private static final String REVISION = "1111111";
     private static final String JENKINS_URL = "https://gitlab.org/jenkins/";
@@ -116,7 +117,7 @@ public class CommitStatusUpdaterTest {
 	public void test() {
 		CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
 		
-		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, Jenkins.getInstance().getRootUrl() + BUILD_URL, null);
+		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, Jenkins.getInstance().getRootUrl() + BUILD_URL + BUILD_URL_REDIRECT, null);
 	}
 
 }
