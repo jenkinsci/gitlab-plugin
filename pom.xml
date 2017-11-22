@@ -14,7 +14,7 @@
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -192,6 +192,12 @@
         <artifactId>matrix-project</artifactId>
         <version>1.10</version>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>display-url-api</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
 
     <!-- REST client dependencies -->
     <dependency>
@@ -251,6 +257,18 @@
       <artifactId>mockito-all</artifactId>
       <version>1.9.5</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito</artifactId>
+        <version>1.6.1</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>1.6.1</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
