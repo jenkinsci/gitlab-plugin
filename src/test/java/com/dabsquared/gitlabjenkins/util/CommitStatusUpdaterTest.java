@@ -117,7 +117,7 @@ public class CommitStatusUpdaterTest {
 	public void test() {
 		CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
 		
-		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), null);
+		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
 	}
 
 }
