@@ -273,6 +273,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
     }
+    
+    @DataBoundSetter
+    public void setTriggerOnApprovedMergeRequest(boolean triggerOnApprovedMergeRequest) {
+        this.triggerOnApprovedMergeRequest = triggerOnApprovedMergeRequest;
+    }
 
     @DataBoundSetter
     public void setTriggerOnMergeRequest(boolean triggerOnMergeRequest) {
