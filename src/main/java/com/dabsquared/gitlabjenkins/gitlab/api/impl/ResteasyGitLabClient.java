@@ -96,11 +96,6 @@ final class ResteasyGitLabClient implements GitLabClient {
     }
 
     @Override
-    public void headCurrentUser() {
-        api.headCurrentUser();
-    }
-
-    @Override
     public User getCurrentUser() {
         return api.getCurrentUser();
     }
