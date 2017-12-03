@@ -22,10 +22,10 @@ import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.Trigger;
-import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -158,7 +158,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
             GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
-                String targetUrl = Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
+                String targetUrl = DisplayURLProvider.get().getJobURL(job);
                 client.changeBuildStatus(projectId, commit, BuildState.pending, ref, publisher.getName(), targetUrl, BuildState.pending.name());
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
