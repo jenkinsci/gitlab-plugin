@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
@@ -22,7 +23,9 @@ import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -60,9 +63,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract boolean isCiSkip(H hook);
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
-        if (job instanceof AbstractProject && ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class) != null) {
-            GitLabCommitStatusPublisher publisher =
-                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+        String buildName = resolvePendingBuildName(job);
+        if (StringUtils.isNotBlank(buildName)) {
             GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
             try {
@@ -72,7 +74,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                     String targetUrl =
                         Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
                     client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
-                        BuildState.pending, buildStatusUpdate.getRef(), publisher.getName(), targetUrl, BuildState.pending.name());
+                        BuildState.pending, buildStatusUpdate.getRef(), buildName, targetUrl, BuildState.pending.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
@@ -168,5 +170,21 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         public String getRef() {
             return ref;
         }
+    }
+
+    public static String resolvePendingBuildName(Job<?, ?> job) {
+        if (job instanceof AbstractProject) {
+            GitLabCommitStatusPublisher publisher =
+                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+            if (publisher != null) {
+                return publisher.getName();
+            }
+        } else if (job instanceof WorkflowJob) {
+            GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(job);
+            if (trigger != null) {
+                return trigger.getPendingBuildName();
+            }
+        }
+        return null;
     }
 }
