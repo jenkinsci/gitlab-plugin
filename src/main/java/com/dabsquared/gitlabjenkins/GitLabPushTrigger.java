@@ -82,6 +82,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private boolean triggerOnPipelineEvent = false;
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
+    private boolean triggerOnApprovedMergeRequest = false;
     private TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean triggerOnNoteRequest = true;
     private String noteRegex = "";
@@ -119,7 +120,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex,
-                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent) {
+                             MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent, 
+                             boolean triggerOnApprovedMergeRequest) {
         this.triggerOnPush = triggerOnPush;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOnAcceptedMergeRequest = triggerOnAcceptedMergeRequest;
@@ -141,6 +143,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
         this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
         this.secretToken = Secret.fromString(secretToken);
+        this.triggerOnApprovedMergeRequest = triggerOnApprovedMergeRequest;
 
         initializeTriggerHandler();
         initializeBranchFilter();
@@ -269,6 +272,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     @DataBoundSetter
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
+    }
+    
+    @DataBoundSetter
+    public void setTriggerOnApprovedMergeRequest(boolean triggerOnApprovedMergeRequest) {
+        this.triggerOnApprovedMergeRequest = triggerOnApprovedMergeRequest;
     }
 
     @DataBoundSetter
@@ -421,7 +429,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private void initializeTriggerHandler() {
 		mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest,
 				triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequestOnPush,
-				skipWorkInProgressMergeRequest);
+				skipWorkInProgressMergeRequest, triggerOnApprovedMergeRequest);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
         pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);

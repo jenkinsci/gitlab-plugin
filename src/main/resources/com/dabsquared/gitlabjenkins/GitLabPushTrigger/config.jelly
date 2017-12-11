@@ -18,6 +18,9 @@
       <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
         <f:select/>
       </f:entry>
+      <f:entry title="Approved Merge Requests (EE-only)" field="triggerOnApprovedMergeRequest">
+        <f:checkbox default="true"/>
+      </f:entry>
       <f:entry title="Comments" field="triggerOnNoteRequest">
         <f:checkbox default="true"/>
       </f:entry>
