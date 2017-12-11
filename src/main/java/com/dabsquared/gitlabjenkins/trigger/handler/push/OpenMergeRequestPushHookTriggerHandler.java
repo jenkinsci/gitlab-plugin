@@ -12,11 +12,10 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -25,6 +24,7 @@ import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
 
 import javax.ws.rs.ProcessingException;
@@ -153,13 +153,12 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
-        if (job instanceof AbstractProject && ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class) != null) {
-            GitLabCommitStatusPublisher publisher =
-                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+        String buildName = AbstractWebHookTriggerHandler.resolvePendingBuildName(job);
+        if (StringUtils.isNotBlank(buildName)) {
             GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
                 String targetUrl = Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
-                client.changeBuildStatus(projectId, commit, BuildState.pending, ref, publisher.getName(), targetUrl, BuildState.pending.name());
+                client.changeBuildStatus(projectId, commit, BuildState.pending, ref, buildName, targetUrl, BuildState.pending.name());
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
