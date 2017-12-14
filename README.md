@@ -102,7 +102,7 @@ Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeli
 1. Click **Add source**
 2. Select **Git**
 3. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
-4. Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to ``http://JENKINS_URL/project/PROJECT_NAME``
+4. Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to ``http://JENKINS_URL/project/PROJECT_NAME`` or ``http://JENKINS_URL/project/FOLDER/PROJECT_NAME`` if the project in inside a folder in Jenkins.
 
 Example `Jenkinsfile` for multibranch pipeline jobs
 ```
