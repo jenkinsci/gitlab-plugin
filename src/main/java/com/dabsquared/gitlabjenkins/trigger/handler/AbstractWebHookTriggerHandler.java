@@ -1,18 +1,16 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
-import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
-import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import hudson.model.AbstractProject;
+import com.dabsquared.gitlabjenkins.util.PendingBuildsUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -25,7 +23,6 @@ import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -52,6 +49,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         if (branchFilter.isBranchAllowed(targetBranch)) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
             setCommitStatusPendingIfNecessary(job, hook);
+            cancelPendingBuildsIfNecessary(job, hook);
             scheduleBuild(job, createActions(job, hook));
         } else {
             LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
@@ -63,7 +61,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract boolean isCiSkip(H hook);
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
-        String buildName = resolvePendingBuildName(job);
+        String buildName = PendingBuildsUtil.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
             GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
@@ -95,6 +93,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         }
         return actions.toArray(new Action[actions.size()]);
     }
+
+    protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, H hook) {}
 
     protected abstract CauseData retrieveCauseData(H hook);
 
@@ -170,21 +170,5 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         public String getRef() {
             return ref;
         }
-    }
-
-    public static String resolvePendingBuildName(Job<?, ?> job) {
-        if (job instanceof AbstractProject) {
-            GitLabCommitStatusPublisher publisher =
-                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
-            if (publisher != null) {
-                return publisher.getName();
-            }
-        } else if (job instanceof WorkflowJob) {
-            GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(job);
-            if (trigger != null) {
-                return trigger.getPendingBuildName();
-            }
-        }
-        return null;
     }
 }

@@ -21,11 +21,12 @@ public final class MergeRequestHookTriggerHandlerFactory {
     		                                                                       boolean triggerOnClosedMergeRequest,
                                                                                    TriggerOpenMergeRequest triggerOpenMergeRequest,
                                                                                    boolean skipWorkInProgressMergeRequest,
-                                                                                   boolean triggerOnApprovedMergeRequest) {
+                                                                                   boolean triggerOnApprovedMergeRequest,
+                                                                                   boolean cancelPendingBuildsOnUpdate) {
         if (triggerOnMergeRequest || triggerOnAcceptedMergeRequest || triggerOnClosedMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never || triggerOnApprovedMergeRequest) {
         	return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequest), 
             											  retrieveAllowedActions(triggerOnApprovedMergeRequest),
-                                                          skipWorkInProgressMergeRequest);
+                                                          skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
         } else {
             return new NopMergeRequestHookTriggerHandler();
         }
