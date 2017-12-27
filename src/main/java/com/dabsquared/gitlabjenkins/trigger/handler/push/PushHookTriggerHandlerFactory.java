@@ -14,10 +14,9 @@ public final class PushHookTriggerHandlerFactory {
 
     public static PushHookTriggerHandler newPushHookTriggerHandler(boolean triggerOnPush,
                                                                    TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
-                                                                   boolean skipWorkInProgressMergeRequest,
-                                                                   boolean cancelPendingBuildsOnUpdate) {
+                                                                   boolean skipWorkInProgressMergeRequest) {
         if (triggerOnPush || triggerOpenMergeRequestOnPush == TriggerOpenMergeRequest.both) {
-            return new PushHookTriggerHandlerList(retrieveHandlers(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate));
+            return new PushHookTriggerHandlerList(retrieveHandlers(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest));
         } else {
             return new NopPushHookTriggerHandler();
         }
@@ -25,14 +24,13 @@ public final class PushHookTriggerHandlerFactory {
 
     private static List<PushHookTriggerHandler> retrieveHandlers(boolean triggerOnPush,
                                                                  TriggerOpenMergeRequest triggerOpenMergeRequestOnPush,
-                                                                 boolean skipWorkInProgressMergeRequest,
-                                                                 boolean cancelPendingBuildsOnUpdate) {
+                                                                 boolean skipWorkInProgressMergeRequest) {
         List<PushHookTriggerHandler> result = new ArrayList<>();
         if (triggerOnPush) {
             result.add(new PushHookTriggerHandlerImpl());
         }
         if (triggerOpenMergeRequestOnPush == TriggerOpenMergeRequest.both) {
-            result.add(new OpenMergeRequestPushHookTriggerHandler(skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate));
+            result.add(new OpenMergeRequestPushHookTriggerHandler(skipWorkInProgressMergeRequest));
         }
         return result;
     }

@@ -15,7 +15,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import com.dabsquared.gitlabjenkins.util.PendingBuildsUtil;
+import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -47,11 +47,9 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     private final static Logger LOGGER = Logger.getLogger(OpenMergeRequestPushHookTriggerHandler.class.getName());
 
     private final boolean skipWorkInProgressMergeRequest;
-    private final boolean cancelPendingBuildsOnUpdate;
 
-    OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+    OpenMergeRequestPushHookTriggerHandler(boolean skipWorkInProgressMergeRequest) {
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
-        this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
     }
 
     @Override
@@ -74,7 +72,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                         }
                 	}
                 }
-                
+
             } else {
             	LOGGER.log(Level.FINE, "Not a ParameterizedJob: {0}",LoggerUtil.toArray(job.getClass().getName()));
             }
@@ -116,7 +114,6 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             Project project = client.getProject(mergeRequest.getSourceProjectId().toString());
             String commit = branch.getCommit().getId();
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
-            cancelPendingBuildsIfNecessary(job, mergeRequest.getSourceProjectId(), mergeRequest.getSourceBranch());
             List<Action> actions = Arrays.<Action>asList(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
                                                          new RevisionParameterAction(commit, retrieveUrIish(hook)));
             scheduleBuild(job, actions.toArray(new Action[actions.size()]));
@@ -155,7 +152,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
-        String buildName = PendingBuildsUtil.resolvePendingBuildName(job);
+        String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
             GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
@@ -165,13 +162,6 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
         }
-    }
-
-    private void cancelPendingBuildsIfNecessary(Job<?, ?> job, Integer projectId, String branch) {
-        if (!this.cancelPendingBuildsOnUpdate) {
-            return;
-        }
-        PendingBuildsUtil.cancelPendingBuilds(job, projectId, branch);
     }
 
     private void scheduleBuild(Job<?, ?> job, Action[] actions) {

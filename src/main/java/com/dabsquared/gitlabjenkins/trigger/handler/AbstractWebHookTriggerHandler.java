@@ -10,7 +10,6 @@ import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import com.dabsquared.gitlabjenkins.util.PendingBuildsUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -37,6 +36,7 @@ import java.util.logging.Logger;
 public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implements WebHookTriggerHandler<H> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
+    protected PendingBuildsHandler pendingBuildsHandler = new PendingBuildsHandler();
 
     @Override
     public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
@@ -61,7 +61,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract boolean isCiSkip(H hook);
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
-        String buildName = PendingBuildsUtil.resolvePendingBuildName(job);
+        String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
             GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
