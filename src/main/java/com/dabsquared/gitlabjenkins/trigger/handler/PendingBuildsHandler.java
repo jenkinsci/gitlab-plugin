@@ -14,6 +14,7 @@ import hudson.model.Job;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 import java.util.logging.Level;
@@ -67,10 +68,11 @@ public class PendingBuildsHandler {
         if (StringUtils.isBlank(buildName)) {
             return;
         }
+        String targetUrl = DisplayURLProvider.get().getJobURL(job);
         GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
         try {
             client.changeBuildStatus(causeData.getSourceProjectId(), causeData.getLastCommit(), BuildState.canceled,
-                causeData.getSourceBranch(), buildName, null, BuildState.canceled.name());
+                causeData.getSourceBranch(), buildName, targetUrl, BuildState.canceled.name());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
         }

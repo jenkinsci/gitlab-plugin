@@ -103,8 +103,10 @@ public class PendingBuildsHandlerTest {
         gitLabPushTrigger.onPost(mergeRequestHook(1, "anotherBranch", "commit4"));
         gitLabPushTrigger.onPost(mergeRequestHook(2, "sourceBranch", "commit5"));
 
-        verify(gitLabClient).changeBuildStatus(1, "commit1", BuildState.canceled, "sourceBranch", "Jenkins", null, BuildState.canceled.name());
-        verify(gitLabClient).changeBuildStatus(1, "commit2", BuildState.canceled, "sourceBranch", "Jenkins", null, BuildState.canceled.name());
+        verify(gitLabClient).changeBuildStatus(eq(1), eq("commit1"), eq(BuildState.canceled), eq("sourceBranch"),
+            eq("Jenkins"), contains("project1"), eq(BuildState.canceled.name()));
+        verify(gitLabClient).changeBuildStatus(eq(1), eq("commit2"), eq(BuildState.canceled), eq("sourceBranch"),
+            eq("Jenkins"), contains("project1"), eq(BuildState.canceled.name()));
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
     }
