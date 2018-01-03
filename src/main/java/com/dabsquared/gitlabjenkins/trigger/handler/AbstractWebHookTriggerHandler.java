@@ -48,8 +48,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         String targetBranch = getTargetBranch(hook);
         if (branchFilter.isBranchAllowed(targetBranch)) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
-            setCommitStatusPendingIfNecessary(job, hook);
             cancelPendingBuildsIfNecessary(job, hook);
+            setCommitStatusPendingIfNecessary(job, hook);
             scheduleBuild(job, createActions(job, hook));
         } else {
             LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
