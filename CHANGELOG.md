@@ -271,7 +271,7 @@ ChangeLog
 1.0.8
 =====================
 * Fix images not showing up. (Jotschi)
-* Supprting nested groups with CloudBees Plugin (FrantaM)
+* Supporting nested groups with CloudBees Plugin (FrantaM)
 
 1.0.7
 =====================
