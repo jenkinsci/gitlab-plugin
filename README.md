@@ -294,7 +294,7 @@ In order to build when a new tag is pushed:
 * In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
 * In the ``Jenkins`` under the ``Source Code Management`` section:
     * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
-    * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
+    * you can also use ``Branch Specifier`` to specify which tag need to be built (example ``refs/tags/${TAGNAME}``)
 
 # Send message on complete of a build
 
