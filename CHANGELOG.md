@@ -78,7 +78,7 @@ ChangeLog
 =====================
 * Breaking changes for some Pipeline jobs (see [migration guide](https://github.com/jenkinsci/gitlab-plugin/wiki/Migration-Guides) for more information)
 * Cleanup UI for GitLabPushTrigger
-* #201: customize notes for merge requsts
+* #201: customize notes for merge requests
 * #168: MR Voting Broken after Gitlab 8.2
 * #190: Add option to mark unstable builds as success in GitLab
 * #345: Configurable "Add note with build status on merge requests"
