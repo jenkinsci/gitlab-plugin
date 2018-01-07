@@ -420,11 +420,11 @@ public class GitLabCommitStatusPublisherTest {
         return build;
     }
 
-    private String getSingleProjectJson(String name,String projectNameWithNamespace, int porjectId) throws IOException {
+    private String getSingleProjectJson(String name,String projectNameWithNamespace, int projectId) throws IOException {
         String nameSpace = projectNameWithNamespace.split("/")[0];
         String projectName = projectNameWithNamespace.split("/")[1];
         return IOUtils.toString(getClass().getResourceAsStream(name))
-                 .replace("${projectId}", porjectId + "")
+                 .replace("${projectId}", projectId + "")
                  .replace("${nameSpace}", nameSpace)
                  .replace("${projectName}", projectName);
     }
