@@ -4,6 +4,13 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
@@ -24,6 +31,9 @@ import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
@@ -31,16 +41,21 @@ import hudson.model.TaskListener;
 public class GitLabCommitStatusStep extends Step {
 
     private String name;
+    private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>() ;
+    private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
-    public GitLabCommitStatusStep(String name) {
+    public GitLabCommitStatusStep(String name, List<GitLabBranchBuild> builds, GitLabConnectionProperty connection) {
         this.name = StringUtils.isEmpty(name) ? null : name;
+        this.builds = builds;
+        this.connection = connection ;
     }
     
 	@Override
 	public StepExecution start(StepContext context) throws Exception {
 		return new GitLabCommitStatusStepExecution(context, this);
 	}
+
 
     public String getName() {
         return name;
@@ -49,6 +64,24 @@ public class GitLabCommitStatusStep extends Step {
     @DataBoundSetter
     public void setName(String name) {
         this.name = StringUtils.isEmpty(name) ? null : name;
+    }
+
+    public List<GitLabBranchBuild> getBuilds() {
+        return builds;
+    }
+
+    @DataBoundSetter
+    public void setBuilds(List<GitLabBranchBuild> builds) {
+        this.builds = builds;
+    }
+
+    public GitLabConnectionProperty getConnection() {
+        return connection;
+    }
+
+    @DataBoundSetter
+    public void setConnection(GitLabConnectionProperty connection) {
+        this.connection = connection;
     }
 
     public static class GitLabCommitStatusStepExecution extends StepExecution {
@@ -73,7 +106,7 @@ public class GitLabCommitStatusStep extends Step {
                 .withCallback(new BodyExecutionCallback() {
                     @Override
                     public void onStart(StepContext context) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name);
+                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name, step.builds, step.connection);
                         PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
                         if (action != null) {
                             action.startBuild(name);
@@ -82,14 +115,14 @@ public class GitLabCommitStatusStep extends Step {
 
                     @Override
                     public void onSuccess(StepContext context, Object result) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name);
+                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name,  step.builds, step.connection);
                         context.onSuccess(result);
                     }
 
                     @Override
                     public void onFailure(StepContext context, Throwable t) {
                         BuildState state = t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name);
+                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name,  step.builds, step.connection);
                         context.onFailure(t);
                     }
                 })
@@ -102,7 +135,7 @@ public class GitLabCommitStatusStep extends Step {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name);
+                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name,  step.builds, step.connection);
                 body.cancel(cause);
             }
         }

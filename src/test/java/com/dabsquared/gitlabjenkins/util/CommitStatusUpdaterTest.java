@@ -6,9 +6,12 @@ import static org.mockito.Mockito.when;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.Before;
@@ -36,21 +39,23 @@ import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
 import jenkins.model.Jenkins;
 
+
 /**
  * @author Daumantas Stulgis
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GitLabConnectionProperty.class, Jenkins.class})
 public class CommitStatusUpdaterTest {
-	
+
 	private static final int PROJECT_ID = 1;
     private static final String BUILD_URL = "job/Test-Job";
     private static final String STAGE = "test";
     private static final String REVISION = "1111111";
     private static final String JENKINS_URL = "https://gitlab.org/jenkins/";
-	
+
     @Mock Run<?, ?> build;
 	@Mock TaskListener taskListener;
+	@Mock GitLabConnectionConfig gitLabConnectionConfig;
 	@Mock GitLabClient client;
 	@Mock GitLabWebHookCause gitlabCause;
 	@Mock BuildData action;
@@ -61,7 +66,8 @@ public class CommitStatusUpdaterTest {
 	@Mock UpstreamCause upCauseLevel1;
 	@Mock UpstreamCause upCauseLevel2;
 	@Mock Jenkins jenkins;
-	
+	@Mock GitLabConnectionProperty connection;
+
 	CauseData causeData;
 
 	@Before
@@ -71,7 +77,10 @@ public class CommitStatusUpdaterTest {
 	    PowerMockito.mockStatic(Jenkins.class);
 	    when(Jenkins.getInstance()).thenReturn(jenkins);
 	    when(jenkins.getRootUrl()).thenReturn(JENKINS_URL);
+	    when(jenkins.getDescriptor(GitLabConnectionConfig.class)).thenReturn(gitLabConnectionConfig);
 	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
+	    when(gitLabConnectionConfig.getClient(any(String.class))).thenReturn(client);
+        when(connection.getClient()).thenReturn(client);
 	    when(build.getAction(BuildData.class)).thenReturn(action);
 	    when(action.getLastBuiltRevision()).thenReturn(lastBuiltRevision);
 	    when(action.getLastBuild(any(ObjectId.class))).thenReturn(lastBuild);
@@ -82,7 +91,8 @@ public class CommitStatusUpdaterTest {
 	    when(build.getCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel1)));
 	    when(upCauseLevel1.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel2)));
 	    when(upCauseLevel2.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(gitlabCause)));
-	    
+	    when(taskListener.getLogger()).thenReturn(new PrintStream("/dev/null"));
+
 	    causeData = causeData()
                 .withActionType(CauseData.ActionType.NOTE)
                 .withSourceProjectId(PROJECT_ID)
@@ -108,16 +118,40 @@ public class CommitStatusUpdaterTest {
                 .withLastCommit(REVISION)
                 .withTargetProjectUrl("https://gitlab.org/test")
                 .build();
-	    
+
 	    when(gitlabCause.getData()).thenReturn(causeData);
 	    PowerMockito.spy(client);
 	}
 
 	@Test
-	public void test() {
+	public void buildStateUpdateTest() {
 		CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
-		
+
 		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
 	}
 
+	@Test
+	public void buildStateUpdateTestSpecificConnection() {
+	    CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE,null, connection);
+
+	    verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+	}
+
+    @Test
+    public void buildStateUpdateTestSpecificBuild() {
+        ArrayList builds = new ArrayList();
+        builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, null);
+
+        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+    }
+
+    @Test
+    public void buildStateUpdateTestSpecificConnectionSpecificBuild() {
+        ArrayList builds = new ArrayList();
+        builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, connection);
+
+        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+    }
 }
