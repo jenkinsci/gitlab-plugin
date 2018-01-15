@@ -89,11 +89,6 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
-    public void headCurrentUser() {
-
-    }
-
-    @Override
     public User getCurrentUser() {
         return null;
     }

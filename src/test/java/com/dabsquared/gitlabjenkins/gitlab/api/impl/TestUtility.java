@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static javax.ws.rs.HttpMethod.HEAD;
+import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,7 +46,7 @@ class TestUtility {
     }
 
     static HttpRequest versionRequest(String id) {
-        return request().withMethod(HEAD).withPath("/gitlab/api/" + id + "/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
+        return request().withMethod(GET).withPath("/gitlab/api/" + id + "/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
     }
 
     static HttpResponse responseOk() {

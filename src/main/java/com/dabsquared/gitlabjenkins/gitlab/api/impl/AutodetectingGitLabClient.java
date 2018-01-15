@@ -199,18 +199,6 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
-    public void headCurrentUser() {
-        execute(
-            new GitLabOperation<Void>() {
-                @Override
-                Void execute(GitLabClient client) {
-                    client.headCurrentUser();
-                    return null;
-                }
-            });
-    }
-
-    @Override
     public User getCurrentUser() {
         return execute(
             new GitLabOperation<User>() {
@@ -287,7 +275,7 @@ final class AutodetectingGitLabClient implements GitLabClient {
         for (GitLabClientBuilder candidate : builders) {
             GitLabClient client = candidate.buildClient(url, token, ignoreCertificateErrors, connectionTimeout, readTimeout);
             try {
-                client.headCurrentUser();
+                client.getCurrentUser();
                 return client;
             } catch (NotFoundException ignored) {
                 // api-endpoint not found (== api-level not supported by this client)

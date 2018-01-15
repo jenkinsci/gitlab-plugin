@@ -36,8 +36,6 @@ public interface GitLabClient {
 
     Branch getBranch(String projectId, String branch);
 
-    void headCurrentUser();
-
     User getCurrentUser();
 
     User addUser(String email, String username, String name, String password);

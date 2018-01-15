@@ -46,7 +46,7 @@ public class AutodetectingGitLabClientTest {
     @Test
     public void buildClient_success_v3() throws Exception {
         mockServerClient.when(v3Request).respond(responseOk());
-        api.headCurrentUser();
+        api.getCurrentUser();
         assertApiImpl(api, V3GitLabApiProxy.class);
         mockServerClient.verify(v3Request, v3Request);
     }
@@ -55,7 +55,7 @@ public class AutodetectingGitLabClientTest {
     public void buildClient_success_v4() throws Exception {
         mockServerClient.when(v3Request).respond(responseNotFound());
         mockServerClient.when(v4Request).respond(responseOk());
-        api.headCurrentUser();
+        api.getCurrentUser();
         assertApiImpl(api, V4GitLabApiProxy.class);
         mockServerClient.verify(v3Request, v4Request, v4Request);
     }
@@ -64,12 +64,12 @@ public class AutodetectingGitLabClientTest {
     public void buildClient_success_switching_apis() throws Exception {
         mockServerClient.when(v3Request, once()).respond(responseNotFound());
         mockServerClient.when(v4Request, exactly(2)).respond(responseOk());
-        api.headCurrentUser();
+        api.getCurrentUser();
         assertApiImpl(api, V4GitLabApiProxy.class);
 
         mockServerClient.when(v4Request, once()).respond(responseNotFound());
         mockServerClient.when(v3Request, exactly(2)).respond(responseOk());
-        api.headCurrentUser();
+        api.getCurrentUser();
         assertApiImpl(api, V3GitLabApiProxy.class);
 
         mockServerClient.verify(v3Request, v4Request, v4Request, v3Request, v3Request);
@@ -80,7 +80,7 @@ public class AutodetectingGitLabClientTest {
         mockServerClient.when(v3Request).respond(responseNotFound());
         mockServerClient.when(v4Request).respond(responseNotFound());
         try {
-            api.headCurrentUser();
+            api.getCurrentUser();
             fail("endpoint should throw exception when no matching delegate is found");
         } catch (NoSuchElementException e) {
             mockServerClient.verify(v3Request, v4Request);
