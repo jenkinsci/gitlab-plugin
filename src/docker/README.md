@@ -4,7 +4,7 @@ In order to test the plugin on different versions of `GitLab` and `Jenkins` you 
 
 A example docker-compose file is available at `gitlab-plugin/src/docker` which allows to set up instances of the latest `GitLab` and `Jenkins` versions.
 
-If they don't already exist, create the following directories and make sure the user that Docker is runnning as owns them:
+If they don't already exist, create the following directories and make sure the user that Docker is running as owns them:
 * /srv/docker/gitlab/postgresql
 * /srv/docker/gitlab/gitlab
 * /srv/docker/gitlab/redis

@@ -294,13 +294,13 @@ In order to build when a new tag is pushed:
 * In the ``GitLab server`` add ``Tag push events`` to the ``Web Hook``
 * In the ``Jenkins`` under the ``Source Code Management`` section:
     * select ``Advance...`` and add  ``+refs/tags/*:refs/remotes/origin/tags/*`` as ``Refspec``
-    * you can also use ``Branch Specifier`` to specify which tag need to be built (exampple ``refs/tags/${TAGNAME}``)
+    * you can also use ``Branch Specifier`` to specify which tag need to be built (example ``refs/tags/${TAGNAME}``)
 
 # Send message on complete of a build
 
 1. In the *Post build steps* section:
     1. Click *Add post build step*
-    2. Click *Add note with build status on GitLab merge requests* and save build settings (You enabled autoumatically sending default message on result of a build)
+    2. Click *Add note with build status on GitLab merge requests* and save build settings (You enabled automatically sending default message on result of a build)
 
 2. If you want make custom message on result of a build:
     1. In *Add note with build status on GitLab merge requests* section click to *Custom message on success/failure/abort*
