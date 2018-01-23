@@ -52,16 +52,30 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 # Configuring the plugin
 ## Global configuration
 ### GitLab-to-Jenkins authentication (required by default)
+**Disabling authentication**
+
 By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs. If you want to disable this (not recommended):
 1. In Jenkins, go to Manage Jenkins -> Configure System
 2. Scroll down to the section labeled 'GitLab'
 3. Uncheck "Enable authentication for '/project' end-point" - you will now be able to trigger Jenkins jobs from GitLab without needing authentication
 
+**Configuring global authentication**
+
 Otherwise, to set up authentication for GitLab to trigger builds:
 1. Create a user in Jenkins which has, at a minimum, Job/Build permissions
 2. Log in as that user (this is required even if you are a Jenkins admin user), then click on the user's name in the top right corner of the page
 3. Click 'Configure,' then 'Show API Token...', and note/copy the User ID and API Token
-4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL: `http://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
+4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL and do not enter anything for 'Secret Token': `http://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
+5. After you add the webhook, click the 'Test' button, and it should succeed
+
+**Configuring per-project authentication**
+
+If you want to create separate authentication credentials for each Jenkins job:
+1. In the configuration of your Jenkins job, in the GitLab configuration section, click 'Advanced'
+2. Click the 'Generate' button under the 'Secret Token' field
+3. Copy the resulting token, and save the job configuration
+4. In GitLab, create a webhook for your project, enter the trigger URL (e.g. `http://JENKINS_URL/project/YOUR_JOB`) and paste the token in the Secret Token field
+5. After you add the webhook, click the 'Test' button, and it should succeed
 
 ### Jenkins-to-GitLab authentication (optional)
 This plugin can be configured to send build status messages to GitLab, which show up in the GitLab Merge Request UI. To enable this functionality: 
