@@ -3,9 +3,9 @@
 - [User support](#user-support)
 - [Known bugs/issues](#known-bugsissues)
 - [Supported GitLab versions](#supported-gitlab-versions)
-- [Configuring access to GitLab](#configuring-access-to-gitlab)
+- [Configuring the plugin](#configuring-the-plugin)
+    - [Global configuration and authentication](#global-configuration)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
-    - [Gitlab Configuration (>= 8.1)](#gitlab-configuration)
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
@@ -49,11 +49,31 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab [commit status API](https://docs.gitlab.com/ce/api/commits.html#commit-status) which supports with external CI services like Jenkins
 * Versions older than 8.1.x may work but are no longer officially supported
 
-# Configuring access to GitLab
+# Configuring the plugin
+## Global configuration
+### GitLab-to-Jenkins authentication (required by default)
+By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs. If you want to disable this (not recommended):
+1. In Jenkins, go to Manage Jenkins -> Configure System
+2. Scroll down to the section labeled 'GitLab'
+3. Uncheck "Enable authentication for '/project' end-point" - you will now be able to trigger Jenkins jobs from GitLab without needing authentication
 
-Optionally, the plugin communicates with the GitLab server in order to fetch additional information. At this moment, this information is limited to fetching the source project of a Merge Request, in order to support merging from forked repositories.
+Otherwise, to set up authentication for GitLab to trigger builds:
+1. Create a user in Jenkins which has, at a minimum, Job/Build permissions
+2. Log in as that user (this is required even if you are a Jenkins admin user), then click on the user's name in the top right corner of the page
+3. Click 'Configure,' then 'Show API Token...', and note/copy the User ID and API Token
+4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL: `http://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
 
-To enable this functionality, a user should be set up on GitLab, with GitLab 'Developer' permissions, to access the repository. You will need to give this user access to each repo you want Jenkins to be able to clone. Log in to GitLab as that user, go to its profile, and copy its secret API key. On the Global Configuration page in Jenkins, supply the GitLab host URL, e.g. ``http://your.gitlab.server.`` Click the 'Add' button to add a credential, choose 'GitLab API token' as the kind of credential, and paste your GitLab user's API key into the 'API token' field. Testing the connection should succeed.
+### Jenkins-to-GitLab authentication (optional)
+This plugin can be configured to send build status messages to GitLab, which show up in the GitLab Merge Request UI. To enable this functionality: 
+1. Create a new user in GitLab
+2. Give this user 'Developer' permissions on each repo you want Jenkins to send build status to
+3. Log in or 'Impersonate' that user in GitLab, click the user's icon/avatar and choose Settings
+4. Click on 'Access Tokens'
+5. Create a token named e.g. 'jenkins' with 'api' scope; expiration is optional
+6. Copy the token immediately, it cannot be accessed after you leave this page
+7. On the Global Configuration page in Jenkins, in the GitLab configuration section, supply the GitLab host URL, e.g. `http://your.gitlab.server` 
+8. Click the 'Add' button to add a credential, choose 'GitLab API token' as the kind of credential, and paste your GitLab user's API key into the 'API token' field
+9. Click the 'Test Connection' button; it should succeed
 
 ## Jenkins Job Configuration
 ### Git configuration for Freestyle jobs
