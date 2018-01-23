@@ -78,6 +78,8 @@ If you want to create separate authentication credentials for each Jenkins job:
 5. After you add the webhook, click the 'Test' button, and it should succeed
 
 ### Jenkins-to-GitLab authentication (optional)
+**PLEASE NOTE:** This auth configuration is only used for accessing the GitLab API for sending build status to GitLab. It is **not** used for cloning git repos. The credentials for cloning (usually SSH credentials) should be configuring separately, in the git plugin.
+
 This plugin can be configured to send build status messages to GitLab, which show up in the GitLab Merge Request UI. To enable this functionality: 
 1. Create a new user in GitLab
 2. Give this user 'Developer' permissions on each repo you want Jenkins to send build status to
