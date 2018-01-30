@@ -1,10 +1,13 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
+import java.util.List;
 
 /**
  * @author Robin Müller
@@ -16,6 +19,7 @@ public class MergeRequestHook extends WebHook {
     private User assignee;
     private Project project;
     private MergeRequestObjectAttributes objectAttributes;
+    private List<Label> labels;
 
     public User getUser() {
         return user;
@@ -42,14 +46,21 @@ public class MergeRequestHook extends WebHook {
     }
 
     public User getAssignee() {
-		return assignee;
-	}
-    
-	public void setAssignee(User assignee) {
-		this.assignee = assignee;
-	}
+        return assignee;
+    }
 
-	@Override
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
+    }
+
+    public List<Label> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<Label> labels) {
+        this.labels = labels;
+    }
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -59,30 +70,33 @@ public class MergeRequestHook extends WebHook {
         }
         MergeRequestHook that = (MergeRequestHook) o;
         return new EqualsBuilder()
-                .append(user, that.user)
-                .append(assignee, that.assignee)
-                .append(project, that.project)
-                .append(objectAttributes, that.objectAttributes)
-                .isEquals();
+            .append(user, that.user)
+            .append(assignee, that.assignee)
+            .append(project, that.project)
+            .append(objectAttributes, that.objectAttributes)
+            .append(labels, that.labels)
+            .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(user)
-                .append(assignee)
-                .append(project)
-                .append(objectAttributes)
-                .toHashCode();
+            .append(user)
+            .append(assignee)
+            .append(project)
+            .append(objectAttributes)
+            .append(labels)
+            .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("user", user)
-                .append("assignee", assignee)
-                .append("project", project)
-                .append("objectAttributes", objectAttributes)
-                .toString();
+            .append("user", user)
+            .append("assignee", assignee)
+            .append("project", project)
+            .append("objectAttributes", objectAttributes)
+            .append("labels", labels)
+            .toString();
     }
 }

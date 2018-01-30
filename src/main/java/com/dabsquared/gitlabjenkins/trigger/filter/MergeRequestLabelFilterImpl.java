@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.google.common.base.Splitter;
 
 import java.util.Collection;
@@ -19,24 +20,28 @@ class MergeRequestLabelFilterImpl implements MergeRequestLabelFilter {
         this.excludeLabels = convert(excludeLabels);
     }
 
+
     @Override
-    public boolean isMergeRequestAllowed(Collection<String> labels) {
+    public boolean isMergeRequestAllowed(Collection<Label> labels) {
         return containsNoExcludeLabel(labels) && containsIncludeLabel(labels);
     }
 
-    private boolean containsNoExcludeLabel(Collection<String> labels) {
-        for (String excludeLabel : excludeLabels) {
-            if (labels != null && labels.contains(excludeLabel)) {
-                return false;
-            }
+    private boolean containsNoExcludeLabel(Collection<Label> labels) {
+        for (Label label : labels) {
+            for(String excludeLabel : excludeLabels)
+                if (label != null && label.getTitle() != null && label.getTitle().contains(excludeLabel)) {
+                    return false;
+                }
         }
         return true;
     }
 
-    private boolean containsIncludeLabel(Collection<String> labels) {
-        for (String includeLabel : includeLabels) {
-            if (labels != null && labels.contains(includeLabel)) {
-                return true;
+    private boolean containsIncludeLabel(Collection<Label> labels) {
+        for (Label label : labels) {
+            for (String includeLabel : includeLabels) {
+                if (label != null && label.getTitle() != null && label.getTitle().contains(includeLabel)) {
+                    return true;
+                }
             }
         }
         return includeLabels.isEmpty();

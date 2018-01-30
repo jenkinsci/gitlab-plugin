@@ -56,7 +56,7 @@ public class GitLabProjectLabelsServiceTest {
     private List<Label> convert(List<String> labels) {
         ArrayList<Label> result = new ArrayList<>();
         for (String label : labels) {
-            result.add(label().withName(label).build());
+            result.add(label().withTitle(label).build());
         }
         return result;
     }
