@@ -11,6 +11,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Project {
 
+    private Integer id;
     private String name;
     private String description;
     private String webUrl;
@@ -120,6 +121,14 @@ public class Project {
         this.httpUrl = httpUrl;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -130,6 +139,7 @@ public class Project {
         }
         Project project = (Project) o;
         return new EqualsBuilder()
+                .append(id, project.id)
                 .append(name, project.name)
                 .append(description, project.description)
                 .append(webUrl, project.webUrl)
@@ -148,6 +158,7 @@ public class Project {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
+                .append(id)
                 .append(name)
                 .append(description)
                 .append(webUrl)
@@ -166,6 +177,7 @@ public class Project {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .append("id", id)
                 .append("name", name)
                 .append("description", description)
                 .append("webUrl", webUrl)

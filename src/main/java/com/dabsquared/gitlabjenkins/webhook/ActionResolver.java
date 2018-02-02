@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins.webhook;
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
+import com.dabsquared.gitlabjenkins.webhook.build.PipelineBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
@@ -110,7 +111,9 @@ public class ActionResolver {
             case "Tag Push Hook":
                 return new PushBuildAction(project, getRequestBody(request), tokenHeader);
             case "Note Hook":
-                    return new NoteBuildAction(project, getRequestBody(request), tokenHeader);
+                return new NoteBuildAction(project, getRequestBody(request), tokenHeader);
+            case "Pipeline Hook":
+                return new PipelineBuildAction(project, getRequestBody(request), tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
                 return new NoopAction();
