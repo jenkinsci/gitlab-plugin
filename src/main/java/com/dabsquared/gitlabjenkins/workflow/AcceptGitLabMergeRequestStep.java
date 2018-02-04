@@ -1,30 +1,35 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.*;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import javax.inject.Inject;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.google.common.collect.ImmutableSet;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
 @ExportedBean
-public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
+public class AcceptGitLabMergeRequestStep extends Step {
 
     private static final Logger LOGGER = Logger.getLogger(AcceptGitLabMergeRequestStep.class.getName());
 
@@ -35,6 +40,11 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
     }
 
+	@Override
+	public StepExecution start(StepContext context) throws Exception {
+		return new AcceptGitLabMergeRequestStepExecution(context, this);
+	}
+	
     public String getMergeCommitMessage() {
         return mergeCommitMessage;
     }
@@ -44,15 +54,19 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Void> {
+    public static class AcceptGitLabMergeRequestStepExecution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
-        @StepContextParameter
-        private transient Run<?, ?> run;
+        private final transient Run<?, ?> run;
 
-        @Inject
-        private transient AcceptGitLabMergeRequestStep step;
+        private final transient AcceptGitLabMergeRequestStep step;
 
+        AcceptGitLabMergeRequestStepExecution(StepContext context, AcceptGitLabMergeRequestStep step) throws Exception {
+            super(context);
+            this.step = step;
+            run = context.get(Run.class);
+        }
+        
         @Override
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
@@ -107,10 +121,7 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-        public DescriptorImpl() {
-            super(Execution.class);
-        }
+    public static final class DescriptorImpl extends StepDescriptor {
 
         @Override
         public String getDisplayName() {
@@ -121,5 +132,10 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
         public String getFunctionName() {
             return "acceptGitLabMR";
         }
+        
+		@Override
+		public Set<Class<?>> getRequiredContext() {
+			return ImmutableSet.of(TaskListener.class, Run.class);
+		}
     }
 }
