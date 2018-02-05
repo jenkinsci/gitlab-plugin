@@ -1,5 +1,10 @@
 ChangeLog
 
+1.5.3
+=====================
+* #622: GitlabCommitStatus throws error after force kill
+* #678: Fixes NPE if GitLab connection fails
+
 1.5.2
 =====================
 * #524: If Blue Ocean is installed, build URL in GitLab will point to Blue Ocean
