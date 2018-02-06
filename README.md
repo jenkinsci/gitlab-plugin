@@ -114,7 +114,7 @@ This plugin can be configured to send build status messages to GitLab, which sho
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
 
 ### Git configuration for Pipeline/Workflow jobs
-**Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. ${gitlabSourceBranch}. After version 1.2.1, these variables are only accessible in the env[] map. E.g. ${env.gitlabSourceBranch}.
+**Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. `${gitlabSourceBranch}`. After version 1.2.1, these variables are only accessible in the `env[]` map. E.g. `${env.gitlabSourceBranch}`.
 
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
 
@@ -194,7 +194,7 @@ pipeline {
       }
     }
     options {
-      gitLabConnection('<your-gitlab-connection-name')
+      gitLabConnection('your-gitlab-connection-name')
     }
     triggers {
         gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
@@ -210,11 +210,11 @@ pipeline {
 }
 ```
 
-If you make use of the "Merge When Pipeline Succeeds" option for Merge Requests in GitLab, and your Declarative Pipeline jobs have more than one stage, you will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
+If you make use of the *"Merge When Pipeline Succeeds"* option for Merge Requests in GitLab, and your Declarative Pipeline jobs have more than one stage, you will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
 
 ```
     options {
-      gitLabConnection('<your-gitlab-connection-name')
+      gitLabConnection('your-gitlab-connection-name')
       gitlabBuilds(builds: ['build', 'test', 'deploy'])
     }
 ```
@@ -274,7 +274,7 @@ GitLab 8.1 has implemented a commit status API, you need an extra post-build ste
         * Jenkins project ``JENKINS_PROJECT_NAME`` should start
 
 * Add a post-build step *Publish build status to GitLab commit (GitLab 8.1+ required)* to the job.
-* For pipeline jobs surround your build step with the gitlabCommitStatus step like this:
+* For pipeline jobs surround your build step with the `gitlabCommitStatus` step like this:
 
     ```
     node() {
@@ -286,7 +286,7 @@ GitLab 8.1 has implemented a commit status API, you need an extra post-build ste
         }
     }
     ```
-* For pipeline jobs there is also the updateGitlabCommitStatus step to use a custom state for updating the commit status:
+* For pipeline jobs there is also the `updateGitlabCommitStatus` step to use a custom state for updating the commit status:
 
     ```
     node() {
@@ -296,7 +296,7 @@ GitLab 8.1 has implemented a commit status API, you need an extra post-build ste
         updateGitlabCommitStatus name: 'build', state: 'pending'
     }
     ```
-* To mark several build stages as pending in GitLab you can use the gitlabBuilds step:
+* To mark several build stages as pending in GitLab you can use the `gitlabBuilds` step:
 
     ```
     node() {
@@ -347,34 +347,34 @@ In order to build when a new tag is pushed:
 You can trigger a job a manually by clicking ``This build is parameterized`` and adding the any of the relevant build parameters.
 These include:
 
-* gitlabBranch
-* gitlabSourceBranch
-* gitlabActionType
-* gitlabUserName
-* gitlabUserEmail
-* gitlabSourceRepoHomepage
-* gitlabSourceRepoName
-* gitlabSourceNamespace
-* gitlabSourceRepoURL
-* gitlabSourceRepoSshUrl
-* gitlabSourceRepoHttpUrl
-* gitlabMergeRequestTitle
-* gitlabMergeRequestDescription
-* gitlabMergeRequestId
-* gitlabMergeRequestIid
-* gitlabMergeRequestState
-* gitlabMergedByUser
-* gitlabMergeRequestAssignee
-* gitlabMergeRequestLastCommit
-* gitlabMergeRequestTargetProjectId
-* gitlabTargetBranch
-* gitlabTargetRepoName
-* gitlabTargetNamespace
-* gitlabTargetRepoSshUrl
-* gitlabTargetRepoHttpUrl
-* gitlabBefore
-* gitlabAfter
-* gitlabTriggerPhrase
+* `gitlabBranch`
+* `gitlabSourceBranch`
+* `gitlabActionType`
+* `gitlabUserName`
+* `gitlabUserEmail`
+* `gitlabSourceRepoHomepage`
+* `gitlabSourceRepoName`
+* `gitlabSourceNamespace`
+* `gitlabSourceRepoURL`
+* `gitlabSourceRepoSshUrl`
+* `gitlabSourceRepoHttpUrl`
+* `gitlabMergeRequestTitle`
+* `gitlabMergeRequestDescription`
+* `gitlabMergeRequestId`
+* `gitlabMergeRequestIid`
+* `gitlabMergeRequestState`
+* `gitlabMergedByUser`
+* `gitlabMergeRequestAssignee`
+* `gitlabMergeRequestLastCommit`
+* `gitlabMergeRequestTargetProjectId`
+* `gitlabTargetBranch`
+* `gitlabTargetRepoName`
+* `gitlabTargetNamespace`
+* `gitlabTargetRepoSshUrl`
+* `gitlabTargetRepoHttpUrl`
+* `gitlabBefore`
+* `gitlabAfter`
+* `gitlabTriggerPhrase`
 
 # Contributing to the Plugin
 
