@@ -38,7 +38,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 	private final Collection<Action> allowedActions;
 
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates,  boolean skipWorkInProgressMergeRequest) {
-    	this(allowedStates, EnumSet.noneOf(Action.class),skipWorkInProgressMergeRequest);
+    	this(allowedStates, EnumSet.allOf(Action.class),skipWorkInProgressMergeRequest);
     }
 	
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest) {
@@ -159,7 +159,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
 		return allowedStates.contains(objectAttributes.getState()) 
-        	|| allowedActions.contains(objectAttributes.getAction());
+        	&& allowedActions.contains(objectAttributes.getAction());
 	}    
     
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {

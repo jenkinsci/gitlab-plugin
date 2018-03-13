@@ -101,6 +101,20 @@ public class MergeRequestBuildActionTest {
     }
 
     @Test
+    public void skip_approvedMR() throws IOException, ExecutionException, InterruptedException {
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
+        testProject.addTrigger(trigger);
+        testProject.setScm(new GitSCM(gitRepoUrl));
+        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
+        future.get();
+
+        exception.expect(HttpResponses.HttpResponseException.class);
+        new MergeRequestBuildAction(testProject, getJson("MergeRequestEvent_approvedMR.json"), null).execute(response);
+
+        verify(trigger, never()).onPost(any(MergeRequestHook.class));
+    }
+
+    @Test
     public void skip_alreadyBuiltMR() throws IOException, ExecutionException, InterruptedException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
