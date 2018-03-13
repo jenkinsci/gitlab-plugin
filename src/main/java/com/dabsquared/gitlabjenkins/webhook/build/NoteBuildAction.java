@@ -34,15 +34,7 @@ public class NoteBuildAction implements WebHookAction {
     }
 
     public void execute(StaplerResponse response) {
-        if (!(project instanceof Job<?, ?>)) {
-            throw HttpResponses.errorWithoutStack(409, "Note Hook is not supported for this project");
-        }
-        ACL.impersonate(ACL.SYSTEM, new BuildWebHookAction.TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
-            @Override
-            protected void performOnPost(GitLabPushTrigger trigger) {
-                trigger.onPost(noteHook);
-            }
-        });
+        ACL.impersonate(ACL.SYSTEM, new BuildWebHookAction.TriggerAction<>(noteHook, project, secretToken));
         throw HttpResponses.ok();
     }
 }

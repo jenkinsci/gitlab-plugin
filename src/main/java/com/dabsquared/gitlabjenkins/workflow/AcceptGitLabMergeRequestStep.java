@@ -54,7 +54,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
     }
 
-    public static class AcceptGitLabMergeRequestStepExecution extends AbstractSynchronousStepExecution<Void> {
+    public static class AcceptGitLabMergeRequestStepExecution extends SynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
         private final transient Run<?, ?> run;

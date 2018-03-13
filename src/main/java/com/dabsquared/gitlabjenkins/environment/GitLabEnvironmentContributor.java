@@ -18,12 +18,12 @@ import java.io.IOException;
 @Extension
 public class GitLabEnvironmentContributor extends EnvironmentContributor {
     @Override
-    public void buildEnvironmentFor(@Nonnull Run r, @Nonnull EnvVars envs, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    public void buildEnvironmentFor(@Nonnull Run r, @Nonnull EnvVars envs, @Nonnull TaskListener listener) {
         GitLabWebHookCause cause = null;
         if (r instanceof MatrixRun) {
             MatrixBuild parent = ((MatrixRun)r).getParentBuild();
             if (parent != null) {
-                cause = (GitLabWebHookCause) parent.getCause(GitLabWebHookCause.class);
+                cause = parent.getCause(GitLabWebHookCause.class);
             }
         } else {
             cause = (GitLabWebHookCause) r.getCause(GitLabWebHookCause.class);

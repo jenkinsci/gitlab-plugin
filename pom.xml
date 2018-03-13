@@ -9,6 +9,7 @@
   <properties>
     <jenkins.version>1.609.3</jenkins.version>
     <hpi-plugin.version>1.115</hpi-plugin.version>
+    <workflow-plugin.version>2.14</workflow-plugin.version>
     <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
   </properties>
@@ -129,6 +130,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.5.1</version>
+          <configuration>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+            <compilerArgs>
+              <compilerArg>-Xlint:unchecked</compilerArg>
+            </compilerArgs>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -164,8 +172,8 @@
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
-      <artifactId>workflow-step-api</artifactId>
-      <version>1.15</version>
+      <artifactId>workflow-multibranch</artifactId>
+      <version>${workflow-plugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>

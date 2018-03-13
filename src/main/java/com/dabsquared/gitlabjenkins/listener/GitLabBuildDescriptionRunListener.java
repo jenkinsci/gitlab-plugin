@@ -10,6 +10,8 @@ import hudson.model.listeners.RunListener;
 
 import java.io.IOException;
 
+import static com.dabsquared.gitlabjenkins.util.TriggerUtil.getFromJob;
+
 /**
  * RunListener that will be called when a build starts and completes.
  * Will lookup GitLabPushTrigger and call set the build description if necessary.
@@ -21,7 +23,7 @@ public class GitLabBuildDescriptionRunListener extends RunListener<Run<?, ?>> {
 
     @Override
     public void onStarted(Run<?, ?> build, TaskListener listener) {
-        GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(build.getParent());
+        GitLabPushTrigger trigger = getFromJob(build.getParent(), null);
         if (trigger != null && trigger.getSetBuildDescription()) {
             Cause cause = build.getCause(GitLabWebHookCause.class);
             if (cause != null && !cause.getShortDescription().isEmpty()) {

@@ -4,11 +4,11 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -60,7 +60,7 @@ public class UpdateGitLabCommitStatusStep extends Step {
         this.state = state;
     }
 
-    public static class UpdateGitLabCommitStatusStepExecution extends AbstractSynchronousStepExecution<Void> {
+    public static class UpdateGitLabCommitStatusStepExecution extends SynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
         private final transient Run<?, ?> run;

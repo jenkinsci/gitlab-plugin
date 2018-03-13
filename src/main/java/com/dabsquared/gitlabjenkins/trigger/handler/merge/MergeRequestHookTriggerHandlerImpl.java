@@ -55,6 +55,8 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             && isNotSkipWorkInProgressMergeRequest(objectAttributes)
             && mergeRequestLabelFilter.isMergeRequestAllowed(hook.getObjectAttributes().getLabels())) {
             super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        } else {
+            LOGGER.warning("Merge hook not allowed by config");
         }
     }
 

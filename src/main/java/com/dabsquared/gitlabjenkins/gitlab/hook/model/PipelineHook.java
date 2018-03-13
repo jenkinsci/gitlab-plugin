@@ -58,7 +58,11 @@ public class PipelineHook extends WebHook {
 
     public void setObjectAttributes(PipelineEventObjectAttributes objectAttributes) {
         this.objectAttributes = objectAttributes;
+    }
 
+    @Override
+    public String getEventSourceBranch() {
+        return objectAttributes.getRef();
     }
 
     @Override

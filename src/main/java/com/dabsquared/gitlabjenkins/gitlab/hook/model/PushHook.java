@@ -114,6 +114,11 @@ public class PushHook extends WebHook {
     }
 
     @Override
+    public String getEventSourceBranch() {
+        return ref;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

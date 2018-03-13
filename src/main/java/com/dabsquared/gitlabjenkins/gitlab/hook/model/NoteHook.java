@@ -50,6 +50,11 @@ public class NoteHook extends WebHook {
     }
 
     @Override
+    public String getEventSourceBranch() {
+        return mergeRequest.getSourceBranch();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

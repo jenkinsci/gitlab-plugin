@@ -53,17 +53,8 @@ public class PipelineBuildAction extends BuildWebHookAction {
     }
 
     void execute() {
-        if (!(project instanceof Job<?, ?>)) {
-            throw HttpResponses.errorWithoutStack(409, "Pipeline Hook is not supported for this project");
-        }
-        ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
-            @Override
-            protected void performOnPost(GitLabPushTrigger trigger) {
-                trigger.onPost(pipelineBuildHook);
-            }
-        });
+        ACL.impersonate(ACL.SYSTEM, new TriggerAction<>(pipelineBuildHook, project, secretToken));
         throw HttpResponses.ok();
     }
-
 }
 
