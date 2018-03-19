@@ -16,6 +16,10 @@
 
 This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and/or after an existing merge request was merged/closed, and report build status back to GitLab.
 
+### Seeking maintainers
+
+Most of the current maintainers of the plugin are no longer using GitLab on a daily basis, and therefore have less time to contribute to it. If you are a regular user and would like to help out, please consider volunteering as a maintainer. There are verified bugs that need fixes, open PRs that need review, and feature requests that range from simple to complex. If you are interested in contributing, contact Owen (email address in git log) for additional access.
+
 # User support
 
 If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
