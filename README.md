@@ -4,7 +4,12 @@
 - [Known bugs/issues](#known-bugsissues)
 - [Configuring the plugin](#configuring-the-plugin)
     - [Global configuration and authentication](#global-configuration)
+        - [GitLab-to-Jenkins auth](#gitlab-to-jenkins-authentication-required-by-default)
+        - [Jenkins-to-GitLab auth](#jenkins-to-gitlab-authentication-optional)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
+        - [Git configuration for Freestyle jobs](#git-configuration-for-freestyle-jobs)
+        - [Git configuration for Pipeline jobs](#git-configuration-for-pipeline-jobs)
+        - [Git configuration for Pipeline Multibranch jobs](#git-configuration-for-pipeline-multibranch-jobs)
 - [Branch filtering](#branch-filtering)
 - [Build Tags](#build-tags)
 - [Parameterized builds](#parameterized-builds)
@@ -90,6 +95,9 @@ This plugin can be configured to send build status messages to GitLab, which sho
 9. Click the 'Test Connection' button; it should succeed
 
 ## Jenkins Job Configuration
+
+There are two aspects of your Jenkins job that you may want to modify when using GitLab to trigger jobs. The first is the Git configuration, where Jenkins clones your git repo. The GitLab Plugin will set some environment variables when GitLab triggers a build, and you can use those to control what code is cloned from Git. The second is the configuration for sending the build status back to GitLab, where it will be visible in the commit and/or merge request UI.
+
 ### Git configuration for Freestyle jobs
 1. In the *Source Code Management* section:
     1. Click *Git*
@@ -111,7 +119,7 @@ This plugin can be configured to send build status messages to GitLab, which sho
 
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
 
-### Git configuration for Pipeline/Workflow jobs
+### Git configuration for Pipeline jobs
 **Incompatibility note:** When upgrading to version 1.2.1 or later of the plugin, if you are using Pipeline jobs you will need to manually reconfigure your Pipeline scripts. In older versions the plugin set global Groovy variables that could be accessed as e.g. `${gitlabSourceBranch}`. After version 1.2.1, these variables are only accessible in the `env[]` map. E.g. `${env.gitlabSourceBranch}`.
 
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
@@ -129,7 +137,7 @@ checkout changelog: true, poll: true, scm: [
     ]
 ```
 
-### Git configuration for Multibranch Pipeline/Workflow jobs
+### Git configuration for Pipeline Multibranch jobs
 **Note:** none of the GitLab environment variables are available for multibranch pipeline jobs as there is no way to pass some additional data to a multibranch pipeline build while notifying a multibranch pipeline job about SCM changes.
 Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; Merge Request hooks are ignored.
 
