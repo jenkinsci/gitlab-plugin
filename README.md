@@ -2,7 +2,6 @@
 - [Introduction](#introduction)
 - [User support](#user-support)
 - [Known bugs/issues](#known-bugsissues)
-- [Supported GitLab versions](#supported-gitlab-versions)
 - [Configuring the plugin](#configuring-the-plugin)
     - [Global configuration and authentication](#global-configuration)
     - [Jenkins Job Configuration](#jenkins-job-configuration)
@@ -20,9 +19,9 @@ This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/
 # User support
 
 If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
-* GitLab plugin version (e.g. 1.2.0)
-* GitLab version (e.g. 8.1.1)
-* Jenkins version (e.g. 1.651.1)
+* GitLab plugin version (e.g. 1.5.2)
+* GitLab version (e.g. 10.5.1)
+* Jenkins version (e.g. 2.111)
 * Relevant log output from the plugin (see below for instructions on capturing this)
 
 Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it:
@@ -43,11 +42,6 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
 * [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
 * [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
-
-# Supported GitLab versions
-
-* GitLab versions 8.1.x and newer (both CE and EE editions) are supported via the GitLab [commit status API](https://docs.gitlab.com/ce/api/commits.html#commit-status) which supports with external CI services like Jenkins
-* Versions older than 8.1.x may work but are no longer officially supported
 
 # Configuring the plugin
 ## Global configuration
@@ -259,7 +253,7 @@ To use GitLab with Flexible Publish, configure the *Post-build Actions* as follo
 
 ## Gitlab Configuration
 
-GitLab 8.1 has implemented a commit status API, you need an extra post-build step to support commit status.
+You need an extra post-build step to support commit status.
 
 * In GitLab go to your repository's project *Settings*
     * Click on *Web Hooks*
@@ -273,7 +267,7 @@ GitLab 8.1 has implemented a commit status API, you need an extra post-build ste
         * GitLab should display "Hook successfully executed"
         * Jenkins project ``JENKINS_PROJECT_NAME`` should start
 
-* Add a post-build step *Publish build status to GitLab commit (GitLab 8.1+ required)* to the job.
+* Add a post-build step *Publish build status to GitLab* to the job.
 * For pipeline jobs surround your build step with the `gitlabCommitStatus` step like this:
 
     ```
