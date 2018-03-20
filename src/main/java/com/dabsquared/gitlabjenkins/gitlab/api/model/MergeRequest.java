@@ -26,7 +26,7 @@ public class MergeRequest {
     private User assignee;
     private Integer sourceProjectId;
     private Integer targetProjectId;
-    private List<String> labels;
+    private List<Label> labels;
     private String description;
     private Boolean workInProgress;
     private Boolean mergeWhenBuildSucceeds;
@@ -152,11 +152,11 @@ public class MergeRequest {
         this.targetProjectId = targetProjectId;
     }
 
-    public List<String> getLabels() {
+    public List<Label> getLabels() {
         return labels;
     }
 
-    public void setLabels(List<String> labels) {
+    public void setLabels(List<Label> labels) {
         this.labels = labels;
     }
 
@@ -202,72 +202,72 @@ public class MergeRequest {
         }
         MergeRequest that = (MergeRequest) o;
         return new EqualsBuilder()
-                .append(id, that.id)
-                .append(iid, that.iid)
-                .append(sourceBranch, that.sourceBranch)
-                .append(targetBranch, that.targetBranch)
-                .append(projectId, that.projectId)
-                .append(title, that.title)
-                .append(state, that.state)
-                .append(upvotes, that.upvotes)
-                .append(downvotes, that.downvotes)
-                .append(author, that.author)
-                .append(assignee, that.assignee)
-                .append(sourceProjectId, that.sourceProjectId)
-                .append(targetProjectId, that.targetProjectId)
-                .append(labels, that.labels)
-                .append(description, that.description)
-                .append(workInProgress, that.workInProgress)
-                .append(mergeWhenBuildSucceeds, that.mergeWhenBuildSucceeds)
-                .append(mergeStatus, that.mergeStatus)
-                .isEquals();
+            .append(id, that.id)
+            .append(iid, that.iid)
+            .append(sourceBranch, that.sourceBranch)
+            .append(targetBranch, that.targetBranch)
+            .append(projectId, that.projectId)
+            .append(title, that.title)
+            .append(state, that.state)
+            .append(upvotes, that.upvotes)
+            .append(downvotes, that.downvotes)
+            .append(author, that.author)
+            .append(assignee, that.assignee)
+            .append(sourceProjectId, that.sourceProjectId)
+            .append(targetProjectId, that.targetProjectId)
+            .append(labels, that.labels)
+            .append(description, that.description)
+            .append(workInProgress, that.workInProgress)
+            .append(mergeWhenBuildSucceeds, that.mergeWhenBuildSucceeds)
+            .append(mergeStatus, that.mergeStatus)
+            .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(id)
-                .append(iid)
-                .append(sourceBranch)
-                .append(targetBranch)
-                .append(projectId)
-                .append(title)
-                .append(state)
-                .append(upvotes)
-                .append(downvotes)
-                .append(author)
-                .append(assignee)
-                .append(sourceProjectId)
-                .append(targetProjectId)
-                .append(labels)
-                .append(description)
-                .append(workInProgress)
-                .append(mergeWhenBuildSucceeds)
-                .append(mergeStatus)
-                .toHashCode();
+            .append(id)
+            .append(iid)
+            .append(sourceBranch)
+            .append(targetBranch)
+            .append(projectId)
+            .append(title)
+            .append(state)
+            .append(upvotes)
+            .append(downvotes)
+            .append(author)
+            .append(assignee)
+            .append(sourceProjectId)
+            .append(targetProjectId)
+            .append(labels)
+            .append(description)
+            .append(workInProgress)
+            .append(mergeWhenBuildSucceeds)
+            .append(mergeStatus)
+            .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("id", id)
-                .append("iid", iid)
-                .append("sourceBranch", sourceBranch)
-                .append("targetBranch", targetBranch)
-                .append("projectId", projectId)
-                .append("title", title)
-                .append("state", state)
-                .append("upvotes", upvotes)
-                .append("downvotes", downvotes)
-                .append("author", author)
-                .append("assignee", assignee)
-                .append("sourceProjectId", sourceProjectId)
-                .append("targetProjectId", targetProjectId)
-                .append("labels", labels)
-                .append("description", description)
-                .append("workInProgress", workInProgress)
-                .append("mergeWhenBuildSucceeds", mergeWhenBuildSucceeds)
-                .append("mergeStatus", mergeStatus)
-                .toString();
+            .append("id", id)
+            .append("iid", iid)
+            .append("sourceBranch", sourceBranch)
+            .append("targetBranch", targetBranch)
+            .append("projectId", projectId)
+            .append("title", title)
+            .append("state", state)
+            .append("upvotes", upvotes)
+            .append("downvotes", downvotes)
+            .append("author", author)
+            .append("assignee", assignee)
+            .append("sourceProjectId", sourceProjectId)
+            .append("targetProjectId", targetProjectId)
+            .append("labels", labels)
+            .append("description", description)
+            .append("workInProgress", workInProgress)
+            .append("mergeWhenBuildSucceeds", mergeWhenBuildSucceeds)
+            .append("mergeStatus", mergeStatus)
+            .toString();
     }
 }

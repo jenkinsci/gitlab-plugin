@@ -26,9 +26,9 @@ public class GitLabProjectLabelsService {
 
     GitLabProjectLabelsService() {
         this.projectLabelsCache = CacheBuilder.<String, String>newBuilder()
-                .maximumSize(1000)
-                .expireAfterWrite(5, TimeUnit.SECONDS)
-                .build();
+            .maximumSize(1000)
+            .expireAfterWrite(5, TimeUnit.SECONDS)
+            .build();
     }
 
     public static GitLabProjectLabelsService instance() {
@@ -68,7 +68,7 @@ public class GitLabProjectLabelsService {
             List<String> result = new ArrayList<>();
             String projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             for (Label label : client.getLabels(projectId)) {
-                result.add(label.getName());
+                result.add(label.getTitle());
             }
             LOGGER.log(Level.FINEST, "found these labels for repo {0} : {1}", LoggerUtil.toArray(sourceRepository, result));
             return result;

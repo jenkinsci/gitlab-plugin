@@ -34,7 +34,6 @@ public class MergeRequestObjectAttributes {
     private String url;
     private Action action;
     private Boolean workInProgress;
-    private List<String> labels;
 
     public Integer getId() {
         return id;
@@ -196,14 +195,6 @@ public class MergeRequestObjectAttributes {
         this.workInProgress = workInProgress;
     }
 
-    public List<String> getLabels() {
-        return labels;
-    }
-
-    public void setLabels(List<String> labels) {
-        this.labels = labels;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -234,7 +225,6 @@ public class MergeRequestObjectAttributes {
             .append(url, that.url)
             .append(action, that.action)
             .append(workInProgress, that.workInProgress)
-            .append(labels, that.labels)
             .isEquals();
     }
 
@@ -261,7 +251,6 @@ public class MergeRequestObjectAttributes {
             .append(url)
             .append(action)
             .append(workInProgress)
-            .append(labels)
             .toHashCode();
     }
 
@@ -288,7 +277,6 @@ public class MergeRequestObjectAttributes {
             .append("url", url)
             .append("action", action)
             .append("workInProgress", workInProgress)
-            .append("labels", labels)
             .toString();
     }
 }

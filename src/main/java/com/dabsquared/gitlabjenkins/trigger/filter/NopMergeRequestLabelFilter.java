@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
+
 import java.util.Collection;
 
 /**
@@ -7,7 +9,7 @@ import java.util.Collection;
  */
 class NopMergeRequestLabelFilter implements MergeRequestLabelFilter {
     @Override
-    public boolean isMergeRequestAllowed(Collection<String> labels) {
+    public boolean isMergeRequestAllowed(Collection<Label> labels) {
         return true;
     }
 }

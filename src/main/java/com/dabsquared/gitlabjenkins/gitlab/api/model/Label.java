@@ -10,27 +10,28 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Label {
+
     /*
-          "name" : "bug",
+          "title" : "bug",
       "color" : "#d9534f",
       "description": "Bug reported by user",
       "open_issues_count": 1,
       "closed_issues_count": 0,
       "open_merge_requests_count": 1
      */
-    private String name;
+    private String title;
     private String color;
     private String description;
     private long openIssuesCount;
     private long closedIssuesCount;
     private long openMergeRequestsCount;
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getColor() {
@@ -86,7 +87,7 @@ public class Label {
             .append(openIssuesCount, label.openIssuesCount)
             .append(closedIssuesCount, label.closedIssuesCount)
             .append(openMergeRequestsCount, label.openMergeRequestsCount)
-            .append(name, label.name)
+            .append(title, label.title)
             .append(color, label.color)
             .append(description, label.description)
             .isEquals();
@@ -95,7 +96,7 @@ public class Label {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(name)
+            .append(title)
             .append(color)
             .append(description)
             .append(openIssuesCount)
@@ -107,7 +108,7 @@ public class Label {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("name", name)
+            .append("name", title)
             .append("color", color)
             .append("description", description)
             .append("openIssuesCount", openIssuesCount)
