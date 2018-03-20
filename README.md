@@ -2,17 +2,27 @@
 - [Introduction](#introduction)
 - [User support](#user-support)
 - [Known bugs/issues](#known-bugsissues)
-- [Configuring the plugin](#configuring-the-plugin)
-    - [Global configuration and authentication](#global-configuration)
-        - [GitLab-to-Jenkins auth](#gitlab-to-jenkins-authentication-required-by-default)
-        - [Jenkins-to-GitLab auth](#jenkins-to-gitlab-authentication-optional)
-    - [Jenkins Job Configuration](#jenkins-job-configuration)
-        - [Git configuration for Freestyle jobs](#git-configuration-for-freestyle-jobs)
-        - [Git configuration for Pipeline jobs](#git-configuration-for-pipeline-jobs)
-        - [Git configuration for Pipeline Multibranch jobs](#git-configuration-for-pipeline-multibranch-jobs)
-- [Branch filtering](#branch-filtering)
-- [Build Tags](#build-tags)
-- [Parameterized builds](#parameterized-builds)
+- [Global plugin configuration](#global-plugin-configuration)
+  - [GitLab-to-Jenkins auth](#gitlab-to-jenkins-authentication)
+  - [Jenkins-to-GitLab auth](#jenkins-to-gitlab-authentication)
+ - [Jenkins Job Configuration](#jenkins-job-configuration)
+   - [Git configuration](#git-configuration)
+     - [Freestyle jobs](#freestyle-jobs)
+     - [Pipeline jobs](#pipeline-jobs)
+     - [Pipeline Multibranch jobs](#pipeline-multibranch-jobs)
+   - [Job trigger configuration](#job-trigger-configuration)
+     - [Freestyle and Pipeline jobs](#freestyle-and-pipeline-jobs)
+     - [Pipeline Multibranch jobs](#pipeline-multibranch-jobs-1)
+   - [Build status configuration](#build-status-configuration)
+     - [Freestyle jobs](#freestyle-jobs-1)
+     - [Scripted Pipeline jobs](#scripted-pipeline-jobs)
+     - [Declarative Pipeline jobs](#declarative-pipeline-jobs)
+     - [Matrix jobs](#matrixmulti-configuration-jobs)
+- [Advanced features](#advanced-features)
+  - [Branch filtering](#branch-filtering)
+  - [Build when tags are pushed](#build-when-tags-are-pushed)
+  - [Add a note to merge requests](#add-a-note-to-merge-requests)
+  - [Parameterized builds](#parameterized-builds)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Testing With Docker](#testing-with-docker)
 - [Release Workflow](#release-workflow)
@@ -52,7 +62,7 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
 * [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
 
-# Global configuration
+# Global plugin configuration
 ## GitLab-to-Jenkins authentication
 By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs. 
 
