@@ -2,6 +2,7 @@
 - [Introduction](#introduction)
 - [User support](#user-support)
 - [Known bugs/issues](#known-bugsissues)
+- [Defined variables](#defined-variables)
 - [Global plugin configuration](#global-plugin-configuration)
   - [GitLab-to-Jenkins auth](#gitlab-to-jenkins-authentication)
   - [Jenkins-to-GitLab auth](#jenkins-to-gitlab-authentication)
@@ -29,7 +30,7 @@
 
 # Introduction
 
-This plugin allows GitLab to trigger builds in Jenkins after code is pushed and/or after a merge request is created and/or after an existing merge request was merged/closed, and report build status back to GitLab.
+This plugin allows GitLab to trigger builds in Jenkins when code is committed or merge requests are opened/updated. It can also send build status back to GitLab.
 
 ### Seeking maintainers
 
@@ -61,6 +62,43 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
 * [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
 * [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
+
+# Defined variables
+
+When GitLab triggers a build via the plugin, various environment variables are set based on the JSON payload that GitLab sends. You can use these throughout your job configuration. The available variables are:
+
+```
+gitlabBranch
+gitlabSourceBranch
+gitlabActionType
+gitlabUserName
+gitlabUserEmail
+gitlabSourceRepoHomepage
+gitlabSourceRepoName
+gitlabSourceNamespace
+gitlabSourceRepoURL
+gitlabSourceRepoSshUrl
+gitlabSourceRepoHttpUrl
+gitlabMergeRequestTitle
+gitlabMergeRequestDescription
+gitlabMergeRequestId
+gitlabMergeRequestIid
+gitlabMergeRequestState
+gitlabMergedByUser
+gitlabMergeRequestAssignee
+gitlabMergeRequestLastCommit
+gitlabMergeRequestTargetProjectId
+gitlabTargetBranch
+gitlabTargetRepoName
+gitlabTargetNamespace
+gitlabTargetRepoSshUrl
+gitlabTargetRepoHttpUrl
+gitlabBefore
+gitlabAfter
+gitlabTriggerPhrase
+```
+
+ **NOTE:** These variables are not available in Pipeline Multibranch jobs. 
 
 # Global plugin configuration
 ## GitLab-to-Jenkins authentication
@@ -332,37 +370,7 @@ In order to build when a new tag is pushed:
 To add a note to GitLab merge requests after the build completes, select 'Add note with build status on GitLab merge requests' from the optional Post-build actions. Optionally, click the 'Advanced' button to customize the content of the note depending on the build result.
 
 ## Parameterized builds
-
-You can trigger a job a manually by clicking 'This build is parameterized' in the job configuration and adding the any of the relevant build parameters. These include:
-
-* `gitlabBranch`
-* `gitlabSourceBranch`
-* `gitlabActionType`
-* `gitlabUserName`
-* `gitlabUserEmail`
-* `gitlabSourceRepoHomepage`
-* `gitlabSourceRepoName`
-* `gitlabSourceNamespace`
-* `gitlabSourceRepoURL`
-* `gitlabSourceRepoSshUrl`
-* `gitlabSourceRepoHttpUrl`
-* `gitlabMergeRequestTitle`
-* `gitlabMergeRequestDescription`
-* `gitlabMergeRequestId`
-* `gitlabMergeRequestIid`
-* `gitlabMergeRequestState`
-* `gitlabMergedByUser`
-* `gitlabMergeRequestAssignee`
-* `gitlabMergeRequestLastCommit`
-* `gitlabMergeRequestTargetProjectId`
-* `gitlabTargetBranch`
-* `gitlabTargetRepoName`
-* `gitlabTargetNamespace`
-* `gitlabTargetRepoSshUrl`
-* `gitlabTargetRepoHttpUrl`
-* `gitlabBefore`
-* `gitlabAfter`
-* `gitlabTriggerPhrase`
+You can trigger a job a manually by clicking 'This build is parameterized' in the job configuration and adding the any of the relevant build parameters. See the [defined parameters](#defined-parameters) list. If you only care about jobs being triggered from GitLab webhooks, this step is unnecessary.
 
 # Contributing to the Plugin
 
