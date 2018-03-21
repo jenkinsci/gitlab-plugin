@@ -32,7 +32,7 @@ public final class MergeRequestHookTriggerHandlerFactory {
     }
 
 	private static Set<Action> retrieveAllowedActions(boolean triggerOnApprovedMergeRequest) {
-		Set<Action> allowedActions = EnumSet.noneOf(Action.class);
+		Set<Action> allowedActions = EnumSet.of(Action.open, Action.update);
 		if (triggerOnApprovedMergeRequest)
 			allowedActions.add(Action.approved);
 		return allowedActions;
