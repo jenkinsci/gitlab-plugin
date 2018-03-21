@@ -109,23 +109,19 @@ There are two aspects of your Jenkins job that you may want to modify when using
 
 ## Git configuration 
 ### Freestyle jobs
-1. In the *Source Code Management* section:
-    1. Click *Git*
-    2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
-       * In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to
-        ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
-    3. In order to merge from forked repositories:  <br/>**Note:** this requires [configuring communication to the GitLab server](#configuring-access-to-gitlab)
-       * Click *Add Repository* to specify the merge request source repository.  Then specify:
-         * *URL*: ``${gitlabSourceRepoURL}``
-         * In the *Advanced* settings, set *Name* to ``${gitlabSourceRepoName}``.  Leave *Refspec* blank.
-    4. In *Branch Specifier* enter:
-       * For single-repository workflows: ``origin/${gitlabSourceBranch}``
-       * For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
-    5. In *Additional Behaviours*:
-        * Click the *Add* drop-down button
-        * Select *Merge before build* from the drop-down
-        * Set *Name of repository* to ``origin``
-        * Set *Branch to merge* as ``${gitlabTargetBranch}``
+In the *Source Code Management* section:
+
+1. Click *Git*
+2. Enter your *Repository URL*, such as ``git@your.gitlab.server:gitlab_group/gitlab_project.git``
+    1. In the *Advanced* settings, set *Name* to ``origin`` and *Refspec* to ``+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*``
+3. In *Branch Specifier* enter:
+    1. For single-repository workflows: ``origin/${gitlabSourceBranch}``
+    2. For forked repository workflows: ``merge-requests/${gitlabMergeRequestIid}``
+4. In *Additional Behaviours*:
+    1. Click the *Add* drop-down button
+    2. Select *Merge before build* from the drop-down
+    3. Set *Name of repository* to ``origin``
+    4. Set *Branch to merge* as ``${gitlabTargetBranch}``
 
 **Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
 
