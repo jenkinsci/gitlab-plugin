@@ -188,6 +188,8 @@ You can optionally have your Jenkins jobs send their build status back to GitLab
 Freestyle jobs can only send build status after the build steps are complete. To do this, choose 'Publish build status to GitLab' from the available 'Post-build actions' in your Jenkins job config. Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
 
 ### Scripted Pipeline jobs
+**NOTE:** If you use Pipeline global libraries, or if you clone your project's Jenkinsfile from a repo different from the one that contains the relevant source code, you need to be careful about when you send project status. In short, make sure you put your `gitlabCommitStatus` or other similar steps *after* the SCM step that clones your project's source. Otherwise, you may get HTTP 400 errors, or you may find build status being sent to the wrong repo.
+
 * For Pipeline jobs surround your build steps with the `gitlabCommitStatus` step like this:
     ```
     node() {
