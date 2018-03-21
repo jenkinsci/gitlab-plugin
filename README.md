@@ -264,7 +264,13 @@ pipeline {
 }
 ```
 
-If you make use of the *"Merge When Pipeline Succeeds"* option for Merge Requests in GitLab, and your Declarative Pipeline jobs have more than one stage, you will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
+If:
+1. You use the *"Merge When Pipeline Succeeds"* option for Merge Requests in GitLab, and 
+2. Your Declarative Pipeline jobs have more than one stage, and
+3. You use a `gitlabCommitStatus` step *in each stage* to send status to GitLab...
+
+Then:
+You will need to define those stages in an `options` block. Otherwise, when and if the first stage passes, GitLab will merge the change. For example, if you have three stages named build, test, and deploy:
 
 ```
     options {
