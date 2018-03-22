@@ -11,7 +11,7 @@
             <f:textbox value="${connection.name}"/>
             <input type="hidden" name="id" value="${connection}"/>
           </f:entry>
-          <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%i.e. http://gitlab.org})">
+          <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%e.g. http://gitlab.mydomain.com})">
             <f:textbox value="${connection.url}"/>
           </f:entry>
           <f:entry title="${%Credentials}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
