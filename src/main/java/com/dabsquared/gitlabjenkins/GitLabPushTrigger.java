@@ -383,6 +383,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
 
+    @DataBoundSetter
+    public void setTriggerOnPipelineEvent(boolean triggerOnPipelineEvent) {
+        this.triggerOnPipelineEvent = triggerOnPipelineEvent;
+    }
+
     // executes when the Trigger receives a push request
     public void onPost(final PushHook hook) {
         if (branchFilter == null) {
