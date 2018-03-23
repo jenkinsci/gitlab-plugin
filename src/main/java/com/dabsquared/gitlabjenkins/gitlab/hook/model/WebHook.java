@@ -28,6 +28,13 @@ public abstract class WebHook {
         this.repository = repository;
     }
 
+    /**
+     * Get branch of project, that was used to trigger build.
+     *
+     * @return name of hook initiating branch
+     */
+    public abstract String getEventSourceBranch();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -38,24 +45,24 @@ public abstract class WebHook {
         }
         WebHook webHook = (WebHook) o;
         return new EqualsBuilder()
-                .append(repository, webHook.repository)
-                .append(objectKind, webHook.objectKind)
-                .isEquals();
+            .append(repository, webHook.repository)
+            .append(objectKind, webHook.objectKind)
+            .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(repository)
-                .append(objectKind)
-                .toHashCode();
+            .append(repository)
+            .append(objectKind)
+            .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("repository", repository)
-                .append("objectKind", objectKind)
-                .toString();
+            .append("repository", repository)
+            .append("objectKind", objectKind)
+            .toString();
     }
 }

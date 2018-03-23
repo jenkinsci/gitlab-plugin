@@ -49,7 +49,12 @@ public class MergeRequestHook extends WebHook {
 		this.assignee = assignee;
 	}
 
-	@Override
+    @Override
+    public String getEventSourceBranch() {
+        return objectAttributes.getSourceBranch();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

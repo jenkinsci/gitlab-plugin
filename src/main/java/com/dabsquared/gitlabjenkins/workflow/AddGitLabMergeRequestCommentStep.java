@@ -10,11 +10,11 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -57,7 +57,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         this.comment = StringUtils.isEmpty(comment) ? null : comment;
     }
 
-    public static class AddGitLabMergeRequestCommentStepExecution extends AbstractSynchronousStepExecution<Void> {
+    public static class AddGitLabMergeRequestCommentStepExecution extends SynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
         private final transient Run<?, ?> run;

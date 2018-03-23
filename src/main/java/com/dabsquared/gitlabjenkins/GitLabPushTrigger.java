@@ -4,10 +4,7 @@ package com.dabsquared.gitlabjenkins;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.publisher.GitLabAcceptMergeRequestPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
@@ -20,20 +17,21 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterConfig;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory;
+import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
+import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Util;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import hudson.model.AbstractProject;
-import hudson.model.AutoCompletionCandidates;
-import hudson.model.Item;
-import hudson.model.Job;
+import hudson.model.*;
+import hudson.slaves.WorkspaceList;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
@@ -48,6 +46,7 @@ import net.karneim.pojobuilder.GeneratePojoBuilder;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -60,12 +59,19 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandlerFactory.newNoteHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandlerFactory.newPipelineHookTriggerHandler;
 import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandlerFactory.newPushHookTriggerHandler;
+import static jenkins.model.Jenkins.getInstance;
 
 
 /**
@@ -74,7 +80,7 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerH
  * @author Daniel Brooks
  */
 public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
-
+    private static final Logger LOGGER = Logger.getLogger(GitLabPushTrigger.class.getName());
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private boolean triggerOnPush = true;
@@ -108,6 +114,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private transient PipelineHookTriggerHandler pipelineTriggerHandler;
     private transient boolean acceptMergeRequestOnSuccess;
     private transient MergeRequestLabelFilter mergeRequestLabelFilter;
+    private transient Map<Class<?>, WebHookTriggerHandler<?>> handlers;
 
     /**
      * @deprecated use {@link #GitLabPushTrigger()} with setters to configure an instance of this class.
@@ -383,51 +390,32 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
 
-    // executes when the Trigger receives a push request
-    public void onPost(final PushHook hook) {
-        if (branchFilter == null) {
-            initializeBranchFilter();
-        }
-        if (mergeRequestLabelFilter == null) {
-            initializeMergeRequestLabelFilter();
-        }
-        if (pushHookTriggerHandler == null) {
-            initializeTriggerHandler();
-        }
-        pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+    public void setJob(Job<?, ?> job) {
+        this.job = job;
     }
 
-    // executes when the Trigger receives a merge request
-    public void onPost(final MergeRequestHook hook) {
-        if (branchFilter == null) {
-            initializeBranchFilter();
+    public <T extends WebHook> boolean onPost(T hook) {
+        if (!(hook instanceof PipelineHook)) {
+            if (branchFilter == null) {
+                initializeBranchFilter();
+            }
+            if (mergeRequestLabelFilter == null) {
+                initializeMergeRequestLabelFilter();
+            }
+            if (noteHookTriggerHandler == null || mergeRequestHookTriggerHandler == null
+                || pushHookTriggerHandler == null || pipelineTriggerHandler == null) {
+                initializeTriggerHandler();
+            }
         }
-        if (mergeRequestLabelFilter == null) {
-            initializeMergeRequestLabelFilter();
+        //noinspection unchecked
+        WebHookTriggerHandler<T> handler = (WebHookTriggerHandler<T>) handlers.get(hook.getClass());
+        if (handler != null) {
+            LOGGER.severe("Hook handler not found : " + hook.getClass().getSimpleName());
+            handler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            return true;
+        } else {
+            return false;
         }
-        if (mergeRequestHookTriggerHandler == null) {
-            initializeTriggerHandler();
-        }
-        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
-    }
-
-    // executes when the Trigger receives a note request
-    public void onPost(final NoteHook hook) {
-        if (branchFilter == null) {
-            initializeBranchFilter();
-        }
-        if (mergeRequestLabelFilter == null) {
-            initializeMergeRequestLabelFilter();
-        }
-        if (noteHookTriggerHandler == null) {
-            initializeTriggerHandler();
-        }
-        noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
-    }
-
-    // executes when the Trigger receives a pipeline event
-    public void onPost(final PipelineHook hook) {
-        pipelineTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     private void initializeTriggerHandler() {
@@ -437,6 +425,13 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
         pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
+
+        Map<Class<?>, WebHookTriggerHandler<?>> handlerMap = new HashMap<>();
+        handlerMap.put(NoteHook.class, noteHookTriggerHandler);
+        handlerMap.put(MergeRequestHook.class, mergeRequestHookTriggerHandler);
+        handlerMap.put(PushHook.class, pushHookTriggerHandler);
+        handlerMap.put(PipelineHook.class, pipelineTriggerHandler);
+        handlers = Collections.unmodifiableMap(handlerMap);
     }
 
     private void initializeBranchFilter() {
@@ -462,18 +457,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return super.readResolve();
     }
 
-    public static GitLabPushTrigger getFromJob(Job<?, ?> job) {
-        GitLabPushTrigger trigger = null;
-        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-            ParameterizedJobMixIn.ParameterizedJob p = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (Trigger t : p.getTriggers().values()) {
-                if (t instanceof GitLabPushTrigger) {
-                    trigger = (GitLabPushTrigger) t;
-                }
-            }
-        }
-        return trigger;
-    }
+
 
     @Extension
     @Symbol("gitlab")

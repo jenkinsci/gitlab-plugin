@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
@@ -8,7 +7,6 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import jenkins.model.Jenkins;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
@@ -66,12 +64,7 @@ public class PushBuildAction extends BuildWebHookAction {
         }
 
         if (project instanceof Job<?, ?>) {
-            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
-                @Override
-                protected void performOnPost(GitLabPushTrigger trigger) {
-                    trigger.onPost(pushHook);
-                }
-            });
+            ACL.impersonate(ACL.SYSTEM, new TriggerAction<>(pushHook, project, secretToken));
             throw HttpResponses.ok();
         }
         if (project instanceof SCMSourceOwner) {

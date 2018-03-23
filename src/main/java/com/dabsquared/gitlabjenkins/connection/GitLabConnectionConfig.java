@@ -9,7 +9,6 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.security.ACL;
@@ -23,6 +22,7 @@ import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.Nonnull;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
@@ -188,7 +188,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     private static class GitLabCredentialMatcher implements CredentialsMatcher {
         @Override
-        public boolean matches(@NonNull Credentials credentials) {
+        public boolean matches(@Nonnull Credentials credentials) {
             try {
                 return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
             } catch (Throwable e) {

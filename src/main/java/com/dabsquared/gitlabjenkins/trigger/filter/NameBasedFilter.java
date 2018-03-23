@@ -51,7 +51,7 @@ class NameBasedFilter implements BranchFilter {
 
     private List<String> convert(String commaSeparatedString) {
         if (commaSeparatedString == null)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
         ArrayList<String> result = new ArrayList<>();
         for (String s : Splitter.on(',').omitEmptyStrings().trimResults().split(commaSeparatedString)) {
