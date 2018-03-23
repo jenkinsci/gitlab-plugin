@@ -1,5 +1,10 @@
 ChangeLog
 
+1.5.4
+=====================
+* #714: Fix broken 'Trigger on approved merge requests' setting
+* #726: Do not build approved merge requests unless configured to do so
+
 1.5.3
 =====================
 * #622: GitlabCommitStatus throws error after force kill
