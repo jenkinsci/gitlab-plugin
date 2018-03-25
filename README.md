@@ -142,6 +142,9 @@ Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeli
 
 Example `Jenkinsfile` for multibranch pipeline jobs
 ```
+// Define your secret project token here
+def project_token = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEF'
+
 // Reference the GitLab connection name from your Jenkins Global configuration (http://JENKINS_URL/configure, GitLab section)
 properties([
     gitLabConnection('your-gitlab-connection-name'),
