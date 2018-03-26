@@ -24,6 +24,7 @@ This plugin allows GitLab to trigger builds in Jenkins when code is committed or
   - [Job trigger configuration](#job-trigger-configuration)
     - [Freestyle and Pipeline jobs](#freestyle-and-pipeline-jobs)
     - [Multibranch Pipeline jobs](#multibranch-pipeline-jobs)
+    - [Multibranch Pipeline jobs with Job DSL](#multibranch-pipeline-jobs-with-job-dsl)
   - [Build status configuration](#build-status-configuration)
     - [Freestyle jobs](#freestyle-jobs)
     - [Scripted Pipeline jobs](#scripted-pipeline-jobs)
@@ -267,6 +268,34 @@ properties([
         ]
     ])
 ])
+```
+
+### Multibranch Pipeline jobs with Job DSL
+
+You can use [Dynamic-DSL](https://github.com/jenkinsci/job-dsl-plugin/wiki/Dynamic-DSL) to configure thegitlab plugin. See <https://github.com/jenkinsci/gitlab-plugin/blob/master/src/main/java/com/dabsquared/gitlabjenkins/GitLabPushTrigger.java> for the methods you can use.
+
+```groovy
+job('seed-job') {
+
+    description('Job that makes sure a service has a build pipeline available')
+
+    parameters {
+        // stringParam('gitlabSourceRepoURL', '', 'the git repository url, e.g. git@git.your-domain.com:kubernetes/cronjobs/cleanup-jenkins.git')
+    }
+
+    triggers {
+        gitlab {
+            secretToken(System.getenv("API_TOKEN"))
+            triggerOnNoteRequest(false)
+        }
+    }
+
+    steps {
+        dsl {
+            text(new File('/usr/share/jenkins/ref/jobdsl/multibranch-pipeline.groovy').getText('UTF-8'))
+        }
+    }
+}
 ```
 
 ## Build status configuration
