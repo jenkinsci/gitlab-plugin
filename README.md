@@ -203,8 +203,8 @@ node {
 ### Freestyle and Pipeline jobs
 1. In the *Build Triggers* section:
     * Select *Build when a change is pushed to GitLab*
-    * Make a note of the *GitLab CI Service URL* appearing on the same line with *Build when a change is
-      pushed to GitLab*.  You will later use this URL to define a GitLab web hook.
+    * Copy the *GitLab webhook URL* appearing on the same line with *Build when a change is
+      pushed to GitLab*.
     * Use the check boxes to trigger builds on *Push Events* and/or *Created Merge Request Events* and/or *Accepted Merge Request Events* and/or *Closed Merge Request Events*
     * Optionally use *Rebuild open Merge Requests* to enable re-building open merge requests after a
       push to the source branch
@@ -216,6 +216,7 @@ node {
       Otherwise you might end up in a loop.
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins.
+4. Create a webhook in the relevant GitLab projects (consult the GitLab documentation for instructions on this), and use the URL you copied from the Jenkins job configuration UI. It should look something like `http://JENKINS_URL/project/yourbuildname`
 
 ### Pipeline Multibranch jobs
 Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to ``http://JENKINS_URL/project/PROJECT_NAME`` or ``http://JENKINS_URL/project/FOLDER/PROJECT_NAME`` if the project in inside a folder in Jenkins. When GitLab POSTs to this URL, it will trigger branch indexing for the Jenkins project, and Jenkins will handle starting any builds necessary.

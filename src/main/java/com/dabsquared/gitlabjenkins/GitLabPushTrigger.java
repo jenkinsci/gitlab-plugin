@@ -507,7 +507,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
             Job<?, ?> project = retrieveCurrentJob();
             if (project != null) {
                 try {
-                    return "Build when a change is pushed to GitLab. GitLab CI Service URL: " + retrieveProjectUrl(project);
+                    return "Build when a change is pushed to GitLab. GitLab webhook URL: " + retrieveProjectUrl(project);
                 } catch (IllegalStateException e) {
                     // nothing to do
                 }
