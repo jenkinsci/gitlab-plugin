@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -18,6 +19,8 @@ import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +43,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates,  boolean skipWorkInProgressMergeRequest) {
     	this(allowedStates, EnumSet.allOf(Action.class),skipWorkInProgressMergeRequest);
     }
-	
+
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest) {
         this.allowedStates = allowedStates;
         this.allowedActions = allowedActions;
@@ -52,9 +55,18 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (isAllowedByConfig(objectAttributes)
             && isLastCommitNotYetBuild(job, hook)
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
-            && mergeRequestLabelFilter.isMergeRequestAllowed(hook.getObjectAttributes().getLabels())) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
+
+            List<String> labelsNames = new ArrayList<>();
+            if (hook.getLabels() != null) {
+                for (MergeRequestLabel label : hook.getLabels()) {
+                    labelsNames.add(label.getTitle());
+                }
+            }
+
+            if (mergeRequestLabelFilter.isMergeRequestAllowed(labelsNames)) {
+                super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            }
         }
     }
 
@@ -137,11 +149,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
-        if (objectAttributes.getAction() == Action.approved) {
+        if (objectAttributes != null && objectAttributes.getAction() == Action.approved) {
             LOGGER.log(Level.FINEST, "Skipping LastCommitNotYetBuild check for approve action");
-        	return true;
+            return true;
         }
-        
+
         if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
             Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getLastCommit().getId());
             if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
@@ -158,10 +170,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
-		return allowedStates.contains(objectAttributes.getState()) 
+		return allowedStates.contains(objectAttributes.getState())
         	&& allowedActions.contains(objectAttributes.getAction());
-	}    
-    
+	}
+
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {
         Boolean workInProgress = objectAttributes.getWorkInProgress();
         if (skipWorkInProgressMergeRequest && workInProgress != null && workInProgress) {
