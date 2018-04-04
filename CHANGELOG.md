@@ -3,7 +3,7 @@ ChangeLog
 1.5.5
 =====================
 * #698: Make plugin respect no-proxy-hosts when a proxy is used
-* #723: "Build on successful pipeline events" setting does not stay set
+* #731: "Build on successful pipeline events" setting does not stay set
 * #732: Filtering by label never matches anything
 
 1.5.4
