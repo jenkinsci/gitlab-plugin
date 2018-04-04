@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.net.Proxy.NO_PROXY;
+import static java.net.Proxy.Type.HTTP;
 
 
 @Restricted(NoExternalUse.class)
@@ -90,19 +90,22 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
 
     private GitLabClient buildClient(String url, String apiToken, ProxyConfiguration httpProxyConfig, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         ResteasyClientBuilder builder = new ResteasyClientBuilder();
+
         if (ignoreCertificateErrors) {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
             builder.disableTrustManager();
         }
 
-        Proxy proxy = httpProxyConfig != null ? httpProxyConfig.createProxy(getHost(url)) : NO_PROXY;
-        if (proxy != NO_PROXY) {
-            InetSocketAddress address = (InetSocketAddress) proxy.address();
-            builder.defaultProxy(address.getHostName().replaceFirst("^.*://", ""),
-                address.getPort(),
-                address.getHostName().startsWith("https") ? "https" : "http",
-                httpProxyConfig.getUserName(),
-                httpProxyConfig.getPassword());
+        if (httpProxyConfig != null) {
+            Proxy proxy = httpProxyConfig.createProxy(getHost(url));
+            if (proxy.type() == HTTP) {
+                InetSocketAddress address = (InetSocketAddress) proxy.address();
+                builder.defaultProxy(address.getHostString().replaceFirst("^.*://", ""),
+                    address.getPort(),
+                    address.getHostName().startsWith("https") ? "https" : "http",
+                    httpProxyConfig.getUserName(),
+                    httpProxyConfig.getPassword());
+            }
         }
 
         GitLabApiProxy apiProxy = builder
@@ -120,6 +123,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             .proxyBuilder(apiProxyClass)
             .classloader(apiProxyClass.getClassLoader())
             .build();
+
         return new ResteasyGitLabClient(url, apiProxy, mergeRequestIdProvider);
     }
 
@@ -139,7 +143,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             this.gitlabApiToken = gitlabApiToken;
         }
 
-        public void filter(ClientRequestContext requestContext) throws IOException {
+        public void filter(ClientRequestContext requestContext) {
             requestContext.getHeaders().putSingle(PRIVATE_TOKEN, gitlabApiToken);
         }
     }
@@ -147,7 +151,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     @Priority(Priorities.USER)
     private static class LoggingFilter implements ClientRequestFilter, ClientResponseFilter {
         @Override
-        public void filter(ClientRequestContext context) throws IOException {
+        public void filter(ClientRequestContext context) {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.log(Level.FINEST, "Call GitLab:\nHTTP method: {0}\nURL: {1}\nRequest headers: [\n{2}\n]",
                         LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getHeaders())));
@@ -155,7 +159,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
 
         @Override
-        public void filter(ClientRequestContext request, ClientResponseContext response) throws IOException {
+        public void filter(ClientRequestContext request, ClientResponseContext response) {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.log(Level.FINEST, "Got response from GitLab:\nURL: {0}\nStatus: {1} {2}\nResponse headers: [\n{3}\n]\nResponse body: {4}",
                         LoggerUtil.toArray(request.getUri(), response.getStatus(), response.getStatusInfo(), toString(response.getHeaders()),
@@ -220,7 +224,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     private static class RemoveAcceptEncodingFilter implements ClientRequestFilter {
         RemoveAcceptEncodingFilter() {}
         @Override
-        public void filter(ClientRequestContext clientRequestContext) throws IOException {
+        public void filter(ClientRequestContext clientRequestContext) {
             clientRequestContext.getHeaders().remove("Accept-Encoding");
         }
     }

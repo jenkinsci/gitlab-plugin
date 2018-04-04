@@ -9,6 +9,7 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
+import hudson.ProxyConfiguration;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
@@ -39,8 +40,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.dabsquared.gitlabjenkins.connection.Messages.connection_error;
+import static com.dabsquared.gitlabjenkins.connection.Messages.connection_success;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertSame;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -77,17 +81,32 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void doCheckConnection_success() {
-        String expected = Messages.connection_success();
+        String expected = connection_success();
         assertThat(doCheckConnection("v3", Response.Status.OK), is(expected));
         assertThat(doCheckConnection("v4", Response.Status.OK), is(expected));
     }
 
     @Test
-    public void doCheckConnection_forbidden() throws IOException {
-        String expected = Messages.connection_error("HTTP 403 Forbidden");
+    public void doCheckConnection_forbidden() {
+        String expected = connection_error("HTTP 403 Forbidden");
         assertThat(doCheckConnection("v3", Response.Status.FORBIDDEN), is(expected));
         assertThat(doCheckConnection("v4", Response.Status.FORBIDDEN), is(expected));
     }
+
+    @Test
+    public void doCheckConnection_proxy() {
+        jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
+        GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
+        FormValidation result = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
+        assertThat(result.getMessage(), containsString("Connection refused"));
+    }
+
+    @Test
+    public void doCheckConnection_noProxy() {
+        jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
+        assertThat(doCheckConnection("v3", Response.Status.OK), is(connection_success()));
+    }
+
 
     private String doCheckConnection(String clientBuilderId, Response.Status status) {
         HttpRequest request = request().withPath("/gitlab/api/" + clientBuilderId + "/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
@@ -101,7 +120,7 @@ public class GitLabConnectionConfigTest {
 
 
     @Test
-    public void authenticationEnabled_anonymous_forbidden() throws IOException, URISyntaxException {
+    public void authenticationEnabled_anonymous_forbidden() throws IOException {
         Boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
         assertTrue(defaultValue);
         jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
