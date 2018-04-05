@@ -109,7 +109,6 @@ public class AcceptGitLabMergeRequestStep extends Step {
         	if (!step.useMRDescription)
         		return step.mergeCommitMessage;
         	
-        	println("Merge description is: "+mergeRequest.getDescription());
         	String message = "Merge branch '"+mergeRequest.getSourceBranch()+"' into '"+mergeRequest.getTargetBranch()+"'\n\n"+
         		mergeRequest.getTitle()+"\n\n"+
     			mergeRequest.getDescription()+"\n\n" +
