@@ -130,7 +130,7 @@ If you want to disable this authentication (not recommended):
 3. Uncheck "Enable authentication for '/project' end-point" - you will now be able to trigger Jenkins jobs from GitLab without needing authentication
 
 ## Jenkins-to-GitLab authentication
-**PLEASE NOTE:** This auth configuration is only used for accessing the GitLab API for sending build status to GitLab. It is **not** used for cloning git repos. The credentials for cloning (usually SSH credentials) should be configuring separately, in the git plugin.
+**PLEASE NOTE:** This auth configuration is only used for accessing the GitLab API for sending build status to GitLab. It is **not** used for cloning git repos. The credentials for cloning (usually SSH credentials) should be configured separately, in the git plugin.
 
 This plugin can be configured to send build status messages to GitLab, which show up in the GitLab Merge Request UI. To enable this functionality: 
 1. Create a new user in GitLab
@@ -182,13 +182,13 @@ checkout changelog: true, poll: true, scm: [
 ```
 
 ### Pipeline Multibranch jobs
-**Note:** There is no way to pass external data from GitLab to a Pipeline Multibranch job, so the GitLab environment variables are **not populated** for this job type. GitLab will just trigger branch indexing for the Jenkins project, and Jenkins will build branches accordingly without needing e.g. the git branch env var. **Due to this the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; Merge Request hooks are ignored.**
+**Note:** There is no way to pass external data from GitLab to a Pipeline Multibranch job, so the GitLab environment variables are **not populated** for this job type. GitLab will just trigger branch indexing for the Jenkins project, and Jenkins will build branches accordingly without needing e.g. the git branch env var. **Due to this, the plugin just listens for GitLab Push Hooks for multibranch pipeline jobs; merge Request hooks are ignored.**
 
 1. Click **Add source**
 2. Select **Git**
 3. Enter your *Repository URL* (e.g.: ``git@your.gitlab.server:group/repo_name.git``)
 
-Example `Jenkinsfile` for multibranch pipeline jobs
+Example `Jenkinsfile` for multibranch pipeline jobs:
 ```
 // Reference the GitLab connection name from your Jenkins Global configuration (http://JENKINS_URL/configure, GitLab section)
 properties([gitLabConnection('your-gitlab-connection-name')])
@@ -205,22 +205,22 @@ node {
 1. In the *Build Triggers* section:
     * Select *Build when a change is pushed to GitLab*
     * Copy the *GitLab webhook URL* appearing on the same line with *Build when a change is
-      pushed to GitLab*.
+      pushed to GitLab*
     * Use the check boxes to trigger builds on *Push Events* and/or *Created Merge Request Events* and/or *Accepted Merge Request Events* and/or *Closed Merge Request Events*
     * Optionally use *Rebuild open Merge Requests* to enable re-building open merge requests after a
       push to the source branch
     * If you selected *Rebuild open Merge Requests* other than *None*, check *Comments*, and specify the
       *Comment for triggering a build*.  A new build will be triggered when this phrase appears in a
-      commit comment.  In addition to a literal phrase, you can also specify a Java regular expression.
+      commit comment.  In addition to a literal phrase, you can also specify a Java regular expression
     * You can use *Build on successful pipeline events* to trigger on a successful pipeline run in Gitlab. Note that 
       this build trigger will only trigger a build if the commit is not already built and does not set the Gitlab status.
-      Otherwise you might end up in a loop.
+      Otherwise you might end up in a loop
 2. Configure any other pre build, build or post build actions as necessary
-3. Click *Save* to preserve your changes in Jenkins.
+3. Click *Save* to preserve your changes in Jenkins
 4. Create a webhook in the relevant GitLab projects (consult the GitLab documentation for instructions on this), and use the URL you copied from the Jenkins job configuration UI. It should look something like `http://JENKINS_URL/project/yourbuildname`
 
 ### Pipeline Multibranch jobs
-Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to ``http://JENKINS_URL/project/PROJECT_NAME`` or ``http://JENKINS_URL/project/FOLDER/PROJECT_NAME`` if the project in inside a folder in Jenkins. When GitLab POSTs to this URL, it will trigger branch indexing for the Jenkins project, and Jenkins will handle starting any builds necessary.
+Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to ``http://JENKINS_URL/project/PROJECT_NAME`` or ``http://JENKINS_URL/project/FOLDER/PROJECT_NAME`` if the project is inside a folder in Jenkins. When GitLab POSTs to this URL, it will trigger branch indexing for the Jenkins project, and Jenkins will handle starting any builds necessary.
 
 If you want to configure some of the trigger options, such as the secret token or CI skip functionality, you can use a `properties` step. For example:
 
@@ -293,7 +293,7 @@ Freestyle jobs can only send build status after the build steps are complete. To
 ### Scripted Pipeline jobs
 **NOTE:** If you use Pipeline global libraries, or if you clone your project's Jenkinsfile from a repo different from the one that contains the relevant source code, you need to be careful about when you send project status. In short, make sure you put your `gitlabCommitStatus` or other similar steps *after* the SCM step that clones your project's source. Otherwise, you may get HTTP 400 errors, or you may find build status being sent to the wrong repo.
 
-* For Pipeline jobs surround your build steps with the `gitlabCommitStatus` step like this:
+* For Pipeline jobs, surround your build steps with the `gitlabCommitStatus` step like this:
     ```
     node() {
         stage('Checkout') { checkout <your-scm-config> }
@@ -435,7 +435,7 @@ In order to build when a new tag is pushed:
 To add a note to GitLab merge requests after the build completes, select 'Add note with build status on GitLab merge requests' from the optional Post-build actions. Optionally, click the 'Advanced' button to customize the content of the note depending on the build result.
 
 ## Parameterized builds
-You can trigger a job a manually by clicking 'This build is parameterized' in the job configuration and adding the any of the relevant build parameters. See the [defined parameters](#defined-parameters) list. If you only care about jobs being triggered from GitLab webhooks, this step is unnecessary.
+You can trigger a job manually by clicking 'This build is parameterized' in the job configuration and adding any of the relevant build parameters. See the [defined parameters](#defined-parameters) list. If you only care about jobs being triggered from GitLab webhooks, this step is unnecessary.
 
 # Contributing to the Plugin
 
@@ -456,7 +456,7 @@ Before submitting your change make sure that:
 * imports are organised
 * you updated the help docs
 * you updated the README
-* you have used findbugs to see if you haven't introduced any new warnings.
+* you have used findbugs to see if you haven't introduced any new warnings
 
 # Testing With Docker
 
