@@ -60,22 +60,22 @@ public class GitLabVotePublisherTest {
 
     @Test
     public void success_v3() throws IOException, InterruptedException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", MERGE_REQUEST_ID, ":+1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", MERGE_REQUEST_ID, "thumbsup");
     }
 
     @Test
     public void success_v4() throws IOException, InterruptedException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", MERGE_REQUEST_IID, ":+1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", MERGE_REQUEST_IID, "thumbsup");
     }
 
     @Test
     public void failed_v3() throws IOException, InterruptedException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", MERGE_REQUEST_ID, ":-1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", MERGE_REQUEST_ID, "thumbsdown");
     }
 
     @Test
     public void failed_v4() throws IOException, InterruptedException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, ":-1:");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, "thumbsdown");
     }
 
 
@@ -92,11 +92,11 @@ public class GitLabVotePublisherTest {
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String name) throws UnsupportedEncodingException {
         return request()
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/notes")
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/award_emoji")
+                .withQueryStringParameter("name", name)
                 .withMethod("POST")
-                .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody("body=" + URLEncoder.encode(body, "UTF-8"));
+                .withHeader("PRIVATE-TOKEN", "secret");
     }
 }

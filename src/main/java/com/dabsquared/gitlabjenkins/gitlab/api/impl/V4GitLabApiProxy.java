@@ -131,6 +131,32 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/award_emoji")
+    @Override
+    List<Awardable> getMergeRequestEmoji(@PathParam("projectId") Integer projectId,
+                                         @PathParam("mergeRequestIid") Integer mergeRequestIid);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/award_emoji")
+    @Override
+    void awardMergeRequestEmoji(@PathParam("projectId") Integer projectId,
+                                @PathParam("mergeRequestIid") Integer mergeRequestIid,
+                                @QueryParam("name") String name);
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/award_emoji/{awardId}")
+    @Override
+    void deleteMergeRequestEmoji(@PathParam("projectId") Integer projectId,
+                                 @PathParam("mergeRequestIid") Integer mergeRequestIid,
+                                 @PathParam("awardId") Integer awardId);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/merge_requests")
     @Override
     List<MergeRequest> getMergeRequests(@PathParam("projectId") String projectId,

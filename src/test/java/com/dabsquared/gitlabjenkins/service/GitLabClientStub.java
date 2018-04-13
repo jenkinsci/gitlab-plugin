@@ -130,6 +130,21 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
+    public void awardMergeRequestEmoji(MergeRequest mr, String name) {
+
+    }
+
+    @Override
+    public List<Awardable> getMergeRequestEmoji(MergeRequest mr) {
+        return null;
+    }
+
+    @Override
+    public void deleteMergeRequestEmoji(MergeRequest mr, Integer awardId) {
+
+    }
+
+    @Override
     public List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage) {
         return null;
     }
