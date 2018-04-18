@@ -16,8 +16,6 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
@@ -46,6 +44,7 @@ public class GitLabVotePublisherTest {
     public void setup() {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
         mockServerClient = new MockServerClient("localhost", mockServer.getPort());
+        mockUser(1, "jenkins");
     }
 
     @After
@@ -78,7 +77,6 @@ public class GitLabVotePublisherTest {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, "thumbsdown");
     }
 
-
     private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote) throws InterruptedException, IOException {
         GitLabVotePublisher publisher = preparePublisher(new GitLabVotePublisher(), build);
         publisher.perform(build, null, listener);
@@ -86,17 +84,32 @@ public class GitLabVotePublisherTest {
         mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, apiLevel, mergeRequestId, defaultNote));
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(AbstractBuild build, String apiLevel, int mergeRequestId, String body) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageWithSuccessResponse(AbstractBuild build, String apiLevel, int mergeRequestId, String body) {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, formatNote(build, body));
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String name) throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String name) {
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/award_emoji")
                 .withQueryStringParameter("name", name)
                 .withMethod("POST")
+                .withHeader("PRIVATE-TOKEN", "secret");
+    }
+
+    private void mockUser(final int id, final String username) {
+        String sb = ("{\"id\": " + id) +
+                     ",\"username\": \"" + username + "\"" +
+                     ",\"email\": \"jenkins@jenkins.io\"" +
+                     ",\"name\": \"Ms Jenkins\"}";
+        mockServerClient.when(prepareUserQuery()).respond(response(sb));
+    }
+
+    private HttpRequest prepareUserQuery() {
+        return request()
+                .withPath("/gitlab/api/v(3|4)/user")
+                .withMethod("GET")
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 }
