@@ -5,5 +5,5 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
  */
 public interface BranchFilter {
 
-    boolean isBranchAllowed(String branchName);
+    boolean isBranchAllowed(String sourceBranchName, String targetBranchName);
 }

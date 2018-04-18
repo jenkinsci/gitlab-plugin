@@ -21,8 +21,8 @@ class NameBasedFilter implements BranchFilter {
     }
 
     @Override
-    public boolean isBranchAllowed(String branchName) {
-        return hasNoBranchSpecs() || (isBranchNotExcluded(branchName) && isBranchIncluded(branchName));
+    public boolean isBranchAllowed(String sourceBranchName, String targetBranchName) {
+        return hasNoBranchSpecs() || (isBranchNotExcluded(targetBranchName) && isBranchIncluded(targetBranchName));
     }
 
     private boolean hasNoBranchSpecs() {

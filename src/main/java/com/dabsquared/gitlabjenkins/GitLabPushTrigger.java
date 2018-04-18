@@ -97,6 +97,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
     private String excludeBranchesSpec;
+    private String sourceBranchRegex;
     private String targetBranchRegex;
     private MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
     private volatile Secret secretToken;
@@ -119,7 +120,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     						 boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
-                             String includeBranchesSpec, String excludeBranchesSpec, String targetBranchRegex,
+                             String includeBranchesSpec, String excludeBranchesSpec, String sourceBranchRegex, String targetBranchRegex,
                              MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent, 
                              boolean triggerOnApprovedMergeRequest) {
         this.triggerOnPush = triggerOnPush;
@@ -139,6 +140,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         this.branchFilterType = branchFilterType;
         this.includeBranchesSpec = includeBranchesSpec;
         this.excludeBranchesSpec = excludeBranchesSpec;
+        this.sourceBranchRegex = sourceBranchRegex;
         this.targetBranchRegex = targetBranchRegex;
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
         this.mergeRequestLabelFilterConfig = mergeRequestLabelFilterConfig;
@@ -261,6 +263,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return excludeBranchesSpec;
     }
 
+    public String getSourceBranchRegex() {
+        return sourceBranchRegex;
+    }
+
     public String getTargetBranchRegex() {
         return targetBranchRegex;
     }
@@ -364,6 +370,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     @DataBoundSetter
+    public void setSourceBranchRegex(String sourceBranchRegex) {
+        this.sourceBranchRegex = sourceBranchRegex;
+    }
+
+    @DataBoundSetter
     public void setTargetBranchRegex(String targetBranchRegex) {
         this.targetBranchRegex = targetBranchRegex;
     }
@@ -448,6 +459,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec(includeBranchesSpec)
                 .withExcludeBranchesSpec(excludeBranchesSpec)
+                .withSourceBranchRegex(sourceBranchRegex)
                 .withTargetBranchRegex(targetBranchRegex)
                 .build(branchFilterType));
     }

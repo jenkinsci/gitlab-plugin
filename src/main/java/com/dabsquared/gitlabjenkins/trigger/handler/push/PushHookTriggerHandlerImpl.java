@@ -79,6 +79,11 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
+    protected String getSourceBranch(PushHook hook) {
+        return hook.getRef() == null ? null : hook.getRef().replaceFirst("^refs/heads/", "");
+    }
+
+    @Override
     protected String getTargetBranch(PushHook hook) {
         return hook.getRef() == null ? null : hook.getRef().replaceFirst("^refs/heads/", "");
     }
