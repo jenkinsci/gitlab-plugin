@@ -77,6 +77,21 @@ public class GitLabVotePublisherTest {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, "thumbsdown");
     }
 
+    @Test
+    public void removePreviousVote() throws IOException, InterruptedException {
+        // GIVEN
+        AbstractBuild build = mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
+        mockAward("v4", MERGE_REQUEST_IID, 1, "thumbsdown");
+
+        // WHEN
+        performAndVerify(build, "v4", MERGE_REQUEST_IID, "thumbsdown");
+
+        // THEN
+        mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, "v4", MERGE_REQUEST_IID, "thumbsdown"));
+        mockServerClient.verify(awardEmojiRequest("v4", MERGE_REQUEST_IID, "POST")
+            .withQueryStringParameter("name", "thumbsdown"));
+    }
+
     private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote) throws InterruptedException, IOException {
         GitLabVotePublisher publisher = preparePublisher(new GitLabVotePublisher(), build);
         publisher.perform(build, null, listener);
@@ -91,10 +106,14 @@ public class GitLabVotePublisherTest {
     }
 
     private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String name) {
+        return awardEmojiRequest(apiLevel, mergeRequestId, "POST")
+                .withQueryStringParameter("name", name);
+    }
+
+    private HttpRequest awardEmojiRequest(final String apiLevel, int mergeRequestId, String type) {
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/award_emoji")
-                .withQueryStringParameter("name", name)
-                .withMethod("POST")
+                .withMethod(type)
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
@@ -111,5 +130,15 @@ public class GitLabVotePublisherTest {
                 .withPath("/gitlab/api/v(3|4)/user")
                 .withMethod("GET")
                 .withHeader("PRIVATE-TOKEN", "secret");
+    }
+
+    private void mockAward(final String apiLevel, int mergeRequestId, int awardId, String name) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"id\": " + awardId);
+        sb.append(",\"name\": " + name);
+        sb.append(",\"User\": ");
+        sb.append("  { \"id\": 1 }");
+        sb.append("}");
+        mockServerClient.when(awardEmojiRequest(apiLevel, mergeRequestId, "GET")).respond(response(sb.toString()));
     }
 }
