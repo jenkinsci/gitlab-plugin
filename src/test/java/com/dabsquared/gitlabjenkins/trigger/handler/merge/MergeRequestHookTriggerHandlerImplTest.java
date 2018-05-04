@@ -118,40 +118,36 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
         assertThat(buildTriggered.isSignaled(), is(false));
     }
-    
+
     @Test
     public void mergeRequest_build_when_approved() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(EnumSet.allOf(State.class), EnumSet.of(Action.approved), false, false);
-
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(EnumSet.noneOf(State.class), EnumSet.of(Action.approved), false, false);
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, Action.approved);
 
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 
     @Test
-    public void mergeRequest_do_not_build_when_when_approved() throws Exception {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(EnumSet.allOf(State.class), EnumSet.of(Action.update), false, false);
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, defaultMergeRequestObjectAttributes().withState(State.opened).withAction(Action.approved));
-
-        assertThat(buildTriggered.isSignaled(), is (false));
+    public void mergeRequest_build_only_when_approved_and_not_when_updated() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        mergeRequest_build_only_when_approved(Action.update);
     }
-    
+
     @Test
     public void mergeRequest_build_only_when_approved_and_not_when_opened() throws IOException, InterruptedException, GitAPIException, ExecutionException {
         mergeRequest_build_only_when_approved(Action.open);
     }
 
     @Test
-    public void mergeRequest_build_only_when_approved_and_not_when_updated() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        mergeRequest_build_only_when_approved(Action.update);
+    public void mergeRequest_build_only_when_approved_and_not_when_merge() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        mergeRequest_build_only_when_approved(Action.merge);
     }
-    
-    
+
+
 	private void mergeRequest_build_only_when_approved(Action action)
 			throws GitAPIException, IOException, InterruptedException {
-		MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(EnumSet.allOf(State.class), EnumSet.of(Action.approved), false, false);
+		MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(EnumSet.noneOf(State.class), EnumSet.of(Action.approved), false, false);
 	    OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, action);
-	
+
 	    assertThat(buildTriggered.isSignaled(), is(false));
 	}
 
