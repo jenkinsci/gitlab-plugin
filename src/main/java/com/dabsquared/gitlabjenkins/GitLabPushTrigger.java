@@ -432,6 +432,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
 
     // executes when the Trigger receives a pipeline event
     public void onPost(final PipelineHook hook) {
+        if (pipelineTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
         pipelineTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
