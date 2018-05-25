@@ -365,6 +365,8 @@ Freestyle jobs can only send build status after the build steps are complete. To
 ### Declarative Pipeline jobs
 The example below configures the GitLab connection and job triggers. It also sends build status back to GitLab.
 
+**NOTE: You will need to run this job manually once, in order for Jenkins to read and set up the trigger configuration. Otherwise webhooks will fail to trigger the job.**
+
 ```
 pipeline {
     agent any
