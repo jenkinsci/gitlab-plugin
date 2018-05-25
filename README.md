@@ -7,6 +7,7 @@
   - [GitLab-to-Jenkins auth](#gitlab-to-jenkins-authentication)
   - [Jenkins-to-GitLab auth](#jenkins-to-gitlab-authentication)
  - [Jenkins Job Configuration](#jenkins-job-configuration)
+   - [Parameter configuration](#parameter-configuration)
    - [Git configuration](#git-configuration)
      - [Freestyle jobs](#freestyle-jobs)
      - [Pipeline jobs](#pipeline-jobs)
@@ -25,7 +26,6 @@
   - [Branch filtering](#branch-filtering)
   - [Build when tags are pushed](#build-when-tags-are-pushed)
   - [Add a note to merge requests](#add-a-note-to-merge-requests)
-  - [Parameterized builds](#parameterized-builds)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Testing With Docker](#testing-with-docker)
 - [Release Workflow](#release-workflow)
@@ -148,6 +148,36 @@ This plugin can be configured to send build status messages to GitLab, which sho
 
 There are two aspects of your Jenkins job that you may want to modify when using GitLab to trigger jobs. The first is the Git configuration, where Jenkins clones your git repo. The GitLab Plugin will set some environment variables when GitLab triggers a build, and you can use those to control what code is cloned from Git. The second is the configuration for sending the build status back to GitLab, where it will be visible in the commit and/or merge request UI.
 
+## Parameter configuration
+**If you want to be able to run jobs both manually *and* automatically via GitLab webhooks, you will need to configure parameters for those jobs.** If you only want to trigger jobs from GitLab, you can skip this section.
+
+Any GitLab parameters you create will always take precedence over the values that are sent by the webhook, unless you use the [EnvInject plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin) to map the webhook values onto the job parameters. This is due to changes that were made to address [security vulnerabilities,](https://jenkins.io/security/advisory/2016-05-11/) with changes that landed in Jenkins 2.3.
+
+In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined parameters](#defined-parameters) list for options - your parameter names must match these. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
+* Keep Jenkins Environment Variables
+* Keep Jenkins Build Variables
+* Override Build Parameters
+
+In the Groovy Script field insert something similar to:
+
+```
+import hudson.model.*
+def env = Thread.currentThread()?.executable.parent.builds[0].properties.get('envVars')
+def map = [:]
+
+if (env['gitlabSourceBranch'] != null) { 
+  map['gitlabSourceBranch'] = env['gitlabSourceBranch'] 
+}
+if (env['gitlabTargetBranch'] != null) { 
+  map['gitlabTargetBranch'] = env['gitlabTargetBranch'] 
+}
+// Add additional entries for any other parameters you have created
+
+return map
+```
+
+You will need to update this code anytime you add or remove parameters.
+
 ## Git configuration 
 ### Freestyle jobs
 In the *Source Code Management* section:
@@ -163,8 +193,6 @@ In the *Source Code Management* section:
     2. Select *Merge before build* from the drop-down
     3. Set *Name of repository* to ``origin``
     4. Set *Branch to merge* as ``${gitlabTargetBranch}``
-
-**Note:** Since version **1.2.0** the *gitlab-plugin* sets the gitlab hook values through *environment variables* instead of *build parameters*. To set default values, consult [EnvInject Plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin).
 
 ### Pipeline jobs
 * A Jenkins Pipeline bug will prevent the Git clone from working when you use a Pipeline script from SCM. It works if you use the Jenkins job config UI to edit the script. There is a workaround mentioned here: https://issues.jenkins-ci.org/browse/JENKINS-33719
@@ -431,9 +459,6 @@ In order to build when a new tag is pushed:
 
 ## Add a note to merge requests
 To add a note to GitLab merge requests after the build completes, select 'Add note with build status on GitLab merge requests' from the optional Post-build actions. Optionally, click the 'Advanced' button to customize the content of the note depending on the build result.
-
-## Parameterized builds
-You can trigger a job manually by clicking 'This build is parameterized' in the job configuration and adding any of the relevant build parameters. See the [defined parameters](#defined-parameters) list. If you only care about jobs being triggered from GitLab webhooks, this step is unnecessary.
 
 # Contributing to the Plugin
 
