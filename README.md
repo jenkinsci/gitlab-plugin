@@ -151,9 +151,9 @@ There are two aspects of your Jenkins job that you may want to modify when using
 ## Parameter configuration
 **If you want to be able to run jobs both manually *and* automatically via GitLab webhooks, you will need to configure parameters for those jobs.** If you only want to trigger jobs from GitLab, you can skip this section.
 
-Any GitLab parameters you create will always take precedence over the values that are sent by the webhook, unless you use the [EnvInject plugin](https://wiki.jenkins-ci.org/display/JENKINS/EnvInject+Plugin) to map the webhook values onto the job parameters. This is due to changes that were made to address [security vulnerabilities,](https://jenkins.io/security/advisory/2016-05-11/) with changes that landed in Jenkins 2.3.
+Any GitLab parameters you create will always take precedence over the values that are sent by the webhook, unless you use the [EnvInject plugin](https://plugins.jenkins.io/envinject) to map the webhook values onto the job parameters. This is due to changes that were made to address [security vulnerabilities,](https://jenkins.io/security/advisory/2016-05-11/) with changes that landed in Jenkins 2.3.
 
-In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined parameters](#defined-parameters) list for options - your parameter names must match these. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
+In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined variables](#defined-variables) list for options - your parameter names must match these. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
 * Keep Jenkins Environment Variables
 * Keep Jenkins Build Variables
 * Override Build Parameters
