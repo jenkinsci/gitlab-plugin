@@ -8,6 +8,10 @@ public final class BranchFilterFactory {
     private BranchFilterFactory() { }
 
     public static BranchFilter newBranchFilter(BranchFilterConfig config) {
+		
+		if(config == null)
+			return new AllBranchesFilter();
+		
         switch (config.getType()) {
             case NameBasedFilter:
                 return new NameBasedFilter(config.getIncludeBranchesSpec(), config.getExcludeBranchesSpec());
