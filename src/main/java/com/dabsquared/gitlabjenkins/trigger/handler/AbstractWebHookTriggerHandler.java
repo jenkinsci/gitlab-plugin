@@ -18,11 +18,11 @@ import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.scm.SCM;
-import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -69,8 +69,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 if (client == null) {
                     LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                 } else {
-                    String targetUrl =
-                        Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
+                    String targetUrl = DisplayURLProvider.get().getJobURL(job);
                     client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
                         BuildState.pending, buildStatusUpdate.getRef(), publisher.getName(), targetUrl, BuildState.pending.name());
                 }
