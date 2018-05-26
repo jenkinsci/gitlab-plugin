@@ -12,6 +12,7 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
+import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
@@ -39,15 +40,17 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private final Collection<State> allowedStates;
     private final boolean skipWorkInProgressMergeRequest;
 	private final Collection<Action> allowedActions;
+    private final boolean cancelPendingBuildsOnUpdate;
 
-    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates,  boolean skipWorkInProgressMergeRequest) {
-    	this(allowedStates, EnumSet.allOf(Action.class),skipWorkInProgressMergeRequest);
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this(allowedStates, EnumSet.allOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
     }
 
-    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest) {
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
         this.allowedStates = allowedStates;
         this.allowedActions = allowedActions;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+        this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
     }
 
     @Override
@@ -75,6 +78,17 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return hook.getObjectAttributes() != null
                 && hook.getObjectAttributes().getDescription() != null
                 && hook.getObjectAttributes().getDescription().contains("[ci-skip]");
+    }
+
+    @Override
+    protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, MergeRequestHook hook) {
+        if (!this.cancelPendingBuildsOnUpdate) {
+            return;
+        }
+        if (!hook.getObjectAttributes().getAction().equals(Action.update)) {
+            return;
+        }
+        this.pendingBuildsHandler.cancelPendingBuilds(job, hook.getObjectAttributes().getSourceProjectId(), hook.getObjectAttributes().getSourceBranch());
     }
 
     @Override
