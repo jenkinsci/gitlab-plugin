@@ -1,5 +1,13 @@
 ChangeLog
 
+1.5.6
+=====================
+* #691: Fix project ID regex to not require '.git' in URLs
+* #693: Allow sending 'pending' status when Pipeline jobs are in queue
+* #693: Allow canceling of running MR builds when new commits are pushed to the MR
+* #759: Fix NPE when saving job config in some cases
+* #767: Fix NPE when GitLab pipeline event is received
+
 1.5.5
 =====================
 * #698: Make plugin respect no-proxy-hosts when a proxy is used
