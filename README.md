@@ -456,7 +456,7 @@ Triggers may be filtered based on the branch name, i.e. the build will only be a
 In order to build when a new tag is pushed:
 1. In the GitLab webhook configuration, add 'Tag push events'
 2. In the job configuration under 'Source code management':
-    1. Select 'Advanced...' and add '+refs/tags/*:refs/remotes/origin/tags/*' as the Refspec
+    1. Select 'Advanced...' and add '`+refs/tags/*:refs/remotes/origin/tags/*`' as the Refspec
     2. You can also use 'Branch Specifier' to specify which tag need to be built (example 'refs/tags/${TAGNAME}')
 
 ## Add a note to merge requests
