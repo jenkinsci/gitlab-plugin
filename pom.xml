@@ -32,11 +32,6 @@
       <name>Owen Mehegan</name>
       <email>owen@nerdnetworks.org</email>
     </developer>
-    <developer>
-      <id>milena</id>
-      <name>Milena Reichel</name>
-      <email>milena.reichel@gmail.com</email>
-    </developer>
   </developers>
 
   <distributionManagement>
