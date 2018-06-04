@@ -12,6 +12,7 @@ import java.util.Collections;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
+import hudson.Functions;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.Before;
@@ -91,7 +92,12 @@ public class CommitStatusUpdaterTest {
 	    when(build.getCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel1)));
 	    when(upCauseLevel1.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel2)));
 	    when(upCauseLevel2.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(gitlabCause)));
-	    when(taskListener.getLogger()).thenReturn(new PrintStream("/dev/null"));
+	    if(Functions.isWindows()) {
+	        when(taskListener.getLogger()).thenReturn(new PrintStream("nul"));
+	    } else {
+	        when(taskListener.getLogger()).thenReturn(new PrintStream("/dev/null"));
+	    }
+
 
 	    causeData = causeData()
                 .withActionType(CauseData.ActionType.NOTE)
