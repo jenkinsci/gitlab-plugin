@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public final class ProjectIdUtil {
 
-    private static final Pattern PROJECT_ID_PATTERN = Pattern.compile("^/?(?<projectId>.*)(\\.git)$");
+    private static final Pattern PROJECT_ID_PATTERN = Pattern.compile("^/?(?<projectId>.*?)(\\.git)?$");
 
     private ProjectIdUtil() { }
 
