@@ -14,7 +14,7 @@
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.5.6-SNAPSHOT</version>
+  <version>1.5.7-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -31,11 +31,6 @@
       <id>owenmehegan</id>
       <name>Owen Mehegan</name>
       <email>owen@nerdnetworks.org</email>
-    </developer>
-    <developer>
-      <id>milena</id>
-      <name>Milena Reichel</name>
-      <email>milena.reichel@gmail.com</email>
     </developer>
   </developers>
 
@@ -165,6 +160,11 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
+      <version>1.15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-job</artifactId>
       <version>1.15</version>
     </dependency>
     <dependency>
