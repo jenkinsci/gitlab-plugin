@@ -160,4 +160,40 @@ public class CommitStatusUpdaterTest {
 
         verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
     }
+
+    @Test
+    public void testTagEvent() {
+        causeData = causeData()
+            .withActionType(CauseData.ActionType.TAG_PUSH)
+            .withSourceProjectId(PROJECT_ID)
+            .withTargetProjectId(PROJECT_ID)
+            .withBranch("refs/tags/3.0.0")
+            .withSourceBranch("refs/tags/3.0.0")
+            .withUserName("")
+            .withSourceRepoHomepage("https://gitlab.org/test")
+            .withSourceRepoName("test")
+            .withSourceNamespace("test-namespace")
+            .withSourceRepoUrl("git@gitlab.org:test.git")
+            .withSourceRepoSshUrl("git@gitlab.org:test.git")
+            .withSourceRepoHttpUrl("https://gitlab.org/test.git")
+            .withMergeRequestTitle("Test")
+            .withMergeRequestId(1)
+            .withMergeRequestIid(1)
+            .withTargetBranch("master")
+            .withTargetRepoName("test")
+            .withTargetNamespace("test-namespace")
+            .withTargetRepoSshUrl("git@gitlab.org:test.git")
+            .withTargetRepoHttpUrl("https://gitlab.org/test.git")
+            .withTriggeredByUser("test")
+            .withLastCommit(REVISION)
+            .withTargetProjectUrl("https://gitlab.org/test")
+            .build();
+
+        when(build.getCause(GitLabWebHookCause.class)).thenReturn(gitlabCause);
+        when(gitlabCause.getData()).thenReturn(causeData);
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
+
+        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, "3.0.0", STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+    }
 }

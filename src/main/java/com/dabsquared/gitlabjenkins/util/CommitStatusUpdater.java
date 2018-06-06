@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.util;
 
 
+import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
@@ -81,7 +82,7 @@ public class CommitStatusUpdater {
 
                 if (existsCommit(current_client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
                     LOGGER.log(Level.INFO, String.format("Updating build '%s' to '%s'", gitLabBranchBuild.getProjectId(),state));
-                    current_client.changeBuildStatus(gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash(), state, getBuildBranch(build), current_build_name, buildUrl, state.name());
+                    current_client.changeBuildStatus(gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash(), state, getBuildBranchOrTag(build), current_build_name, buildUrl, state.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 printf(listener, "Failed to update Gitlab commit status for project '%s': %s%n", gitLabBranchBuild.getProjectId(), e.getMessage());
@@ -125,9 +126,15 @@ public class CommitStatusUpdater {
         }
     }
 
-    private static String getBuildBranch(Run<?, ?> build) {
+    private static String getBuildBranchOrTag(Run<?, ?> build) {
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getData().getSourceBranch();
+        if (cause == null) {
+            return null;
+        }
+        if (cause.getData().getActionType() == CauseData.ActionType.TAG_PUSH) {
+            return StringUtils.removeStart(cause.getData().getSourceBranch(), "refs/tags/");
+        }
+        return cause.getData().getSourceBranch();
     }
 
     private static String getBuildUrl(Run<?, ?> build) {
