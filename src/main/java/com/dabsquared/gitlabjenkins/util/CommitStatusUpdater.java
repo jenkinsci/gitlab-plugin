@@ -81,7 +81,7 @@ public class CommitStatusUpdater {
 
                 if (existsCommit(current_client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
                     LOGGER.log(Level.INFO, String.format("Updating build '%s' to '%s'", gitLabBranchBuild.getProjectId(),state));
-                    client.changeBuildStatus(gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash(), state, getBuildBranch(build), current_build_name, buildUrl, state.name());
+                    current_client.changeBuildStatus(gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash(), state, getBuildBranch(build), current_build_name, buildUrl, state.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 printf(listener, "Failed to update Gitlab commit status for project '%s': %s%n", gitLabBranchBuild.getProjectId(), e.getMessage());
