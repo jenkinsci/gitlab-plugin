@@ -361,6 +361,7 @@ Freestyle jobs can only send build status after the build steps are complete. To
         }
     }
     ```
+    **Note:** If you put the `gitlabBuilds` block *inside* a node block, it will not trigger until a node is allocated. On a busy system, or one where nodes are allocated on demand, there could be a delay here, and the 'pending' status would not be sent to GitLab right away. If this is a concern, you can move the `gitlabBuilds` block to wrap the node block, and then the status will be sent when Jenkins *starts* trying to allocate a node.
 
 ### Declarative Pipeline jobs
 The example below configures the GitLab connection and job triggers. It also sends build status back to GitLab.
