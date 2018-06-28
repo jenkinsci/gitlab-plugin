@@ -314,7 +314,10 @@ job('seed-job') {
 You can optionally have your Jenkins jobs send their build status back to GitLab, where it will be displayed in the commit or merge request UI as appropriate. 
 
 ### Freestyle jobs
-Freestyle jobs can only send build status after the build steps are complete. To do this, choose 'Publish build status to GitLab' from the available 'Post-build actions' in your Jenkins job config. Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
+Use 'Publish build status to GitLab' Post-build action to send build status with the given build name back to GitLab.
+'Pending' build status is sent when the build is triggered, 'Running' status is sent when the build starts and 'Success' or 'Failed' status is sent after the build is finished.
+
+Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
 
 ### Scripted Pipeline jobs
 **NOTE:** If you use Pipeline global libraries, or if you clone your project's Jenkinsfile from a repo different from the one that contains the relevant source code, you need to be careful about when you send project status. In short, make sure you put your `gitlabCommitStatus` or other similar steps *after* the SCM step that clones your project's source. Otherwise, you may get HTTP 400 errors, or you may find build status being sent to the wrong repo.
@@ -430,9 +433,14 @@ triggers {
       branchFilterType: "NameBasedFilter",
       includeBranchesSpec: "release/qat",
       excludeBranchesSpec: "",
+      pendingBuildName: "Jenkins",
+      cancelPendingBuildsOnUpdate: false,
       secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
 }
 ```
+
+#### Pending build status for pipelines
+To send 'Pending' build status to GitLab when the pipeline is triggered, set a build name to 'Pending build name for pipeline' field in the Advanced-section of the trigger configuration or use pendingBuildName option in the GitLab-trigger configuration in the declarative pipeline.
 
 ### Matrix/Multi-configuration jobs
 
@@ -462,6 +470,10 @@ In order to build when a new tag is pushed:
 
 ## Add a note to merge requests
 To add a note to GitLab merge requests after the build completes, select 'Add note with build status on GitLab merge requests' from the optional Post-build actions. Optionally, click the 'Advanced' button to customize the content of the note depending on the build result.
+
+## Cancel pending builds on merge request update
+To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.
+This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
 
 # Contributing to the Plugin
 
