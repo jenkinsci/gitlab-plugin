@@ -35,9 +35,15 @@ public class AcceptGitLabMergeRequestStep extends Step {
 
     private String mergeCommitMessage;
 
+	private boolean useMRDescription;
+
+	private boolean removeSourceBranch;
+
     @DataBoundConstructor
-    public AcceptGitLabMergeRequestStep(String mergeCommitMessage) {
-        this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
+    public AcceptGitLabMergeRequestStep(String mergeCommitMessage,boolean useMRDescription, boolean removeSourceBranch) {
+		this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
+        this.useMRDescription = useMRDescription;
+        this.removeSourceBranch = removeSourceBranch;
     }
 
 	@Override
@@ -52,6 +58,16 @@ public class AcceptGitLabMergeRequestStep extends Step {
     @DataBoundSetter
     public void setMergeCommitMessage(String mergeCommitMessage) {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
+    }
+    
+    @DataBoundSetter
+    public void setUseMRDescription(boolean useMRDescription) {
+    	this.useMRDescription = useMRDescription;
+    }
+    
+    @DataBoundSetter
+    public void setRemoveSourceBranch(boolean removeSourceBranch) {
+    	this.removeSourceBranch = removeSourceBranch;
     }
 
     public static class AcceptGitLabMergeRequestStepExecution extends AbstractSynchronousStepExecution<Void> {
@@ -78,7 +94,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            client.acceptMergeRequest(mergeRequest, step.mergeCommitMessage, false);
+                            client.acceptMergeRequest(mergeRequest, getCommitMessage(mergeRequest), step.removeSourceBranch);
                         } catch (WebApplicationException | ProcessingException e) {
                             printf("Failed to accept merge request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
                             LOGGER.log(Level.SEVERE, String.format("Failed to accept merge request for project '%s'", mergeRequest.getProjectId()), e);
@@ -89,7 +105,18 @@ public class AcceptGitLabMergeRequestStep extends Step {
             return null;
         }
 
-        private void println(String message) {
+        private String getCommitMessage(MergeRequest mergeRequest) {
+        	if (!step.useMRDescription)
+        		return step.mergeCommitMessage;
+        	
+        	String message = "Merge branch '"+mergeRequest.getSourceBranch()+"' into '"+mergeRequest.getTargetBranch()+"'\n\n"+
+        		mergeRequest.getTitle()+"\n\n"+
+    			mergeRequest.getDescription()+"\n\n" +
+        		"See merge request !"+mergeRequest.getIid();
+			return message;
+		}
+
+		private void println(String message) {
             TaskListener listener = getTaskListener();
             if (listener == null) {
                 LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", message);

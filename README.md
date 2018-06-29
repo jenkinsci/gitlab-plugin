@@ -472,6 +472,18 @@ In order to build when a new tag is pushed:
 ## Add a note to merge requests
 To add a note to GitLab merge requests after the build completes, select 'Add note with build status on GitLab merge requests' from the optional Post-build actions. Optionally, click the 'Advanced' button to customize the content of the note depending on the build result.
 
+## Accept merge request
+To accept a merge request when build is completed select 'Accept GitLab merge request on success' from the optional Post-build actions.
+
+### Pipeline jobs
+For pipeline jobs two advanced configuration options can be provided
+1. **useMRDescription** - Adds the merge request description into the merge commit, in a similar format as would be recieved by selecting 'Modify commit message' followed by 'include description in commit message' in GitLab UI  
+2. **removeSourceBranch** - Removes the source branch in GitLab when the merge request is accepted
+
+```
+acceptGitLabMR(useMRDescription: true, removeSourceBranch: true)
+```
+
 ## Notify Specific project by a specific gitlab connection
 You can specify a map of project builds to notify a vary of gitlab repositories which could be located on different servers
 This is useful if you want to create a complex CI/CD which involve several jenkins and gitlab projects, see examples bellow:
