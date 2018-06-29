@@ -2,21 +2,28 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
+import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,22 +38,40 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerImpl.class.getName());
 
-    private final List<State> allowedStates;
+    private final Collection<State> allowedStates;
     private final boolean skipWorkInProgressMergeRequest;
+	private final Collection<Action> allowedActions;
+    private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved);
+    private final boolean cancelPendingBuildsOnUpdate;
 
-    MergeRequestHookTriggerHandlerImpl(List<State> allowedStates, boolean skipWorkInProgressMergeRequest) {
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this(allowedStates, EnumSet.noneOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+    }
+
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
         this.allowedStates = allowedStates;
+        this.allowedActions = allowedActions;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+        this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
     }
 
     @Override
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
-        if (allowedStates.contains(objectAttributes.getState())
+        if (isAllowedByConfig(objectAttributes)
             && isLastCommitNotYetBuild(job, hook)
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
-            && mergeRequestLabelFilter.isMergeRequestAllowed(hook.getObjectAttributes().getLabels())) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
+
+            List<String> labelsNames = new ArrayList<>();
+            if (hook.getLabels() != null) {
+                for (MergeRequestLabel label : hook.getLabels()) {
+                    labelsNames.add(label.getTitle());
+                }
+            }
+
+            if (mergeRequestLabelFilter.isMergeRequestAllowed(labelsNames)) {
+                super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            }
         }
     }
 
@@ -55,6 +80,17 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return hook.getObjectAttributes() != null
                 && hook.getObjectAttributes().getDescription() != null
                 && hook.getObjectAttributes().getDescription().contains("[ci-skip]");
+    }
+
+    @Override
+    protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, MergeRequestHook hook) {
+        if (!this.cancelPendingBuildsOnUpdate) {
+            return;
+        }
+        if (!hook.getObjectAttributes().getAction().equals(Action.update)) {
+            return;
+        }
+        this.pendingBuildsHandler.cancelPendingBuilds(job, hook.getObjectAttributes().getSourceProjectId(), hook.getObjectAttributes().getSourceBranch());
     }
 
     @Override
@@ -130,13 +166,32 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
-        if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
-            Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getLastCommit().getId());
-            if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
-                LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
-                return false;
-            }
+
+        if (objectAttributes == null) {
+            return true;
         }
+
+        Action action = objectAttributes.getAction();
+        if (skipBuiltYetCheckActions.contains(action)) {
+            LOGGER.log(Level.FINEST, "Skipping LastCommitNotYetBuild check for {0} action", action);
+            return true;
+        }
+
+        Commit lastCommit = objectAttributes.getLastCommit();
+        if (lastCommit == null) {
+            return true;
+        }
+
+        Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, lastCommit.getId());
+        if (mergeBuild == null) {
+            return true;
+        }
+
+        if (StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
+            LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
+            return false;
+        }
+
         return true;
     }
 
@@ -144,6 +199,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         GitLabWebHookCause cause = mergeBuild.getCause(GitLabWebHookCause.class);
         return cause == null ? null : cause.getData().getTargetBranch();
     }
+
+	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
+		return allowedStates.contains(objectAttributes.getState())
+			|| allowedActions.contains(objectAttributes.getAction());
+	}
 
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {
         Boolean workInProgress = objectAttributes.getWorkInProgress();

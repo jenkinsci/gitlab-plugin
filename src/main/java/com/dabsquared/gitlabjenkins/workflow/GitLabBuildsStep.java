@@ -1,39 +1,48 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
-import com.google.common.base.Splitter;
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
+
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
 @ExportedBean
-public class GitLabBuildsStep extends AbstractStepImpl {
+public class GitLabBuildsStep extends Step {
 
     private List<String> builds;
 
     @DataBoundConstructor
     public GitLabBuildsStep() {
     }
+    
+    
+	@Override
+	public StepExecution start(StepContext context) throws Exception {
+		return new GitLabBuildStepExecution(context, this);
+	}
 
     @DataBoundSetter
     public void setBuilds(List<String> builds) {
@@ -51,17 +60,21 @@ public class GitLabBuildsStep extends AbstractStepImpl {
         return builds;
     }
 
-    public static class Execution extends AbstractStepExecutionImpl {
+    public static class GitLabBuildStepExecution extends StepExecution {
         private static final long serialVersionUID = 1;
 
-        @StepContextParameter
-        private transient Run<?, ?> run;
+        private final transient Run<?, ?> run;
 
-        @Inject
-        private transient GitLabBuildsStep step;
+        private final transient GitLabBuildsStep step;
 
         private BodyExecution body;
 
+        GitLabBuildStepExecution(StepContext context, GitLabBuildsStep step) throws Exception {
+            super(context);
+            this.step = step;
+            run = context.get(Run.class);
+        }
+        
         @Override
         public boolean start() throws Exception {
             body = getContext().newBodyInvoker()
@@ -129,11 +142,7 @@ public class GitLabBuildsStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-        public DescriptorImpl() {
-            super(Execution.class);
-        }
-
+    public static final class DescriptorImpl extends StepDescriptor {
         @Override
         public String getDisplayName() {
             return "Notify gitlab about pending builds";
@@ -148,5 +157,10 @@ public class GitLabBuildsStep extends AbstractStepImpl {
         public boolean takesImplicitBlockArgument() {
             return true;
         }
+
+		@Override
+		public Set<Class<?>> getRequiredContext() {
+			return ImmutableSet.of(TaskListener.class, Run.class);
+		}
     }
 }

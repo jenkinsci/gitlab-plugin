@@ -1,43 +1,56 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import javax.inject.Inject;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.google.common.collect.ImmutableSet;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
 @ExportedBean
-public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
+public class AcceptGitLabMergeRequestStep extends Step {
 
     private static final Logger LOGGER = Logger.getLogger(AcceptGitLabMergeRequestStep.class.getName());
 
     private String mergeCommitMessage;
 
+	private boolean useMRDescription;
+
+	private boolean removeSourceBranch;
+
     @DataBoundConstructor
-    public AcceptGitLabMergeRequestStep(String mergeCommitMessage) {
-        this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
+    public AcceptGitLabMergeRequestStep(String mergeCommitMessage,boolean useMRDescription, boolean removeSourceBranch) {
+		this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
+        this.useMRDescription = useMRDescription;
+        this.removeSourceBranch = removeSourceBranch;
     }
 
+	@Override
+	public StepExecution start(StepContext context) throws Exception {
+		return new AcceptGitLabMergeRequestStepExecution(context, this);
+	}
+	
     public String getMergeCommitMessage() {
         return mergeCommitMessage;
     }
@@ -46,32 +59,45 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
     public void setMergeCommitMessage(String mergeCommitMessage) {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
     }
+    
+    @DataBoundSetter
+    public void setUseMRDescription(boolean useMRDescription) {
+    	this.useMRDescription = useMRDescription;
+    }
+    
+    @DataBoundSetter
+    public void setRemoveSourceBranch(boolean removeSourceBranch) {
+    	this.removeSourceBranch = removeSourceBranch;
+    }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Void> {
+    public static class AcceptGitLabMergeRequestStepExecution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
-        @StepContextParameter
-        private transient Run<?, ?> run;
+        private final transient Run<?, ?> run;
 
-        @Inject
-        private transient AcceptGitLabMergeRequestStep step;
+        private final transient AcceptGitLabMergeRequestStep step;
 
+        AcceptGitLabMergeRequestStepExecution(StepContext context, AcceptGitLabMergeRequestStep step) throws Exception {
+            super(context);
+            this.step = step;
+            run = context.get(Run.class);
+        }
+        
         @Override
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause != null) {
-                Integer projectId = cause.getData().getTargetProjectId();
-                Integer mergeRequestId = cause.getData().getMergeRequestId();
-                if (projectId != null && mergeRequestId != null) {
-                    GitLabApi client = getClient(run);
+                MergeRequest mergeRequest = cause.getData().getMergeRequest();
+                if (mergeRequest != null) {
+                    GitLabClient client = getClient(run);
                     if (client == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            client.acceptMergeRequest(projectId, mergeRequestId, step.mergeCommitMessage, false);
+                            client.acceptMergeRequest(mergeRequest, getCommitMessage(mergeRequest), step.removeSourceBranch);
                         } catch (WebApplicationException | ProcessingException e) {
-                            printf("Failed to accept merge request for project '%s': %s%n", projectId, e.getMessage());
-                            LOGGER.log(Level.SEVERE, String.format("Failed to accept merge request for project '%s'", projectId), e);
+                            printf("Failed to accept merge request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
+                            LOGGER.log(Level.SEVERE, String.format("Failed to accept merge request for project '%s'", mergeRequest.getProjectId()), e);
                         }
                     }
                 }
@@ -79,7 +105,18 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
             return null;
         }
 
-        private void println(String message) {
+        private String getCommitMessage(MergeRequest mergeRequest) {
+        	if (!step.useMRDescription)
+        		return step.mergeCommitMessage;
+        	
+        	String message = "Merge branch '"+mergeRequest.getSourceBranch()+"' into '"+mergeRequest.getTargetBranch()+"'\n\n"+
+        		mergeRequest.getTitle()+"\n\n"+
+    			mergeRequest.getDescription()+"\n\n" +
+        		"See merge request !"+mergeRequest.getIid();
+			return message;
+		}
+
+		private void println(String message) {
             TaskListener listener = getTaskListener();
             if (listener == null) {
                 LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", message);
@@ -111,10 +148,7 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-        public DescriptorImpl() {
-            super(Execution.class);
-        }
+    public static final class DescriptorImpl extends StepDescriptor {
 
         @Override
         public String getDisplayName() {
@@ -125,5 +159,10 @@ public class AcceptGitLabMergeRequestStep extends AbstractStepImpl {
         public String getFunctionName() {
             return "acceptGitLabMR";
         }
+        
+		@Override
+		public Set<Class<?>> getRequiredContext() {
+			return ImmutableSet.of(TaskListener.class, Run.class);
+		}
     }
 }

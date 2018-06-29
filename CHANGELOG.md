@@ -1,5 +1,58 @@
 ChangeLog
 
+1.5.7
+=====================
+* #747: Add ability to interact with multiple GitLab services when sending build status
+* #758: Always build new MRs, even if the last commit was already built by Jenkins
+* #762: Fix for trigger builds when MR is accepted
+* #774: Fix display of branch names in GitLab UI when a build is triggered by a tag push
+* #786: Add ability to set pipeline status in GitLab to "skipped"
+
+1.5.6
+=====================
+* #691: Fix project ID regex to not require '.git' in URLs
+* #693: Allow sending 'pending' status when Pipeline jobs are in queue
+* #693: Allow canceling of running MR builds when new commits are pushed to the MR
+* #759: Fix NPE when saving job config in some cases
+* #767: Fix NPE when GitLab pipeline event is received
+
+1.5.5
+=====================
+* #698: Make plugin respect no-proxy-hosts when a proxy is used
+* #731: "Build on successful pipeline events" setting does not stay set
+* #732: Filtering by label never matches anything
+
+1.5.4
+=====================
+* #714: Fix broken 'Trigger on approved merge requests' setting
+* #726: Do not build approved merge requests unless configured to do so
+
+1.5.3
+=====================
+* #622: GitlabCommitStatus throws error after force kill
+* #678: Fixes NPE if GitLab connection fails
+
+1.5.2
+=====================
+* #524: If Blue Ocean is installed, build URL in GitLab will point to Blue Ocean
+* #564: Build status can now be sent to GitLab from builds downstream of the one that GitLab triggered
+* #589: Make it easier to distinguish a commit push from a tag push
+* #616: Make it easier to configure gitlab-plugin from Job DSL plugin.
+* #639: Don't NPE if one of the filter specs is not specified in a Jenkinsfile
+* #658: Send current state of build to GitLab when making commit API calls so it can be seen in the GitLab UI
+* #659: Trigger builds when MR is approved in GitLab
+
+1.5.1
+=====================
+* #648: Fix NPE when an MR build is triggered
+* #650: Improve GitLab API version autodetection
+* #653: Fix unsupported date format in MR trigger
+* #656: Fix 404 error when making v4 API calls for MRs
+
+1.5.0
+=====================
+* #614: Add optional support for GitLab API v4
+
 1.4.8
 =====================
 * #483: If 'Add message for failed builds' feature is used, send the message for both failed and 'unstable' builds

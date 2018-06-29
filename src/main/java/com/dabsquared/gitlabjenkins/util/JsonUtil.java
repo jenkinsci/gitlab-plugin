@@ -46,7 +46,7 @@ public final class JsonUtil {
 
     private static class DateModule extends SimpleModule {
         private static final String[] DATE_FORMATS = new String[] {
-                "yyyy-MM-dd HH:mm:ss Z", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ssX"
+                "yyyy-MM-dd HH:mm:ss Z", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ssX", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
         };
 
         private DateModule() {

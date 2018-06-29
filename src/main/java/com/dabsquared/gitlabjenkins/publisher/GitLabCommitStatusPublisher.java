@@ -99,7 +99,7 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
 
         @Override
         public String getHelpFile() {
-            return "/plugin/gitlab-plugin/help/help-gitlab8.1CI.html";
+            return "/plugin/gitlab-plugin/help/help-send-result-to-gitlab.html";
         }
 
         public FormValidation doCheckName(@QueryParameter String value) {

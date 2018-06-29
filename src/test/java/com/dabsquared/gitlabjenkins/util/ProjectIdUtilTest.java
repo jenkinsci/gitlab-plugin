@@ -1,17 +1,16 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import static com.dabsquared.gitlabjenkins.util.ProjectIdUtilTest.TestData.forRemoteUrl;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import static com.dabsquared.gitlabjenkins.util.ProjectIdUtilTest.TestData.forRemoteUrl;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 
 /**
  * @author Robin Müller
@@ -33,8 +32,7 @@ public class ProjectIdUtilTest {
 
     @Theory
     public void retrieveProjectId(TestData testData) throws ProjectIdUtil.ProjectIdResolutionException {
-        GitLabApi client = mock(GitLabApi.class);
-        when(client.getGitLabHostUrl()).thenReturn(testData.baseUrl);
+        GitLabClient client = new GitLabClientStub(testData.hostUrl);
 
         String projectId = ProjectIdUtil.retrieveProjectId(client, testData.remoteUrl);
 
@@ -44,12 +42,12 @@ public class ProjectIdUtilTest {
 
     static final class TestData {
 
-        private final String baseUrl;
+        private final String hostUrl;
         private final String remoteUrl;
         private String expectedProjectId;
 
-        private TestData(String baseUrl, String remoteUrl) {
-            this.baseUrl = baseUrl;
+        private TestData(String hostUrl, String remoteUrl) {
+            this.hostUrl = hostUrl;
             this.remoteUrl = remoteUrl;
         }
 

@@ -1,10 +1,13 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Robin Müller
@@ -17,14 +20,24 @@ public final class MergeRequestHookTriggerHandlerFactory {
     		                                                                       boolean triggerOnAcceptedMergeRequest,
     		                                                                       boolean triggerOnClosedMergeRequest,
                                                                                    TriggerOpenMergeRequest triggerOpenMergeRequest,
-                                                                                   boolean skipWorkInProgressMergeRequest) {
-        if (triggerOnMergeRequest || triggerOnAcceptedMergeRequest || triggerOnClosedMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
-            return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequest),
-                                                          skipWorkInProgressMergeRequest);
+                                                                                   boolean skipWorkInProgressMergeRequest,
+                                                                                   boolean triggerOnApprovedMergeRequest,
+                                                                                   boolean cancelPendingBuildsOnUpdate) {
+        if (triggerOnMergeRequest || triggerOnAcceptedMergeRequest || triggerOnClosedMergeRequest || triggerOpenMergeRequest != TriggerOpenMergeRequest.never || triggerOnApprovedMergeRequest) {
+        	return new MergeRequestHookTriggerHandlerImpl(retrieveAllowedStates(triggerOnMergeRequest, triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequest), 
+            											  retrieveAllowedActions(triggerOnApprovedMergeRequest),
+                                                          skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
         } else {
             return new NopMergeRequestHookTriggerHandler();
         }
     }
+
+	private static Set<Action> retrieveAllowedActions(boolean triggerOnApprovedMergeRequest) {
+		Set<Action> allowedActions = EnumSet.noneOf(Action.class);
+		if (triggerOnApprovedMergeRequest)
+			allowedActions.add(Action.approved);
+		return allowedActions;
+	}
 
 	private static List<State> retrieveAllowedStates(boolean triggerOnMergeRequest, 
 			                                         boolean triggerOnAcceptedMergeRequest, 
@@ -44,6 +57,7 @@ public final class MergeRequestHookTriggerHandlerFactory {
         if (triggerOpenMergeRequest != TriggerOpenMergeRequest.never) {
             result.add(State.updated);
         }
+        
         return result;
     }
 }

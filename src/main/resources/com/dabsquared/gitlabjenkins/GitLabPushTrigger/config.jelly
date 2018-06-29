@@ -18,6 +18,9 @@
       <f:entry title="Rebuild open Merge Requests" field="triggerOpenMergeRequestOnPush">
         <f:select/>
       </f:entry>
+      <f:entry title="Approved Merge Requests (EE-only)" field="triggerOnApprovedMergeRequest">
+        <f:checkbox default="true"/>
+      </f:entry>
       <f:entry title="Comments" field="triggerOnNoteRequest">
         <f:checkbox default="true"/>
       </f:entry>
@@ -37,6 +40,12 @@
       <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Build on successful pipeline events" field="triggerOnPipelineEvent">
+      <f:checkbox default="false"/>
+    </f:entry>
+    <f:entry title="Pending build name for pipeline" help="/plugin/gitlab-plugin/help/help-pendingBuildName.html">
+      <f:textbox field="pendingBuildName"/>
+    </f:entry>
+    <f:entry title="Cancel pending merge request builds on update" field="cancelPendingBuildsOnUpdate">
       <f:checkbox default="false"/>
     </f:entry>
 

@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.markup.EscapedMarkupFormatter;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -130,9 +131,9 @@ public final class CauseData {
         variables.put("gitlabMergeRequestIid", mergeRequestIid == null ? "" : mergeRequestIid.toString());
         variables.put("gitlabMergeRequestTargetProjectId", mergeRequestTargetProjectId == null ? "" : mergeRequestTargetProjectId.toString());
         variables.put("gitlabMergeRequestLastCommit", lastCommit);
-        variables.pufIfNotNull("gitlabMergeRequestState", mergeRequestState);
-        variables.pufIfNotNull("gitlabMergedByUser", mergedByUser);
-        variables.pufIfNotNull("gitlabMergeRequestAssignee", mergeRequestAssignee);
+        variables.putIfNotNull("gitlabMergeRequestState", mergeRequestState);
+        variables.putIfNotNull("gitlabMergedByUser", mergedByUser);
+        variables.putIfNotNull("gitlabMergeRequestAssignee", mergeRequestAssignee);
         variables.put("gitlabTargetBranch", targetBranch);
         variables.put("gitlabTargetRepoName", targetRepoName);
         variables.put("gitlabTargetNamespace", targetNamespace);
@@ -149,7 +150,7 @@ public final class CauseData {
         variables.put("createdAt", createdAt);
         variables.put("finishedAt", finishedAt);
         variables.put("duration", buildDuration);
-        variables.pufIfNotNull("gitlabTriggerPhrase", triggerPhrase);        
+        variables.putIfNotNull("gitlabTriggerPhrase", triggerPhrase);
         if (labels != null) variables.put("gitlabLabels", StringUtils.join(labels,' '));
         return variables;
     }
@@ -301,6 +302,15 @@ public final class CauseData {
 		return mergeRequestAssignee;
 	}
 
+	public MergeRequest getMergeRequest() {
+        if (mergeRequestId == null) {
+            return null;
+        }
+
+        return new MergeRequest(mergeRequestId, mergeRequestIid, sourceBranch, targetBranch, mergeRequestTitle,
+            sourceProjectId, targetProjectId, mergeRequestDescription, mergeRequestState);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -450,12 +460,12 @@ public final class CauseData {
         PUSH {
             @Override
             String getShortDescription(CauseData data) {
-                String pushedBy = data.getTriggeredByUser();
-                if (pushedBy == null) {
-                    return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
-                } else {
-                    return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
-                }
+                return getShortDescriptionPush(data);
+            }
+        }, TAG_PUSH {
+            @Override
+            String getShortDescription(CauseData data) {
+                return getShortDescriptionPush(data);
             }
         }, MERGE {
             @Override
@@ -502,6 +512,15 @@ public final class CauseData {
                 }
         };
 
+        private static String getShortDescriptionPush(CauseData data) {
+            String pushedBy = data.getTriggeredByUser();
+            if (pushedBy == null) {
+                return Messages.GitLabWebHookCause_ShortDescription_PushHook_noUser();
+            } else {
+                return Messages.GitLabWebHookCause_ShortDescription_PushHook(pushedBy);
+            }
+        }
+
         abstract String getShortDescription(CauseData data);
     }
 
@@ -509,7 +528,7 @@ public final class CauseData {
 
         private final Map<K, V> map;
 
-        public MapWrapper(Map<K, V> map) {
+        MapWrapper(Map<K, V> map) {
             this.map = map;
         }
 
@@ -523,7 +542,7 @@ public final class CauseData {
             return map.entrySet();
         }
 
-        public void pufIfNotNull(K key, V value) {
+        void putIfNotNull(K key, V value) {
             if (value != null) {
                 map.put(key, value);
             }

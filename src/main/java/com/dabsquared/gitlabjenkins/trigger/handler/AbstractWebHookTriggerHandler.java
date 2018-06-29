@@ -3,26 +3,25 @@ package com.dabsquared.gitlabjenkins.trigger.handler;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabApi;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
-import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.scm.SCM;
-import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -37,6 +36,7 @@ import java.util.logging.Logger;
 public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implements WebHookTriggerHandler<H> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
+    protected PendingBuildsHandler pendingBuildsHandler = new PendingBuildsHandler();
 
     @Override
     public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
@@ -48,6 +48,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         String targetBranch = getTargetBranch(hook);
         if (branchFilter.isBranchAllowed(targetBranch)) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+            cancelPendingBuildsIfNecessary(job, hook);
             setCommitStatusPendingIfNecessary(job, hook);
             scheduleBuild(job, createActions(job, hook));
         } else {
@@ -60,19 +61,17 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract boolean isCiSkip(H hook);
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
-        if (job instanceof AbstractProject && ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class) != null) {
-            GitLabCommitStatusPublisher publisher =
-                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
-            GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
+        String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
+        if (StringUtils.isNotBlank(buildName)) {
+            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
             try {
                 if (client == null) {
                     LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                 } else {
-                    String targetUrl =
-                        Jenkins.getInstance().getRootUrl() + job.getUrl() + job.getNextBuildNumber() + "/";
+                    String targetUrl = DisplayURLProvider.get().getJobURL(job);
                     client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
-                        BuildState.pending, buildStatusUpdate.getRef(), publisher.getName(), targetUrl, null);
+                        BuildState.pending, buildStatusUpdate.getRef(), buildName, targetUrl, BuildState.pending.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
@@ -93,6 +92,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         }
         return actions.toArray(new Action[actions.size()]);
     }
+
+    protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, H hook) {}
 
     protected abstract CauseData retrieveCauseData(H hook);
 
