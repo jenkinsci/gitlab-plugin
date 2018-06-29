@@ -48,7 +48,6 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
     }
 
     @Extension
-    @Symbol("gitLabConnection")
     public static class DescriptorImpl extends JobPropertyDescriptor {
 
         @Override
