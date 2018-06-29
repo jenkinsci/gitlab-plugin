@@ -1,5 +1,13 @@
 ChangeLog
 
+1.5.7
+=====================
+* #747: Add ability to interact with multiple GitLab services when sending build status
+* #758: Always build new MRs, even if the last commit was already built by Jenkins
+* #762: Fix for trigger builds when MR is accepted
+* #774: Fix display of branch names in GitLab UI when a build is triggered by a tag push
+* #786: Add ability to set pipeline status in GitLab to "skipped"
+
 1.5.6
 =====================
 * #691: Fix project ID regex to not require '.git' in URLs
