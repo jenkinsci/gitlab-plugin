@@ -64,7 +64,7 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
 * [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
 * [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
-* [#730](https://github.com/jenkinsci/gitlab-plugin/issues/730) - GitLab 10.5.6 introduced an issue which can cause HTTP 500 errors when webhooks are triggered. See the linked issue for a workaround.
+* [#730](https://github.com/jenkinsci/gitlab-plugin/issues/730) - GitLab 10.5.6 introduced an issue which can cause HTTP 500 errors when webhooks are triggered if the webhook is pointing to http://localhost or http://127.0.0.1. See the linked issue for a workaround.
 
 # Defined variables
 
@@ -314,7 +314,10 @@ job('seed-job') {
 You can optionally have your Jenkins jobs send their build status back to GitLab, where it will be displayed in the commit or merge request UI as appropriate. 
 
 ### Freestyle jobs
-Freestyle jobs can only send build status after the build steps are complete. To do this, choose 'Publish build status to GitLab' from the available 'Post-build actions' in your Jenkins job config. Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
+Use 'Publish build status to GitLab' Post-build action to send build status with the given build name back to GitLab.
+'Pending' build status is sent when the build is triggered, 'Running' status is sent when the build starts and 'Success' or 'Failed' status is sent after the build is finished.
+
+Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
 
 ### Scripted Pipeline jobs
 **NOTE:** If you use Pipeline global libraries, or if you clone your project's Jenkinsfile from a repo different from the one that contains the relevant source code, you need to be careful about when you send project status. In short, make sure you put your `gitlabCommitStatus` or other similar steps *after* the SCM step that clones your project's source. Otherwise, you may get HTTP 400 errors, or you may find build status being sent to the wrong repo.
@@ -361,6 +364,7 @@ Freestyle jobs can only send build status after the build steps are complete. To
         }
     }
     ```
+    **Note:** If you put the `gitlabBuilds` block *inside* a node block, it will not trigger until a node is allocated. On a busy system, or one where nodes are allocated on demand, there could be a delay here, and the 'pending' status would not be sent to GitLab right away. If this is a concern, you can move the `gitlabBuilds` block to wrap the node block, and then the status will be sent when Jenkins *starts* trying to allocate a node.
 
 ### Declarative Pipeline jobs
 The example below configures the GitLab connection and job triggers. It also sends build status back to GitLab.
@@ -429,9 +433,14 @@ triggers {
       branchFilterType: "NameBasedFilter",
       includeBranchesSpec: "release/qat",
       excludeBranchesSpec: "",
+      pendingBuildName: "Jenkins",
+      cancelPendingBuildsOnUpdate: false,
       secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
 }
 ```
+
+#### Pending build status for pipelines
+To send 'Pending' build status to GitLab when the pipeline is triggered, set a build name to 'Pending build name for pipeline' field in the Advanced-section of the trigger configuration or use pendingBuildName option in the GitLab-trigger configuration in the declarative pipeline.
 
 ### Matrix/Multi-configuration jobs
 
@@ -503,6 +512,10 @@ gitlabCommitStatus(
             echo 'Hello World'
     }
 ```
+
+## Cancel pending builds on merge request update
+To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.
+This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
 
 # Contributing to the Plugin
 
