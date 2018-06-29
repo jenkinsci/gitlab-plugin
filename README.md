@@ -297,6 +297,7 @@ job('seed-job') {
 
     triggers {
         gitlab {
+            // This line assumes you set the API_TOKEN as an env var before starting Jenkins - not necessarily required
             secretToken(System.getenv("API_TOKEN"))
             triggerOnNoteRequest(false)
         }
