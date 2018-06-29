@@ -69,7 +69,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
             }
         });
         project.setQuietPeriod(0);
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false, false);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), Arrays.asList(Action.approved), false, false);
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
@@ -81,7 +81,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_build() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), false, false);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), Arrays.asList(Action.approved), false, false);
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.opened);
 
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -89,7 +89,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_build_when_accepted() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.merged), false, false);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.merged), Arrays.asList(Action.approved), false, false);
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.merged);
 
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -97,7 +97,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_build_when_closed() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.closed), false, false);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.closed), Arrays.asList(Action.approved), false, false);
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.closed);
 
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -105,7 +105,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_do_not_build_when_accepted() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.updated), false, false);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.updated), Arrays.asList(Action.approved), false, false);
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.merged);
 
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -113,7 +113,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_do_not_build_when_closed() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.updated), false, false);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.updated), Arrays.asList(Action.approved), false, false);
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.closed);
 
         assertThat(buildTriggered.isSignaled(), is(false));
