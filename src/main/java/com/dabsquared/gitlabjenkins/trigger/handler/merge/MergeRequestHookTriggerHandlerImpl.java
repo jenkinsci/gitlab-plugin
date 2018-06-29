@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
@@ -40,6 +41,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private final Collection<State> allowedStates;
     private final boolean skipWorkInProgressMergeRequest;
 	private final Collection<Action> allowedActions;
+    private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved);
     private final boolean cancelPendingBuildsOnUpdate;
 
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
@@ -163,18 +165,32 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private boolean isLastCommitNotYetBuild(Job<?, ?> project, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
-        if (objectAttributes != null && objectAttributes.getAction() == Action.approved) {
-            LOGGER.log(Level.FINEST, "Skipping LastCommitNotYetBuild check for approve action");
+
+        if (objectAttributes == null) {
             return true;
         }
 
-        if (objectAttributes != null && objectAttributes.getLastCommit() != null) {
-            Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getLastCommit().getId());
-            if (mergeBuild != null && StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
-                LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
-                return false;
-            }
+        Action action = objectAttributes.getAction();
+        if (skipBuiltYetCheckActions.contains(action)) {
+            LOGGER.log(Level.FINEST, "Skipping LastCommitNotYetBuild check for {0} action", action);
+            return true;
         }
+
+        Commit lastCommit = objectAttributes.getLastCommit();
+        if (lastCommit == null) {
+            return true;
+        }
+
+        Run<?, ?> mergeBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, lastCommit.getId());
+        if (mergeBuild == null) {
+            return true;
+        }
+
+        if (StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
+            LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
+            return false;
+        }
+
         return true;
     }
 
