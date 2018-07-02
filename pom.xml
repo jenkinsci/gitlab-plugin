@@ -141,6 +141,32 @@
             <compatibleSinceVersion>1.4.0</compatibleSinceVersion>
           </configuration>
         </plugin>
+	<plugin>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <id>shade</id>
+              <phase>package</phase>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+            </execution>
+          </executions>
+	  <configuration>
+	    <artifactSet>
+	      <includes>
+		<include>javax.ws.rs.ext:*</include>
+	      </includes>
+	    </artifactSet>
+            <relocations>
+              <relocation>
+                <pattern>javax.ws.rs.ext</pattern>
+                <shadedPattern>javax.shaded.ws.rs.ext</shadedPattern>
+              </relocation>
+            </relocations>
+          </configuration>
+	</plugin>
       </plugins>
     </pluginManagement>
   </build>
