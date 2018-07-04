@@ -6,12 +6,12 @@ f.entry(title:"Build name", field:"name") {
     f.textbox()
 }
 
-f.entry(title:"Gitalb connection") {
-    f.property(field: "connection")
-}
+f.advanced() {
+    f.optionalProperty(field: "connection", title: "Select specific GitLab Connection")
 
-f.entry(title:"Gitlab Projects To Notify") {
-    f.repeatableHeteroProperty(field: "builds", hasHeader: "true")
+    f.entry(title:"GitLab Projects To Notify") {
+        f.repeatableHeteroProperty(field: "builds", hasHeader: "true")
+    }
 }
 
 

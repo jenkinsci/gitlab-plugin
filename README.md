@@ -502,7 +502,7 @@ gitlabCommitStatus(name: 'stage1',
 
 * Notify several gitlab projects using specific gitlab connection
 ```groovy
-gitlabCommitStatus( name: 'stage1', connection:[gitLabConnection:'site1-connection'],
+gitlabCommitStatus( name: 'stage1', connection:gitLabConnection('site1-connection'),
         builds: [
             [projectId: 'test/test', revisionHash: 'master'],
             [projectId: 'test/utils', revisionHash: 'master'],
@@ -516,10 +516,10 @@ gitlabCommitStatus( name: 'stage1', connection:[gitLabConnection:'site1-connecti
 ```groovy
 gitlabCommitStatus(
         builds: [
-            [name:'stage1',connection:[gitLabConnection:'site1-connection'], projectId: 'group/project1', revisionHash: 'master'],
-            [name:'stage1',connection:[gitLabConnection:'site2-connection'], projectId: 'group/project1', revisionHash: 'master'],
-            [name:'stage1',connection:[gitLabConnection:'site2-connection'], projectId: 'test/test', revisionHash: 'master'],
-            [name:'stage1',connection:[gitLabConnection:'site2-connection'], projectId: 'test/utils', revisionHash: 'master'],
+            [name:'stage1',connection:gitLabConnection('site1-connection'), projectId: 'group/project1', revisionHash: 'master'],
+            [name:'stage1',connection:gitLabConnection('site2-connection'), projectId: 'group/project1', revisionHash: 'master'],
+            [name:'stage1',connection:gitLabConnection('site2-connection'), projectId: 'test/test', revisionHash: 'master'],
+            [name:'stage1',connection:gitLabConnection('site2-connection'), projectId: 'test/utils', revisionHash: 'master'],
         ])
     {
             echo 'Hello World'

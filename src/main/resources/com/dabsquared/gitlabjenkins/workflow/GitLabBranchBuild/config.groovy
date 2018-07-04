@@ -6,11 +6,11 @@ f.entry(title:"Build Name",field:"name") {
   f.textbox()
 }
 
-f.entry(title:"Gitlab Project id", field:"projectId") {
+f.entry(title:"GitLab Project Id", field:"projectId") {
   f.textbox()
 }
 
-f.entry(title:"Gitlab Commit sha1", field:"revisionHash") {
+f.entry(title:"GitLab Commit sha1", field:"revisionHash") {
   f.textbox()
 }
 
