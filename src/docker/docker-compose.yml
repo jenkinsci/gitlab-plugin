@@ -2,8 +2,8 @@ version: '2'
 
 services:
   postgresql:
-    restart: always
-    image: sameersbn/postgresql:9.5-1
+    restart: "no"
+    image: sameersbn/postgresql:9.6-2
     ports:
       - "5432:5432"
     environment:
@@ -15,7 +15,7 @@ services:
       - /srv/docker/gitlab/postgresql:/var/lib/postgresql
 
   gitlab:
-    restart: always
+    restart: "no"
     image: sameersbn/gitlab:9.4.1
     depends_on:
       - redis
@@ -83,13 +83,13 @@ services:
       - /srv/docker/gitlab/gitlab:/home/git/data
 
   redis:
-    restart: always
+    restart: "no"
     image: sameersbn/redis:latest
     volumes:
       - /srv/docker/gitlab/redis:/var/lib/redis
 
   jenkins:
-    restart: always
+    restart: "no"
     image: jenkins/jenkins:lts
     ports:
       - "8080:8080"
