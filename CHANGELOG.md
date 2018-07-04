@@ -1,10 +1,15 @@
 ChangeLog
 
+1.5.8
+=====================
+* #735: Add additional options to acceptGitlabMergeRequest step, to remove source branch and use the MR description in the merge commit
+* #793: Fix Pipeline support which was broken in 1.5.7
+
 1.5.7
 =====================
 * #747: Add ability to interact with multiple GitLab services when sending build status
 * #758: Always build new MRs, even if the last commit was already built by Jenkins
-* #762: Fix for trigger builds when MR is accepted
+* #762: Fix for triggering builds when MR is accepted/approved/closed
 * #774: Fix display of branch names in GitLab UI when a build is triggered by a tag push
 * #786: Add ability to set pipeline status in GitLab to "skipped"
 
