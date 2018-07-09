@@ -176,7 +176,7 @@ if (env['gitlabTargetBranch'] != null) {
 return map
 ```
 
-You will need to update this code anytime you add or remove parameters.
+You can then reference these variables in your job config, e.g. as `${sourceBranch}`. You will need to update this code anytime you add or remove parameters.
 
 ## Git configuration 
 ### Freestyle jobs
