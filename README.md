@@ -153,7 +153,7 @@ There are two aspects of your Jenkins job that you may want to modify when using
 
 Any GitLab parameters you create will always take precedence over the values that are sent by the webhook, unless you use the [EnvInject plugin](https://plugins.jenkins.io/envinject) to map the webhook values onto the job parameters. This is due to changes that were made to address [security vulnerabilities,](https://jenkins.io/security/advisory/2016-05-11/) with changes that landed in Jenkins 2.3.
 
-In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined variables](#defined-variables) list for options - your parameter names must match these. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
+In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined variables](#defined-variables) list for options - your parameter names must match these .e.g `sourceBranch` and `targetBranch` in the example Groovy Script belolow. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
 * Keep Jenkins Environment Variables
 * Keep Jenkins Build Variables
 * Override Build Parameters
@@ -166,17 +166,17 @@ def env = Thread.currentThread()?.executable.parent.builds[0].properties.get('en
 def map = [:]
 
 if (env['gitlabSourceBranch'] != null) { 
-  map['gitlabSourceBranch'] = env['gitlabSourceBranch'] 
+  map['sourceBranch'] = env['gitlabSourceBranch'] 
 }
 if (env['gitlabTargetBranch'] != null) { 
-  map['gitlabTargetBranch'] = env['gitlabTargetBranch'] 
+  map['targetBranch'] = env['gitlabTargetBranch'] 
 }
 // Add additional entries for any other parameters you have created
 
 return map
 ```
 
-You will need to update this code anytime you add or remove parameters.
+You can then reference these variables in your job config, e.g. as `${sourceBranch}`. You will need to update this code anytime you add or remove parameters.
 
 ## Git configuration 
 ### Freestyle jobs
