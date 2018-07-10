@@ -45,18 +45,20 @@ public class GitLabCommitStatusStep extends Step {
     private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
-    public GitLabCommitStatusStep(String name) {
-        this.name = StringUtils.isEmpty(name) ? null : name;
-    }
+    public GitLabCommitStatusStep(){ }
 
 	@Override
 	public StepExecution start(StepContext context) throws Exception {
 		return new GitLabCommitStatusStepExecution(context, this);
 	}
 
-
     public String getName() {
         return name;
+    }
+
+    @DataBoundSetter
+    public void setName(String name) {
+        this.name = StringUtils.isEmpty(name) ? null : name;
     }
 
     public List<GitLabBranchBuild> getBuilds() {
