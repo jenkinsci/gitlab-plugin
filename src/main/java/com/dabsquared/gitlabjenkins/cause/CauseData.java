@@ -8,6 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 import java.util.*;
 
@@ -16,6 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Robin Müller
  */
+@ExportedBean
 public final class CauseData {
     private final ActionType actionType;
     private final Integer sourceProjectId;
@@ -110,6 +113,7 @@ public final class CauseData {
         this.buildDuration = buildDuration;
     }
 
+    @Exported
     public Map<String, String> getBuildVariables() {
         MapWrapper<String, String> variables = new MapWrapper<>(new HashMap<String, String>());
         variables.put("gitlabBranch", branch);
@@ -152,134 +156,171 @@ public final class CauseData {
         return variables;
     }
 
+    @Exported
     public Integer getSourceProjectId() {
         return sourceProjectId;
     }
 
+    @Exported
     public Integer getTargetProjectId() {
         return targetProjectId;
     }
 
+    @Exported
     public String getBranch() {
         return branch;
     }
 
+    @Exported
     public String getSourceBranch() {
         return sourceBranch;
     }
 
+    @Exported
     public ActionType getActionType() {
         return actionType;
     }
 
+    @Exported
     public String getUserName() {
         return userName;
     }
 
+    @Exported
     public String getUserEmail() {
         return userEmail;
     }
 
+    @Exported
     public String getSourceRepoHomepage() {
         return sourceRepoHomepage;
     }
 
+    @Exported
     public String getSourceRepoName() {
         return sourceRepoName;
     }
 
+    @Exported
     public String getSourceNamespace() {
         return sourceNamespace;
     }
 
+    @Exported
     public String getSourceRepoUrl() {
         return sourceRepoUrl;
     }
 
+    @Exported
     public String getSourceRepoSshUrl() {
         return sourceRepoSshUrl;
     }
 
+    @Exported
     public String getSourceRepoHttpUrl() {
         return sourceRepoHttpUrl;
     }
 
+    @Exported
     public String getMergeRequestTitle() {
         return mergeRequestTitle;
     }
 
+    @Exported
     public String getMergeRequestDescription() {
         return mergeRequestDescription;
     }
 
+    @Exported
     public Integer getMergeRequestId() {
         return mergeRequestId;
     }
 
+    @Exported
     public Integer getMergeRequestIid() {
         return mergeRequestIid;
     }
 
+    @Exported
     public Integer getMergeRequestTargetProjectId() {
         return mergeRequestTargetProjectId;
     }
 
+    @Exported
     public String getTargetBranch() {
         return targetBranch;
     }
 
+    @Exported
     public String getTargetRepoName() {
         return targetRepoName;
     }
 
+    @Exported
     public String getTargetNamespace() {
         return targetNamespace;
     }
 
+    @Exported
     public String getTargetRepoSshUrl() {
         return targetRepoSshUrl;
     }
 
+    @Exported
     public String getTargetRepoHttpUrl() {
         return targetRepoHttpUrl;
     }
 
+    @Exported
     public String getTriggeredByUser() {
         return triggeredByUser;
     }
 
+    @Exported
     public String getBefore() {
         return before;
     }
 
+    @Exported
     public String getAfter() {
         return after;
     }
 
+    @Exported
     public String getLastCommit() {
         return lastCommit;
     }
 
+    @Exported
     public String getTargetProjectUrl() {
         return targetProjectUrl;
     }
 
+    @Exported
     public String getRef() { return ref; }
 
+    @Exported
     public String getIsTag() { return isTag; }
 
+    @Exported
     public String getSha() { return sha; }
 
+    @Exported
     public String getBeforeSha() {return beforeSha; }
 
+    @Exported
     public String getStatus() { return status; }
 
+    @Exported
     public String getStages() { return stages; }
 
+    @Exported
     public String getCreatedAt() { return createdAt; }
 
+    @Exported
     public String getFinishedAt() { return finishedAt; }
 
+    @Exported
     public String getBuildDuration() { return buildDuration; }
 
 
@@ -287,18 +328,22 @@ public final class CauseData {
         return actionType.getShortDescription(this);
     }
 
+    @Exported
     public String getMergeRequestState() {
 		return mergeRequestState;
 	}
 
+    @Exported
 	public String getMergedByUser() {
 		return mergedByUser;
 	}
 
+    @Exported
 	public String getMergeRequestAssignee() {
 		return mergeRequestAssignee;
 	}
 
+    @Exported
 	public MergeRequest getMergeRequest() {
         if (mergeRequestId == null) {
             return null;
