@@ -4,7 +4,6 @@ package com.dabsquared.gitlabjenkins.publisher;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -16,6 +15,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import java.util.logging.Level;
@@ -73,6 +73,11 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
             if (!alreadyAwarded) {
                 client.awardMergeRequestEmoji(mergeRequest, getResultIcon(build.getResult()));
             }
+        } catch (NotFoundException e) {
+            String message = String.format("Failed to add vote on Merge Request for project '%s'\n" +
+                "Got unexpected 404, are you using the wrong API version or trying to vote on your own merge request?", mergeRequest.getProjectId());
+            listener.getLogger().println(message);
+            LOGGER.log(Level.WARNING, message, e);
         } catch (WebApplicationException | ProcessingException e) {
             listener.getLogger().printf("Failed to add vote on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
             LOGGER.log(Level.SEVERE, String.format("Failed to add vote on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
