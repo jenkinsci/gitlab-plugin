@@ -59,24 +59,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_ciSkip() throws IOException, InterruptedException {
-        final OneShotEvent buildTriggered = new OneShotEvent();
-        FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new TestBuilder() {
-            @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                buildTriggered.signal();
-                return true;
-            }
-        });
-        project.setQuietPeriod(0);
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), Arrays.asList(Action.approved), false, false);
-        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
-                .withObjectAttributes(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-                                              newMergeRequestLabelFilter(null));
-
-        buildTriggered.block(10000);
-        assertThat(buildTriggered.isSignaled(), is(false));
+        assertThat(ciSkipTestHelper("enable build","enable build"), is(true));
+        assertThat(ciSkipTestHelper("garbage [ci-skip] garbage","enable build"), is(false));
+        assertThat(ciSkipTestHelper("enable build","garbage [ci-skip] garbage"), is(false));
     }
 
     @Test
@@ -197,6 +182,27 @@ public class MergeRequestHookTriggerHandlerImplTest {
         buildTriggered.block(10000);
         return buildTriggered;
 	}
+
+    private boolean ciSkipTestHelper(String MRDescription, String lastCommitMsg) throws IOException, InterruptedException {
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                buildTriggered.signal();
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened, State.reopened), Arrays.asList(Action.approved), false, false);
+        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
+                .withObjectAttributes(defaultMergeRequestObjectAttributes().withDescription(MRDescription).withLastCommit(commit().withMessage(lastCommitMsg).withAuthor(user().withName("test").build()).withId("testid").build()).build())
+                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+            newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        return buildTriggered.isSignaled();
+    }
 
 	private MergeRequestObjectAttributesBuilder defaultMergeRequestObjectAttributes() {
 		return mergeRequestObjectAttributes()

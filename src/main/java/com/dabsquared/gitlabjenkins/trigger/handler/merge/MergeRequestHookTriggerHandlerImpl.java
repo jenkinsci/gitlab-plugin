@@ -78,8 +78,16 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     @Override
     protected boolean isCiSkip(MergeRequestHook hook) {
         return hook.getObjectAttributes() != null
-                && hook.getObjectAttributes().getDescription() != null
-                && hook.getObjectAttributes().getDescription().contains("[ci-skip]");
+            && (
+                (hook.getObjectAttributes().getDescription() != null
+                    && hook.getObjectAttributes().getDescription().contains("[ci-skip]")
+                ) ||
+                (
+                    hook.getObjectAttributes().getLastCommit() != null &&
+                        hook.getObjectAttributes().getLastCommit().getMessage() != null &&
+                        hook.getObjectAttributes().getLastCommit().getMessage().contains("[ci-skip]")
+                )
+        );
     }
 
     @Override
