@@ -22,7 +22,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.google.common.collect.ImmutableSet;
 import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
@@ -30,20 +32,20 @@ import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.g
  * @author <a href="mailto:deep.alexander@gmail.com">Alex Nordlund</a>
  */
 @ExportedBean
-public class AddGitLabMergeRequestEmojiStep extends Step {
+public class RemoveGitLabMergeRequestEmojiStep extends Step {
 
-    private static final Logger LOGGER = Logger.getLogger(AddGitLabMergeRequestEmojiStep.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(RemoveGitLabMergeRequestEmojiStep.class.getName());
 
     private String emoji;
 
     @DataBoundConstructor
-    public AddGitLabMergeRequestEmojiStep(String comment) {
+    public RemoveGitLabMergeRequestEmojiStep(String comment) {
         this.emoji = StringUtils.isEmpty(comment) ? null : comment;
     }
 
 	@Override
 	public StepExecution start(StepContext context) throws Exception {
-		return new AddGitLabMergeRequestEmojiStepExecution(context, this);
+		return new RemoveGitLabMergeRequestEmojiStepExecution(context, this);
 	}
 	
     public String getEmoji() {
@@ -55,14 +57,14 @@ public class AddGitLabMergeRequestEmojiStep extends Step {
         this.emoji = StringUtils.isBlank(emoji) ? null : emoji;
     }
 
-    public static class AddGitLabMergeRequestEmojiStepExecution extends AbstractSynchronousStepExecution<Void> {
+    public static class RemoveGitLabMergeRequestEmojiStepExecution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
         private final transient Run<?, ?> run;
 
-        private final transient AddGitLabMergeRequestEmojiStep step;
+        private final transient RemoveGitLabMergeRequestEmojiStep step;
 
-        AddGitLabMergeRequestEmojiStepExecution(StepContext context, AddGitLabMergeRequestEmojiStep step) throws Exception {
+        RemoveGitLabMergeRequestEmojiStepExecution(StepContext context, RemoveGitLabMergeRequestEmojiStep step) throws Exception {
             super(context);
             this.step = step;
             run = context.get(Run.class);
@@ -81,15 +83,15 @@ public class AddGitLabMergeRequestEmojiStep extends Step {
                         error("No emoji given configured!");
                     } else {
                         try {
-                            client.awardMergeRequestEmoji(mergeRequest, step.getEmoji());
-                        } catch (NotFoundException e) {
-                            String message = String.format("Failed to add vote on Merge Request for project '%s'\n" +
-                                "Got unexpected 404, are you using the wrong API version, " +
-                                "an unknown emoji, or trying to thumbs up/down your own merge request?", mergeRequest.getProjectId());
-                            error(message);
+                            Integer userId = client.getCurrentUser().getId();
+                            for (Awardable emoji : client.getMergeRequestEmoji(mergeRequest)) {
+                                if (emoji.getUser().getId().equals(userId) && step.getEmoji().equals(emoji.getName())) {
+                                    client.deleteMergeRequestEmoji(mergeRequest, emoji.getId());
+                                }
+                            }
                         } catch (WebApplicationException | ProcessingException e) {
-                            printf("Failed to add emoji on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
-                            LOGGER.log(Level.SEVERE, String.format("Failed to add emoji on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
+                            printf("Failed to remove emoji on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
+                            LOGGER.log(Level.SEVERE, String.format("Failed to remove emoji on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
                         }
                     }
                 }
@@ -142,12 +144,12 @@ public class AddGitLabMergeRequestEmojiStep extends Step {
 
         @Override
         public String getDisplayName() {
-            return "Add emoji on GitLab Merge Request";
+            return "Remove emoji from GitLab Merge Request";
         }
 
         @Override
         public String getFunctionName() {
-            return "addGitLabMREmoji";
+            return "removeGitLabMREmoji";
         }
         
 		@Override
