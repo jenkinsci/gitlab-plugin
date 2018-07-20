@@ -36,6 +36,10 @@ public interface GitLabClient {
 
     void deleteMergeRequestEmoji(MergeRequest mr, Integer awardId);
 
+    void approveMergeRequest(MergeRequest mr);
+
+    void unapproveMergeRequest(MergeRequest mr);
+
     List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage);
 
     List<Branch> getBranches(String projectId);
