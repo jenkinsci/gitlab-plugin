@@ -30,6 +30,12 @@ public interface GitLabClient {
 
     void createMergeRequestNote(MergeRequest mr, String body);
 
+    List<Awardable> getMergeRequestEmoji(MergeRequest mr);
+
+    void awardMergeRequestEmoji(MergeRequest mr, String name);
+
+    void deleteMergeRequestEmoji(MergeRequest mr, Integer awardId);
+
     List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage);
 
     List<Branch> getBranches(String projectId);

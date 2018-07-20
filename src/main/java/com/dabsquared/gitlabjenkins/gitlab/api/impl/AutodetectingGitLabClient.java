@@ -166,6 +166,45 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public List<Awardable> getMergeRequestEmoji(final MergeRequest mr) {
+        return execute(
+            new GitLabOperation<List<Awardable>>() {
+                @Override
+                List<Awardable> execute(GitLabClient client) {
+                    return client.getMergeRequestEmoji(mr);
+                }
+            }
+        );
+    }
+
+
+    @Override
+    public void awardMergeRequestEmoji(final MergeRequest mr, final String body) {
+        execute(
+            new GitLabOperation<Void>() {
+                @Override
+                Void execute(GitLabClient client) {
+                    client.awardMergeRequestEmoji(mr, body);
+                    return null;
+                }
+            }
+        );
+    }
+
+    @Override
+    public void deleteMergeRequestEmoji(final MergeRequest mr, final Integer awardId) {
+        execute(
+            new GitLabOperation<Void>() {
+                @Override
+                Void execute(GitLabClient client) {
+                    client.deleteMergeRequestEmoji(mr, awardId);
+                    return null;
+                }
+            }
+        );
+    }
+
+    @Override
     public List<MergeRequest> getMergeRequests(final String projectId, final State state, final int page, final int perPage) {
         return execute(
             new GitLabOperation<List<MergeRequest>>() {

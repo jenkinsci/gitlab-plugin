@@ -30,6 +30,12 @@ interface GitLabApiProxy {
 
     void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body);
 
+    List<Awardable> getMergeRequestEmoji(Integer projectId, Integer mergeRequestId);
+
+    void awardMergeRequestEmoji(Integer projectId, Integer mergeRequestId, String name);
+
+    void deleteMergeRequestEmoji(Integer projectId, Integer mergeRequestId, Integer awardId);
+
     List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage);
 
     List<Branch> getBranches(String projectId);
