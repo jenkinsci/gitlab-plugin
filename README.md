@@ -39,7 +39,13 @@ This plugin allows GitLab to trigger builds in Jenkins when code is committed or
 Most of the current maintainers of the plugin are no longer using GitLab on a daily basis, and therefore have less time to contribute to it. If you are a regular user and would like to help out, please consider volunteering as a maintainer. There are verified bugs that need fixes, open PRs that need review, and feature requests that range from simple to complex. If you are interested in contributing, contact Owen (email address in git log) for additional access.
 
 # User support
+### Relationship with GitLab Inc.
+This plugin is Open Source Software, developed on a volunteer basis by users of Jenkins and GitLab. It is not formally supported by either GitLab Inc. or CloudBees Inc.
 
+### Supported GitLab versions
+GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the current major release. At the time of this writing, the current stable release of GitLab is 11.1, so the oldest release supported by this plugin is 9.0.
+
+### Getting help
 If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
 * GitLab plugin version (e.g. 1.5.2)
 * GitLab version (e.g. 10.5.1)
