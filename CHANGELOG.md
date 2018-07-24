@@ -1,5 +1,12 @@
 ChangeLog
 
+1.5.9
+=====================
+* #748: Fix so that the 'Add vote for build status' feature actually adds a vote/+1 rather than just a comment
+* #798: Fix so that MR 'approved' action does not trigger a build unless it is configured to do so
+* #799: Fix so that gitlabCommitStatus does not require a 'name' parameter.
+* #807: Fix so that the plugin checks commits to MRs for [ci-skip], instead of only checking the MR description
+
 1.5.8
 =====================
 * #735: Add additional options to acceptGitlabMergeRequest step, to remove source branch and use the MR description in the merge commit
