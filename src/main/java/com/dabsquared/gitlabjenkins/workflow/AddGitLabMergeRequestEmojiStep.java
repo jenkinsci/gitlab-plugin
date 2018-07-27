@@ -37,8 +37,8 @@ public class AddGitLabMergeRequestEmojiStep extends Step {
     private String emoji;
 
     @DataBoundConstructor
-    public AddGitLabMergeRequestEmojiStep(String comment) {
-        this.emoji = StringUtils.isEmpty(comment) ? null : comment;
+    public AddGitLabMergeRequestEmojiStep(String emoji) {
+        this.emoji = StringUtils.isEmpty(emoji) ? null : emoji;
     }
 
 	@Override

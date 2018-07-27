@@ -7,7 +7,6 @@ import hudson.model.TaskListener;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
@@ -24,7 +23,6 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.google.common.collect.ImmutableSet;
 import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
@@ -39,8 +37,8 @@ public class RemoveGitLabMergeRequestEmojiStep extends Step {
     private String emoji;
 
     @DataBoundConstructor
-    public RemoveGitLabMergeRequestEmojiStep(String comment) {
-        this.emoji = StringUtils.isEmpty(comment) ? null : comment;
+    public RemoveGitLabMergeRequestEmojiStep(String emoji) {
+        this.emoji = StringUtils.isEmpty(emoji) ? null : emoji;
     }
 
 	@Override
