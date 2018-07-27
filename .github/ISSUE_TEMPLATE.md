@@ -2,6 +2,7 @@
 
 - [] read the documentation on the [homepage](https://github.com/jenkinsci/gitlab-plugin) 
 - [] searched for similar already existing issue
+- [] confirmed that my GitLab webhook is using the http://JENKINS_URL/project endpoint and not the http://JENKINS_URL/job endpoint
 
 *(if you have performed all the above, remove the paragraph and continue describing the issue with template below)*
 
