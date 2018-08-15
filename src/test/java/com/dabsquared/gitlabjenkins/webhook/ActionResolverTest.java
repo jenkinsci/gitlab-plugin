@@ -17,6 +17,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -209,5 +210,20 @@ public class ActionResolverTest {
         public int read() throws IOException {
             return input.read();
         }
+
+//        @Override
+//        public boolean isReady(){
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean isFinished(){
+//            return true;
+//        }
+//
+//
+//        @Override
+//        public void setReadListener(ReadListener var1){
+//        }
     }
 }

@@ -60,6 +60,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
+import java.util.List;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
@@ -499,7 +500,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         GitLabPushTrigger trigger = null;
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob p = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (Trigger t : p.getTriggers().values()) {
+            for (Trigger t : p.getTriggers().values() ) {
                 if (t instanceof GitLabPushTrigger) {
                     trigger = (GitLabPushTrigger) t;
                 }
