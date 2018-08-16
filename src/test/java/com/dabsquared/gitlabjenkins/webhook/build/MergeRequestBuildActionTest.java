@@ -5,19 +5,14 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
-import hudson.model.Action;
-import hudson.model.FreeStyleProject;
-import hudson.model.ParametersAction;
-import hudson.model.StringParameterValue;
+import hudson.model.*;
+import hudson.model.queue.QueueListener;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -59,12 +54,29 @@ public class MergeRequestBuildActionTest {
     @Mock
     private StaplerResponse response;
 
-    private boolean wouldFire = false;
+    private static volatile boolean wouldFire = false;
 
     private GitLabPushTrigger trigger = new GitLabPushTrigger();
 
     private String gitRepoUrl;
     private String commitSha1;
+
+    @BeforeClass
+    public static void addQueueListener() {
+        QueueListener ql = new QueueListener() {
+            @Override
+            public void onEnterWaiting(Queue.WaitingItem wi) {
+                System.out.println("Got "+wi+" : "+wi.getCausesDescription());
+                wouldFire = true;
+            }
+
+            @Override
+            public void onEnterBuildable(Queue.BuildableItem bi) {
+                System.out.println("Is buildable: "+bi.getCausesDescription());
+            }
+        };
+        jenkins.getInstance().getExtensionList(QueueListener.class).add(ql);
+    }
 
     @Before
     public void setup() throws Exception {
@@ -101,17 +113,9 @@ public class MergeRequestBuildActionTest {
             wouldFire = false;
 
             // spy always feels wrong, we should likely rather directly check whether job has been scheduled after call.
-            FreeStyleProject spiedProject = spy(testProject);
-            trigger.start(spiedProject, false);
-            doAnswer(new Answer() {
-                @Override
-                public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                    wouldFire = true;
-                    return null;
-                }
-            }).when(spiedProject).scheduleBuild2(anyInt(), any(Action[].class));
+            trigger.start(testProject, false);
 
-            new MergeRequestBuildAction(spiedProject, json, null)
+            new MergeRequestBuildAction(testProject, json, null)
                 .execute(response);
         } catch (HttpResponses.HttpResponseException hre) {
             // Test for OK status of a response.
@@ -122,6 +126,7 @@ public class MergeRequestBuildActionTest {
                 throw new IOException(e);
             }
         }
+        // The assumption is, that queue listener have already been invoked when we got back a response.
     }
 
     @Test
