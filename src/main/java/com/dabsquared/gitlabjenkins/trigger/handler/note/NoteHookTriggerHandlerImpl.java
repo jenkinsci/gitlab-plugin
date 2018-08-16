@@ -45,6 +45,11 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     }
 
     @Override
+    protected String getSourceBranch(NoteHook hook) {
+        return hook.getMergeRequest() == null ? null : hook.getMergeRequest().getSourceBranch();
+    }
+
+    @Override
     protected String getTargetBranch(NoteHook hook) {
         return hook.getMergeRequest() == null ? null : hook.getMergeRequest().getTargetBranch();
     }

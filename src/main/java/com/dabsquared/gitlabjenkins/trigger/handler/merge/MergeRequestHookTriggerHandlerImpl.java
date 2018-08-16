@@ -103,6 +103,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     @Override
+    protected String getSourceBranch(MergeRequestHook hook) {
+        return hook.getObjectAttributes() == null ? null : hook.getObjectAttributes().getSourceBranch();
+    }
+
+    @Override
     protected String getTargetBranch(MergeRequestHook hook) {
         return hook.getObjectAttributes() == null ? null : hook.getObjectAttributes().getTargetBranch();
     }

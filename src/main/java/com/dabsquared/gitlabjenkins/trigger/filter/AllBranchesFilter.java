@@ -5,7 +5,7 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
  */
 class AllBranchesFilter implements BranchFilter {
     @Override
-    public boolean isBranchAllowed(String branchName) {
+    public boolean isBranchAllowed(String sourceBranchName, String targetBranchName) {
         return true;
     }
 }

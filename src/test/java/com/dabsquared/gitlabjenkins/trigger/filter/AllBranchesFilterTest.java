@@ -15,6 +15,6 @@ public class AllBranchesFilterTest {
     public void isRandomBranchNameAllowed() {
         String randomBranchName = RandomStringUtils.random(10, true, false);
 
-        assertThat(new AllBranchesFilter().isBranchAllowed(randomBranchName), is(true));
+        assertThat(new AllBranchesFilter().isBranchAllowed(null, randomBranchName), is(true));
     }
 }

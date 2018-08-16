@@ -62,13 +62,14 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
             }
             //we do not call super here, since we do not want the status to be changed
             //in case of pipeline events that could lead to a deadlock
+            String sourceBranch = getSourceBranch(hook);
             String targetBranch = getTargetBranch(hook);
-            if (branchFilter.isBranchAllowed(targetBranch)) {
+            if (branchFilter.isBranchAllowed(sourceBranch, targetBranch)) {
                 LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
 
                 super.scheduleBuild(job, createActions(job, hook));
             } else {
-                LOGGER.log(Level.INFO, "branch {0} is not allowed", targetBranch);
+                LOGGER.log(Level.INFO, "branch {0} is not allowed", sourceBranch + " or " + targetBranch);
             }
 
         }
@@ -78,6 +79,11 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     protected boolean isCiSkip(PipelineHook hook) {
         //we don't get a commit message or suchlike that could contain ci-skip
         return false;
+    }
+
+    @Override
+    protected String getSourceBranch(PipelineHook hook) {
+        return hook.getObjectAttributes().getRef() == null ? null : hook.getObjectAttributes().getRef().replaceFirst("^refs/heads/", "");
     }
 
     @Override

@@ -16,7 +16,7 @@ public final class BranchFilterFactory {
             case NameBasedFilter:
                 return new NameBasedFilter(config.getIncludeBranchesSpec(), config.getExcludeBranchesSpec());
             case RegexBasedFilter:
-                return new RegexBasedFilter(config.getTargetBranchRegex());
+                return new RegexBasedFilter(config.getSourceBranchRegex(), config.getTargetBranchRegex());
             default:
                 return new AllBranchesFilter();
         }

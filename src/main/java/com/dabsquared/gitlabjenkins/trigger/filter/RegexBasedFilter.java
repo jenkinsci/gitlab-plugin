@@ -7,14 +7,21 @@ import org.apache.commons.lang.StringUtils;
  */
 class RegexBasedFilter implements BranchFilter {
 
-    private final String regex;
+	private final String sourceRegex;
+	private final String targetRegex;
 
-    public RegexBasedFilter(String regex) {
-        this.regex = regex;
-    }
+	public RegexBasedFilter(String sourceRegex, String targetRegex) {
+		this.sourceRegex = sourceRegex;
+		this.targetRegex = targetRegex;
+	}
 
-    @Override
-    public boolean isBranchAllowed(String branchName) {
-        return StringUtils.isEmpty(branchName) || StringUtils.isEmpty(regex) || branchName.matches(regex);
-    }
+	@Override
+	public boolean isBranchAllowed(String sourceBranchName, String targetBranchName) {
+		boolean isSourceBranchAllowed = StringUtils.isEmpty(sourceRegex) || sourceBranchName.matches(sourceRegex);
+		if (StringUtils.isEmpty(targetBranchName)) {
+			return isSourceBranchAllowed;
+		} else {
+			return isSourceBranchAllowed && (StringUtils.isEmpty(targetRegex) || targetBranchName.matches(targetRegex));
+		}
+	}
 }
