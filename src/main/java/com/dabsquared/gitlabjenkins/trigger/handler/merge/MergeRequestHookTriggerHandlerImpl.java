@@ -14,6 +14,7 @@ import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
+import com.google.common.base.Predicate;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
@@ -38,9 +39,8 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerImpl.class.getName());
 
-    private final Collection<State> allowedStates;
     private final boolean skipWorkInProgressMergeRequest;
-	private final Collection<Action> allowedActions;
+    private final Predicate<MergeRequestObjectAttributes> triggerConfig;
     private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved);
     private final EnumSet<Action> skipAllowedStateForActions = EnumSet.of(Action.approved);
     private final boolean cancelPendingBuildsOnUpdate;
@@ -50,8 +50,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this.allowedStates = allowedStates;
-        this.allowedActions = allowedActions;
+        this(new StateAndActionConfig(allowedStates, allowedActions), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+    }
+
+    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this.triggerConfig = triggerConfig;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
     }
@@ -214,10 +217,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
-        // Allowed state changes accepted whenever not in conflict with available action options
-        // e.g. prevent state updates for actions unless action allowed explicitly
-        return (allowedStates.contains(objectAttributes.getState()) && !skipAllowedStateForActions.contains(objectAttributes.getAction()))
-            || allowedActions.contains(objectAttributes.getAction());
+		return triggerConfig.apply(objectAttributes);
     }
 
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {

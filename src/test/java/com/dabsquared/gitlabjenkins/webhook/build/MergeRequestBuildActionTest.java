@@ -112,7 +112,6 @@ public class MergeRequestBuildActionTest {
         try {
             wouldFire = false;
 
-            // spy always feels wrong, we should likely rather directly check whether job has been scheduled after call.
             trigger.start(testProject, false);
 
             new MergeRequestBuildAction(testProject, json, null)
