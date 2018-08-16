@@ -142,8 +142,6 @@ public class MergeRequestBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
-        future.get();
 
         executeMergeRequestAction(testProject, getJson("MergeRequestEvent_approvedMR.json"));
 
@@ -160,7 +158,20 @@ public class MergeRequestBuildActionTest {
 
         executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json"));
         assertFalse(wouldFire);
+    }
 
+    @Test
+    public void build_acceptedMr() throws IOException, ExecutionException, InterruptedException {
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
+        trigger.setTriggerOnAcceptedMergeRequest(true);
+        trigger.setTriggerOnMergeRequest(false);
+        testProject.addTrigger(trigger);
+        testProject.setScm(new GitSCM(gitRepoUrl));
+        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
+        future.get();
+
+        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_merged.json"));
+        assertTrue(wouldFire);
     }
 
     @Test
