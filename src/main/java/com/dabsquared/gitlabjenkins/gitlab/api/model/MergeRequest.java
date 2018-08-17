@@ -5,12 +5,15 @@ import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 import java.util.List;
 
 /**
  * @author Robin Müller
  */
+@ExportedBean
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class MergeRequest {
     private Integer id;
@@ -48,6 +51,7 @@ public class MergeRequest {
         this.mergeStatus = mergeStatus;
     }
 
+    @Exported
     public Integer getId() {
         return id;
     }
@@ -56,6 +60,7 @@ public class MergeRequest {
         this.id = id;
     }
 
+    @Exported
     public Integer getIid() {
         return iid;
     }
@@ -64,6 +69,7 @@ public class MergeRequest {
         this.iid = iid;
     }
 
+    @Exported
     public String getSourceBranch() {
         return sourceBranch;
     }
@@ -72,6 +78,7 @@ public class MergeRequest {
         this.sourceBranch = sourceBranch;
     }
 
+    @Exported
     public String getTargetBranch() {
         return targetBranch;
     }
@@ -80,6 +87,7 @@ public class MergeRequest {
         this.targetBranch = targetBranch;
     }
 
+    @Exported
     public Integer getProjectId() {
         return projectId;
     }
@@ -88,6 +96,7 @@ public class MergeRequest {
         this.projectId = projectId;
     }
 
+    @Exported
     public String getTitle() {
         return title;
     }
@@ -96,6 +105,7 @@ public class MergeRequest {
         this.title = title;
     }
 
+    @Exported
     public State getState() {
         return state;
     }
@@ -104,6 +114,7 @@ public class MergeRequest {
         this.state = state;
     }
 
+    @Exported
     public Integer getUpvotes() {
         return upvotes;
     }
@@ -112,6 +123,7 @@ public class MergeRequest {
         this.upvotes = upvotes;
     }
 
+    @Exported
     public Integer getDownvotes() {
         return downvotes;
     }
@@ -120,6 +132,7 @@ public class MergeRequest {
         this.downvotes = downvotes;
     }
 
+    @Exported
     public User getAuthor() {
         return author;
     }
@@ -128,6 +141,7 @@ public class MergeRequest {
         this.author = author;
     }
 
+    @Exported
     public User getAssignee() {
         return assignee;
     }
@@ -136,6 +150,7 @@ public class MergeRequest {
         this.assignee = assignee;
     }
 
+    @Exported
     public Integer getSourceProjectId() {
         return sourceProjectId;
     }
@@ -144,6 +159,7 @@ public class MergeRequest {
         this.sourceProjectId = sourceProjectId;
     }
 
+    @Exported
     public Integer getTargetProjectId() {
         return targetProjectId;
     }
@@ -152,6 +168,7 @@ public class MergeRequest {
         this.targetProjectId = targetProjectId;
     }
 
+    @Exported
     public List<String> getLabels() {
         return labels;
     }
@@ -160,6 +177,7 @@ public class MergeRequest {
         this.labels = labels;
     }
 
+    @Exported
     public String getDescription() {
         return description;
     }
@@ -168,6 +186,7 @@ public class MergeRequest {
         this.description = description;
     }
 
+    @Exported
     public Boolean getWorkInProgress() {
         return workInProgress;
     }
@@ -176,6 +195,7 @@ public class MergeRequest {
         this.workInProgress = workInProgress;
     }
 
+    @Exported
     public Boolean getMergeWhenBuildSucceeds() {
         return mergeWhenBuildSucceeds;
     }
@@ -184,6 +204,7 @@ public class MergeRequest {
         this.mergeWhenBuildSucceeds = mergeWhenBuildSucceeds;
     }
 
+    @Exported
     public String getMergeStatus() {
         return mergeStatus;
     }
