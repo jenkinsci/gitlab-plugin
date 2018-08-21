@@ -23,10 +23,11 @@ public final class ProjectIdUtil {
             String baseUri = client.getHostUrl();
             String projectId;
             if (baseUri != null && remoteUrl.startsWith(baseUri)) {
-                if (remoteUrl.substring(baseUri.length()).startsWith(":")) {
-                    projectId = new URIish(remoteUrl.substring(baseUri.length())).getPath();
-                } else {
-                    projectId = new URIish(remoteUrl.substring(remoteUrl.indexOf("/", baseUri.length()))).getPath();
+                projectId = new URIish(remoteUrl.substring(baseUri.length())).getPath();
+                if (projectId.contains(":")) {
+                    projectId = projectId.substring(projectId.indexOf(":"));
+                } else if (projectId.startsWith(".")) {
+                    projectId = projectId.substring(projectId.indexOf("/"));
                 }
             } else {
                 projectId = new URIish(remoteUrl).getPath();

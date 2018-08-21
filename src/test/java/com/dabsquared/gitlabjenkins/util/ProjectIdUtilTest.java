@@ -29,6 +29,8 @@ public class ProjectIdUtilTest {
         forRemoteUrl("https://myurl.com", "https://myurl.com/group/subgroup/subsubgroup/project.git").expectProjectId("group/subgroup/subsubgroup/project"),
         forRemoteUrl("git@gitlab.com", "git@gitlab.com:group/subgroup/subsubgroup/project.git").expectProjectId("group/subgroup/subsubgroup/project"),
         forRemoteUrl("http://myhost", "http://myhost.com/group/project.git").expectProjectId("group/project"),
+        forRemoteUrl("", "http://myhost.com/group/project.git").expectProjectId("group/project"),
+        forRemoteUrl("", "http://myhost.com:group/project.git").expectProjectId("group/project"),
     };
 
     @Theory
