@@ -15,21 +15,26 @@ public final class ProjectIdUtil {
 
     private static final Pattern PROJECT_ID_PATTERN = Pattern.compile("^/?(?<projectId>.*?)(\\.git)?$");
 
-    private ProjectIdUtil() { }
+    private ProjectIdUtil() {
+    }
 
     public static String retrieveProjectId(GitLabClient client, String remoteUrl) throws ProjectIdResolutionException {
         try {
             String baseUri = client.getHostUrl();
             String projectId;
             if (baseUri != null && remoteUrl.startsWith(baseUri)) {
-                projectId = new URIish(remoteUrl.substring(baseUri.length(), remoteUrl.length())).getPath();
+                if (remoteUrl.substring(baseUri.length()).startsWith(":")) {
+                    projectId = new URIish(remoteUrl.substring(baseUri.length())).getPath();
+                } else {
+                    projectId = new URIish(remoteUrl.substring(remoteUrl.indexOf("/", baseUri.length()))).getPath();
+                }
             } else {
                 projectId = new URIish(remoteUrl).getPath();
             }
             if (projectId.startsWith(":")) {
                 projectId = projectId.substring(1);
             }
-            
+
             Matcher matcher = PROJECT_ID_PATTERN.matcher(projectId);
             if (matcher.matches()) {
                 return matcher.group("projectId");
