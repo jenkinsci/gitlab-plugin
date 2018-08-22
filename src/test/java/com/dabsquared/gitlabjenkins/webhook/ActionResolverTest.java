@@ -127,6 +127,20 @@ public class ActionResolverTest {
     }
 
     @Test
+    public void postSystemHookMergeRequest() throws IOException {
+        String projectName = "postMergeRequest";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
+    }
+
+    @Test
     public void postNote() throws IOException {
         String projectName = "postNote";
         jenkins.createFreeStyleProject(projectName);

@@ -31,6 +31,15 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -114,11 +123,45 @@ public class ActionResolver {
                 return new NoteBuildAction(project, getRequestBody(request), tokenHeader);
             case "Pipeline Hook":
                 return new PipelineBuildAction(project, getRequestBody(request), tokenHeader);
+            case "System Hook":
+                return processSystemHook(project, getRequestBody(request), tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
                 return new NoopAction();
         }
     }
+
+    private WebHookAction processSystemHook(Item project, String requestBody, String tokenHeader) {
+        String objectKind = "";
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            Map<String, Object> map = new HashMap<String, Object>();
+
+            // convert JSON string to Map
+            map = mapper.readValue(requestBody, new TypeReference<Map<String, Object>>() {
+            });
+
+            if (map.containsKey("object_kind")) {
+                objectKind = (String) map.get("object_kind");
+            }
+        }
+        catch (IOException exception) {
+            //TODO: Handle better
+            System.err.println(exception);
+            System.err.println("Something is wrong");
+        }
+
+        // TODO: STUFFFF
+        switch (objectKind) {
+            case "merge_request":
+                return new MergeRequestBuildAction(project, requestBody, tokenHeader);
+            default:
+                LOGGER.log(Level.FINE, "Unsupported System Hook event type: {0}", objectKind);
+                return new NoopAction();
+        }
+    }
+
 
     private String getRequestBody(StaplerRequest request) {
         String requestBody;
