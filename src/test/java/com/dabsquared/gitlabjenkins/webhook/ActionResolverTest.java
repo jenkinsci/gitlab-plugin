@@ -133,7 +133,7 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 

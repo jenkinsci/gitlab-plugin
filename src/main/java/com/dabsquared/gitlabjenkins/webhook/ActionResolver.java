@@ -116,19 +116,18 @@ public class ActionResolver {
             case "Pipeline Hook":
                 return new PipelineBuildAction(project, getRequestBody(request), tokenHeader);
             case "System Hook":
-                return processSystemHook(project, getRequestBody(request), tokenHeader);
+                return onSystemHook(project, getRequestBody(request), tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
                 return new NoopAction();
         }
     }
 
-    private WebHookAction processSystemHook(Item project, String requestBody, String tokenHeader) {
+    private WebHookAction onSystemHook(Item project, String requestBody, String tokenHeader) {
         String objectKind = "";
         try {
             objectKind = new ObjectMapper().readTree(requestBody).path("object_kind").asText("");
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             LOGGER.log(Level.FINE, "Could not extract object_kind from request body.");
         }
 
