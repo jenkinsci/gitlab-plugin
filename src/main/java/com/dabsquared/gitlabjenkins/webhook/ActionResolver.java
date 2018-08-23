@@ -134,6 +134,9 @@ public class ActionResolver {
         switch (objectKind) {
             case "merge_request":
                 return new MergeRequestBuildAction(project, requestBody, tokenHeader);
+            case "tag_push":
+            case "push":
+                return new PushBuildAction(project, requestBody, tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported System Hook event type: {0}", objectKind);
                 return new NoopAction();
