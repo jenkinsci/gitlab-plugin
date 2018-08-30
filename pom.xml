@@ -7,9 +7,9 @@
   </parent>
 
   <properties>
-    <jenkins.version>1.609.3</jenkins.version>
+    <jenkins.version>2.7.1</jenkins.version>
     <hpi-plugin.version>1.115</hpi-plugin.version>
-    <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
+    <jenkins-test-harness.version>2.40</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
   </properties>
 
@@ -299,6 +299,12 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>9.4.1208</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-auth</artifactId>
+      <version>1.0.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

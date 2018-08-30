@@ -121,7 +121,7 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void authenticationEnabled_anonymous_forbidden() throws IOException {
-        Boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
+        boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
         assertTrue(defaultValue);
         jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
