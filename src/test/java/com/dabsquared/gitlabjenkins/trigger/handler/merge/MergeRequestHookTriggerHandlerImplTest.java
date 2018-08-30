@@ -28,8 +28,12 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestName;
+import org.junit.runner.Description;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -49,10 +53,28 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Robin Müller
  */
+// TODO: This class should rather use triggers instantiated by MergeRequestHookTriggerHandlerFactory and test real-world scenarios
 public class MergeRequestHookTriggerHandlerImplTest {
+    private static final Logger logger = LoggerFactory.getLogger(MergeRequestHookTriggerHandlerImplTest.class);
 
     @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    public static JenkinsRule jenkins;
+
+    static {
+        // Every negative (or failing positive) test adds 10 seconds to run time. The default 180 seconds might not
+        // suffice
+        System.setProperty("jenkins.test.timeout", "300");
+        jenkins = new JenkinsRule();
+    }
+
+    @Rule
+    public TestName name = new TestName() {
+        @Override
+        protected void starting(Description d) {
+            super.starting(d);
+            logger.info(">> Starting test {}", getMethodName());
+        }
+    };
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
