@@ -49,8 +49,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         this(allowedStates, EnumSet.noneOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
     }
 
+    // this retains internal API, however, the plugin code no longer instantiates the handler this way.
+    // any code using it should test it on higher level
+    @Deprecated
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(new StateAndActionConfig(allowedStates, allowedActions), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
     }
 
     MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {

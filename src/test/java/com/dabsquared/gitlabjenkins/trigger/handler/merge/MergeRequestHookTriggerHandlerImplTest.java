@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder;
+import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
@@ -12,15 +13,7 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.NoMessageException;
-import org.eclipse.jgit.api.errors.UnmergedPathsException;
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -196,8 +189,12 @@ public class MergeRequestHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void mergeRequest_do_not_build_for_updated_state_and_approved_action_when_updated_enabled_but_approved_not() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.updated), EnumSet.noneOf(Action.class), false, false);
+    public void mergeRequest_do_not_build_for_updated_state_and_approved_action_when_updated_enabled_but_approved_not() throws IOException, InterruptedException, GitAPIException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
+            MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(
+                true, false, false, TriggerOpenMergeRequest.source,
+                true, false, false
+            );
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.updated, Action.approved);
 
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -294,9 +291,8 @@ public class MergeRequestHookTriggerHandlerImplTest {
     }
 
 	private OneShotEvent doHandle(MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler,
-			MergeRequestObjectAttributesBuilder objectAttributes) throws GitAPIException, IOException, NoHeadException,
-			NoMessageException, UnmergedPathsException, ConcurrentRefUpdateException, WrongRepositoryStateException,
-			AmbiguousObjectException, IncorrectObjectTypeException, MissingObjectException, InterruptedException {
+			MergeRequestObjectAttributesBuilder objectAttributes) throws GitAPIException, IOException,
+            InterruptedException {
 		Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
