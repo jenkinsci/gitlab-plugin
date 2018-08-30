@@ -4,11 +4,6 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.StateAndActionConfig.notEqual;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.StateAndActionConfig.nullOrContains;
 import static java.util.EnumSet.of;
@@ -29,11 +24,12 @@ public final class MergeRequestHookTriggerHandlerFactory {
                                                                                    boolean cancelPendingBuildsOnUpdate) {
 
         TriggerConfigChain chain = new TriggerConfigChain();
-        chain.addIf(triggerOnMergeRequest, nullOrContains(of(State.opened, State.reopened)), notEqual(Action.approved))
-            .addIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
-            .addIf(triggerOnClosedMergeRequest, null, of(Action.closed))
-            .addIf(triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.updated), null)
-            .addIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
+        chain
+            .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
+            .acceptIf(triggerOnMergeRequest, of(State.opened, State.reopened), null)
+            .acceptIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
+            .acceptIf(triggerOnClosedMergeRequest, null, of(Action.closed))
+            .acceptIf(triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.updated), null)
         ;
 
         return new MergeRequestHookTriggerHandlerImpl(chain, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
