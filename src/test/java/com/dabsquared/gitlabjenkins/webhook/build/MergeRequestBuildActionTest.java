@@ -120,7 +120,7 @@ public class MergeRequestBuildActionTest {
             // Test for OK status of a response.
             try {
                 hre.generateResponse(null, response, null);
-                verify(response).setStatus(200);
+                verify(response, atLeastOnce()).setStatus(200);
             } catch (ServletException e) {
                 throw new IOException(e);
             }
@@ -149,13 +149,12 @@ public class MergeRequestBuildActionTest {
     }
 
     @Test
-    public void skip_alreadyBuiltMR() throws IOException, ExecutionException, InterruptedException {
+    public void skip_alreadyBuiltMR() throws Exception {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
-        future.get();
-
+        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR_initialBuild.json"));
+        jenkins.waitUntilNoActivity();
         executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json"));
         assertFalse(wouldFire);
     }
@@ -206,7 +205,7 @@ public class MergeRequestBuildActionTest {
                 .build()));
         future.get();
 
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json"));
+        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR_differentTargetBranch.json"));
 
         assertTrue(wouldFire);
     }
