@@ -4,6 +4,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -35,6 +36,19 @@ public class PushBuildAction extends BuildWebHookAction {
     private final String secretToken;
 
     public PushBuildAction(Item project, String json, String secretToken) {
+        LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
+        this.project = project;
+        this.pushHook = JsonUtil.read(json, PushHook.class);
+        this.secretToken = secretToken;
+    }
+
+    /**
+     * Alternative Constructor which takes in an already deserialized Json Tree.
+     * @param project Jenkins Project Item
+     * @param json Payload Json Tree
+     * @param secretToken Secret Token
+     */
+    public PushBuildAction(Item project, JsonNode json, String secretToken) {
         LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
         this.pushHook = JsonUtil.read(json, PushHook.class);

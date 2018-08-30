@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -27,6 +28,19 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
     private final String secretToken;
 
     public MergeRequestBuildAction(Item project, String json, String secretToken) {
+        LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
+        this.project = project;
+        this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
+        this.secretToken = secretToken;
+    }
+
+    /**
+     * Alternative Constructor which takes in an already deserialized Json Tree.
+     * @param project Jenkins Project Item
+     * @param json Payload Json Tree
+     * @param secretToken Secret Token
+     */
+    public MergeRequestBuildAction(Item project, JsonNode json, String secretToken) {
         LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
         this.project = project;
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);

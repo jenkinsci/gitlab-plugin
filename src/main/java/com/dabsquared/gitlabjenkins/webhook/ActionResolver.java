@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
+import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PipelineBuildAction;
@@ -10,7 +11,7 @@ import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import hudson.model.Item;
@@ -124,19 +125,26 @@ public class ActionResolver {
     }
 
     private WebHookAction onSystemHook(Item project, String requestBody, String tokenHeader) {
+        /*
+         * Each Gitlab System Hook request uses the same common Header, so the deterministic transform based on the
+         * header value, as seen in onPost, is not possible. Instead we need to peek at the payload to make the
+         * determination.
+         */
+        JsonNode jsonTree = null;
         String objectKind = "";
         try {
-            objectKind = new ObjectMapper().readTree(requestBody).path("object_kind").asText("");
-        } catch (IOException exception) {
+            jsonTree = JsonUtil.readTree(requestBody);
+            objectKind = jsonTree.path("object_kind").asText("");
+        } catch (RuntimeException exception) {
             LOGGER.log(Level.FINE, "Could not extract object_kind from request body.");
         }
 
         switch (objectKind) {
             case "merge_request":
-                return new MergeRequestBuildAction(project, requestBody, tokenHeader);
+                return new MergeRequestBuildAction(project, jsonTree, tokenHeader);
             case "tag_push":
             case "push":
-                return new PushBuildAction(project, requestBody, tokenHeader);
+                return new PushBuildAction(project, jsonTree, tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported System Hook event type: {0}", objectKind);
                 return new NoopAction();

@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -28,6 +29,19 @@ public class PipelineBuildAction extends BuildWebHookAction {
     private final String secretToken;
 
     public PipelineBuildAction(Item project, String json, String secretToken) {
+        LOGGER.log(Level.FINE, "Pipeline event: {0}", toPrettyPrint(json));
+        this.project = project;
+        this.pipelineBuildHook = JsonUtil.read(json, PipelineHook.class);
+        this.secretToken = secretToken;
+    }
+
+    /**
+     * Alternative Constructor which takes in an already deserialized Json Tree.
+     * @param project Jenkins Project Item
+     * @param json Payload Json Tree
+     * @param secretToken Secret Token
+     */
+    public PipelineBuildAction(Item project, JsonNode json, String secretToken) {
         LOGGER.log(Level.FINE, "Pipeline event: {0}", toPrettyPrint(json));
         this.project = project;
         this.pipelineBuildHook = JsonUtil.read(json, PipelineHook.class);
