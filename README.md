@@ -273,7 +273,7 @@ properties([
             triggerOnNoteRequest: true,
             noteRegex: "Jenkins please retry a build",
             skipWorkInProgressMergeRequest: true,
-            secretToken: project_token
+            secretToken: project_token,
             ciSkip: false,
             setBuildDescription: true,
             addNoteOnMergeRequest: true,
