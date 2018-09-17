@@ -127,6 +127,48 @@ public class ActionResolverTest {
     }
 
     @Test
+    public void postSystemHookMergeRequest() throws IOException {
+        String projectName = "postSystemHookMergeRequest";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
+    }
+
+    @Test
+    public void postSystemHookPush() throws IOException {
+        String projectName = "postSystemHookPush";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(PushBuildAction.class));
+    }
+
+    @Test
+    public void postSystemHookPushTag() throws IOException {
+        String projectName = "postSystemHookPushTag";
+        jenkins.createFreeStyleProject(projectName);
+        when(request.getRestOfPath()).thenReturn("");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
+        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
+
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+
+        assertThat(resolvedAction, instanceOf(PushBuildAction.class));
+    }
+
+    @Test
     public void postNote() throws IOException {
         String projectName = "postNote";
         jenkins.createFreeStyleProject(projectName);

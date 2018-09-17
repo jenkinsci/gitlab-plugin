@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.util;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,7 +31,23 @@ public final class JsonUtil {
 
     public static String toPrettyPrint(String json) {
         try {
-            return OBJECT_MAPPER.writeValueAsString(OBJECT_MAPPER.readValue(json, Object.class));
+            return toPrettyPrint(OBJECT_MAPPER.readValue(json, Object.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String toPrettyPrint(Object obj) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(obj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static JsonNode readTree(String json) {
+        try {
+            return OBJECT_MAPPER.readTree(json);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -39,6 +56,14 @@ public final class JsonUtil {
     public static <T> T read(String json, Class<T> type) {
         try {
             return OBJECT_MAPPER.readValue(json, type);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T read(JsonNode json, Class<T> type) {
+        try {
+            return OBJECT_MAPPER.treeToValue(json, type);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

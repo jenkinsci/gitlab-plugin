@@ -4,6 +4,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -27,6 +28,19 @@ public class NoteBuildAction implements WebHookAction {
     private final String secretToken;
 
     public NoteBuildAction(Item project, String json, String secretToken) {
+        LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
+        this.project = project;
+        this.noteHook = JsonUtil.read(json, NoteHook.class);
+        this.secretToken = secretToken;
+    }
+
+    /**
+     * Alternative Constructor which takes in an already deserialized Json Tree.
+     * @param project Jenkins Project Item
+     * @param json Payload Json Tree
+     * @param secretToken Secret Token
+     */
+    public NoteBuildAction(Item project, JsonNode json, String secretToken) {
         LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
         this.project = project;
         this.noteHook = JsonUtil.read(json, NoteHook.class);
