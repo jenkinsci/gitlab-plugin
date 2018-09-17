@@ -18,7 +18,7 @@
     "st_commits": null,
     "st_diffs": null,
     "milestone_id": null,
-    "state": "opened",
+    "state": "merged",
     "merge_status": "unchecked",
     "target_project_id": 14,
     "iid": 1,
@@ -65,9 +65,23 @@
         "email": "gitlabdev@dv6700.(none)"
       }
     },
+    "changes" : {
+      "state" : {
+        "previous" : "locked",
+        "current" : "merged"
+      },
+      "updated_at" : {
+        "previous" : "2018-03-28 15:36:42 UTC",
+        "current" : "2018-03-28 15:36:42 UTC"
+      },
+      "total_time_spent" : {
+        "previous" : null,
+        "current" : 0
+      }
+    },
     "work_in_progress": false,
     "url": "http://example.com/diaspora/merge_requests/1",
-    "action": "reopen",
+    "action": "merge",
     "assignee": {
       "name": "User1",
       "username": "user1",

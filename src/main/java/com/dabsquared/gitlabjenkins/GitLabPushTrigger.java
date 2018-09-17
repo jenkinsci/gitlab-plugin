@@ -73,7 +73,7 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerH
  *
  * @author Daniel Brooks
  */
-public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
+public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeRequestTriggerConfig {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -213,18 +213,22 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return triggerOnPush;
     }
 
+    @Override
     public boolean getTriggerOnMergeRequest() {
         return triggerOnMergeRequest;
     }
 
+    @Override
     public boolean isTriggerOnAcceptedMergeRequest() {
         return triggerOnAcceptedMergeRequest;
     }
 
+    @Override
     public boolean isTriggerOnApprovedMergeRequest() {
 		return triggerOnApprovedMergeRequest;
 	}    
     
+    @Override
     public boolean isTriggerOnClosedMergeRequest() {
         return triggerOnClosedMergeRequest;
     }
@@ -239,6 +243,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return this.noteRegex == null ? "" : this.noteRegex;
     }
 
+    @Override
     public TriggerOpenMergeRequest getTriggerOpenMergeRequestOnPush() {
         return triggerOpenMergeRequestOnPush;
     }
@@ -251,6 +256,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return ciSkip;
     }
 
+    @Override
     public boolean isSkipWorkInProgressMergeRequest() {
         return skipWorkInProgressMergeRequest;
     }
@@ -287,6 +293,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
         return pendingBuildName;
     }
 
+    @Override
     public boolean getCancelPendingBuildsOnUpdate() {
         return this.cancelPendingBuildsOnUpdate;
     }
@@ -475,9 +482,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     private void initializeTriggerHandler() {
-		mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(triggerOnMergeRequest,
-				triggerOnAcceptedMergeRequest, triggerOnClosedMergeRequest, triggerOpenMergeRequestOnPush,
-				skipWorkInProgressMergeRequest, triggerOnApprovedMergeRequest, cancelPendingBuildsOnUpdate);
+		mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(this);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
         pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
