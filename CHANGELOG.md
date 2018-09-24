@@ -1,5 +1,13 @@
 ChangeLog
 
+1.5.10
+=====================
+* #742: Fix inability to trigger builds on Accepted, Approved, and Closed Merge Requests
+* #818: Fix NPE when 'Build on successful pipeline events' is enabled
+* #824: Allow filtering source branches by regex
+* #825: Improve project ID parsing, fixes bugs in some edge cases
+* #826: Add support for GitLab System Hooks
+
 1.5.9
 =====================
 * #748: Fix so that the 'Add vote for build status' feature actually adds a vote/+1 rather than just a comment
