@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import hudson.model.Run;
+import org.junit.Ignore;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,27 +26,7 @@ public class GitLabCommitStatusStepTest {
     }
 
     @Test
-    public void simple_pipeline_buils_as_LString() throws Exception {
-        WorkflowJob project = j.createProject(WorkflowJob.class);
-        String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
-            "pipeline/simple-pipeline-builds-as-LString.groovy"));
-        project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
-        j.assertLogContains("this is pre-build stage", build);
-    }
-
-    @Test
-    public void simple_pipeline_buils_as_String() throws Exception {
-        WorkflowJob project = j.createProject(WorkflowJob.class);
-        String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
-            "pipeline/simple-pipeline-builds-as-String.groovy"));
-        project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
-        j.assertLogContains("this is pre-build stage", build);
-    }
-
-    @Test
-    public void named_simple_pipeline_buils_as_LString() throws Exception {
+    public void named_simple_pipeline_builds_as_LString() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/named-simple-pipeline-builds-as-LString.groovy"));
@@ -55,7 +36,7 @@ public class GitLabCommitStatusStepTest {
     }
 
     @Test
-    public void named_simple_pipeline_buils_as_String() throws Exception {
+    public void named_simple_pipeline_builds_as_String() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/named-simple-pipeline-builds-as-String.groovy"));
@@ -71,7 +52,7 @@ public class GitLabCommitStatusStepTest {
             "pipeline/multisite-pipeline.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
         Run build = j.buildAndAssertSuccess(project);
-        j.assertLogContains("this is pre-build stage", build);
+        j.assertLogContains("this is stage3", build);
     }
 
     @Test

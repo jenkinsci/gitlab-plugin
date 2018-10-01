@@ -1,6 +1,6 @@
 package com.dabsquared.gitlabjenkins.workflow.pipeline
 
-def builds = 'pre-build, build'
+def builds = ['pre-build, build']
 
 node('master') {
   gitlabBuilds(builds: builds) {

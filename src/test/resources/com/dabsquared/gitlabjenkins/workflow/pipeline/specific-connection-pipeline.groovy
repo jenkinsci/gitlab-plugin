@@ -7,7 +7,7 @@ node('master') {
     gitlabCommitStatus(name: 'pre-build', connection: gitLabConnection('test-connection')) {
       echo 'this is pre-build stage'
     }
-    gitlabCommitStatus(name: 'build',connection: gitLabConnection('test-connection')) {
+    gitlabCommitStatus(name: 'build', connection: gitLabConnection('test-connection')) {
       echo 'this is build stage'
     }
   }
