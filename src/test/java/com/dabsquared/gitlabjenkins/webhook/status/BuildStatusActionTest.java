@@ -197,14 +197,14 @@ public abstract class BuildStatusActionTest {
             public void write(int b) throws IOException {
                 out.write(b);
             }
-//            @Override
-//            public void setWriteListener(javax.servlet.WriteListener writeListener) {
-//            }
-//
-//            @Override
-//            public boolean isReady() {
-//                return true;
-//            }
+            @Override
+            public void setWriteListener(javax.servlet.WriteListener writeListener) {
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
 
 
         };

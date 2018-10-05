@@ -39,6 +39,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_error;
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_success;

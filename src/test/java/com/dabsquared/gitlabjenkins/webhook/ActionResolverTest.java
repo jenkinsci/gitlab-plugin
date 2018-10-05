@@ -211,19 +211,18 @@ public class ActionResolverTest {
             return input.read();
         }
 
-//        @Override
-//        public boolean isReady(){
-//            return true;
-//        }
-//
-//        @Override
-//        public boolean isFinished(){
-//            return true;
-//        }
-//
-//
-//        @Override
-//        public void setReadListener(ReadListener var1){
-//        }
+        @Override
+        public boolean isReady(){
+            return true;
+        }
+
+        @Override
+        public boolean isFinished(){
+            return true;
+        }
+
+        @Override
+        public void setReadListener(ReadListener var1){
+        }
     }
 }
