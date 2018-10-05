@@ -9,6 +9,7 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -47,20 +49,80 @@ public class GitLabConnectionConfigSSLTest {
     public static JenkinsRule jenkins = new JenkinsRule();
 
     @BeforeClass
+    // based on https://www.eclipse.org/jetty/documentation/9.4.x/embedded-examples.html#Multiple%20Connectors
     public static void startJetty() throws Exception {
         port = PortFactory.findFreePort();
+        int _http_port = PortFactory.findFreePort();
+
+        // Create a basic jetty server object without declaring the port. Since
+        // we are configuring connectors directly we'll be setting ports on
+        // those connectors.
         server = new Server();
 
-        HttpConfiguration https_config = new HttpConfiguration();
-        https_config.setSecureScheme("https");
-        https_config.setSecurePort(port);
-        https_config.setOutputBufferSize(32768);
-        ServerConnector https = new ServerConnector(server,new HttpConnectionFactory(https_config));
-        https.setPort(port);
+        // HTTP Configuration
+        // HttpConfiguration is a collection of configuration information
+        // appropriate for http and https. The default scheme for http is
+        // <code>http</code> of course, as the default for secured http is
+        // <code>https</code> but we show setting the scheme to show it can be
+        // done. The port for secured communication is also set here.
+        HttpConfiguration http_config = new HttpConfiguration();
+        http_config.setSecureScheme("https");
+        http_config.setSecurePort(port);
+        http_config.setOutputBufferSize(32768);
+
+        // HTTP connector
+        // The first server connector we create is the one for http, passing in
+        // the http configuration we configured above so it can get things like
+        // the output buffer size, etc. We also set the port (8080) and
+        // configure an idle timeout.
+        ServerConnector http = new ServerConnector(server,
+            new HttpConnectionFactory(http_config));
+        http.setPort(_http_port);
+        http.setIdleTimeout(30000);
+
+        // SSL Context Factory for HTTPS
+        // SSL requires a certificate so we configure a factory for ssl contents
+        // with information pointing to what keystore the ssl connection needs
+        // to know about. Much more configuration is available the ssl context,
+        // including things like choosing the particular certificate out of a
+        // keystore to be used.
+
         SslContextFactory sslContextFactory = new SslContextFactory();
         sslContextFactory.setKeyStorePath("src/test/resources/keystore");
         sslContextFactory.setKeyStorePassword("password");
-        server.setConnectors(new Connector[]{https});
+
+        // OPTIONAL: Un-comment the following to use Conscrypt for SSL instead of
+        // the native JSSE implementation.
+
+        //Security.addProvider(new OpenSSLProvider());
+        //sslContextFactory.setProvider("Conscrypt");
+
+        // HTTPS Configuration
+        // A new HttpConfiguration object is needed for the next connector and
+        // you can pass the old one as an argument to effectively clone the
+        // contents. On this HttpConfiguration object we add a
+        // SecureRequestCustomizer which is how a new connector is able to
+        // resolve the https connection before handing control over to the Jetty
+        // Server.
+        HttpConfiguration https_config = new HttpConfiguration(http_config);
+        SecureRequestCustomizer src = new SecureRequestCustomizer();
+        src.setStsMaxAge(2000);
+        src.setStsIncludeSubDomains(true);
+        https_config.addCustomizer(src);
+
+        // HTTPS connector
+        // We create a second ServerConnector, passing in the http configuration
+        // we just made along with the previously created ssl context factory.
+        // Next we set the port and a longer idle timeout.
+        ServerConnector https = new ServerConnector(server,
+            new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+            new HttpConnectionFactory(https_config));
+        https.setPort(port);
+        https.setIdleTimeout(500000);
+
+        // Set the connectors
+        server.setConnectors(new Connector[] { http, https });
+
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.setHandlers(new Handler[] {
             new AbstractHandler() {
@@ -72,6 +134,8 @@ public class GitLabConnectionConfigSSLTest {
         });
         server.setHandler(handlerCollection);
         server.start();
+
+
     }
 
     @AfterClass
