@@ -153,7 +153,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.1</version>
         <executions>
           <execution>
             <id>shade</id>
@@ -166,13 +166,13 @@
         <configuration>
           <artifactSet>
             <includes>
-              <include>javax.ws.rs.ext:*</include>
+              <include>org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.0_spec</include>
             </includes>
           </artifactSet>
           <relocations>
             <relocation>
-              <pattern>javax.ws.rs.ext</pattern>
-              <shadedPattern>javax.shaded.ws.rs.ext</shadedPattern>
+              <pattern>javax.ws.rs</pattern>
+              <shadedPattern>javax.shaded.ws.rs</shadedPattern>
             </relocation>
           </relocations>
         </configuration>
@@ -240,6 +240,7 @@
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
       <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
       <version>1.0.0.Final</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
