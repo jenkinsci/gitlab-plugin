@@ -319,7 +319,7 @@ public class GitLabCommitStatusPublisherTest {
         HttpRequest request= request()
                      .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode(projectName, "UTF-8"))
                      .withMethod("GET")
-                   .  withHeader("PRIVATE-TOKEN", "secret");
+                     .withHeader("PRIVATE-TOKEN", "secret");
 
         HttpResponse response = response().withBody(getSingleProjectJson("GetSingleProject.json", projectName, PROJECT_ID));
 

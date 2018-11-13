@@ -3,14 +3,17 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.3</version>
+    <version>2.29</version>
   </parent>
 
   <properties>
+    <java.level>8</java.level>
+    <animal.sniffer.version>1.14</animal.sniffer.version>
     <jenkins.version>1.609.3</jenkins.version>
     <hpi-plugin.version>1.115</hpi-plugin.version>
-    <jenkins-test-harness.version>${jenkins.version}</jenkins-test-harness.version>
+    <jenkins-test-harness.version>2.38</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
+    <jenkins-war.version>2.60.1</jenkins-war.version>
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
@@ -56,8 +59,12 @@
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
-      <id>repo.jenkins-ci.org</id>
+      <id>repo.jenkins-ci.org-public</id>
       <url>http://repo.jenkins-ci.org/public/</url>
+    </repository>
+    <repository>
+      <id>repo.jenkins-ci.org-releases</id>
+      <url>http://repo.jenkins-ci.org/releases/</url>
     </repository>
     <repository>
       <id>jgit-repository</id>
@@ -160,7 +167,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
-      <version>1.15</version>
+      <version>2.16</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -301,6 +308,26 @@
       <version>9.4.1208</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-auth</artifactId>
+      <version>2.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-cps</artifactId>
+      <version>2.19</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-basic-steps</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- parent pom test dependencies needs overriding-->
+
   </dependencies>
 
   <profiles>

@@ -4,7 +4,6 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
@@ -23,13 +22,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import com.google.common.collect.ImmutableSet;
-
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +38,9 @@ public class GitLabCommitStatusStep extends Step {
     private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
-    public GitLabCommitStatusStep(){ }
+    public GitLabCommitStatusStep(String name){
+        this.name = StringUtils.isEmpty(name) ? null : name;
+    }
 
 	@Override
 	public StepExecution start(StepContext context) throws Exception {
@@ -54,11 +49,6 @@ public class GitLabCommitStatusStep extends Step {
 
     public String getName() {
         return name;
-    }
-
-    @DataBoundSetter
-    public void setName(String name) {
-        this.name = StringUtils.isEmpty(name) ? null : name;
     }
 
     public List<GitLabBranchBuild> getBuilds() {
