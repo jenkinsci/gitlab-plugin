@@ -1,5 +1,10 @@
 ChangeLog
 
+1.5.11
+=====================
+* #823: Fix gitlabCommitStatus step so that name argument is not required
+* #854: Improve log string for 'not allowed' branches
+
 1.5.10
 =====================
 * #742: Fix inability to trigger builds on Accepted, Approved, and Closed Merge Requests
