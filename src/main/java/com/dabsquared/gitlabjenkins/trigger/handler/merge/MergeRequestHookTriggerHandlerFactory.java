@@ -34,12 +34,12 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
         TriggerConfigChain chain = new TriggerConfigChain();
         chain
+            .acceptOnlyIf(triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.opened, State.updated), of(Action.update))
             .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
             .acceptIf(triggerOnMergeRequest, of(State.opened, State.reopened), null)
             .acceptIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
             .acceptIf(triggerOnClosedMergeRequest, null, of(Action.close))
             .acceptIf(triggerOnClosedMergeRequest, of(State.closed), null)
-            .acceptIf(triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.updated), null)
         ;
 
         Set<String> labelsThatForcesBuildIfAddedSet = Stream.of(split(trimToEmpty(labelsThatForcesBuildIfAdded), ",")).collect(toSet());
