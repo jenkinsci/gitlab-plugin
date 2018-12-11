@@ -52,7 +52,7 @@ If you have a problem or question about using the plugin, please make sure you a
 * Jenkins version (e.g. 2.111)
 * Relevant log output from the plugin (see below for instructions on capturing this)
 
-Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it:
+To enable debug logging in the plugin:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
@@ -60,8 +60,6 @@ Version 1.2.0 of the plugin introduced improved logging for debugging purposes. 
 4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINEST, and save
 5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
 6. Refresh the log page and you should see output
-
-You can also try chatting with us in the #gitlab-plugin channel on the Freenode IRC network.
 
 # Known bugs/issues
 
