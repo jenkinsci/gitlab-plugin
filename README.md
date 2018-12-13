@@ -26,6 +26,9 @@
   - [Branch filtering](#branch-filtering)
   - [Build when tags are pushed](#build-when-tags-are-pushed)
   - [Add a note to merge requests](#add-a-note-to-merge-requests)
+  - [Accept merge request after build](#accept-merge-request)
+  - [Notify specific project by a specific GitLab connection](#notify-specific-project-by-a-specific-gitlab-connection)
+  - [Cancel pending builds on merge request update](#cancel-pending-builds-on-merge-request-update)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Testing With Docker](#testing-with-docker)
 - [Release Workflow](#release-workflow)
@@ -488,11 +491,10 @@ For pipeline jobs two advanced configuration options can be provided
 acceptGitLabMR(useMRDescription: true, removeSourceBranch: true)
 ```
 
-## Notify Specific project by a specific gitlab connection
-You can specify a map of project builds to notify a vary of gitlab repositories which could be located on different servers
-This is useful if you want to create a complex CI/CD which involve several jenkins and gitlab projects, see examples bellow:
+## Notify Specific project by a specific GitLab connection
+You can specify a map of project builds to notify a variety of GitLab repositories which could be located on different servers. This is useful if you want to create a complex CI/CD which involves several Jenkins and GitLab projects, see examples bellow:
 
-* Notify several gitlab projects using gitlab connection data from the trigger context
+* Notify several GitLab projects using GitLab connection data from the trigger context:
 ```groovy
 gitlabCommitStatus(name: 'stage1',
         builds: [
@@ -504,7 +506,7 @@ gitlabCommitStatus(name: 'stage1',
     }
 ```
 
-* Notify several gitlab projects using specific gitlab connection
+* Notify several GitLab projects using specific GitLab connection:
 ```groovy
 gitlabCommitStatus( name: 'stage1', connection:gitLabConnection('site1-connection'),
         builds: [
@@ -516,7 +518,7 @@ gitlabCommitStatus( name: 'stage1', connection:gitLabConnection('site1-connectio
     }
 ```
 
-* Notify several gitlab repositories located on different gitlab servers
+* Notify several GitLab repositories located on different GitLab servers:
 ```groovy
 gitlabCommitStatus(
         builds: [
