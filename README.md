@@ -55,7 +55,7 @@ If you have a problem or question about using the plugin, please make sure you a
 * Jenkins version (e.g. 2.111)
 * Relevant log output from the plugin (see below for instructions on capturing this)
 
-To enable debug logging in the plugin:
+Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
@@ -63,6 +63,8 @@ To enable debug logging in the plugin:
 4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINEST, and save
 5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
 6. Refresh the log page and you should see output
+
+You can also try chatting with us in the #gitlab-plugin channel on the Freenode IRC network.
 
 # Known bugs/issues
 
@@ -327,9 +329,10 @@ Use 'Publish build status to GitLab' Post-build action to send build status with
 
 Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
 
-### Scripted Pipeline jobs
+### Scripted or Declarative Pipeline jobs
 **NOTE:** If you use Pipeline global libraries, or if you clone your project's Jenkinsfile from a repo different from the one that contains the relevant source code, you need to be careful about when you send project status. In short, make sure you put your `gitlabCommitStatus` or other similar steps *after* the SCM step that clones your project's source. Otherwise, you may get HTTP 400 errors, or you may find build status being sent to the wrong repo.
 
+### Scripted Pipeline jobs
 * For Pipeline jobs, surround your build steps with the `gitlabCommitStatus` step like this:
     ```
     node() {
