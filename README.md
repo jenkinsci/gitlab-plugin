@@ -49,13 +49,9 @@ This plugin is Open Source Software, developed on a volunteer basis by users of 
 GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the current major release. At the time of this writing, the current stable release of GitLab is 11.1, so the oldest release supported by this plugin is 9.0.
 
 ### Getting help
-If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
-* GitLab plugin version (e.g. 1.5.2)
-* GitLab version (e.g. 10.5.1)
-* Jenkins version (e.g. 2.111)
-* Relevant log output from the plugin (see below for instructions on capturing this)
+If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project.
 
-Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it:
+To enable debug logging in the plugin:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
@@ -63,8 +59,6 @@ Version 1.2.0 of the plugin introduced improved logging for debugging purposes. 
 4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINEST, and save
 5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
 6. Refresh the log page and you should see output
-
-You can also try chatting with us in the #gitlab-plugin channel on the Freenode IRC network.
 
 # Known bugs/issues
 
