@@ -16,6 +16,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabApiProxy.ID;
@@ -214,7 +215,7 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/labels")
     @Override
-    List<Label> getLabels(@PathParam("projectId") String projectId);
+    Response getLabels(@PathParam("projectId") String projectId, @QueryParam("page") int page);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

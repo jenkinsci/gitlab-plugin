@@ -6,6 +6,9 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.google.common.base.Function;
 
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -13,6 +16,8 @@ final class ResteasyGitLabClient implements GitLabClient {
     private final String hostUrl;
     private final GitLabApiProxy api;
     private final Function<MergeRequest, Integer> mergeRequestIdProvider;
+
+    private final static String TOTAL_PAGES = "X-Total-Pages";
 
     ResteasyGitLabClient(String hostUrl, GitLabApiProxy api, Function<MergeRequest, Integer> mergeRequestIdProvider) {
         this.hostUrl = hostUrl;
@@ -127,7 +132,24 @@ final class ResteasyGitLabClient implements GitLabClient {
 
     @Override
     public List<Label> getLabels(String projectId) {
-        return api.getLabels(projectId);
+        GenericType<List<Label>> listGenericType = new GenericType<List<Label>>() {};
+
+        Response response = api.getLabels(projectId, 1);
+        String numberOfPagesString = response.getStringHeaders().getFirst(TOTAL_PAGES);
+        if(numberOfPagesString == null) {
+            return response.readEntity(listGenericType);
+        }
+
+        int numberOfPages = Integer.valueOf(numberOfPagesString);
+
+        List<Label> labelList = new ArrayList<>(response.readEntity(listGenericType));
+
+        for (int i = 2; i <= numberOfPages; i++) {
+            labelList.addAll(api.getLabels(projectId, i).readEntity(listGenericType));
+        }
+
+        return labelList;
+
     }
 
     @Override

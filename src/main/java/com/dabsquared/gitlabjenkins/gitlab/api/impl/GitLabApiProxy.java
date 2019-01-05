@@ -4,6 +4,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 
@@ -50,7 +51,7 @@ interface GitLabApiProxy {
 
     User updateUser(String userId, String email, String username, String name, String password);
 
-    List<Label> getLabels(String projectId);
+    Response getLabels(String projectId, int page);
 
     List<Pipeline> getPipelines(String projectName);
 }
