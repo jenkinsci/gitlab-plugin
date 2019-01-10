@@ -12,7 +12,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import hudson.ProxyConfiguration;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
-import hudson.security.GlobalMatrixAuthorizationStrategy;
+import hudson.model.Project;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
@@ -124,7 +125,7 @@ public class GitLabConnectionConfigTest {
     public void authenticationEnabled_anonymous_forbidden() throws IOException {
         Boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
         assertTrue(defaultValue);
-        jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        jenkins.getInstance().setAuthorizationStrategy(new MockAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
         GitLabPushTrigger trigger = mock(GitLabPushTrigger.class);
@@ -144,11 +145,11 @@ public class GitLabConnectionConfigTest {
     public void authenticationEnabled_registered_success() throws Exception {
         String username = "test-user";
         jenkins.getInstance().setSecurityRealm(jenkins.createDummySecurityRealm());
-        GlobalMatrixAuthorizationStrategy authorizationStrategy = new GlobalMatrixAuthorizationStrategy();
-        authorizationStrategy.add(Item.BUILD, username);
+        Project project = jenkins.createFreeStyleProject("test");
+        MockAuthorizationStrategy authorizationStrategy = new MockAuthorizationStrategy();
+        authorizationStrategy.grant(Item.BUILD).onItems(project).to(username);
         jenkins.getInstance().setAuthorizationStrategy(authorizationStrategy);
         URL jenkinsURL = jenkins.getURL();
-        jenkins.createFreeStyleProject("test");
 
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
@@ -165,7 +166,7 @@ public class GitLabConnectionConfigTest {
     @Test
     public void authenticationDisabled_anonymous_success() throws IOException, URISyntaxException {
         jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(false);
-        jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        jenkins.getInstance().setAuthorizationStrategy(new MockAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
         jenkins.createFreeStyleProject("test");
 
