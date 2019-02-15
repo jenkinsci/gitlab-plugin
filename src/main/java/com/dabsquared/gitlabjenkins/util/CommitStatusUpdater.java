@@ -3,7 +3,6 @@ package com.dabsquared.gitlabjenkins.util;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
@@ -14,6 +13,7 @@ import hudson.model.Cause.UpstreamCause;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
+import hudson.plugins.git.util.BuildDetails;
 import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMRevisionAction;
@@ -163,14 +163,16 @@ public class CommitStatusUpdater {
             return result;
         }
 
-        final List<BuildData> buildDatas = build.getActions(BuildData.class);
-        if (CollectionUtils.isEmpty(buildDatas)) {
+        final BuildDataProvider dataProvider = new BuildDataProvider(build);
+        if (dataProvider.isBuildDataMissing()) {
             LOGGER.log(Level.INFO, "Build does not contain build data.");
             return result;
         }
 
+        final List<BuildData> buildDatas = dataProvider.getBuildData();
+
         if (buildDatas.size() == 1) {
-            addGitLabBranchBuild(result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
+            addGitLabBranchBuild(result, getBuildRevision(build, dataProvider), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
         } else {
             final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
 
@@ -198,13 +200,13 @@ public class CommitStatusUpdater {
         return result;
     }
 
-    private static String getBuildRevision(Run<?, ?> build) {
+    private static String getBuildRevision(Run<?, ?> build, BuildDataProvider buildDataProvider) {
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
         if (cause != null) {
             return cause.getData().getLastCommit();
         }
 
-        BuildData action = build.getAction(BuildData.class);
+        BuildData action = buildDataProvider.getSingleBuildData();
         if (action == null) {
             throw new IllegalStateException("No (git-plugin) BuildData associated to current build");
         }
@@ -262,5 +264,45 @@ public class CommitStatusUpdater {
         return Collections.emptyList();
     }
 
+    private static class BuildDataProvider {
+        private final List<BuildData> buildData;
+
+        private BuildDataProvider(Run<?, ?> build) {
+            if(CollectionUtils.isEmpty(build.getActions(BuildData.class))) {
+                buildData = new ArrayList<>();
+                try
+                {
+                    List<BuildDetails> buildDetails = build.getActions(BuildDetails.class);
+                    for (BuildDetails details : buildDetails)
+                    {
+                        buildData.add(new BuildData(details));
+                    }
+                }
+                catch (NoClassDefFoundError error)
+                {
+                    LOGGER.log(Level.FINE, "BuildDetails not found, assuming pre-v4 version of git plugin", error);
+                }
+            } else {
+                buildData = build.getActions(BuildData.class);
+            }
+        }
+
+        public List<BuildData> getBuildData() {
+            return buildData;
+        }
+
+        public boolean isBuildDataMissing() {
+            return CollectionUtils.isEmpty(buildData);
+        }
+
+        public BuildData getSingleBuildData() {
+            if (CollectionUtils.isNotEmpty(buildData))
+            {
+                return buildData.get(0);
+            } else {
+                return null;
+            }
+        }
+    }
 
 }
