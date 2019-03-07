@@ -93,7 +93,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private boolean isExecutable(Job<?, ?> job, MergeRequestHook hook) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         boolean forcedByAddedLabel = isForcedByAddedLabel(hook);
-        return (forcedByAddedLabel || isAllowedByConfig(objectAttributes))
+        return isAllowedByConfig(objectAttributes)
             && (forcedByAddedLabel || isLastCommitNotYetBuild(job, hook))
             && isNotSkipWorkInProgressMergeRequest(objectAttributes);
     }
