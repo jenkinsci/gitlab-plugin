@@ -209,8 +209,8 @@ public class GitLabConnectionConfigTest {
         connectionList1.add(connection);
         config.setConnections(connectionList1);
 
-        GitLabClient client = config.getClient(connection.getName());
+        GitLabClient client = config.getClient(connection.getName(), null, null);
         assertNotNull(client);
-        assertSame(client, config.getClient(connection.getName()));
+        assertSame(client, config.getClient(connection.getName(), null, null));
     }
 }

@@ -111,17 +111,17 @@ public class GitLabConnection {
         return readTimeout;
     }
 
-    public GitLabClient getClient() {
+    public GitLabClient getClient(Item item, String jobCredentialId) {
         if (apiCache == null) {
-            apiCache = clientBuilder.buildClient(url, getApiToken(apiTokenId), ignoreCertificateErrors, connectionTimeout, readTimeout);
-        }
-
-        return apiCache;
+			apiCache = clientBuilder.buildClient(url, null == jobCredentialId ? getApiToken(apiTokenId, null) : getApiToken(jobCredentialId, item), ignoreCertificateErrors,
+					connectionTimeout, readTimeout);
+		}
+		return apiCache;
     }
 
-    private String getApiToken(String apiTokenId) {
+    private String getApiToken(String apiTokenId, Item item) {
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-            lookupCredentials(StandardCredentials.class, (Item) null, ACL.SYSTEM, new ArrayList<DomainRequirement>()),
+            lookupCredentials(StandardCredentials.class, item, ACL.SYSTEM, new ArrayList<DomainRequirement>()),
             CredentialsMatchers.withId(apiTokenId));
         if (credentials != null) {
             if (credentials instanceof GitLabApiToken) {

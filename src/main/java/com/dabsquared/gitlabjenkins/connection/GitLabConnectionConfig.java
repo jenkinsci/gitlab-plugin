@@ -82,11 +82,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public GitLabClient getClient(String connectionName) {
+    public GitLabClient getClient(String connectionName, Item item, String jobCredentialId) {
         if (!connectionMap.containsKey(connectionName)) {
             return null;
         }
-        return connectionMap.get(connectionName).getClient();
+        return connectionMap.get(connectionName).getClient(item, jobCredentialId);
     }
 
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
@@ -138,7 +138,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
                                            @QueryParameter int connectionTimeout,
                                            @QueryParameter int readTimeout) {
         try {
-            new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient().getCurrentUser();
+            new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));

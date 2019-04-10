@@ -9,6 +9,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.*;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.model.FreeStyleProject;
+import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Project;
 import hudson.model.Queue;
@@ -50,7 +51,7 @@ public class PendingBuildsHandlerTest {
 
     @Before
     public void init() {
-        when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
+        when(gitLabConnectionProperty.getClient(any(Item.class))).thenReturn(gitLabClient);
     }
 
     @After

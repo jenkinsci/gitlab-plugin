@@ -62,8 +62,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 	if (t instanceof GitLabPushTrigger) {
                 		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Integer projectId = hook.getProjectId();
-                        if (property != null && property.getClient() != null && projectId != null && trigger != null) {
-                            GitLabClient client = property.getClient();
+                        if (property != null && property.getClient(job) != null && projectId != null && trigger != null) {
+                            GitLabClient client = property.getClient(job);
                             for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
                                 	handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
@@ -154,7 +154,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
         String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
-            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
+            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient(job);
             try {
                 String targetUrl = DisplayURLProvider.get().getJobURL(job);
                 client.changeBuildStatus(projectId, commit, BuildState.pending, ref, buildName, targetUrl, BuildState.pending.name());
