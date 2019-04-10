@@ -186,16 +186,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    private static class GitLabCredentialMatcher implements CredentialsMatcher {
-        @Override
-        public boolean matches(@NonNull Credentials credentials) {
-            try {
-                return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
-            } catch (Throwable e) {
-                return false;
-            }
-        }
-    }
     //For backwards compatibility. ReadResolve is called on startup
     protected GitLabConnectionConfig readResolve() {
         if (useAuthenticatedEndpoint == null) {
