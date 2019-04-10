@@ -7,8 +7,8 @@ package com.dabsquared.gitlabjenkins.workflow.pipeline
 // The idea is to have 1 pipeline script which contains a list of all build stages for each gitlab projects involved
 // but it can change the behaviour depending on which jenkins server it is being executed
 //
-def site_1_connection = gitLabConnection('test-connection' )
-def site_2_connection = gitLabConnection('test-connection2' )
+def site_1_connection = gitLabConnection(gitLabConnection:'test-connection')
+def site_2_connection = gitLabConnection(gitLabConnection:'test-connection2')
 def builds = [
     // jenkins master on site 1
     [name:"stage1-jenkins-site1", connection:site_1_connection, projectId:'test/test',  revisionHash:'master'],

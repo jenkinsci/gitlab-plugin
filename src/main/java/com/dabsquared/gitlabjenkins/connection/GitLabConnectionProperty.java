@@ -52,7 +52,15 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         return gitLabConnection;
     }
 
-    public GitLabClient getClient(Item item) {
+    public String getJobCredentialId() {
+		return jobCredentialId;
+	}
+
+	public boolean isUseAlternativeCredential() {
+		return useAlternativeCredential;
+	}
+
+	public GitLabClient getClient(Item item) {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
             return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, item, jobCredentialId)
