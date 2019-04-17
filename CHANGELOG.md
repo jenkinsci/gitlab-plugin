@@ -1,5 +1,9 @@
 ChangeLog
 
+1.5.12
+=====================
+* [SECURITY-1357](https://jenkins.io/security/advisory/2019-04-17/#SECURITY-1357): Fix security issues
+
 1.5.11
 =====================
 * #823: Fix gitlabCommitStatus step so that name argument is not required
