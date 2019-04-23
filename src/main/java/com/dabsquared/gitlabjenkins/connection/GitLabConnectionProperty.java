@@ -36,35 +36,34 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
     private String jobCredentialId;
 	private boolean useAlternativeCredential = false;
 
-
     @DataBoundConstructor
     public GitLabConnectionProperty(String gitLabConnection, boolean useAlternativeCredential, String jobCredentialId) {
         this.gitLabConnection = gitLabConnection;
         this.useAlternativeCredential = useAlternativeCredential;
-		this.jobCredentialId = jobCredentialId;
+        this.jobCredentialId = jobCredentialId;
     }
     
     public GitLabConnectionProperty(String gitLabConnection) {
-		this.gitLabConnection = gitLabConnection;
-	}
+        this.gitLabConnection = gitLabConnection;
+    }
 
     public String getGitLabConnection() {
         return gitLabConnection;
     }
 
     public String getJobCredentialId() {
-		return jobCredentialId;
-	}
+        return jobCredentialId;
+    }
 
-	public boolean isUseAlternativeCredential() {
-		return useAlternativeCredential;
-	}
+    public boolean isUseAlternativeCredential() {
+        return useAlternativeCredential;
+    }
 
 	public GitLabClient getClient(Item item) {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
             return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, item, jobCredentialId)
-					: null;
+                   : null;
         }
         return null;
     }
@@ -106,38 +105,38 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         }
         
         public ListBoxModel doFillJobCredentialIdItems(@AncestorInPath Item item, @QueryParameter String url,
-				@QueryParameter String jobCredentialId) {
-			StandardListBoxModel result = new StandardListBoxModel();
-			return result.includeEmptyValue()
-					.includeMatchingAs(ACL.SYSTEM, item, StandardCredentials.class,
-							URIRequirementBuilder.fromUri(url).build(), new GitLabCredentialMatcher())
-					.includeCurrentValue(jobCredentialId);
-		}
-        
+               @QueryParameter String jobCredentialId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            return result.includeEmptyValue()
+                    .includeMatchingAs(ACL.SYSTEM, item, StandardCredentials.class,
+                            URIRequirementBuilder.fromUri(url).build(), new GitLabCredentialMatcher())
+                    .includeCurrentValue(jobCredentialId);
+        }
+
         public FormValidation doTestConnection(@QueryParameter String jobCredentialId,
-				@QueryParameter String gitLabConnection, @AncestorInPath Item item) {
-			try {
-				GitLabConnection gitLabConnectionTested = null;
-				GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance()
-						.getDescriptor(GitLabConnectionConfig.class);
-				for (GitLabConnection connection : descriptor.getConnections()) {
-					if (gitLabConnection.equals(connection.getName())) {
-						gitLabConnectionTested = connection;
-					}
-				}
-				if (gitLabConnectionTested == null) {
-					return FormValidation.error(Messages.connection_error("The GitLab Connection does not exist"));
-				}
-				new GitLabConnection("", gitLabConnectionTested.getUrl(), jobCredentialId,
-						gitLabConnectionTested.getClientBuilderId(), true,
-						gitLabConnectionTested.getConnectionTimeout(), gitLabConnectionTested.getReadTimeout())
-								.getClient(item, jobCredentialId).getCurrentUser();
-				return FormValidation.ok(Messages.connection_success());
-			} catch (WebApplicationException e) {
-				return FormValidation.error(Messages.connection_error(e.getMessage()));
-			} catch (ProcessingException e) {
-				return FormValidation.error(Messages.connection_error(e.getCause().getMessage()));
-			}
-		}
+                @QueryParameter String gitLabConnection, @AncestorInPath Item item) {
+             try {
+                GitLabConnection gitLabConnectionTested = null;
+                GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance()
+                        .getDescriptor(GitLabConnectionConfig.class);
+                for (GitLabConnection connection : descriptor.getConnections()) {
+                    if (gitLabConnection.equals(connection.getName())) {
+                         gitLabConnectionTested = connection;
+                    }
+                }
+                if (gitLabConnectionTested == null) {
+                    return FormValidation.error(Messages.connection_error("The GitLab Connection does not exist"));
+                }
+                new GitLabConnection("", gitLabConnectionTested.getUrl(), jobCredentialId,
+                        gitLabConnectionTested.getClientBuilderId(), true,
+                        gitLabConnectionTested.getConnectionTimeout(), gitLabConnectionTested.getReadTimeout())
+                                .getClient(item, jobCredentialId).getCurrentUser();
+                return FormValidation.ok(Messages.connection_success());
+            } catch (WebApplicationException e) {
+                return FormValidation.error(Messages.connection_error(e.getMessage()));
+            } catch (ProcessingException e) {
+                return FormValidation.error(Messages.connection_error(e.getCause().getMessage()));
+            }
+        }
     }
 }
