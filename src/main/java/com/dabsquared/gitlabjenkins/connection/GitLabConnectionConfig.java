@@ -22,6 +22,9 @@ import org.eclipse.jgit.util.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.interceptor.RequirePOST;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.DoNotUse;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -131,12 +134,15 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
+    @RequirePOST
+    @Restricted(DoNotUse.class) // WebOnly
     public FormValidation doTestConnection(@QueryParameter String url,
                                            @QueryParameter String apiTokenId,
                                            @QueryParameter String clientBuilderId,
                                            @QueryParameter boolean ignoreCertificateErrors,
                                            @QueryParameter int connectionTimeout,
                                            @QueryParameter int readTimeout) {
+	Jenkins.getActiveInstance().checkPermission(Jenkins.ADMINISTER);
         try {
             new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
             return FormValidation.ok(Messages.connection_success());
