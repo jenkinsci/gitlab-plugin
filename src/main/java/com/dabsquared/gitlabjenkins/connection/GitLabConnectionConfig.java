@@ -20,6 +20,7 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.eclipse.jgit.util.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -64,7 +65,8 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return useAuthenticatedEndpoint;
     }
 
-    void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
+    @DataBoundSetter
+    public void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
     }
 

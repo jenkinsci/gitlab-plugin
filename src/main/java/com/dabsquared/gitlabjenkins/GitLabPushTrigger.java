@@ -516,7 +516,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         GitLabPushTrigger trigger = null;
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob p = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (Trigger t : p.getTriggers().values()) {
+            for (Object t : p.getTriggers().values()) {
                 if (t instanceof GitLabPushTrigger) {
                     trigger = (GitLabPushTrigger) t;
                 }

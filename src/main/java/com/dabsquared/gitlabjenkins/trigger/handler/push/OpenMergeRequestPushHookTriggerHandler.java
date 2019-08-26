@@ -58,7 +58,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                 ParameterizedJob project = (ParameterizedJobMixIn.ParameterizedJob) job;
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
-                for (Trigger t : project.getTriggers().values()) {
+                for (Object t : project.getTriggers().values()) {
                 	if (t instanceof GitLabPushTrigger) {
                 		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Integer projectId = hook.getProjectId();
