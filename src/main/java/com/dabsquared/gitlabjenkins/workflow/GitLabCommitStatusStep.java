@@ -56,8 +56,8 @@ public class GitLabCommitStatusStep extends Step {
         return builds;
     }
 
-    @DataBoundConstructor
-    public GitLabCommitStatusStep(String state){
+    @DataBoundSetter
+    public setState(String state){
         this.state = StringUtils.isEmpty(state) ? null : state;
     }
 
