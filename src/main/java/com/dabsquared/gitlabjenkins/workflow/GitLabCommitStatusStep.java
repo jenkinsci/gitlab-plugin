@@ -91,10 +91,14 @@ public class GitLabCommitStatusStep extends Step {
                 .withCallback(new BodyExecutionCallback() {
                     @Override
                     public void onStart(StepContext context) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name, step.builds, step.connection);
-                        PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
-                        if (action != null) {
-                            action.startBuild(name);
+                        if (step.state == null) {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name, step.builds, step.connection);
+                            PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
+                            if (action != null) {
+                                action.startBuild(name);
+                            }
+                        } else if (step.state == "pending") {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.pending, name, step.builds, step.connection);
                         }
                     }
 
