@@ -114,7 +114,9 @@ public class GitLabCommitStatusStep extends Step {
 
                     @Override
                     public void onSuccess(StepContext context, Object result) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name,  step.builds, step.connection);
+                        if (step.state == null || step.state != "pending") {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name,  step.builds, step.connection);
+                        }
                         context.onSuccess(result);
                     }
 
