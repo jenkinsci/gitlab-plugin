@@ -36,6 +36,7 @@ public class GitLabCommitStatusStep extends Step {
     private String name;
     private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>() ;
     private GitLabConnectionProperty connection;
+    private String state;
 
     @DataBoundConstructor
     public GitLabCommitStatusStep(String name){
@@ -53,6 +54,15 @@ public class GitLabCommitStatusStep extends Step {
 
     public List<GitLabBranchBuild> getBuilds() {
         return builds;
+    }
+
+    @DataBoundConstructor
+    public GitLabCommitStatusStep(String state){
+        this.state = StringUtils.isEmpty(state) ? null : state;
+    }
+
+    public String getState() {
+        return state;
     }
 
     @DataBoundSetter
