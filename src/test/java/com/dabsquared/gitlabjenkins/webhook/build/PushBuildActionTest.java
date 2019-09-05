@@ -67,6 +67,7 @@ public class PushBuildActionTest {
             verify(trigger).onPost(pushHookArgumentCaptor.capture());
             assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
             assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getUserUsername(), is(notNullValue()));
         }
     }
 

@@ -78,6 +78,7 @@ gitlabBranch
 gitlabSourceBranch
 gitlabActionType
 gitlabUserName
+gitlabUserUsername
 gitlabUserEmail
 gitlabSourceRepoHomepage
 gitlabSourceRepoName
