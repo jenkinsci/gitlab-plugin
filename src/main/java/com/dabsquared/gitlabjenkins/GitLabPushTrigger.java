@@ -78,6 +78,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private boolean triggerOnPush = true;
+    private boolean triggerToBranchDeleteRequest = false;
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOnPipelineEvent = false;
     private boolean triggerOnAcceptedMergeRequest = false;
@@ -117,7 +118,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
      */
     @Deprecated
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest,
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerToBranchDeleteRequest, boolean triggerOnMergeRequest, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest,
     						 TriggerOpenMergeRequest triggerOpenMergeRequestOnPush, boolean triggerOnNoteRequest, String noteRegex,
     						 boolean skipWorkInProgressMergeRequest, boolean ciSkip,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
@@ -126,6 +127,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                              MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent,
                              boolean triggerOnApprovedMergeRequest, String pendingBuildName, boolean cancelPendingBuildsOnUpdate) {
         this.triggerOnPush = triggerOnPush;
+        this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
         this.triggerOnAcceptedMergeRequest = triggerOnAcceptedMergeRequest;
         this.triggerOnClosedMergeRequest = triggerOnClosedMergeRequest;
@@ -211,6 +213,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     public boolean getTriggerOnPush() {
         return triggerOnPush;
+    }
+
+    public boolean getTriggerToBranchDeleteRequest() {
+        return triggerToBranchDeleteRequest;
     }
 
     @Override
@@ -301,6 +307,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
+    }
+
+    @DataBoundSetter
+    public void setTriggerToBranchDeleteRequest(boolean triggerToBranchDeleteRequest) {
+        this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
     }
     
     @DataBoundSetter
@@ -484,7 +495,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private void initializeTriggerHandler() {
 		mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(this);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
-        pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
+        pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush,triggerToBranchDeleteRequest, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
     }
 

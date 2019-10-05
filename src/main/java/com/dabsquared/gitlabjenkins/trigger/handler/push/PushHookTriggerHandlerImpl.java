@@ -23,10 +23,17 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.Bui
 class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
 
     private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
+    private boolean triggerToBranchDeleteRequest = false;
+    
+
+    public PushHookTriggerHandlerImpl(boolean triggerToBranchDeleteRequest)
+    {
+    this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
+    }
 
     @Override
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-        if (isNoRemoveBranchPush(hook)) {
+        if (isNoRemoveBranchPush(hook) || this.triggerToBranchDeleteRequest ) {
             super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
