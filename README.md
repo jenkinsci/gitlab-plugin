@@ -474,7 +474,17 @@ In order to build when a new tag is pushed:
     2. You can also use 'Branch Specifier' to specify which tag need to be built (example 'refs/tags/${TAGNAME}')
 
 ## Add a note to merge requests
+
 To add a note to GitLab merge requests after the build completes, select 'Add note with build status on GitLab merge requests' from the optional Post-build actions. Optionally, click the 'Advanced' button to customize the content of the note depending on the build result.
+
+### Pipeline jobs - addGitLabMRComment
+
+```groovy
+addGitLabMRComment(comment: 'The pipeline was run on Jenkins')
+```
+
+Note that it requires that the build be triggered by the GitLab MR webhook, not the push webhook (or manual build).
+Please also note that it currently does *not* work with Multibranch Pipeline jobs, because MR hooks won't trigger.
 
 ## Accept merge request
 To accept a merge request when build is completed select 'Accept GitLab merge request on success' from the optional Post-build actions.
@@ -484,7 +494,7 @@ For pipeline jobs two advanced configuration options can be provided
 1. **useMRDescription** - Adds the merge request description into the merge commit, in a similar format as would be recieved by selecting 'Modify commit message' followed by 'include description in commit message' in GitLab UI  
 2. **removeSourceBranch** - Removes the source branch in GitLab when the merge request is accepted
 
-```
+```groovy
 acceptGitLabMR(useMRDescription: true, removeSourceBranch: true)
 ```
 
