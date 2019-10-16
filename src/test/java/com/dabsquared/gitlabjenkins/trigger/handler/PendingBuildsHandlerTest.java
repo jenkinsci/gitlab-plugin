@@ -78,7 +78,7 @@ public class PendingBuildsHandlerTest {
     public void workflowJobCanConfiguredToSendToPendingBuildStatusWhenTriggered() throws IOException {
         WorkflowJob workflowJob = workflowJob();
 
-        GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(workflowJob);
+        GitLabPushTrigger gitLabPushTrigger =  gitLabPushTrigger(workflowJob);
         gitLabPushTrigger.setPendingBuildName(GITLAB_BUILD_NAME);
 
         gitLabPushTrigger.onPost(mergeRequestHook(1, "branch1", "commit1"));
@@ -114,14 +114,14 @@ public class PendingBuildsHandlerTest {
     private GitLabPushTrigger gitLabPushTrigger(Project project) throws IOException {
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger();
         project.addTrigger(gitLabPushTrigger);
-        gitLabPushTrigger.start(project,true);
+        gitLabPushTrigger.start(project, true);
         return gitLabPushTrigger;
     }
 
-    private GitLabPushTrigger gitLabPushTrigger(WorkflowJob workflowJob) {
+    private GitLabPushTrigger gitLabPushTrigger(WorkflowJob workflowJob) throws IOException {
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger();
         workflowJob.addTrigger(gitLabPushTrigger);
-        gitLabPushTrigger.start(workflowJob,true);
+        gitLabPushTrigger.start(workflowJob, true);
         return gitLabPushTrigger;
     }
 
