@@ -30,6 +30,7 @@ public class MergeRequestObjectAttributes {
     private Project source;
     private Project target;
     private Commit lastCommit;
+    private String oldrev;
     private String mergeStatus;
     private String url;
     private Action action;
@@ -162,6 +163,10 @@ public class MergeRequestObjectAttributes {
     public void setLastCommit(Commit lastCommit) {
         this.lastCommit = lastCommit;
     }
+
+    public String getOldrev() { return oldrev; }
+
+    public void setOldrev(String oldrev) { this.oldrev = oldrev; }
 
     public String getMergeStatus() {
         return mergeStatus;
