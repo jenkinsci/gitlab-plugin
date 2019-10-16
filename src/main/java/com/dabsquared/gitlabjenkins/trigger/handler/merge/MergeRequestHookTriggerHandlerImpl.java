@@ -67,7 +67,8 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (isAllowedByConfig(objectAttributes)
             && isLastCommitNotYetBuild(job, hook)
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
+            && isNewCommitPushed(hook)) {
 
             List<String> labelsNames = new ArrayList<>();
             if (hook.getLabels() != null) {
@@ -82,6 +83,15 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         }
     }
 
+    protected boolean isNewCommitPushed(MergeRequestHook hook) {
+        if (hook.getObjectAttributes().getAction().equals(Action.update)) {
+            if (hook.getObjectAttributes().getOldrev() != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
     @Override
     protected boolean isCiSkip(MergeRequestHook hook) {
         return hook.getObjectAttributes() != null
