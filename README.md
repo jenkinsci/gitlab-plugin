@@ -39,7 +39,7 @@ This plugin allows GitLab to trigger builds in Jenkins when code is committed or
 
 ### Seeking maintainers
 
-I am no longer using GitLab on a daily basis, and therefore I have less time to spend working on the plugin. If you are a regular user and would like to help out, please consider volunteering as a maintainer. There are verified bugs that need fixes, open PRs that need review, and feature requests that range from simple to complex. If you are interested in contributing, contact Owen (email address in git log) for additional access.
+I am no longer using GitLab on a daily basis, and therefore I have less time to spend working on the plugin. If you are a regular user and would like to help out, please consider volunteering as a maintainer. There are verified bugs that need fixes, open PRs that need review, and feature requests that range from simple to complex. If you are interested in contributing, contact Marky (email address in git log) for additional access.
 
 # User support
 ### Relationship with GitLab Inc.
