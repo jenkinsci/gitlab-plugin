@@ -26,6 +26,7 @@ public final class CauseData {
     private final String branch;
     private final String sourceBranch;
     private final String userName;
+    private final String userUsername;
     private final String userEmail;
     private final String sourceRepoHomepage;
     private final String sourceRepoName;
@@ -64,7 +65,7 @@ public final class CauseData {
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
-              String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
+              String userUsername, String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
               Integer mergeRequestIid, Integer mergeRequestTargetProjectId, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
               String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
@@ -76,6 +77,7 @@ public final class CauseData {
         this.branch = checkNotNull(branch, "branch must not be null.");
         this.sourceBranch = checkNotNull(sourceBranch, "sourceBranch must not be null.");
         this.userName = checkNotNull(userName, "userName must not be null.");
+        this.userUsername = userUsername == null ? "" : userUsername;
         this.userEmail = userEmail == null ? "" : userEmail;
         this.sourceRepoHomepage = sourceRepoHomepage == null ? "" : sourceRepoHomepage;
         this.sourceRepoName = checkNotNull(sourceRepoName, "sourceRepoName must not be null.");
@@ -120,6 +122,7 @@ public final class CauseData {
         variables.put("gitlabSourceBranch", sourceBranch);
         variables.put("gitlabActionType", actionType.name());
         variables.put("gitlabUserName", userName);
+        variables.put("gitlabUserUsername", userUsername == null ? "" : userUsername);
         variables.put("gitlabUserEmail", userEmail);
         variables.put("gitlabSourceRepoHomepage", sourceRepoHomepage);
         variables.put("gitlabSourceRepoName", sourceRepoName);
@@ -184,6 +187,11 @@ public final class CauseData {
     @Exported
     public String getUserName() {
         return userName;
+    }
+
+    @Exported
+    public String getUserUsername() {
+        return userUsername;
     }
 
     @Exported
@@ -369,6 +377,7 @@ public final class CauseData {
             .append(branch, causeData.branch)
             .append(sourceBranch, causeData.sourceBranch)
             .append(userName, causeData.userName)
+            .append(userUsername, causeData.userUsername)
             .append(userEmail, causeData.userEmail)
             .append(sourceRepoHomepage, causeData.sourceRepoHomepage)
             .append(sourceRepoName, causeData.sourceRepoName)
@@ -415,6 +424,7 @@ public final class CauseData {
             .append(branch)
             .append(sourceBranch)
             .append(userName)
+            .append(userUsername)
             .append(userEmail)
             .append(sourceRepoHomepage)
             .append(sourceRepoName)
@@ -461,6 +471,7 @@ public final class CauseData {
             .append("branch", branch)
             .append("sourceBranch", sourceBranch)
             .append("userName", userName)
+            .append("userUsername", userUsername)
             .append("userEmail", userEmail)
             .append("sourceRepoHomepage", sourceRepoHomepage)
             .append("sourceRepoName", sourceRepoName)

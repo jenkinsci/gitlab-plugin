@@ -16,6 +16,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import static org.hamcrest.CoreMatchers.containsString;
 
 import java.io.IOException;
 
@@ -67,6 +68,8 @@ public class PushBuildActionTest {
             verify(trigger).onPost(pushHookArgumentCaptor.capture());
             assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
             assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getUserUsername(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getUserUsername(), containsString("jsmith"));
         }
     }
 

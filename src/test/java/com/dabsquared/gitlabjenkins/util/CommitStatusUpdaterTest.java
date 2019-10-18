@@ -77,6 +77,7 @@ public class CommitStatusUpdaterTest {
 	    PowerMockito.mockStatic(GitLabConnectionProperty.class);
 	    PowerMockito.mockStatic(Jenkins.class);
 	    when(Jenkins.getInstance()).thenReturn(jenkins);
+        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
 	    when(jenkins.getRootUrl()).thenReturn(JENKINS_URL);
 	    when(jenkins.getDescriptor(GitLabConnectionConfig.class)).thenReturn(gitLabConnectionConfig);
 	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
