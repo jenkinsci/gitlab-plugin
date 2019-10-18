@@ -1,5 +1,13 @@
 ChangeLog
 
+1.5.13
+=====================
+* #972: Security fixes for jackson databind & httpclient
+
+1.5.12
+=====================
+* Fixes SECURITY-1357. When testing the connection to GitLab, require a POST operation, require that the user be an Administrator, and don't allow triggering the test via the Jenkins API.
+
 1.5.11
 =====================
 * #823: Fix gitlabCommitStatus step so that name argument is not required

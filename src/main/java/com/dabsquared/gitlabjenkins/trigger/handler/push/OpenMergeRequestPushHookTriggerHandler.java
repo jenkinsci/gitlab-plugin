@@ -32,6 +32,7 @@ import javax.ws.rs.WebApplicationException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,7 +59,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                 ParameterizedJob project = (ParameterizedJobMixIn.ParameterizedJob) job;
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
-                for (Trigger t : project.getTriggers().values()) {
+                Collection<Trigger> triggerList = project.getTriggers().values();
+                for (Trigger t : triggerList) {
                 	if (t instanceof GitLabPushTrigger) {
                 		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Integer projectId = hook.getProjectId();

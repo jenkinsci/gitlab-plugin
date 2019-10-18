@@ -51,7 +51,7 @@ public class PushHookTriggerHandlerImplTest {
 
     @Before
     public void setup() {
-        pushHookTriggerHandler = new PushHookTriggerHandlerImpl();
+        pushHookTriggerHandler = new PushHookTriggerHandlerImpl(false);
     }
 
     @Test

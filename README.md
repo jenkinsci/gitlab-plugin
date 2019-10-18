@@ -26,6 +26,9 @@
   - [Branch filtering](#branch-filtering)
   - [Build when tags are pushed](#build-when-tags-are-pushed)
   - [Add a note to merge requests](#add-a-note-to-merge-requests)
+  - [Accept merge request after build](#accept-merge-request)
+  - [Notify specific project by a specific GitLab connection](#notify-specific-project-by-a-specific-gitlab-connection)
+  - [Cancel pending builds on merge request update](#cancel-pending-builds-on-merge-request-update)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Testing With Docker](#testing-with-docker)
 - [Release Workflow](#release-workflow)
@@ -36,7 +39,7 @@ This plugin allows GitLab to trigger builds in Jenkins when code is committed or
 
 ### Seeking maintainers
 
-I am no longer using GitLab on a daily basis, and therefore I have less time to spend working on the plugin. If you are a regular user and would like to help out, please consider volunteering as a maintainer. There are verified bugs that need fixes, open PRs that need review, and feature requests that range from simple to complex. If you are interested in contributing, contact Owen (email address in git log) for additional access.
+I am no longer using GitLab on a daily basis, and therefore I have less time to spend working on the plugin. If you are a regular user and would like to help out, please consider volunteering as a maintainer. There are verified bugs that need fixes, open PRs that need review, and feature requests that range from simple to complex. If you are interested in contributing, contact Marky (email address in git log) for additional access.
 
 # User support
 ### Relationship with GitLab Inc.
@@ -46,13 +49,9 @@ This plugin is Open Source Software, developed on a volunteer basis by users of 
 GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the current major release. At the time of this writing, the current stable release of GitLab is 11.1, so the oldest release supported by this plugin is 9.0.
 
 ### Getting help
-If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project if necessary. New issues should include the following:
-* GitLab plugin version (e.g. 1.5.2)
-* GitLab version (e.g. 10.5.1)
-* Jenkins version (e.g. 2.111)
-* Relevant log output from the plugin (see below for instructions on capturing this)
+If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project.
 
-Version 1.2.0 of the plugin introduced improved logging for debugging purposes. To enable it:
+To enable debug logging in the plugin:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
@@ -60,8 +59,6 @@ Version 1.2.0 of the plugin introduced improved logging for debugging purposes. 
 4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINEST, and save
 5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
 6. Refresh the log page and you should see output
-
-You can also try chatting with us in the #gitlab-plugin channel on the Freenode IRC network.
 
 # Known bugs/issues
 
@@ -81,6 +78,7 @@ gitlabBranch
 gitlabSourceBranch
 gitlabActionType
 gitlabUserName
+gitlabUserUsername
 gitlabUserEmail
 gitlabSourceRepoHomepage
 gitlabSourceRepoName
@@ -159,7 +157,7 @@ There are two aspects of your Jenkins job that you may want to modify when using
 
 Any GitLab parameters you create will always take precedence over the values that are sent by the webhook, unless you use the [EnvInject plugin](https://plugins.jenkins.io/envinject) to map the webhook values onto the job parameters. This is due to changes that were made to address [security vulnerabilities,](https://jenkins.io/security/advisory/2016-05-11/) with changes that landed in Jenkins 2.3.
 
-In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined variables](#defined-variables) list for options - your parameter names must match these .e.g `sourceBranch` and `targetBranch` in the example Groovy Script belolow. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
+In your job configuration, click 'This build is parameterized' and add any parameters you want to use. See the [defined variables](#defined-variables) list for options - your parameter names must match these .e.g `sourceBranch` and `targetBranch` in the example Groovy Script below. Then, having installed EnvInject, click 'Prepare an environment for the run' and check:
 * Keep Jenkins Environment Variables
 * Keep Jenkins Build Variables
 * Override Build Parameters
@@ -326,9 +324,10 @@ Use 'Publish build status to GitLab' Post-build action to send build status with
 
 Also make sure you have chosen the appropriate GitLab instance from the 'GitLab connection' dropdown menu, if you have more than one.
 
-### Scripted Pipeline jobs
+### Scripted or Declarative Pipeline jobs
 **NOTE:** If you use Pipeline global libraries, or if you clone your project's Jenkinsfile from a repo different from the one that contains the relevant source code, you need to be careful about when you send project status. In short, make sure you put your `gitlabCommitStatus` or other similar steps *after* the SCM step that clones your project's source. Otherwise, you may get HTTP 400 errors, or you may find build status being sent to the wrong repo.
 
+### Scripted Pipeline jobs
 * For Pipeline jobs, surround your build steps with the `gitlabCommitStatus` step like this:
     ```
     node() {
@@ -490,11 +489,10 @@ For pipeline jobs two advanced configuration options can be provided
 acceptGitLabMR(useMRDescription: true, removeSourceBranch: true)
 ```
 
-## Notify Specific project by a specific gitlab connection
-You can specify a map of project builds to notify a vary of gitlab repositories which could be located on different servers
-This is useful if you want to create a complex CI/CD which involve several jenkins and gitlab projects, see examples bellow:
+## Notify Specific project by a specific GitLab connection
+You can specify a map of project builds to notify a variety of GitLab repositories which could be located on different servers. This is useful if you want to create a complex CI/CD which involves several Jenkins and GitLab projects, see examples bellow:
 
-* Notify several gitlab projects using gitlab connection data from the trigger context
+* Notify several GitLab projects using GitLab connection data from the trigger context:
 ```groovy
 gitlabCommitStatus(name: 'stage1',
         builds: [
@@ -506,7 +504,7 @@ gitlabCommitStatus(name: 'stage1',
     }
 ```
 
-* Notify several gitlab projects using specific gitlab connection
+* Notify several GitLab projects using specific GitLab connection:
 ```groovy
 gitlabCommitStatus( name: 'stage1', connection:gitLabConnection('site1-connection'),
         builds: [
@@ -518,7 +516,7 @@ gitlabCommitStatus( name: 'stage1', connection:gitLabConnection('site1-connectio
     }
 ```
 
-* Notify several gitlab repositories located on different gitlab servers
+* Notify several GitLab repositories located on different GitLab servers:
 ```groovy
 gitlabCommitStatus(
         builds: [
