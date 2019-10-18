@@ -9,7 +9,7 @@
   <properties>
     <java.level>8</java.level>
     <animal.sniffer.version>1.14</animal.sniffer.version>
-    <jenkins.version>2.200</jenkins.version>
+    <jenkins.version>2.190.1</jenkins.version>
     <hpi-plugin.version>1.115</hpi-plugin.version>
     <jenkins-test-harness.version>2.38</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
