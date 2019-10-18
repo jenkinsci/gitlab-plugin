@@ -77,7 +77,7 @@ public final class CauseData {
         this.branch = checkNotNull(branch, "branch must not be null.");
         this.sourceBranch = checkNotNull(sourceBranch, "sourceBranch must not be null.");
         this.userName = checkNotNull(userName, "userName must not be null.");
-        this.userUsername = userUsername == null ? "" : userEmail;
+        this.userUsername = userUsername == null ? "" : userUsername;
         this.userEmail = userEmail == null ? "" : userEmail;
         this.sourceRepoHomepage = sourceRepoHomepage == null ? "" : sourceRepoHomepage;
         this.sourceRepoName = checkNotNull(sourceRepoName, "sourceRepoName must not be null.");
