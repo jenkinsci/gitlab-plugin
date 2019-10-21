@@ -229,6 +229,7 @@ public class MergeRequestObjectAttributes {
             .append(mergeStatus, that.mergeStatus)
             .append(url, that.url)
             .append(action, that.action)
+            .append(oldrev, that.oldrev)
             .append(workInProgress, that.workInProgress)
             .isEquals();
     }
@@ -281,6 +282,7 @@ public class MergeRequestObjectAttributes {
             .append("mergeStatus", mergeStatus)
             .append("url", url)
             .append("action", action)
+            .append("oldrev", oldrev)
             .append("workInProgress", workInProgress)
             .toString();
     }
