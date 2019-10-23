@@ -51,7 +51,7 @@ public class PendingBuildsHandlerTest {
 
     @Before
     public void init() {
-        when(gitLabConnectionProperty.getClient(any(Item.class))).thenReturn(gitLabClient);
+        when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
     }
 
     @After

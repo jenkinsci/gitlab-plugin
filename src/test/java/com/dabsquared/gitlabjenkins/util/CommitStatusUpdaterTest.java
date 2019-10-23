@@ -82,7 +82,7 @@ public class CommitStatusUpdaterTest {
 	    when(jenkins.getDescriptor(GitLabConnectionConfig.class)).thenReturn(gitLabConnectionConfig);
 	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
 	    when(gitLabConnectionConfig.getClient(any(String.class), any(Item.class), any(String.class))).thenReturn(client);
-        when(connection.getClient(any(Item.class))).thenReturn(client);
+        when(connection.getClient()).thenReturn(client);
 	    when(build.getAction(BuildData.class)).thenReturn(action);
 	    when(action.getLastBuiltRevision()).thenReturn(lastBuiltRevision);
 	    when(action.getLastBuild(any(ObjectId.class))).thenReturn(lastBuild);

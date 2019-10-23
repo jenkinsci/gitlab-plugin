@@ -69,7 +69,7 @@ public class PendingBuildsHandler {
             return;
         }
         String targetUrl = DisplayURLProvider.get().getJobURL(job);
-        GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient(job);
+        GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
         try {
             client.changeBuildStatus(causeData.getSourceProjectId(), causeData.getLastCommit(), BuildState.canceled,
                 causeData.getSourceBranch(), buildName, targetUrl, BuildState.canceled.name());

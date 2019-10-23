@@ -64,7 +64,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
         String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
-            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient(job);
+            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
             BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
             try {
                 if (client == null) {

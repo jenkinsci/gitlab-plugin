@@ -46,8 +46,8 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
             if (job instanceof AbstractProject<?, ?>) {
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
 
-                if (property != null && property.getClient(job) != null) {
-                    GitLabClient client = property.getClient(job);
+                if (property != null && property.getClient() != null) {
+                    GitLabClient client = property.getClient();
                     com.dabsquared.gitlabjenkins.gitlab.api.model.Project projectForName = client.getProject(hook.getProject().getPathWithNamespace());
                     hook.setProjectId(projectForName.getId());
                 }

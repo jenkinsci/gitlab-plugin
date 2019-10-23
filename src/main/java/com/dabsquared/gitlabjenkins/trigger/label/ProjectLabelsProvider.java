@@ -45,8 +45,8 @@ public final class ProjectLabelsProvider {
     private List<String> getProjectLabels(Job<?, ?> project) {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null && connectionProperty.getClient(project) != null) {
-            return GitLabProjectLabelsService.instance().getLabels(connectionProperty.getClient(project), sourceRepository.toString());
+        if (connectionProperty != null && connectionProperty.getClient() != null) {
+            return GitLabProjectLabelsService.instance().getLabels(connectionProperty.getClient(), sourceRepository.toString());
         } else {
             LOGGER.log(Level.WARNING, "getProjectLabels: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
             return Collections.emptyList();

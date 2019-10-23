@@ -20,8 +20,11 @@ import net.sf.json.JSONObject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
+import org.antlr.v4.runtime.misc.NotNull;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -59,19 +62,19 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         return useAlternativeCredential;
     }
 
-	public GitLabClient getClient(Item item) {
+    public GitLabClient getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, item, jobCredentialId)
+            return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId)
                    : null;
         }
         return null;
     }
 
-    public static GitLabClient getClient(Run<?, ?> build) {
+    public static GitLabClient getClient(@NotNull Run<?, ?> build) {
         final GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null) {
-            return connectionProperty.getClient(build.getParent());
+            return connectionProperty.getClient();
         }
         return null;
     }

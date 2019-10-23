@@ -46,7 +46,7 @@ public class CommitStatusUpdater {
     public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state, String name, List<GitLabBranchBuild> gitLabBranchBuilds, GitLabConnectionProperty connection) {
         GitLabClient client;
         if(connection != null) {
-            client = connection.getClient(build.getParent());
+            client = connection.getClient();
         } else {
             client = getClient(build);
         }
@@ -69,7 +69,7 @@ public class CommitStatusUpdater {
             try {
                 GitLabClient current_client = client;
                 if(gitLabBranchBuild.getConnection() != null ) {
-                    GitLabClient build_specific_client = gitLabBranchBuild.getConnection().getClient(build.getParent());
+                    GitLabClient build_specific_client = gitLabBranchBuild.getConnection().getClient();
                     if (build_specific_client != null) {
                         current_client = build_specific_client;
                     }

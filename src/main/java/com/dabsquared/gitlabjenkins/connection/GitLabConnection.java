@@ -1,6 +1,18 @@
 package com.dabsquared.gitlabjenkins.connection;
 
 
+import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -8,28 +20,18 @@ import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.Domain;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.AutodetectGitLabClientBuilder;
+
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.security.ACL;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
-import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
 
 
 /**
@@ -119,9 +121,15 @@ public class GitLabConnection {
         return apiCache;
     }
 
+    @Restricted(NoExternalUse.class)
     private String getApiToken(String apiTokenId, Item item) {
+        ItemGroup context = null != item ? item.getParent() : Jenkins.getInstance();
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-            lookupCredentials(StandardCredentials.class, item, ACL.SYSTEM, new ArrayList<DomainRequirement>()),
+            lookupCredentials(
+                    StandardCredentials.class,
+                    context, 
+                    ACL.SYSTEM,
+                    URIRequirementBuilder.fromUri(url).build()),
             CredentialsMatchers.withId(apiTokenId));
         if (credentials != null) {
             if (credentials instanceof GitLabApiToken) {
@@ -133,7 +141,6 @@ public class GitLabConnection {
         }
         throw new IllegalStateException("No credentials found for credentialsId: " + apiTokenId);
     }
-
 
     protected GitLabConnection readResolve() {
         if (connectionTimeout == null || readTimeout == null) {
