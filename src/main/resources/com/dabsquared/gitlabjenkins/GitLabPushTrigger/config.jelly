@@ -33,6 +33,9 @@
     </table>
   </f:entry>
   <f:advanced>
+    <f:entry title="Always force build, even if the latest commit already has been built" field="alwaysForceBuild">
+      <f:checkbox default="false"/>
+    </f:entry>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
       <f:checkbox default="true"/>
     </f:entry>

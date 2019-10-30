@@ -22,7 +22,8 @@ public final class MergeRequestHookTriggerHandlerFactory {
                                                                                    TriggerOpenMergeRequest triggerOpenMergeRequest,
                                                                                    boolean skipWorkInProgressMergeRequest,
                                                                                    boolean triggerOnApprovedMergeRequest,
-                                                                                   boolean cancelPendingBuildsOnUpdate) {
+                                                                                   boolean cancelPendingBuildsOnUpdate,
+                                                                                   boolean alwaysForceBuild) {
 
         TriggerConfigChain chain = new TriggerConfigChain();
         chain
@@ -33,7 +34,7 @@ public final class MergeRequestHookTriggerHandlerFactory {
             .acceptIf(triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.updated), null)
         ;
 
-        return new MergeRequestHookTriggerHandlerImpl(chain, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+        return new MergeRequestHookTriggerHandlerImpl(chain, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate, alwaysForceBuild);
     }
 
     public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(MergeRequestTriggerConfig config) {
@@ -43,7 +44,8 @@ public final class MergeRequestHookTriggerHandlerFactory {
             config.getTriggerOpenMergeRequestOnPush(),
             config.isSkipWorkInProgressMergeRequest(),
             config.isTriggerOnApprovedMergeRequest(),
-            config.getCancelPendingBuildsOnUpdate());
+            config.getCancelPendingBuildsOnUpdate(),
+            config.getAlwaysForceBuild());
     }
 
     public static Config withConfig() {
@@ -58,6 +60,7 @@ public final class MergeRequestHookTriggerHandlerFactory {
         private boolean skipWorkInProgressMergeRequest = false;
         private boolean triggerOnApprovedMergeRequest = false;
         private boolean cancelPendingBuildsOnUpdate = false;
+        private boolean alwaysForceBuild = false;
 
         @Override
         public boolean getTriggerOnMergeRequest() {
@@ -94,6 +97,9 @@ public final class MergeRequestHookTriggerHandlerFactory {
             return cancelPendingBuildsOnUpdate;
         }
 
+        @Override
+        public boolean getAlwaysForceBuild() { return alwaysForceBuild; }
+
         public Config setTriggerOnMergeRequest(boolean triggerOnMergeRequest) {
             this.triggerOnMergeRequest = triggerOnMergeRequest;
             return this;
@@ -126,6 +132,11 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
         public Config setCancelPendingBuildsOnUpdate(boolean cancelPendingBuildsOnUpdate) {
             this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+            return this;
+        }
+
+        public Config setAlwaysForceBuild(boolean alwaysForceBuild) {
+            this.alwaysForceBuild = alwaysForceBuild;
             return this;
         }
 

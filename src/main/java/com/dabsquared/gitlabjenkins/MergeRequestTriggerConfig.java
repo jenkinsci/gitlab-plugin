@@ -16,4 +16,6 @@ public interface MergeRequestTriggerConfig {
     boolean isSkipWorkInProgressMergeRequest();
 
     boolean getCancelPendingBuildsOnUpdate();
+
+    boolean getAlwaysForceBuild();
 }

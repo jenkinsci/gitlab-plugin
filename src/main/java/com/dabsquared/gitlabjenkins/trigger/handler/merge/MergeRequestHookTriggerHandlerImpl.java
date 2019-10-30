@@ -44,6 +44,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved);
     private final EnumSet<Action> skipAllowedStateForActions = EnumSet.of(Action.approved);
     private final boolean cancelPendingBuildsOnUpdate;
+    private final boolean alwaysForceBuild;
 
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
         this(allowedStates, EnumSet.noneOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
@@ -53,13 +54,14 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     // any code using it should test it on higher level
     @Deprecated
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate, false);
     }
 
-    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate, boolean alwaysForceBuild) {
         this.triggerConfig = triggerConfig;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+        this.alwaysForceBuild = alwaysForceBuild;
     }
 
     @Override
@@ -187,6 +189,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
 
         if (objectAttributes == null) {
+            return true;
+        }
+
+        if(this.alwaysForceBuild == true) {
+            LOGGER.log(Level.INFO,"Job has alwaysForceBuild set, enforcing rebuild in isLastCommitNotYetBuild");
             return true;
         }
 

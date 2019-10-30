@@ -85,6 +85,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
     private boolean triggerOnApprovedMergeRequest = false;
+    private boolean alwaysForceBuild = false;
     private TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
     private boolean triggerOnNoteRequest = true;
     private String noteRegex = "";
@@ -126,7 +127,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String sourceBranchRegex, String targetBranchRegex,
                              MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent,
-                             boolean triggerOnApprovedMergeRequest, String pendingBuildName, boolean cancelPendingBuildsOnUpdate) {
+                             boolean triggerOnApprovedMergeRequest, String pendingBuildName, boolean cancelPendingBuildsOnUpdate, boolean alwaysForceBuild) {
         this.triggerOnPush = triggerOnPush;
         this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
@@ -153,6 +154,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.triggerOnApprovedMergeRequest = triggerOnApprovedMergeRequest;
         this.pendingBuildName = pendingBuildName;
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+        this.alwaysForceBuild = alwaysForceBuild;
 
         initializeTriggerHandler();
         initializeBranchFilter();
@@ -305,6 +307,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return this.cancelPendingBuildsOnUpdate;
     }
 
+    public boolean getAlwaysForceBuild() { return this.alwaysForceBuild; }
+
     @DataBoundSetter
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
@@ -438,6 +442,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setCancelPendingBuildsOnUpdate(boolean cancelPendingBuildsOnUpdate) {
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+    }
+
+    @DataBoundSetter
+    public void setAlwaysForceBuild(boolean alwaysForceBuild) {
+        this.alwaysForceBuild = alwaysForceBuild;
     }
 
     // executes when the Trigger receives a push request
