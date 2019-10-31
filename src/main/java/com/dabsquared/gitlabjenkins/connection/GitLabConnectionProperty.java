@@ -24,11 +24,12 @@ import org.antlr.v4.runtime.misc.NotNull;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * @author Robin Müller
@@ -64,7 +65,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
     public GitLabClient getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
-            GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+            GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getActiveInstance().getDescriptor(GitLabConnectionConfig.class);
             return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId)
                    : null;
         }
@@ -72,10 +73,14 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
     }
 
     public static GitLabClient getClient(@NotNull Run<?, ?> build) {
-        final GitLabConnectionProperty connectionProperty = build.getParent().getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null) {
-            return connectionProperty.getClient();
+        Job<?, ?> job = build.getParent();
+        if(job != null) {
+            final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
+            if (connectionProperty != null) {
+                return connectionProperty.getClient();
+            }
         }
+        
         return null;
     }
 
@@ -116,8 +121,11 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
                     .includeCurrentValue(jobCredentialId);
         }
 
+        @RequirePOST
+        @Restricted(DoNotUse.class)
         public FormValidation doTestConnection(@QueryParameter String jobCredentialId,
                 @QueryParameter String gitLabConnection, @AncestorInPath Item item) {
+        	Jenkins.getActiveInstance().checkPermission(Jenkins.ADMINISTER);
              try {
                 GitLabConnection gitLabConnectionTested = null;
                 GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance()
