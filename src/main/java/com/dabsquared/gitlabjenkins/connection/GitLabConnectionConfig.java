@@ -85,11 +85,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    public GitLabClient getClient(String connectionName) {
+    public GitLabClient getClient(String connectionName, Item item, String jobCredentialId) {
         if (!connectionMap.containsKey(connectionName)) {
             return null;
         }
-        return connectionMap.get(connectionName).getClient();
+        return connectionMap.get(connectionName).getClient(item, jobCredentialId);
     }
 
     public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
@@ -144,7 +144,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
                                            @QueryParameter int readTimeout) {
 	Jenkins.getActiveInstance().checkPermission(Jenkins.ADMINISTER);
         try {
-            new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient().getCurrentUser();
+            new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
@@ -192,16 +192,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    private static class GitLabCredentialMatcher implements CredentialsMatcher {
-        @Override
-        public boolean matches(@NonNull Credentials credentials) {
-            try {
-                return credentials instanceof GitLabApiToken || credentials instanceof StringCredentials;
-            } catch (Throwable e) {
-                return false;
-            }
-        }
-    }
     //For backwards compatibility. ReadResolve is called on startup
     protected GitLabConnectionConfig readResolve() {
         if (useAuthenticatedEndpoint == null) {

@@ -11,7 +11,7 @@ pipeline {
     }
   }
   options {
-    gitLabConnection('test-connection')
+    gitLabConnection('test-connection',null,null)
   }
   triggers {
     gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
