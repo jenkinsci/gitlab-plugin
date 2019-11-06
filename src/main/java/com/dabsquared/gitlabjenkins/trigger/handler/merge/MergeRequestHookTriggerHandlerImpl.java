@@ -66,7 +66,6 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         if (isAllowedByConfig(objectAttributes)
-            && isLastCommitNotYetBuild(job, hook)
             && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
 
             List<String> labelsNames = new ArrayList<>();
