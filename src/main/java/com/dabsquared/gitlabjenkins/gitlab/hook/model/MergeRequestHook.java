@@ -14,11 +14,20 @@ import java.util.List;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class MergeRequestHook extends WebHook {
 
+    /*
+        "user": {...},
+        "assignee": {...},
+        "project": {...},
+        "object_attributes": {...},
+        "labels": [{...}],
+        "changes": {...}
+    */
     private User user;
     private User assignee;
     private Project project;
     private MergeRequestObjectAttributes objectAttributes;
     private List<MergeRequestLabel> labels;
+    private MergeRequestChanges changes;
 
     public User getUser() {
         return user;
@@ -60,6 +69,14 @@ public class MergeRequestHook extends WebHook {
         this.labels = labels;
     }
 
+    public MergeRequestChanges getChanges() {
+        return changes;
+    }
+
+    public void setChanges(MergeRequestChanges changes) {
+        this.changes = changes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -75,6 +92,7 @@ public class MergeRequestHook extends WebHook {
                 .append(project, that.project)
                 .append(objectAttributes, that.objectAttributes)
                 .append(labels, that.labels)
+                .append(changes, that.changes)
                 .isEquals();
     }
 
@@ -86,6 +104,7 @@ public class MergeRequestHook extends WebHook {
                 .append(project)
                 .append(objectAttributes)
                 .append(labels)
+                .append(changes)
                 .toHashCode();
     }
 
@@ -97,6 +116,7 @@ public class MergeRequestHook extends WebHook {
                 .append("project", project)
                 .append("objectAttributes", objectAttributes)
                 .append("labels", labels)
+                .append("changes", changes)
                 .toString();
     }
 }
