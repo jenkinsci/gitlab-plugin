@@ -2,14 +2,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestChangedLabels;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestChanges;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -114,7 +107,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return isAllowedByConfig(objectAttributes)
             && (forcedByAddedLabel || isLastCommitNotYetBuild(job, hook))
             && isNotSkipWorkInProgressMergeRequest(objectAttributes)
-            && isNewCommitPushed(hook);
+            && (isNewCommitPushed(hook) || isBecameNoWip(hook));
     }
 
     @Override
@@ -256,6 +249,13 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
 		return triggerConfig.apply(objectAttributes);
+    }
+    private boolean isBecameNoWip(MergeRequestHook hook) {
+        MergeRequestChangedTitle changedTitle = Optional.of(hook).map(MergeRequestHook::getChanges).map(MergeRequestChanges::getTitle).orElse(new MergeRequestChangedTitle());
+        String current = changedTitle.getCurrent() != null ? changedTitle.getCurrent() : "";
+        String previous = changedTitle.getPrevious() != null ? changedTitle.getPrevious() : "";
+
+        return previous.contains("WIP") && !current.contains("WIP");
     }
 
     private boolean isForcedByAddedLabel(MergeRequestHook hook) {
