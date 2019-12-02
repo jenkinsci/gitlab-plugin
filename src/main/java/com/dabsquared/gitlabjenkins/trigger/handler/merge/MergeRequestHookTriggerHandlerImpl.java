@@ -4,6 +4,8 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestChangedLabels;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestChanges;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
@@ -22,8 +24,16 @@ import hudson.plugins.git.RevisionParameterAction;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,37 +51,34 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private final boolean onlyIfNewCommitsPushed;
     private final boolean skipWorkInProgressMergeRequest;
+    private final Set<String> labelsThatForcesBuildIfAdded;
     private final Predicate<MergeRequestObjectAttributes> triggerConfig;
-    private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved);
+    private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved, Action.merge);
     private final EnumSet<Action> skipAllowedStateForActions = EnumSet.of(Action.approved);
     private final boolean cancelPendingBuildsOnUpdate;
 
-    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(allowedStates, EnumSet.noneOf(Action.class), onlyIfNewCommitsPushed, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this(allowedStates, EnumSet.noneOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
     }
 
     // this retains internal API, however, the plugin code no longer instantiates the handler this way.
     // any code using it should test it on higher level
     @Deprecated
-    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), onlyIfNewCommitsPushed, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), false, skipWorkInProgressMergeRequest, emptySet(), cancelPendingBuildsOnUpdate);
     }
 
-    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, Set<String> labelsThatForcesBuildIfAdded, boolean cancelPendingBuildsOnUpdate) {
         this.triggerConfig = triggerConfig;
         this.onlyIfNewCommitsPushed = onlyIfNewCommitsPushed;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+        this.labelsThatForcesBuildIfAdded = labelsThatForcesBuildIfAdded;
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
     }
 
     @Override
     public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-        MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
-        if (isAllowedByConfig(objectAttributes)
-            && isLastCommitNotYetBuild(job, hook)
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
-            && isNewCommitPushed(hook)) {
-
+        if (isExecutable(job, hook)) {
             List<String> labelsNames = new ArrayList<>();
             if (hook.getLabels() != null) {
                 for (MergeRequestLabel label : hook.getLabels()) {
@@ -99,6 +106,15 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         }
 
         return false;
+    }
+
+    private boolean isExecutable(Job<?, ?> job, MergeRequestHook hook) {
+        MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
+        boolean forcedByAddedLabel = isForcedByAddedLabel(hook);
+        return isAllowedByConfig(objectAttributes)
+            && (forcedByAddedLabel || isLastCommitNotYetBuild(job, hook))
+            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
+            && isNewCommitPushed(hook);
     }
 
     @Override
@@ -240,6 +256,21 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
 		return triggerConfig.apply(objectAttributes);
+    }
+
+    private boolean isForcedByAddedLabel(MergeRequestHook hook) {
+        if (labelsThatForcesBuildIfAdded.isEmpty()) {
+            return false;
+        }
+
+        MergeRequestChangedLabels changedLabels = Optional.of(hook).map(MergeRequestHook::getChanges).map(MergeRequestChanges::getLabels).orElse(new MergeRequestChangedLabels());
+        List<MergeRequestLabel> current = changedLabels.getCurrent() != null ? changedLabels.getCurrent() : emptyList();
+        List<MergeRequestLabel> previous = changedLabels.getPrevious() != null ? changedLabels.getPrevious() : emptyList();
+
+        return current.stream()
+                .filter(currentLabel -> !previous.stream().anyMatch(previousLabel -> Objects.equals(currentLabel.getId(), previousLabel.getId())))
+                .map(label -> label.getTitle())
+                .anyMatch(label -> labelsThatForcesBuildIfAdded.contains(label));
     }
 
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {

@@ -15,7 +15,7 @@
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.5.13-SNAPSHOT</version>
+  <version>1.5.16-SNAPSHOT</version>
   <name>GitLab Plugin</name>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
   <packaging>hpi</packaging>
@@ -295,7 +295,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.9.3</version>
+      <version>2.9.10.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
