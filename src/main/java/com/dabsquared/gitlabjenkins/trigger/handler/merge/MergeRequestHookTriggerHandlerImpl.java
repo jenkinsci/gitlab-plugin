@@ -88,17 +88,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     protected boolean isNewCommitPushed(MergeRequestHook hook) {
         if (this.onlyIfNewCommitsPushed) {
             if (hook.getObjectAttributes().getAction().equals(Action.update)) {
-                if (hook.getObjectAttributes().getOldrev() != null) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return hook.getObjectAttributes().getOldrev() != null;
             }
-        } else {
-            return true;
         }
-
-        return false;
+        return true;
     }
 
     private boolean isExecutable(Job<?, ?> job, MergeRequestHook hook) {
