@@ -284,6 +284,39 @@ public class MergeRequestHookTriggerHandlerImplTest {
     }
 
     @Test
+    public void mergeRequest_build_when_new_commits_were_pushed_state_opened_action_open() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
+            .setTriggerOnMergeRequest(true)
+            .setTriggerOnlyIfNewCommitsPushed(true)
+            .build();
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.opened, Action.open);
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void mergeRequest_build_when_new_commits_were_pushed_state_reopened_action_reopen() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
+            .setTriggerOnMergeRequest(true)
+            .setTriggerOnlyIfNewCommitsPushed(true)
+            .build();
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.reopened, Action.reopen);
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    @Test
+    public void mergeRequest_build_when_new_commits_were_pushed_do_not_build_without_commits() throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
+            .setTriggerOnMergeRequest(true)
+            .setTriggerOnlyIfNewCommitsPushed(true)
+            .build();
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, State.updated, Action.update);
+
+        assertThat(buildTriggered.isSignaled(), is(false));
+    }
+
+    @Test
     public void mergeRequest_build_only_when_approved_and_not_when_updated() throws IOException, InterruptedException, GitAPIException, ExecutionException {
         mergeRequest_build_only_when_approved(Action.update);
     }
