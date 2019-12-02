@@ -102,12 +102,26 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     private boolean isExecutable(Job<?, ?> job, MergeRequestHook hook) {
+        // conditions to actually trigger a job with GitLab Trigger set
+        // 1. config options are OK to react on this MR and MR is not work in progress
+        // 2. if MR's labels include label(s) from force label list - build right away
+        // 3. if last commit is not yet build...
+        // 4. but only if triggerOnlyIfNewCommitsPushed is not set, in other case
+        //    only if new commits were pushed to the MR or MR stopped to be work in progress
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         boolean forcedByAddedLabel = isForcedByAddedLabel(hook);
-        return isAllowedByConfig(objectAttributes)
-            && (forcedByAddedLabel || isLastCommitNotYetBuild(job, hook))
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes)
-            && (isNewCommitPushed(hook) || isBecameNoWip(hook));
+
+        if (isAllowedByConfig(objectAttributes) && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
+            if (forcedByAddedLabel) {
+                return true;
+            } else {
+                if (isLastCommitNotYetBuild(job, hook)) {
+                    return isNewCommitPushed(hook) || isBecameNoWip(hook);
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
