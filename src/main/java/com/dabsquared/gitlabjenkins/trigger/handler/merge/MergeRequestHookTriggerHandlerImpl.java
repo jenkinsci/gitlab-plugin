@@ -51,14 +51,14 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private final boolean cancelPendingBuildsOnUpdate;
 
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(allowedStates, EnumSet.noneOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+        this(allowedStates, EnumSet.noneOf(Action.class), false, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
     }
 
     // this retains internal API, however, the plugin code no longer instantiates the handler this way.
     // any code using it should test it on higher level
     @Deprecated
-    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), false, skipWorkInProgressMergeRequest, emptySet(), cancelPendingBuildsOnUpdate);
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), onlyIfNewCommitsPushed, skipWorkInProgressMergeRequest, emptySet(), cancelPendingBuildsOnUpdate);
     }
 
     MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, Set<String> labelsThatForcesBuildIfAdded, boolean cancelPendingBuildsOnUpdate) {
