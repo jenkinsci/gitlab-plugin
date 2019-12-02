@@ -12,7 +12,8 @@
       <f:entry title="Opened Merge Request Events" field="triggerOnMergeRequest">
         <f:checkbox default="true"/>
       </f:entry>
-      <f:entry title="Build only if new commits were pushed to Merge Request" field="triggerOnlyIfNewCommitsPushed">
+      <f:entry title="Build only if new commits were pushed to Merge Request" field="triggerOnlyIfNewCommitsPushed"
+      help="/plugin/gitlab-plugin/help/help-triggerOnlyIfNewCommitsPushed.html">
         <f:checkbox default="false"/>
       </f:entry>
       <f:entry title="Accepted Merge Request Events" field="triggerOnAcceptedMergeRequest">
