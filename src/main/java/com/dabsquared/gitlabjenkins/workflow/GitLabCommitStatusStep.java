@@ -126,10 +126,10 @@ public class GitLabCommitStatusStep extends Step {
         }
 
         private TaskListener getTaskListener(StepContext context) {
-            if (!context.isReady()) {
-                return null;
-            }
             try {
+                if (!context.isReady()) {
+                    return null;
+                }
                 return context.get(TaskListener.class);
             } catch (Exception x) {
                 return null;
