@@ -111,11 +111,17 @@ gitlabTriggerPhrase
 ## GitLab-to-Jenkins authentication
 By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs. 
 
+### Authentication Security
+
+APITOKENS and other secrets MUST not be send over unsecure connections. So, all connections SHOULD use HTTPS.
+Note: Certificates are free and easy to manage with [LetsEncrypt](https://letsencrypt.org/).
+
+
 ### Configuring global authentication
 1. Create a user in Jenkins which has, at a minimum, Job/Build permissions
 2. Log in as that user (this is required even if you are a Jenkins admin user), then click on the user's name in the top right corner of the page
 3. Click 'Configure,' then 'Show API Token...', and note/copy the User ID and API Token
-4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL and do not enter anything for 'Secret Token': `http://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
+4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL and do not enter anything for 'Secret Token': `https://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
 5. After you add the webhook, click the 'Test' button, and it should succeed
 
 ### Configuring per-project authentication
@@ -124,7 +130,7 @@ If you want to create separate authentication credentials for each Jenkins job:
 1. In the configuration of your Jenkins job, in the GitLab configuration section, click 'Advanced'
 2. Click the 'Generate' button under the 'Secret Token' field
 3. Copy the resulting token, and save the job configuration
-4. In GitLab, create a webhook for your project, enter the trigger URL (e.g. `http://JENKINS_URL/project/YOUR_JOB`) and paste the token in the Secret Token field
+4. In GitLab, create a webhook for your project, enter the trigger URL (e.g. `https://JENKINS_URL/project/YOUR_JOB`) and paste the token in the Secret Token field
 5. After you add the webhook, click the 'Test' button, and it should succeed
 
 ### Disabling authentication
@@ -144,7 +150,7 @@ This plugin can be configured to send build status messages to GitLab, which sho
 4. Click on 'Access Tokens'
 5. Create a token named e.g. 'jenkins' with 'api' scope; expiration is optional
 6. Copy the token immediately, it cannot be accessed after you leave this page
-7. On the Global Configuration page in Jenkins, in the GitLab configuration section, supply the GitLab host URL, e.g. `http://your.gitlab.server` 
+7. On the Global Configuration page in Jenkins, in the GitLab configuration section, supply the GitLab host URL, e.g. `https://your.gitlab.server` 
 8. Click the 'Add' button to add a credential, choose 'GitLab API token' as the kind of credential, and paste your GitLab user's API key into the 'API token' field
 9. Click the 'Test Connection' button; it should succeed
 
@@ -223,7 +229,7 @@ checkout changelog: true, poll: true, scm: [
 
 Example `Jenkinsfile` for multibranch pipeline jobs:
 ```
-// Reference the GitLab connection name from your Jenkins Global configuration (http://JENKINS_URL/configure, GitLab section)
+// Reference the GitLab connection name from your Jenkins Global configuration (https://JENKINS_URL/configure, GitLab section)
 properties([gitLabConnection('your-gitlab-connection-name')])
 
 node {
@@ -235,7 +241,7 @@ node {
 
 ## Job trigger configuration
 ### Webhook URL
-When you configure the plugin to trigger your Jenkins job, by following the instructions below depending on job type, it will listen on a dedicated URL for JSON POSTs from GitLab's webhooks. That URL always takes the form ``http://JENKINS_URL/project/PROJECT_NAME``, or ``http://JENKINS_URL/project/FOLDER/PROJECT_NAME`` if the project is inside a folder in Jenkins. **You should not be using** ``http://JENKINS_URL/job/PROJECT_NAME/build`` or ``http://JENKINS_URL/job/gitlab-plugin/buildWithParameters``, as this will bypass the plugin completely.
+When you configure the plugin to trigger your Jenkins job, by following the instructions below depending on job type, it will listen on a dedicated URL for JSON POSTs from GitLab's webhooks. That URL always takes the form ``https://JENKINS_URL/project/PROJECT_NAME``, or ``https://JENKINS_URL/project/FOLDER/PROJECT_NAME`` if the project is inside a folder in Jenkins. **You should not be using** ``https://JENKINS_URL/job/PROJECT_NAME/build`` or ``https://JENKINS_URL/job/gitlab-plugin/buildWithParameters``, as this will bypass the plugin completely.
 
 ### Freestyle and Pipeline jobs
 1. In the *Build Triggers* section:
@@ -247,7 +253,7 @@ When you configure the plugin to trigger your Jenkins job, by following the inst
     * You can use *Build on successful pipeline events* to trigger on a successful pipeline run in Gitlab. Note that this build trigger will only trigger a build if the commit is not already built and does not set the Gitlab status. Otherwise you might end up in a loop
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins
-4. Create a webhook in the relevant GitLab projects (consult the GitLab documentation for instructions on this), and use the URL you copied from the Jenkins job configuration UI. It should look something like `http://JENKINS_URL/project/yourbuildname`
+4. Create a webhook in the relevant GitLab projects (consult the GitLab documentation for instructions on this), and use the URL you copied from the Jenkins job configuration UI. It should look something like `https://JENKINS_URL/project/yourbuildname`
 
 ### Pipeline Multibranch jobs
 Unlike other job types, there is no 'Trigger' setting required for a Multibranch job configuration; just create a webhook in GitLab for push requests which points to [the project's webhook URL.](#webhook-url) When GitLab POSTs to this URL, it will trigger branch indexing for the Jenkins project, and Jenkins will handle starting any builds necessary.
@@ -258,7 +264,7 @@ If you want to configure some of the trigger options, such as the secret token o
 // Define your secret project token here
 def project_token = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEF'
 
-// Reference the GitLab connection name from your Jenkins Global configuration (http://JENKINS_URL/configure, GitLab section)
+// Reference the GitLab connection name from your Jenkins Global configuration (https://JENKINS_URL/configure, GitLab section)
 properties([
     gitLabConnection('your-gitlab-connection-name'),
     pipelineTriggers([
