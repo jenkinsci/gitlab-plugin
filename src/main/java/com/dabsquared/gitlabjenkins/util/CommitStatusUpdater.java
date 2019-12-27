@@ -183,6 +183,10 @@ public class CommitStatusUpdater {
 
             String scmRevisionHash = null;
             if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl) {
+                if (scmRevision == null) {
+                    LOGGER.log(Level.INFO, "Build does not contain SCM revision object.");
+                    return result;
+                }
                 scmRevisionHash = ((AbstractGitSCMSource.SCMRevisionImpl) scmRevision).getHash();
             }
 
