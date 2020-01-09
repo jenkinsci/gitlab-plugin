@@ -27,6 +27,7 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -41,12 +42,6 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 	private boolean useAlternativeCredential = false;
 
     @DataBoundConstructor
-    public GitLabConnectionProperty(String gitLabConnection, boolean useAlternativeCredential, String jobCredentialId) {
-        this.gitLabConnection = gitLabConnection;
-        this.useAlternativeCredential = useAlternativeCredential;
-        this.jobCredentialId = jobCredentialId;
-    }
-    
     public GitLabConnectionProperty(String gitLabConnection) {
         this.gitLabConnection = gitLabConnection;
     }
@@ -61,6 +56,16 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
     public boolean isUseAlternativeCredential() {
         return useAlternativeCredential;
+    }
+
+    @DataBoundSetter
+    public void setJobCredentialId(String jobCredentialId) {
+        this.jobCredentialId = jobCredentialId;
+    }
+
+    @DataBoundSetter
+    public void setUseAlternativeCredential(boolean useAlternativeCredential) {
+        this.useAlternativeCredential = useAlternativeCredential;
     }
 
     public GitLabClient getClient() {
