@@ -70,9 +70,10 @@ public class PendingBuildsHandler {
         }
         String targetUrl = DisplayURLProvider.get().getJobURL(job);
         GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
+        String ref = StringUtils.removeStart(causeData.getSourceBranch(), "refs/tags/");
         try {
             client.changeBuildStatus(causeData.getSourceProjectId(), causeData.getLastCommit(), BuildState.canceled,
-                causeData.getSourceBranch(), buildName, targetUrl, BuildState.canceled.name());
+                ref, buildName, targetUrl, BuildState.canceled.name());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
         }
