@@ -5,35 +5,36 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.util.List;
+
 /**
  * @author Anton Johansson
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-public class MergeRequestChanges {
+public class MergeRequestChangedTitle {
 
     /*
-        "labels": {...}
+        "previous": [{...}],
+        "current": [{...}]
     */
-    private MergeRequestChangedLabels labels;
+    private String previous;
+    private String current;
 
-    public MergeRequestChangedLabels getLabels() {
-        return labels;
+    public String getPrevious() {
+        return previous;
     }
 
-    public void setLabels(MergeRequestChangedLabels labels) {
-        this.labels = labels;
+    public void setPrevious(String previous) {
+        this.previous = previous;
     }
 
+    public String getCurrent() {
+        return current;
+    }
 
-
-    /*
-        "title": {...}
-    */
-    private MergeRequestChangedTitle title;
-
-    public MergeRequestChangedTitle getTitle() { return title; }
-
-    public void setTitle(MergeRequestChangedTitle title) { this.title = title; }
+    public void setCurrent(String current) {
+        this.current = current;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -43,23 +44,26 @@ public class MergeRequestChanges {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        MergeRequestChanges that = (MergeRequestChanges) o;
+        MergeRequestChangedTitle that = (MergeRequestChangedTitle) o;
         return new EqualsBuilder()
-            .append(labels, that.labels)
+            .append(previous, that.previous)
+            .append(current, that.current)
             .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(labels)
+            .append(previous)
+            .append(current)
             .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("labels", labels)
+            .append("previous", previous)
+            .append("current", current)
             .toString();
     }
 }

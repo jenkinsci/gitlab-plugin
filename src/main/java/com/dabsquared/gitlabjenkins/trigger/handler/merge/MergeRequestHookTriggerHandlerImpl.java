@@ -2,14 +2,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestChangedLabels;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestChanges;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -49,6 +42,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     private static final Logger LOGGER = Logger.getLogger(MergeRequestHookTriggerHandlerImpl.class.getName());
 
+    private final boolean onlyIfNewCommitsPushed;
     private final boolean skipWorkInProgressMergeRequest;
     private final Set<String> labelsThatForcesBuildIfAdded;
     private final Predicate<MergeRequestObjectAttributes> triggerConfig;
@@ -57,18 +51,19 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private final boolean cancelPendingBuildsOnUpdate;
 
     MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(allowedStates, EnumSet.noneOf(Action.class), skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
+        this(allowedStates, EnumSet.noneOf(Action.class), false, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate);
     }
 
     // this retains internal API, however, the plugin code no longer instantiates the handler this way.
     // any code using it should test it on higher level
     @Deprecated
-    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
-        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), skipWorkInProgressMergeRequest, emptySet(), cancelPendingBuildsOnUpdate);
+    MergeRequestHookTriggerHandlerImpl(Collection<State> allowedStates, Collection<Action> allowedActions, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, boolean cancelPendingBuildsOnUpdate) {
+        this(new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions), onlyIfNewCommitsPushed, skipWorkInProgressMergeRequest, emptySet(), cancelPendingBuildsOnUpdate);
     }
 
-    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean skipWorkInProgressMergeRequest, Set<String> labelsThatForcesBuildIfAdded, boolean cancelPendingBuildsOnUpdate) {
+    MergeRequestHookTriggerHandlerImpl(Predicate<MergeRequestObjectAttributes> triggerConfig, boolean onlyIfNewCommitsPushed, boolean skipWorkInProgressMergeRequest, Set<String> labelsThatForcesBuildIfAdded, boolean cancelPendingBuildsOnUpdate) {
         this.triggerConfig = triggerConfig;
+        this.onlyIfNewCommitsPushed = onlyIfNewCommitsPushed;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
         this.labelsThatForcesBuildIfAdded = labelsThatForcesBuildIfAdded;
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
@@ -90,12 +85,36 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         }
     }
 
+    protected boolean isNewCommitPushed(MergeRequestHook hook) {
+        if (this.onlyIfNewCommitsPushed) {
+            if (hook.getObjectAttributes().getAction().equals(Action.update)) {
+                return hook.getObjectAttributes().getOldrev() != null;
+            }
+        }
+        return true;
+    }
+
     private boolean isExecutable(Job<?, ?> job, MergeRequestHook hook) {
+        // conditions to actually trigger a job with GitLab Trigger set
+        // 1. config options are OK to react on this MR and MR is not work in progress
+        // 2. if MR's labels include label(s) from force label list - build right away
+        // 3. if last commit is not yet build...
+        // 4. but only if triggerOnlyIfNewCommitsPushed is not set, in other case
+        //    only if new commits were pushed to the MR or MR stopped to be work in progress
         MergeRequestObjectAttributes objectAttributes = hook.getObjectAttributes();
         boolean forcedByAddedLabel = isForcedByAddedLabel(hook);
-        return isAllowedByConfig(objectAttributes)
-            && (forcedByAddedLabel || isLastCommitNotYetBuild(job, hook))
-            && isNotSkipWorkInProgressMergeRequest(objectAttributes);
+
+        if (isAllowedByConfig(objectAttributes) && isNotSkipWorkInProgressMergeRequest(objectAttributes)) {
+            if (forcedByAddedLabel) {
+                return true;
+            } else {
+                if (isLastCommitNotYetBuild(job, hook)) {
+                    return isNewCommitPushed(hook) || isBecameNoWip(hook);
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -237,6 +256,13 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
 		return triggerConfig.apply(objectAttributes);
+    }
+    private boolean isBecameNoWip(MergeRequestHook hook) {
+        MergeRequestChangedTitle changedTitle = Optional.of(hook).map(MergeRequestHook::getChanges).map(MergeRequestChanges::getTitle).orElse(new MergeRequestChangedTitle());
+        String current = changedTitle.getCurrent() != null ? changedTitle.getCurrent() : "";
+        String previous = changedTitle.getPrevious() != null ? changedTitle.getPrevious() : "";
+
+        return previous.contains("WIP") && !current.contains("WIP");
     }
 
     private boolean isForcedByAddedLabel(MergeRequestHook hook) {
