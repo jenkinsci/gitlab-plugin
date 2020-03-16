@@ -17,7 +17,7 @@
   <artifactId>gitlab-plugin</artifactId>
   <version>1.5.17-SNAPSHOT</version>
   <name>GitLab Plugin</name>
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin</url>
+  <url>https://github.com/jenkinsci/gitlab-plugin</url>
   <packaging>hpi</packaging>
 
   <licenses>
@@ -79,7 +79,7 @@
   </pluginRepositories>
 
   <build>
-    <defaultGoal>clean install</defaultGoal>    
+    <defaultGoal>clean install</defaultGoal>
     <directory>${project.basedir}/target</directory>
     <outputDirectory>${project.build.directory}/classes</outputDirectory>
     <finalName>${project.artifactId}-${project.version}</finalName>
