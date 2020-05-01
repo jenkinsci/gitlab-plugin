@@ -63,9 +63,9 @@ public class UpdateGitLabCommitStatusStep extends Step {
     public static class UpdateGitLabCommitStatusStepExecution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
-        private final transient Run<?, ?> run;
+        private final Run<?, ?> run;
 
-        private final transient UpdateGitLabCommitStatusStep step;
+        private final UpdateGitLabCommitStatusStep step;
 
         UpdateGitLabCommitStatusStepExecution(StepContext context, UpdateGitLabCommitStatusStep step) throws Exception {
             super(context);

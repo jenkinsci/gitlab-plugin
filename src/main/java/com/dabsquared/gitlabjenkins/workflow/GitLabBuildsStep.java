@@ -63,9 +63,9 @@ public class GitLabBuildsStep extends Step {
     public static class GitLabBuildStepExecution extends StepExecution {
         private static final long serialVersionUID = 1;
 
-        private final transient Run<?, ?> run;
+        private final Run<?, ?> run;
 
-        private final transient GitLabBuildsStep step;
+        private final GitLabBuildsStep step;
 
         private BodyExecution body;
 

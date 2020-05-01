@@ -72,9 +72,9 @@ public class GitLabCommitStatusStep extends Step {
     public static class GitLabCommitStatusStepExecution extends StepExecution {
         private static final long serialVersionUID = 1;
 
-        private final transient Run<?, ?> run;
+        private final Run<?, ?> run;
 
-        private final transient GitLabCommitStatusStep step;
+        private final GitLabCommitStatusStep step;
 
         private BodyExecution body;
 
