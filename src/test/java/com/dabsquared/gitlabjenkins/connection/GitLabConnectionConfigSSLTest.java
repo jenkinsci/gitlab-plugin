@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
@@ -156,17 +157,17 @@ public class GitLabConnectionConfigSSLTest {
 
     @Test
     public void doCheckConnection_ignoreCertificateErrors() {
-        GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
+        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", true, 10, 10);
+        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", true, 10, 10);
         assertThat(formValidation.getMessage(), is(Messages.connection_success()));
     }
 
     @Test
     public void doCheckConnection_certificateError() throws IOException {
-        GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
+        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation = connectionConfig.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
+        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
         assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
     }
 }

@@ -12,6 +12,7 @@
     <jenkins.version>2.190.1</jenkins.version>
     <jenkins-test-harness.version>2.59</jenkins-test-harness.version>
     <findbugs.failOnError>false</findbugs.failOnError>
+    <configuration-as-code-plugin.version>1.36</configuration-as-code-plugin.version>
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
@@ -317,6 +318,18 @@
     </dependency>
 
     <!-- test dependencies -->
+    <dependency>
+      <groupId>io.jenkins</groupId>
+      <artifactId>configuration-as-code</artifactId>
+      <version>${configuration-as-code-plugin.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.configuration-as-code</groupId>
+      <artifactId>test-harness</artifactId>
+      <version>${configuration-as-code-plugin.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
