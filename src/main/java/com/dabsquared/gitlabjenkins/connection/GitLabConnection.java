@@ -2,14 +2,25 @@ package com.dabsquared.gitlabjenkins.connection;
 
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
 import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
 
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import org.eclipse.jgit.util.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -32,12 +43,14 @@ import hudson.model.ItemGroup;
 import hudson.security.ACL;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 
 /**
  * @author Robin Müller
  */
-public class GitLabConnection {
+public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> {
     private final String name;
     private final String url;
     private transient String apiToken;
@@ -123,7 +136,7 @@ public class GitLabConnection {
 
     @Restricted(NoExternalUse.class)
     private String getApiToken(String apiTokenId, Item item) {
-        ItemGroup context = null != item ? item.getParent() : Jenkins.getInstance();
+        ItemGroup<?> context = null != item ? item.getParent() : Jenkins.get();
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
             lookupCredentials(
                     StandardCredentials.class,
@@ -155,7 +168,8 @@ public class GitLabConnection {
 
     @Initializer(after = InitMilestone.PLUGINS_STARTED)
     public static void migrate() throws IOException {
-        GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+        GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class);
+        if (descriptor == null) return;
         for (GitLabConnection connection : descriptor.getConnections()) {
             if (connection.apiTokenId == null && connection.apiToken != null) {
                 for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
@@ -169,5 +183,90 @@ public class GitLabConnection {
             }
         }
         descriptor.save();
+    }
+
+    @Extension
+    public static class DescriptorImpl extends Descriptor<GitLabConnection> {
+        public FormValidation doCheckName(@QueryParameter String id, @QueryParameter String value) {
+            if (StringUtils.isEmptyOrNull(value)) {
+                return FormValidation.error(Messages.name_required());
+            } else {
+                return FormValidation.ok();
+            }
+        }
+
+        public FormValidation doCheckUrl(@QueryParameter String value) {
+            if (StringUtils.isEmptyOrNull(value)) {
+                return FormValidation.error(Messages.url_required());
+            } else {
+                return FormValidation.ok();
+            }
+        }
+
+        public FormValidation doCheckApiTokenId(@QueryParameter String value) {
+            if (StringUtils.isEmptyOrNull(value)) {
+                return FormValidation.error(Messages.apiToken_required());
+            } else {
+                return FormValidation.ok();
+            }
+        }
+
+        public FormValidation doCheckConnectionTimeout(@QueryParameter Integer value) {
+            if (value == null) {
+                return FormValidation.error(Messages.connectionTimeout_required());
+            } else {
+                return FormValidation.ok();
+            }
+        }
+
+        public FormValidation doCheckReadTimeout(@QueryParameter Integer value) {
+            if (value == null) {
+                return FormValidation.error(Messages.readTimeout_required());
+            } else {
+                return FormValidation.ok();
+            }
+        }
+
+        @RequirePOST
+        @Restricted(DoNotUse.class) // WebOnly
+        public FormValidation doTestConnection(@QueryParameter String url,
+            @QueryParameter String apiTokenId,
+            @QueryParameter String clientBuilderId,
+            @QueryParameter boolean ignoreCertificateErrors,
+            @QueryParameter int connectionTimeout,
+            @QueryParameter int readTimeout) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            try {
+                new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
+                return FormValidation.ok(Messages.connection_success());
+            } catch (WebApplicationException e) {
+                return FormValidation.error(Messages.connection_error(e.getMessage()));
+            } catch (ProcessingException e) {
+                return FormValidation.error(Messages.connection_error(e.getCause().getMessage()));
+            }
+        }
+
+        public ListBoxModel doFillApiTokenIdItems(@QueryParameter String url, @QueryParameter String apiTokenId) {
+            if (Jenkins.get().hasPermission(Item.CONFIGURE)) {
+                return new StandardListBoxModel()
+                    .includeEmptyValue()
+                    .includeMatchingAs(ACL.SYSTEM,
+                        Jenkins.get(),
+                        StandardCredentials.class,
+                        URIRequirementBuilder.fromUri(url).build(),
+                        new GitLabCredentialMatcher())
+                    .includeCurrentValue(apiTokenId);
+            }
+            return new StandardListBoxModel();
+        }
+
+        public ListBoxModel doFillClientBuilderIdItems() {
+            ListBoxModel model = new ListBoxModel();
+            for (GitLabClientBuilder builder : getAllGitLabClientBuilders()) {
+                model.add(builder.id());
+            }
+
+            return model;
+        }
     }
 }
