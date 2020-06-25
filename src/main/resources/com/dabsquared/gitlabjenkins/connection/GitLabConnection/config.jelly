@@ -1,0 +1,29 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials" xmlns:st="jelly:stapler">
+    <f:entry title="${%Connection name}" field="name" description="${%A name for the connection}">
+      <f:textbox/>
+    </f:entry>
+    <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%e.g. http://gitlab.mydomain.com})">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="${%Credentials}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
+      <c:select/>
+    </f:entry>
+    <f:advanced>
+      <f:entry title="${%API-Level}" field="clientBuilderId" description="${%API Level for accessing Gitlab}">
+        <f:select default="autodetect"/>
+      </f:entry>
+      <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
+        <f:checkbox />
+      </f:entry>
+      <f:entry title="${%Connection timeout} (${%in seconds})" field="connectionTimeout" description="${%The time to wait for establishing the connection}">
+        <f:textbox default="10"/>
+      </f:entry>
+      <f:entry title="${%Read timeout} (${%in seconds})" field="readTimeout" description="${%The time to wait while receiving the response}">
+        <f:textbox default="10"/>
+      </f:entry>
+      <st:include page="configure-advanced.jelly" optional="true" />
+    </f:advanced>
+    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
+                      with="apiTokenId,clientBuilderId,url,ignoreCertificateErrors"/>
+</j:jelly>

@@ -70,7 +70,6 @@ public class PipelineHookTriggerHandlerImplTest {
 
         pipelineHookTriggerHandler = new PipelineHookTriggerHandlerImpl(allowedStates);
         pipelineHook = pipelineHook()
-            .withProjectId(1)
             .withUser(user)
             .withRepository(repository()
                 .withName("test")
@@ -93,6 +92,7 @@ public class PipelineHookTriggerHandlerImplTest {
                 .build())
 
             .build();
+        git.close();
     }
 
     @Test

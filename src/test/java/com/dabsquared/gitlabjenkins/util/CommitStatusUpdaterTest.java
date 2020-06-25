@@ -32,6 +32,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 
 import hudson.EnvVars;
 import hudson.model.Cause;
+import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.Cause.UpstreamCause;
@@ -81,7 +82,7 @@ public class CommitStatusUpdaterTest {
 	    when(jenkins.getRootUrl()).thenReturn(JENKINS_URL);
 	    when(jenkins.getDescriptor(GitLabConnectionConfig.class)).thenReturn(gitLabConnectionConfig);
 	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
-	    when(gitLabConnectionConfig.getClient(any(String.class))).thenReturn(client);
+	    when(gitLabConnectionConfig.getClient(any(String.class), any(Item.class), any(String.class))).thenReturn(client);
         when(connection.getClient()).thenReturn(client);
 	    when(build.getAction(BuildData.class)).thenReturn(action);
 	    when(action.getLastBuiltRevision()).thenReturn(lastBuiltRevision);

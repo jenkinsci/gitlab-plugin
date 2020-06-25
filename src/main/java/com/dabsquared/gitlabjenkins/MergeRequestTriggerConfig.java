@@ -5,6 +5,8 @@ import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 public interface MergeRequestTriggerConfig {
     boolean getTriggerOnMergeRequest();
 
+    boolean isTriggerOnlyIfNewCommitsPushed();
+
     boolean isTriggerOnAcceptedMergeRequest();
 
     boolean isTriggerOnApprovedMergeRequest();
@@ -14,6 +16,8 @@ public interface MergeRequestTriggerConfig {
     TriggerOpenMergeRequest getTriggerOpenMergeRequestOnPush();
 
     boolean isSkipWorkInProgressMergeRequest();
+
+    String getLabelsThatForcesBuildIfAdded();
 
     boolean getCancelPendingBuildsOnUpdate();
 }

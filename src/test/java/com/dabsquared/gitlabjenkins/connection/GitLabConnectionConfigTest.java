@@ -7,6 +7,7 @@ import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import hudson.ProxyConfiguration;
@@ -97,8 +98,8 @@ public class GitLabConnectionConfigTest {
     @Test
     public void doCheckConnection_proxy() {
         jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
-        GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation result = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
+        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
+        FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
         assertThat(result.getMessage(), containsString("Connection refused"));
     }
 
@@ -113,8 +114,8 @@ public class GitLabConnectionConfigTest {
         HttpRequest request = request().withPath("/gitlab/api/" + clientBuilderId + "/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
         mockServerClient.when(request).respond(response().withStatusCode(status.getStatusCode()));
 
-        GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
-        FormValidation formValidation = connectionConfig.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 10);
+        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
+        FormValidation formValidation = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 10);
         mockServerClient.verify(request);
         return formValidation.getMessage();
     }
@@ -209,8 +210,8 @@ public class GitLabConnectionConfigTest {
         connectionList1.add(connection);
         config.setConnections(connectionList1);
 
-        GitLabClient client = config.getClient(connection.getName());
+        GitLabClient client = config.getClient(connection.getName(), null, null);
         assertNotNull(client);
-        assertSame(client, config.getClient(connection.getName()));
+        assertSame(client, config.getClient(connection.getName(), null, null));
     }
 }

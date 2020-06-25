@@ -106,7 +106,14 @@ public class GitLabCommitStatusStep extends Step {
 
                     @Override
                     public void onFailure(StepContext context, Throwable t) {
-                        BuildState state = t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
+                        BuildState state = BuildState.failed;
+                        if (t instanceof FlowInterruptedException) {
+                            FlowInterruptedException ex = (FlowInterruptedException) t;
+                            if (ex.isActualInterruption()) {
+                                state = BuildState.canceled;
+                            }
+                        }
+
                         CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name,  step.builds, step.connection);
                         context.onFailure(t);
                     }
@@ -126,10 +133,10 @@ public class GitLabCommitStatusStep extends Step {
         }
 
         private TaskListener getTaskListener(StepContext context) {
-            if (!context.isReady()) {
-                return null;
-            }
             try {
+                if (!context.isReady()) {
+                    return null;
+                }
                 return context.get(TaskListener.class);
             } catch (Exception x) {
                 return null;

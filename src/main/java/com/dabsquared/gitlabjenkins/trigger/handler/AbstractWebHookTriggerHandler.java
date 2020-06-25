@@ -70,9 +70,10 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 if (client == null) {
                     LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                 } else {
+                    String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
                     String targetUrl = DisplayURLProvider.get().getJobURL(job);
                     client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
-                        BuildState.pending, buildStatusUpdate.getRef(), buildName, targetUrl, BuildState.pending.name());
+                        BuildState.pending, ref, buildName, targetUrl, BuildState.pending.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
