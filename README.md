@@ -250,7 +250,7 @@ When you configure the plugin to trigger your Jenkins job, by following the inst
     * Use the check boxes to trigger builds on *Push Events* and/or *Created Merge Request Events* and/or *Accepted Merge Request Events* and/or *Closed Merge Request Events*
     * Optionally use *Rebuild open Merge Requests* to enable re-building open merge requests after a push to the source branch
     * If you selected *Rebuild open Merge Requests* other than *None*, check *Comments*, and specify the *Comment for triggering a build*.  A new build will be triggered when this phrase appears in a commit comment.  In addition to a literal phrase, you can also specify a Java regular expression
-    * You can use *Build on successful pipeline events* to trigger on a successful pipeline run in Gitlab. Note that this build trigger will only trigger a build if the commit is not already built and does not set the GitLab status. Otherwise you might end up in a loop
+    * You can use *Build on successful pipeline events* to trigger on a successful pipeline run in GitLab. Note that this build trigger will only trigger a build if the commit is not already built and does not set the GitLab status. Otherwise you might end up in a loop
 2. Configure any other pre build, build or post build actions as necessary
 3. Click *Save* to preserve your changes in Jenkins
 4. Create a webhook in the relevant GitLab projects (consult the GitLab documentation for instructions on this), and use the URL you copied from the Jenkins job configuration UI. It should look something like `https://JENKINS_URL/project/yourbuildname`
