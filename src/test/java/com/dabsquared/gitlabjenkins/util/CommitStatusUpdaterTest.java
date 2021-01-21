@@ -1,18 +1,23 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
+import hudson.EnvVars;
 import hudson.Functions;
+import hudson.model.Cause;
+import hudson.model.Cause.UpstreamCause;
+import hudson.model.Item;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.git.Revision;
+import hudson.plugins.git.util.Build;
+import hudson.plugins.git.util.BuildData;
+import jenkins.model.Jenkins;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.Before;
@@ -24,22 +29,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 
-import hudson.EnvVars;
-import hudson.model.Cause;
-import hudson.model.Item;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.model.Cause.UpstreamCause;
-import hudson.plugins.git.Revision;
-import hudson.plugins.git.util.Build;
-import hudson.plugins.git.util.BuildData;
-import jenkins.model.Jenkins;
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -91,6 +88,7 @@ public class CommitStatusUpdaterTest {
 	    when(revision.getSha1String()).thenReturn(REVISION);
 	    when(build.getUrl()).thenReturn(BUILD_URL);
 	    when(build.getEnvironment(any(TaskListener.class))).thenReturn(environment);
+	    when(build.getCause(GitLabWebHookCause.class)).thenReturn(gitlabCause);
 	    when(build.getCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel1)));
 	    when(upCauseLevel1.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel2)));
 	    when(upCauseLevel2.getUpstreamCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(gitlabCause)));
@@ -135,14 +133,14 @@ public class CommitStatusUpdaterTest {
 	public void buildStateUpdateTest() {
 		CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
 
-		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+		verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, "feature", STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
 	}
 
 	@Test
 	public void buildStateUpdateTestSpecificConnection() {
 	    CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE,null, connection);
 
-	    verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+	    verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, "feature", STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
 	}
 
     @Test
@@ -151,7 +149,7 @@ public class CommitStatusUpdaterTest {
         builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
         CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, null);
 
-        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, "feature", STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
     }
 
     @Test
@@ -160,7 +158,7 @@ public class CommitStatusUpdaterTest {
         builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
         CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, connection);
 
-        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, null, STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
+        verify(client).changeBuildStatus(Integer.toString(PROJECT_ID), REVISION, BuildState.success, "feature", STAGE, DisplayURLProvider.get().getRunURL(build), BuildState.success.name());
     }
 
     @Test
