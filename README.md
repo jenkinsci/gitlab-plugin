@@ -145,7 +145,7 @@ If you want to disable this authentication (not recommended):
 
 This plugin can be configured to send build status messages to GitLab, which show up in the GitLab Merge Request UI. To enable this functionality: 
 1. Create a new user in GitLab
-2. Give this user 'Developer' permissions on each repo you want Jenkins to send build status to
+2. Give this user 'Maintainer' permissions on each repo you want Jenkins to send build status to
 3. Log in or 'Impersonate' that user in GitLab, click the user's icon/avatar and choose Settings
 4. Click on 'Access Tokens'
 5. Create a token named e.g. 'jenkins' with 'api' scope; expiration is optional

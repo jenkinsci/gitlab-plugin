@@ -92,6 +92,7 @@ public class PipelineHookTriggerHandlerImplTest {
                 .build())
 
             .build();
+        git.close();
     }
 
     @Test

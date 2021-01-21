@@ -58,7 +58,7 @@ abstract class BuildWebHookAction implements WebHookAction {
         private void checkPermission(Permission permission, Item project) {
             if (((GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class)).isUseAuthenticatedEndpoint()) {
                 if (!project.getACL().hasPermission(authentication, permission)) {
-                    String message = Messages.AccessDeniedException2_MissingPermission(authentication.getName(), permission.group.title+"/"+permission.name);
+                    String message =  String.format("%s is missing the %s/%s permission", authentication.getName(), permission.group.title, permission.name);
                     LOGGER.finest("Unauthorized (Did you forget to add API Token to the web hook ?)");
                     throw HttpResponses.errorWithoutStack(403, message);
                 }
