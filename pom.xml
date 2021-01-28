@@ -12,7 +12,7 @@
     <spotbugs.failOnError >false</spotbugs.failOnError>
     <configuration-as-code-plugin.version>1.36</configuration-as-code-plugin.version>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <jackson.version>2.11.0</jackson.version>
+    <jackson.version>2.9.10</jackson.version>
   </properties>
 
   <artifactId>gitlab-plugin</artifactId>
@@ -220,6 +220,8 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.9.10.7</version>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
       <version>${jackson.version}</version>
@@ -234,7 +236,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>24.1.1</version>
+      <version>29.0-jre</version>
     </dependency>
     <dependency>
       <groupId>net.karneim</groupId>
@@ -255,6 +257,16 @@
       <artifactId>test-harness</artifactId>
       <version>${configuration-as-code-plugin.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.dataformat</groupId>
+          <artifactId>jackson-dataformat-yaml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -299,6 +311,11 @@
           <groupId>javax.servlet</groupId>
           <artifactId>javax.servlet-api</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+
       </exclusions>
     </dependency>
     <dependency>
@@ -323,6 +340,12 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-basic-steps</artifactId>
       <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-client-java</artifactId>
+      <version>3.10.2</version>
       <scope>test</scope>
     </dependency>
     <!-- parent pom test dependencies needs overriding-->
