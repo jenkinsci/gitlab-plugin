@@ -331,6 +331,64 @@ public class MergeRequestHookTriggerHandlerImplTest {
         mergeRequest_build_only_when_approved(Action.merge);
     }
 
+    @Test
+    public void mergeRequest_build_only_when_state_modified()throws IOException, InterruptedException, GitAPIException, ExecutionException {
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
+            .setTriggerOnAcceptedMergeRequest(true)
+            .setTriggerOnClosedMergeRequest(true)
+            .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.never)
+            .build();
+        Git.init().setDirectory(tmp.getRoot()).call();
+        tmp.newFile("test");
+        Git git = Git.open(tmp.getRoot());
+        git.add().addFilepattern("test");
+        RevCommit commit = git.commit().setMessage("test").call();
+        ObjectId head = git.getRepository().resolve(Constants.HEAD);
+        String repositoryUrl = tmp.getRoot().toURI().toString();
+
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.setScm(new GitSCM(repositoryUrl));
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                buildTriggered.signal();
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+        MergeRequestObjectAttributesBuilder objectAttributes = defaultMergeRequestObjectAttributes().withAction(Action.update);
+        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
+                .withObjectAttributes(objectAttributes
+                    .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
+                    .withLastCommit(commit().withAuthor(user().withName("test").build()).withId(commit.getName()).build())
+                    .build())
+                .withProject(project()
+                    .withWebUrl("https://gitlab.org/test.git")
+                    .build()
+                )
+                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+            newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+        MergeRequestObjectAttributesBuilder objectAttributes2 = defaultMergeRequestObjectAttributes().withState(State.merged).withAction(Action.merge);
+        mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
+                .withObjectAttributes(objectAttributes2
+                    .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
+                    .withLastCommit(commit().withAuthor(user().withName("test").build()).withId(commit.getName()).build())
+                    .build())
+                .withProject(project()
+                    .withWebUrl("https://gitlab.org/test.git")
+                    .build()
+                )
+                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+            newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
     private void do_not_build_for_state_when_nothing_enabled(State state) throws IOException, InterruptedException, GitAPIException, ExecutionException {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
             .setTriggerOnMergeRequest(false)
