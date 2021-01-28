@@ -258,6 +258,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return cause == null ? null : cause.getData().getTargetBranch();
     }
 
+    private String getTargetMergeRequestStateFromBuild(Run<?, ?> mergeBuild) {
+        GitLabWebHookCause cause = mergeBuild.getCause(GitLabWebHookCause.class);
+        return cause == null ? null : cause.getData().getMergeRequestState();
+    }
+
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
 		return triggerConfig.apply(objectAttributes);
     }
