@@ -11,8 +11,10 @@ import hudson.security.ACL;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
 import jenkins.plugins.git.GitSCMSource;
+import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.api.trait.SCMTrait;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
 
@@ -102,7 +104,7 @@ public class PushBuildAction extends BuildWebHookAction {
                     GitSCMSource gitSCMSource = (GitSCMSource) scmSource;
                     try {
                         if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
-                            if (!gitSCMSource.isIgnoreOnPushNotifications()) {
+                            if (SCMTrait.find(gitSCMSource.getTraits(), IgnoreOnPushNotificationTrait.class) != null) {
                                 LOGGER.log(Level.FINE, "Notify scmSourceOwner {0} about changes for {1}",
                                            toArray(project.getName(), gitSCMSource.getRemote()));
                                 ((SCMSourceOwner) project).onSCMSourceUpdated(scmSource);
