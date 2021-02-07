@@ -68,7 +68,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void matrixAggregatable() throws InterruptedException, IOException {
-        verifyMatrixAggregatable(GitLabMessagePublisher.class, listener);
+        verifyMatrixAggregatable(new GitLabMessagePublisher(), listener);
     }
 
     @Test

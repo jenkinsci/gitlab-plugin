@@ -54,7 +54,7 @@ public class GitLabVotePublisherTest {
 
     @Test
     public void matrixAggregatable() throws InterruptedException, IOException {
-        verifyMatrixAggregatable(GitLabVotePublisher.class, listener);
+        verifyMatrixAggregatable(new GitLabVotePublisher(), listener);
     }
 
     @Test

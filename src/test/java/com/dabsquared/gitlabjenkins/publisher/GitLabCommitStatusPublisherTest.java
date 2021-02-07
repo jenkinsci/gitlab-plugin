@@ -94,7 +94,7 @@ public class GitLabCommitStatusPublisherTest {
 
     @Test
     public void matrixAggregatable() throws InterruptedException, IOException {
-        verifyMatrixAggregatable(GitLabCommitStatusPublisher.class, listener);
+        verifyMatrixAggregatable(new GitLabCommitStatusPublisher("", false), listener);
     }
 
     @Test
@@ -333,6 +333,7 @@ public class GitLabCommitStatusPublisherTest {
         List<BuildData> buildDatas = new ArrayList<>();
         BuildData buildData = mock(BuildData.class);
         Revision revision = mock(Revision.class);
+        when(revision.getSha1()).thenReturn(ObjectId.fromString(SHA1));
         when(revision.getSha1String()).thenReturn(SHA1);
         when(buildData.getLastBuiltRevision()).thenReturn(revision);
         when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));

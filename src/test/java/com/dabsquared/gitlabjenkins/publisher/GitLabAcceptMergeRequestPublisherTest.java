@@ -54,7 +54,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
 
     @Test
     public void matrixAggregatable() throws InterruptedException, IOException {
-        verifyMatrixAggregatable(GitLabAcceptMergeRequestPublisher.class, listener);
+        verifyMatrixAggregatable(new GitLabAcceptMergeRequestPublisher(), listener);
     }
 
     @Test
