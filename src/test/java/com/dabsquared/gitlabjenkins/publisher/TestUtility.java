@@ -65,14 +65,14 @@ final class TestUtility {
 
     }
 
-    static <T  extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
+    static <T extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(MatrixConfiguration.class);
         Notifier publisher = mock(publisherClass);
         MatrixBuild parentBuild = mock(MatrixBuild.class);
 
         when(build.getParent()).thenReturn(project);
-        when(((MatrixAggregatable) publisher).createAggregator(any(MatrixBuild.class), any(Launcher.class), any(BuildListener.class))).thenCallRealMethod();
+        when(((MatrixAggregatable) publisher).createAggregator(any(MatrixBuild.class), any(), any(BuildListener.class))).thenCallRealMethod();
         when(publisher.perform(any(AbstractBuild.class), any(Launcher.class), any(BuildListener.class))).thenReturn(true);
 
         MatrixAggregator aggregator = ((MatrixAggregatable) publisher).createAggregator(parentBuild, null, listener);

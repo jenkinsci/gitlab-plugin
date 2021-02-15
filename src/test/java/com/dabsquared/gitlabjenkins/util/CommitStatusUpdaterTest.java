@@ -1,10 +1,9 @@
 package com.dabsquared.gitlabjenkins.util;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.mockito.Mockito.*;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.Collections;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.Functions;
+import hudson.Util;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.Before;
@@ -46,7 +46,7 @@ import jenkins.model.Jenkins;
  * @author Daumantas Stulgis
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GitLabConnectionProperty.class, Jenkins.class})
+@PrepareForTest({GitLabConnectionProperty.class, Jenkins.class, DisplayURLProvider.class})
 public class CommitStatusUpdaterTest {
 
 	private static final int PROJECT_ID = 1;
@@ -99,6 +99,11 @@ public class CommitStatusUpdaterTest {
 	    } else {
 	        when(taskListener.getLogger()).thenReturn(new PrintStream("/dev/null"));
 	    }
+	    PowerMockito.mockStatic(DisplayURLProvider.class);
+	    DisplayURLProvider urlProvider = mock(DisplayURLProvider.class);
+	    when(DisplayURLProvider.get()).thenReturn(urlProvider);
+	    String url = JENKINS_URL+ Util.encode(build.getUrl());
+	    when(urlProvider.getRunURL(any())).thenReturn(url);
 
 
 	    causeData = causeData()

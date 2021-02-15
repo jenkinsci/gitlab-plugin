@@ -14,10 +14,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
@@ -132,9 +129,17 @@ public class PipelineHookTriggerHandlerImplTest {
         project.setQuietPeriod(0);
 
         pipelineHookTriggerHandler.handle(project, pipelineHook, false, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-                                      newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
+    }
+    @After
+    public void after()    {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
+
+        }
     }
 }
