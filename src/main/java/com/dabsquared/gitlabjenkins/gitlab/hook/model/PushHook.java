@@ -18,7 +18,7 @@ public class PushHook extends WebHook {
     private String ref;
     private Integer userId;
     private String userName;
-    private String userUsername;
+    private String userUserName;
     private String userEmail;
     private String userAvatar;
     private Integer projectId;
@@ -67,11 +67,11 @@ public class PushHook extends WebHook {
     }
 
     public String getUserUsername() {
-        return userUsername;
+        return userUserName;
     }
 
     public void setUserUserName(String userUsername) {
-        this.userUsername = userUsername;
+        this.userUserName = userUsername;
     }
 
     public String getUserEmail() {
