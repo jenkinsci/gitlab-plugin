@@ -4,10 +4,10 @@
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>4.16</version>
-    <relativePath/>
+    <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>1.5.18</version>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/gitlab-plugin/</url>
   <packaging>hpi</packaging>
@@ -17,7 +17,7 @@
     <changelist>-SNAPSHOT</changelist>
     <java.level>8</java.level>
     <jenkins.version>2.222.4</jenkins.version>
-    <spotbugs.failOnError >false</spotbugs.failOnError>
+    <spotbugs.failOnError>false</spotbugs.failOnError>
     <configuration-as-code-plugin.version>1.46</configuration-as-code-plugin.version>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <jackson.version>2.12.1</jackson.version>
@@ -57,7 +57,7 @@
     <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/gitlab-plugin</url>
-    <tag>HEAD</tag>
+    <tag>gitlab-plugin-1.5.18</tag>
   </scm>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
