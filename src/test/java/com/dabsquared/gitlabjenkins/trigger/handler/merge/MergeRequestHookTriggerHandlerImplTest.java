@@ -17,6 +17,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,7 +57,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
     static {
         // Every negative (or failing positive) test adds 10 seconds to run time. The default 180 seconds might not
         // suffice
-        System.setProperty("jenkins.test.timeout", "300");
+        System.setProperty("jenkins.test.timeout", "450");
         jenkins = new JenkinsRule();
     }
 
@@ -450,4 +451,16 @@ public class MergeRequestHookTriggerHandlerImplTest {
 		        .build());
 	}
 
+	@After
+    /* Add sleep(5000) on after to avoid following error on Windows test
+        Unable to delete 'C:\Jenkins\workspace\Plugins_gitlab-plugin_PR-1121\target\tmp\j h4861043637706712359'. Tried 3 times (of a maximum of 3) waiting 0.1 sec between attempts.
+     */
+	public void  after()
+    {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
+
+        }
+    }
 }
