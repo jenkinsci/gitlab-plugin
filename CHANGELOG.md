@@ -1,6 +1,10 @@
 ChangeLog
 
-1.5.14 - to be released
+1.5.15 - 1.5.19
+=====================
+**TODO**
+
+1.5.14
 =====================
 * #866: Better compatibility with Configuration as Code plugin (useAuthenticatedEndpoint)
 
