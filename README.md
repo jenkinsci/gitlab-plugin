@@ -171,22 +171,23 @@ In your job configuration, click 'This build is parameterized' and add any param
 In the Groovy Script field insert something similar to:
 
 ```
-import hudson.model.*
-def env = Thread.currentThread()?.executable.parent.builds[0].properties.get('envVars')
+def env = currentBuild.getEnvironment(currentListener)
 def map = [:]
 
-if (env['gitlabSourceBranch'] != null) { 
-  map['sourceBranch'] = env['gitlabSourceBranch'] 
+if (env.gitlabSourceBranch != null) {
+  map['sourceBranch'] = env.gitlabSourceBranch
 }
-if (env['gitlabTargetBranch'] != null) { 
-  map['targetBranch'] = env['gitlabTargetBranch'] 
+
+if (env.gitlabTargetBranch != null) {
+  map['targetBranch'] = env.gitlabTargetBranch
 }
-// Add additional entries for any other parameters you have created
 
 return map
 ```
 
 You can then reference these variables in your job config, e.g. as `${sourceBranch}`. You will need to update this code anytime you add or remove parameters.
+
+Note: If you use the Groovy Sandbox, you might need to approve the script yourself or let an administrator approve the script in the Jenkins configuration.
 
 ## Git configuration 
 ### Freestyle jobs
