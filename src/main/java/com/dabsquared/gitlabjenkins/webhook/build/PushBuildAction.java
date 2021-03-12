@@ -104,7 +104,7 @@ public class PushBuildAction extends BuildWebHookAction {
                     GitSCMSource gitSCMSource = (GitSCMSource) scmSource;
                     try {
                         if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
-                            if (SCMTrait.find(gitSCMSource.getTraits(), IgnoreOnPushNotificationTrait.class) != null) {
+                            if (SCMTrait.find(gitSCMSource.getTraits(), IgnoreOnPushNotificationTrait.class) == null) {
                                 LOGGER.log(Level.FINE, "Notify scmSourceOwner {0} about changes for {1}",
                                            toArray(project.getName(), gitSCMSource.getRemote()));
                                 ((SCMSourceOwner) project).onSCMSourceUpdated(scmSource);
