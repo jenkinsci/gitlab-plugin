@@ -4,7 +4,11 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import hudson.model.FreeStyleProject;
+import jenkins.plugins.git.GitSCMSource;
+import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
+import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,9 +20,11 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import static org.hamcrest.CoreMatchers.containsString;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -88,5 +94,25 @@ public class PushBuildActionTest {
 
     private String getJson(String name) throws IOException {
         return IOUtils.toString(getClass().getResourceAsStream(name));
+    }
+
+    @Test
+    public void scmSourceOnUpdateExecuted() {
+        GitSCMSource source = new GitSCMSource("http://test");
+        SCMSourceOwner item = mock(SCMSourceOwner.class);
+        when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
+        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
+
+    }
+
+    @Test
+    public void scmSourceOnUpdateNotExecuted() {
+        GitSCMSource source = new GitSCMSource("http://test");
+        source.getTraits().add(new IgnoreOnPushNotificationTrait());
+        SCMSourceOwner item = mock(SCMSourceOwner.class);
+        when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
+        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        verify(item, never()).onSCMSourceUpdated(isA(GitSCMSource.class));
     }
 }
