@@ -560,6 +560,7 @@ copy, and submit a pull request (see [here](https://github.com/jenkinsci/gitlab-
 If you are adding new features please make sure that they support Jenkins Pipeline jobs.
 See [here](https://github.com/jenkinsci/workflow-plugin/blob/master/COMPATIBILITY.md) for some information.
 
+
 Before submitting your change make sure that:
 * your changes work with the oldest and latest supported GitLab version
 * new features are provided with tests
