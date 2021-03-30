@@ -241,6 +241,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             return true;
         }
 
+        if (!StringUtils.equals(getTargetMergeRequestStateFromBuild(mergeBuild), objectAttributes.getState().name())) {
+            return true;
+        }
+
         if (StringUtils.equals(getTargetBranchFromBuild(mergeBuild), objectAttributes.getTargetBranch())) {
             LOGGER.log(Level.INFO, "Last commit in Merge Request has already been built in build #" + mergeBuild.getNumber());
             return false;
@@ -252,6 +256,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private String getTargetBranchFromBuild(Run<?, ?> mergeBuild) {
         GitLabWebHookCause cause = mergeBuild.getCause(GitLabWebHookCause.class);
         return cause == null ? null : cause.getData().getTargetBranch();
+    }
+
+    private String getTargetMergeRequestStateFromBuild(Run<?, ?> mergeBuild) {
+        GitLabWebHookCause cause = mergeBuild.getCause(GitLabWebHookCause.class);
+        return cause == null ? null : cause.getData().getMergeRequestState();
     }
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
