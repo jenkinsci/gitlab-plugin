@@ -114,7 +114,7 @@ By default the plugin will require authentication to be set up for the connectio
 ### Authentication Security
 
 APITOKENS and other secrets MUST not be send over unsecure connections. So, all connections SHOULD use HTTPS.
-Note: Certificates are free and easy to manage with [LetsEncrypt](https://letsencrypt.org/).
+> Note: Certificates are free and easy to manage with [LetsEncrypt](https://letsencrypt.org/).
 
 
 ### Configuring global authentication
