@@ -573,7 +573,7 @@ Before submitting your change make sure that:
 
 # Testing With Docker
 
-See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md
+See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md 🙂
 
 # Release Workflow
 
