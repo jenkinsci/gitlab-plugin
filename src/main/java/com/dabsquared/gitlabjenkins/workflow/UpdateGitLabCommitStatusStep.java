@@ -13,6 +13,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import com.google.common.collect.ImmutableSet;
@@ -22,6 +23,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.ListBoxModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
@@ -30,6 +34,8 @@ public class UpdateGitLabCommitStatusStep extends Step {
 
     private String name;
     private BuildState state;
+    private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>() ;
+    private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
     public UpdateGitLabCommitStatusStep(String name, BuildState state) {
@@ -60,6 +66,24 @@ public class UpdateGitLabCommitStatusStep extends Step {
         this.state = state;
     }
 
+    public List<GitLabBranchBuild> getBuilds() {
+        return builds;
+    }
+
+    @DataBoundSetter
+    public void setBuilds(List<GitLabBranchBuild> builds) {
+        this.builds = builds;
+    }
+
+    public GitLabConnectionProperty getConnection() {
+        return connection;
+    }
+
+    @DataBoundSetter
+    public void setConnection(GitLabConnectionProperty connection) {
+        this.connection = connection;
+    }
+
     public static class UpdateGitLabCommitStatusStepExecution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1;
 
@@ -76,7 +100,7 @@ public class UpdateGitLabCommitStatusStep extends Step {
         @Override
         protected Void run() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-            CommitStatusUpdater.updateCommitStatus(run, null, step.state, name);
+            CommitStatusUpdater.updateCommitStatus(run, null, step.state, name, step.builds, step.connection);
             PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
             if (action != null) {
                 action.startBuild(name);
