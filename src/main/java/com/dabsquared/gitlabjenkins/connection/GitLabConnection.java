@@ -136,7 +136,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
 
     public GitLabClient getClient(Item item, String jobCredentialId) {
         if (apiCache == null) {
-            apiCache = clientBuilder.buildClient(url, null == jobCredentialId ? getApiToken(apiTokenId, null) : getApiToken(jobCredentialId, item), ignoreCertificateErrors,
+            apiCache = clientBuilder.buildClient(url, jobCredentialId == null ? getApiToken(apiTokenId, null) : getApiToken(jobCredentialId, item), ignoreCertificateErrors,
                     connectionTimeout, readTimeout);
         }
         return apiCache;
@@ -144,7 +144,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
 
     @Restricted(NoExternalUse.class)
     private String getApiToken(String apiTokenId, Item item) {
-        ItemGroup<?> context = null != item ? item.getParent() : Jenkins.get();
+        ItemGroup<?> context = item != null ? item.getParent() : Jenkins.get();
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
             lookupCredentials(
                     StandardCredentials.class,
