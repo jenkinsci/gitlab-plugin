@@ -71,8 +71,14 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
     public GitLabClient getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getActiveInstance().getDescriptor(GitLabConnectionConfig.class);
-            return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId)
-                    : null;
+            if (connectionConfig != null) {
+                if (useAlternativeCredential) {
+                    return connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId);
+                } else {
+                    return connectionConfig.getClient(gitLabConnection, null, null);
+                }
+            }
+            return null;
         }
         return null;
     }
