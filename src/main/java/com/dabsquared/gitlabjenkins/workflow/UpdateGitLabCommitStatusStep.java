@@ -76,12 +76,24 @@ public class UpdateGitLabCommitStatusStep extends Step {
         @Override
         protected Void run() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-            CommitStatusUpdater.updateCommitStatus(run, null, step.state, name);
+            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(), step.state, name);
             PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
             if (action != null) {
                 action.startBuild(name);
             }
             return null;
+        }
+
+        private TaskListener getTaskListener() {
+            StepContext context = getContext();
+            if (!context.isReady()) {
+                return null;
+            }
+            try {
+                return context.get(TaskListener.class);
+            } catch (Exception x) {
+                return null;
+            }
         }
     }
 
