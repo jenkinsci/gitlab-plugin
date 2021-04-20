@@ -35,7 +35,7 @@
 
 # Introduction
 
-This plugin allows GitLab to trigger builds in Jenkins when code is committed or merge requests are opened/updated. It can also send build status back to GitLab.
+This wonderful plugin allows GitLab to trigger builds in Jenkins when code is committed or merge requests are opened/updated. It can also send build status back to GitLab.
 
 ### Seeking maintainers
 
