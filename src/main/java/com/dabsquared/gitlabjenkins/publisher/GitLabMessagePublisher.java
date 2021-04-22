@@ -187,7 +187,7 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
         } else if (result == Result.UNSTABLE) {
             return ":warning:";
         } else {
-            return ":negative_squared_cross_mark:";
+            return ":x:";
         }
     }
 
