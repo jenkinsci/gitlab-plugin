@@ -9,6 +9,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
@@ -40,7 +41,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     }
 
     @Override
-    public void handle(Job<?, ?> job, PipelineHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, PipelineHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter, UserNameFilter userNameFilter) {
         PipelineEventObjectAttributes objectAttributes = hook.getObjectAttributes();
         try {
             if (job instanceof AbstractProject<?, ?>) {
@@ -64,14 +65,19 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
             //in case of pipeline events that could lead to a deadlock
             String sourceBranch = getSourceBranch(hook);
             String targetBranch = getTargetBranch(hook);
-            if (branchFilter.isBranchAllowed(sourceBranch, targetBranch)) {
-                LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+            String userName = getUserName(hook);
 
-                super.scheduleBuild(job, createActions(job, hook));
+            if (userNameFilter.isUserNameAllowed(userName)) {
+                if (branchFilter.isBranchAllowed(sourceBranch, targetBranch)) {
+                    LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+
+                    super.scheduleBuild(job, createActions(job, hook));
+                } else {
+                    LOGGER.log(Level.INFO, "branch {0} is not allowed", sourceBranch + " or " + targetBranch);
+                }
             } else {
-                LOGGER.log(Level.INFO, "branch {0} is not allowed", sourceBranch + " or " + targetBranch);
+                LOGGER.log(Level.INFO, "userName {0} is not allowed", userName);
             }
-
         }
     }
 
@@ -89,6 +95,11 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     @Override
     protected String getTargetBranch(PipelineHook hook) {
         return hook.getObjectAttributes().getRef() == null ? null : hook.getObjectAttributes().getRef().replaceFirst("^refs/heads/", "");
+    }
+
+    @Override
+    protected String getUserName(PipelineHook hook) {
+        return hook.getUser().getUsername();
     }
 
     @Override
