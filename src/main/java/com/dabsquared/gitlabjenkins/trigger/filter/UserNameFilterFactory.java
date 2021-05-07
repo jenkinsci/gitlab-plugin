@@ -13,8 +13,6 @@ public final class UserNameFilterFactory {
     private static final Logger LOGGER = Logger.getLogger(UserNameFilterFactory.class.getName());
 
     public static UserNameFilter newUserNameFilter(UserNameFilterConfig config) {
-        LOGGER.log(Level.INFO, "========== newUserNameFilter ==========");
-        LOGGER.log(Level.INFO, config.toString());
 
 		if(config == null)
 			return new AllUserNamesFilter();
