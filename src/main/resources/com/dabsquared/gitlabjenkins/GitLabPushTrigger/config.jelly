@@ -124,10 +124,10 @@
             <!--<f:section title="">-->
             <f:radioBlock name="userNameFilterType" value="All" title="Allow all user names to trigger this job"
                           checked="${instance.userNameFilterType == null || instance.userNameFilterType == 'All'}"
-                          inline="true" help="/plugin/gitlab-plugin/help/help-noBranchFiltering.html"/>
+                          inline="true" help="/plugin/gitlab-plugin/help/help-noUserNameFiltering.html"/>
             <f:radioBlock name="userNameFilterType" value="NameBasedFilter" title="Filter users by name"
                           checked="${instance.userNameFilterType == 'NameBasedFilter'}" inline="true"
-                          help="/plugin/gitlab-plugin/help/help-allowedBranches.html">
+                          help="/plugin/gitlab-plugin/help/help-excludedUsers.html">
               <f:entry title="Exclude">
                 <f:textbox name="excludeUserNamesSpec" field="excludeUserNamesSpec" autoCompleteDelimChar=","/>
               </f:entry>
