@@ -109,7 +109,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
         String sourceBranch = mergeRequest.getSourceBranch();
         String targetBranch = mergeRequest.getTargetBranch();
-        if (targetBranch != null && branchFilter.isBranchAllowed(sourceBranch, targetBranch) && hook.getRef().equals("refs/heads/"+targetBranch) && sourceBranch != null) {
+        String userName = mergeRequest.getAuthor().getUsername();
+        if (targetBranch != null && branchFilter.isBranchAllowed(sourceBranch, targetBranch) && hook.getRef().equals("refs/heads/"+targetBranch) && sourceBranch != null && userNameFilter.isUserNameAllowed(userName)) {
             LOGGER.log(Level.INFO, "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
