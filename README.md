@@ -286,6 +286,7 @@ properties([
             branchFilterType: "NameBasedFilter",
             includeBranchesSpec: "release/qat",
             excludeBranchesSpec: "",
+            userNameFilterType: "All",
         ]
     ])
 ])
@@ -471,6 +472,13 @@ This plugin can be used with Matrix/Multi-configuration jobs together with the [
 Triggers may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, when you configure the GitLab trigger, you can choose 'Filter branches by name' or 'Filter branches by regex.' Filter by name takes comma-separated lists of branch names to include and/or exclude from triggering a build. Filter by regex takes a Java regular expression to include and/or exclude.
 
 **Note:** This functionality requires access to GitLab and a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to add branch filters. For Pipeline jobs, the configuration must be saved *and* the job must be run once before the list is populated.
+
+
+## User name filtering
+Triggers may be filtered based on the user name, i.e. the build will only be allowed for users not listed in excluded user names. On the project configuration page, when you configure the GitLab trigger, you can choose 'Filter users by name'.' Filter by name takes comma-separated lists of user names to exclude from triggering a build.
+
+**Note:** This functionality requires access to GitLab and a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to add branch filters. For Pipeline jobs, the configuration must be saved *and* the job must be run once before the list is populated.
+
 
 ## Build when tags are pushed
 In order to build when a new tag is pushed:
