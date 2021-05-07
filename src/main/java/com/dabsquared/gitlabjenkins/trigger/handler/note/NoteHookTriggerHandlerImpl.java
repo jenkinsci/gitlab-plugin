@@ -57,7 +57,7 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
 
     @Override
     protected String getUserName(NoteHook hook) {
-        return hook.getMergeRequest() == null ? null : hook.getUser().getUsername();
+        return hook.getUser() == null ? null : hook.getUser().getUsername();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
 
 import org.junit.Test;
 
-import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterConfig.UserNameFilterConfigBuilder.userNameFilterConfig;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -15,7 +14,7 @@ public class UserNameFilterFactoryTest {
             .withExcludeUserNamesSpec("John Doe")
             .build(UserNameFilterType.All)
         );
-        assertThat(userNameFilter, instanceOf(AllBranchesFilter.class));
+        assertThat(userNameFilter, instanceOf(AllUserNamesFilter.class));
     }
     @Test
     public void getUserNameBasedFilterFilter() {
@@ -23,6 +22,6 @@ public class UserNameFilterFactoryTest {
             .withExcludeUserNamesSpec("John Doe")
             .build(UserNameFilterType.NameBasedFilter));
 
-        assertThat(userNameFilter, instanceOf(NameBasedFilter.class));
+        assertThat(userNameFilter, instanceOf(UserNameBasedFilter.class));
     }
 }
