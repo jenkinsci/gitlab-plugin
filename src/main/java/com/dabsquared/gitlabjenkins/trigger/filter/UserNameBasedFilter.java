@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 
 /**
- * @author Robin Müller
+ * @author jean flores
  */
 class UserNameBasedFilter implements UserNameFilter {
     private static final Logger LOGGER = Logger.getLogger(UserNameBasedFilter.class.getName());
