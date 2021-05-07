@@ -588,7 +588,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     private void initializeUserNameFilter() {
         userNameFilter = UserNameFilterFactory.newUserNameFilter(userNameFilterConfig()
-            .withExcludeBranchesSpec(excludeUserNamesSpec)
+            .withExcludeUserNamesSpec(excludeUserNamesSpec)
             .build(userNameFilterType)
         );
     }

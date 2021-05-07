@@ -28,7 +28,7 @@ public final class UserNameFilterConfig {
             return new UserNameFilterConfigBuilder();
         }
 
-        public UserNameFilterConfigBuilder withExcludeBranchesSpec(String excludeUserNamesSpec) {
+        public UserNameFilterConfigBuilder withExcludeUserNamesSpec(String excludeUserNamesSpec) {
             this.excludeUserNamesSpec = excludeUserNamesSpec;
             return this;
         }
