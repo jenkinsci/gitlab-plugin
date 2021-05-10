@@ -300,9 +300,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return branchFilterType;
     }
 
-    public UserNameFilterType getUserNameFilterType() {
-        return userNameFilterType;
-    }
+//    UserNameFilterType getUserNameFilterType() {
+//        return userNameFilterType;
+//    }
 
     public String getIncludeBranchesSpec() {
         return includeBranchesSpec;
@@ -320,9 +320,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return targetBranchRegex;
     }
 
-    public String getExcludeUserNamesSpec() {
-        return excludeUserNamesSpec;
-    }
+//    String getExcludeUserNamesSpec() {
+//        return excludeUserNamesSpec;
+//    }
 
     public MergeRequestLabelFilterConfig getMergeRequestLabelFilterConfig() {
         return mergeRequestLabelFilterConfig;
