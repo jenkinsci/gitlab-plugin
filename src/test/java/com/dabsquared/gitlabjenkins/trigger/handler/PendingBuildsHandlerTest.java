@@ -8,6 +8,8 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.*;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterType;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
@@ -132,6 +134,7 @@ public class PendingBuildsHandlerTest {
         gitLabPushTrigger.setTriggerOnMergeRequest(true);
         gitLabPushTrigger.setPendingBuildName(GITLAB_BUILD_NAME);
         gitLabPushTrigger.setBranchFilterType(BranchFilterType.NameBasedFilter);
+        gitLabPushTrigger.setUserNameFilterType(UserNameFilterType.NameBasedFilter);
         gitLabPushTrigger.setBranchFilterName("");
         return gitLabPushTrigger;
     }

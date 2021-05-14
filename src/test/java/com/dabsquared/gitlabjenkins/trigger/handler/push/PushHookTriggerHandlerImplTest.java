@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -30,6 +31,8 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.R
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory.newBranchFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
+import static com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterConfig.UserNameFilterConfigBuilder.userNameFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterFactory.newUserNameFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -66,8 +69,12 @@ public class PushHookTriggerHandlerImplTest {
         pushHookTriggerHandler.handle(project, pushHook()
                 .withCommits(Arrays.asList(commit().withMessage("some message").build(),
                     commit().withMessage("[ci-skip]").build()))
-                .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+                .build(),
+                true,
+                newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null),
+                newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All))
+            );
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -112,8 +119,12 @@ public class PushHookTriggerHandlerImplTest {
                     .build())
                 .withAfter(commit.name())
                 .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
-                .build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+                .build(),
+                true,
+                newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null),
+                newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All))
+            );
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -164,10 +175,10 @@ public class PushHookTriggerHandlerImplTest {
             .withAfter(commit.name())
             .withRef("refs/heads/" + git.nameRev().add(head).call().get(head));
         pushHookTriggerHandler.handle(project, pushHookBuilder.build(), true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null), newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All)));
         pushHookTriggerHandler.handle(project, pushHookBuilder
                 .but().withRef("refs/heads/" + git.nameRev().add(head).call().get(head) + "-2").build(), true,
-            newBranchFilter(branchFilterConfig().build(BranchFilterType.All)), newMergeRequestLabelFilter(null));
+            newBranchFilter(branchFilterConfig().build(BranchFilterType.All)), newMergeRequestLabelFilter(null), newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All)));
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
         assertThat(buildCount.intValue(), is(2));

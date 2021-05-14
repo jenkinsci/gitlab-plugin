@@ -4,6 +4,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -31,6 +32,8 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.R
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory.newBranchFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
+import static com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterConfig.UserNameFilterConfigBuilder.userNameFilterConfig;
+import static com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterFactory.newUserNameFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -108,7 +111,7 @@ public class PipelineHookTriggerHandlerImplTest {
         });
         project.setQuietPeriod(0);
         pipelineHookTriggerHandler.handle(project, pipelineHook , true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null), newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All)));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -129,7 +132,7 @@ public class PipelineHookTriggerHandlerImplTest {
         project.setQuietPeriod(0);
 
         pipelineHookTriggerHandler.handle(project, pipelineHook, false, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null), newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All)));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));

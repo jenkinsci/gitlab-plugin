@@ -9,6 +9,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -39,7 +40,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected PendingBuildsHandler pendingBuildsHandler = new PendingBuildsHandler();
 
     @Override
-    public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, H hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter, UserNameFilter userNameFilter) {
         if (ciSkip && isCiSkip(hook)) {
             LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
             return;
@@ -47,15 +48,20 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
         String sourceBranch = getSourceBranch(hook);
         String targetBranch = getTargetBranch(hook);
-        if (branchFilter.isBranchAllowed(sourceBranch, targetBranch)) {
-            LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
-            cancelPendingBuildsIfNecessary(job, hook);
-            setCommitStatusPendingIfNecessary(job, hook);
-            scheduleBuild(job, createActions(job, hook));
+        String userName = getUserName(hook);
+        if (userNameFilter.isUserNameAllowed(userName)) {
+            if (branchFilter.isBranchAllowed(sourceBranch, targetBranch) && userNameFilter.isUserNameAllowed(userName)) {
+                LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
+                cancelPendingBuildsIfNecessary(job, hook);
+                setCommitStatusPendingIfNecessary(job, hook);
+                scheduleBuild(job, createActions(job, hook));
+            } else {
+                LOGGER.log(Level.INFO, "Source branch {0} or target branch {1} is not allowed", new Object[]{sourceBranch, targetBranch});
+            }
         } else {
-            LOGGER.log(Level.INFO, "Source branch {0} or target branch {1} is not allowed", new Object[]{sourceBranch, targetBranch});
+            LOGGER.log(Level.INFO, "UserName {0} is not allowed", new Object[]{userName});
         }
-    }
+   }
 
     protected abstract String getTriggerType();
 
@@ -102,6 +108,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract String getSourceBranch(H hook);
 
     protected abstract String getTargetBranch(H hook);
+
+    protected abstract String getUserName(H hook);
 
     protected abstract RevisionParameterAction createRevisionParameter(H hook, GitSCM gitSCM) throws NoRevisionToBuildException;
 

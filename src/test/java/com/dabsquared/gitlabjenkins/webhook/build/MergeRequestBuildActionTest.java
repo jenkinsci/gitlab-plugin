@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterType;
 import hudson.model.*;
 import hudson.model.queue.QueueListener;
 import hudson.model.queue.QueueTaskFuture;
@@ -90,6 +91,7 @@ public class MergeRequestBuildActionTest {
 
         // some defaults of the trigger
         trigger.setBranchFilterType(BranchFilterType.All);
+        trigger.setUserNameFilterType(UserNameFilterType.All);
     }
 
 
