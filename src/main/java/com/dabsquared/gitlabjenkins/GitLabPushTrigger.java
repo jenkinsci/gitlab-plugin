@@ -104,13 +104,13 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private transient boolean allowAllUserNames = false;
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
-    private transient String userNameFilterName;
+    protected final String userNameFilterName;
     private UserNameFilterType userNameFilterType;
     private String includeBranchesSpec;
     private String excludeBranchesSpec;
     private String sourceBranchRegex;
     private String targetBranchRegex;
-    private String excludeUserNamesSpec;
+    protected final String excludeUserNamesSpec;
     private MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig;
     private volatile Secret secretToken;
     private String pendingBuildName;
@@ -300,9 +300,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return branchFilterType;
     }
 
-//    UserNameFilterType getUserNameFilterType() {
-//        return userNameFilterType;
-//    }
+    public UserNameFilterType getUserNameFilterType() {
+        return userNameFilterType;
+    }
 
     public String getIncludeBranchesSpec() {
         return includeBranchesSpec;
@@ -320,9 +320,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return targetBranchRegex;
     }
 
-//    String getExcludeUserNamesSpec() {
-//        return excludeUserNamesSpec;
-//    }
+    public String getExcludeUserNamesSpec() {
+        return excludeUserNamesSpec;
+    }
 
     public MergeRequestLabelFilterConfig getMergeRequestLabelFilterConfig() {
         return mergeRequestLabelFilterConfig;
