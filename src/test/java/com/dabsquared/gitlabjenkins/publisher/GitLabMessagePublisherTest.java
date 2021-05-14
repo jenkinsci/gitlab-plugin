@@ -123,7 +123,7 @@ public class GitLabMessagePublisherTest {
     @Test
     public void failed_v3() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.FAILURE);
-        String defaultNote = formatNote(build, ":negative_squared_cross_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
+        String defaultNote = formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
@@ -133,7 +133,7 @@ public class GitLabMessagePublisherTest {
     @Test
     public void failed_v4() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
-        String defaultNote = formatNote(build, ":negative_squared_cross_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
+        String defaultNote = formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
         performAndVerify(
             build, defaultNote, false, false, false, false, false,
@@ -144,7 +144,7 @@ public class GitLabMessagePublisherTest {
     @Test
     public void failed_withOnlyForFailed() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
-        String defaultNote = formatNote(build, ":negative_squared_cross_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
+        String defaultNote = formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
         performAndVerify(
             build, defaultNote, true, false, false, false, false,
