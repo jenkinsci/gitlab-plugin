@@ -13,7 +13,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class NoteHook extends WebHook {
 
     private User user;
-    private Project project;
     private MergeRequestObjectAttributes mergeRequest;
     private NoteObjectAttributes objectAttributes;
 
@@ -23,14 +22,6 @@ public class NoteHook extends WebHook {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public NoteObjectAttributes getObjectAttributes() {
@@ -60,7 +51,7 @@ public class NoteHook extends WebHook {
         NoteHook that = (NoteHook) o;
         return new EqualsBuilder()
                 .append(user, that.user)
-                .append(project, that.project)
+                .append(getProject(), that.getProject())
                 .append(objectAttributes, that.objectAttributes)
                 .append(mergeRequest, that.mergeRequest)
                 .isEquals();
@@ -70,7 +61,7 @@ public class NoteHook extends WebHook {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(user)
-                .append(project)
+                .append(getProject())
                 .append(objectAttributes)
                 .append(mergeRequest)
                 .toHashCode();
@@ -80,7 +71,7 @@ public class NoteHook extends WebHook {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("user", user)
-                .append("project", project)
+                .append("project", getProject())
                 .append("objectAttributes", objectAttributes)
                 .append("mergeRequest", mergeRequest)
                 .toString();

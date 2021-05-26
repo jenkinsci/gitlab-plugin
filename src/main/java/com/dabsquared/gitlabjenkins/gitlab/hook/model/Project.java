@@ -16,6 +16,8 @@ public class Project {
     private String description;
     private String webUrl;
     private String avatarUrl;
+    private String gitHttpUrl;
+    private String gitSshUrl;
     private String namespace;
     private Integer visibilityLevel;
     private String pathWithNamespace;
@@ -55,6 +57,26 @@ public class Project {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+
+    public String getGitHttpUrl () {
+      return gitHttpUrl;
+    }
+
+
+    public void setGitHttpUrl (String gitHttpUrl) {
+      this.gitHttpUrl = gitHttpUrl;
+    }
+
+
+    public String getGitSshUrl () {
+      return gitSshUrl;
+    }
+
+
+    public void setGitSshUrl (String gitSshUrl) {
+      this.gitSshUrl = gitSshUrl;
     }
 
     public String getNamespace() {

@@ -159,7 +159,7 @@ public class GitLabConnectionConfigSSLTest {
     public void doCheckConnection_ignoreCertificateErrors() {
         GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", true, 10, 10);
+        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", null, API_TOKEN_ID, "v3", true, 10, 10);
         assertThat(formValidation.getMessage(), is(Messages.connection_success()));
     }
 
@@ -167,7 +167,7 @@ public class GitLabConnectionConfigSSLTest {
     public void doCheckConnection_certificateError() throws IOException {
         GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
+        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", null, API_TOKEN_ID, "v3", false, 10, 10);
         assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
     }
 }

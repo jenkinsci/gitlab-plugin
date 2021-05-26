@@ -24,7 +24,6 @@ public class MergeRequestHook extends WebHook {
     */
     private User user;
     private User assignee;
-    private Project project;
     private MergeRequestObjectAttributes objectAttributes;
     private List<MergeRequestLabel> labels;
     private MergeRequestChanges changes;
@@ -43,14 +42,6 @@ public class MergeRequestHook extends WebHook {
 
     public void setAssignee(User assignee) {
         this.assignee = assignee;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public MergeRequestObjectAttributes getObjectAttributes() {
@@ -89,7 +80,7 @@ public class MergeRequestHook extends WebHook {
         return new EqualsBuilder()
                 .append(user, that.user)
                 .append(assignee, that.assignee)
-                .append(project, that.project)
+                .append(getProject(), that.getProject())
                 .append(objectAttributes, that.objectAttributes)
                 .append(labels, that.labels)
                 .append(changes, that.changes)
@@ -101,7 +92,7 @@ public class MergeRequestHook extends WebHook {
         return new HashCodeBuilder(17, 37)
                 .append(user)
                 .append(assignee)
-                .append(project)
+                .append(getProject())
                 .append(objectAttributes)
                 .append(labels)
                 .append(changes)
@@ -113,7 +104,7 @@ public class MergeRequestHook extends WebHook {
         return new ToStringBuilder(this)
                 .append("user", user)
                 .append("assignee", assignee)
-                .append("project", project)
+                .append("project", getProject())
                 .append("objectAttributes", objectAttributes)
                 .append("labels", labels)
                 .append("changes", changes)

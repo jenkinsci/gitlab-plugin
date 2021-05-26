@@ -14,7 +14,7 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+ 
 import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 
 /**
@@ -41,12 +41,12 @@ public class NoteBuildAction implements WebHookAction {
      * @param secretToken Secret Token
      */
     public NoteBuildAction(Item project, JsonNode json, String secretToken) {
-        LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
         this.project = project;
         this.noteHook = JsonUtil.read(json, NoteHook.class);
         this.secretToken = secretToken;
     }
 
+    @Override
     public void execute(StaplerResponse response) {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Note Hook is not supported for this project");
@@ -58,5 +58,19 @@ public class NoteBuildAction implements WebHookAction {
             }
         });
         throw HttpResponses.ok();
+    }
+
+    @Override
+    public void executeNoResponse(StaplerResponse response){
+        if (!(project instanceof Job<?, ?>)) {
+          LOGGER.log(Level.WARNING, "Note Hook is not supported for this project");
+          return;
+        }
+        ACL.impersonate(ACL.SYSTEM, new BuildWebHookAction.TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
+            @Override
+            protected void performOnPost(GitLabPushTrigger trigger) {
+                trigger.onPost(noteHook);
+            }
+        });
     }
 }

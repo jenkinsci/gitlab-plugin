@@ -22,7 +22,6 @@ public class PushHook extends WebHook {
     private String userEmail;
     private String userAvatar;
     private Integer projectId;
-    private Project project;
     private List<Commit> commits;
     private Integer totalCommitsCount;
 
@@ -98,14 +97,6 @@ public class PushHook extends WebHook {
         this.projectId = projectId;
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
     public List<Commit> getCommits() {
         return commits;
     }
@@ -140,7 +131,7 @@ public class PushHook extends WebHook {
                 .append(userEmail, pushHook.userEmail)
                 .append(userAvatar, pushHook.userAvatar)
                 .append(projectId, pushHook.projectId)
-                .append(project, pushHook.project)
+                .append(getProject(), pushHook.getProject())
                 .append(commits, pushHook.commits)
                 .append(totalCommitsCount, pushHook.totalCommitsCount)
                 .isEquals();
@@ -157,7 +148,7 @@ public class PushHook extends WebHook {
                 .append(userEmail)
                 .append(userAvatar)
                 .append(projectId)
-                .append(project)
+                .append(getProject())
                 .append(commits)
                 .append(totalCommitsCount)
                 .toHashCode();
@@ -174,7 +165,7 @@ public class PushHook extends WebHook {
                 .append("userEmail", userEmail)
                 .append("userAvatar", userAvatar)
                 .append("projectId", projectId)
-                .append("project", project)
+                .append("project", getProject())
                 .append("commits", commits)
                 .append("totalCommitsCount", totalCommitsCount)
                 .toString();

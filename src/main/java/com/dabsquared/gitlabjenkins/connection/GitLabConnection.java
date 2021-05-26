@@ -53,6 +53,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> {
     private final String name;
     private final String url;
+    private final String globalWebhookURL;
     private transient String apiToken;
     // TODO make final when migration code gets removed
     private String apiTokenId;
@@ -62,10 +63,11 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     private final Integer readTimeout;
     private transient GitLabClient apiCache;
 
-    public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+    public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
             url,
+            globalWebhookURL,
             apiTokenId,
             new AutodetectGitLabClientBuilder(),
             ignoreCertificateErrors,
@@ -75,10 +77,11 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     }
 
     @DataBoundConstructor
-    public GitLabConnection(String name, String url, String apiTokenId, String clientBuilderId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+    public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, String clientBuilderId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
             url,
+            globalWebhookURL,
             apiTokenId,
             getGitLabClientBuilderById(clientBuilderId),
             ignoreCertificateErrors,
@@ -88,9 +91,10 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     }
 
     @Restricted(NoExternalUse.class)
-    public GitLabConnection(String name, String url, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+    public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this.name = name;
         this.url = url;
+        this.globalWebhookURL = globalWebhookURL;
         this.apiTokenId = apiTokenId;
         this.clientBuilder = clientBuilder;
         this.ignoreCertificateErrors = ignoreCertificateErrors;
@@ -104,6 +108,10 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
 
     public String getUrl() {
         return url;
+    }
+
+    public String getGlobalWebhookURL () {
+        return globalWebhookURL;
     }
 
     public String getApiTokenId() {
@@ -140,7 +148,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
             lookupCredentials(
                     StandardCredentials.class,
-                    context, 
+                    context,
                     ACL.SYSTEM,
                     URIRequirementBuilder.fromUri(url).build()),
             CredentialsMatchers.withId(apiTokenId));
@@ -157,10 +165,10 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
 
     protected GitLabConnection readResolve() {
         if (connectionTimeout == null || readTimeout == null) {
-            return new GitLabConnection(name, url, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, 10, 10);
+            return new GitLabConnection(name, url, globalWebhookURL, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, 10, 10);
         }
         if (clientBuilder == null) {
-            return new GitLabConnection(name, url, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, connectionTimeout, readTimeout);
+            return new GitLabConnection(name, url, globalWebhookURL, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, connectionTimeout, readTimeout);
         }
 
         return this;
@@ -230,6 +238,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         @RequirePOST
         @Restricted(DoNotUse.class) // WebOnly
         public FormValidation doTestConnection(@QueryParameter String url,
+            @QueryParameter String globalWebhookURL,
             @QueryParameter String apiTokenId,
             @QueryParameter String clientBuilderId,
             @QueryParameter boolean ignoreCertificateErrors,
@@ -237,7 +246,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
             @QueryParameter int readTimeout) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             try {
-                new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
+                new GitLabConnection("", url, globalWebhookURL, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
             } catch (WebApplicationException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));

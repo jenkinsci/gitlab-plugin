@@ -26,9 +26,18 @@ abstract class BuildWebHookAction implements WebHookAction {
 
     abstract void execute();
 
+    abstract void executeNoResponse();
+
+    @Override
     public final void execute(StaplerResponse response) {
         processForCompatibility();
         execute();
+    }
+
+    @Override
+    public final void executeNoResponse(StaplerResponse response) {
+        processForCompatibility();
+        executeNoResponse();
     }
 
     protected abstract static class TriggerNotifier implements Runnable {
@@ -43,6 +52,7 @@ abstract class BuildWebHookAction implements WebHookAction {
             this.authentication = authentication;
         }
 
+        @Override
         public void run() {
             GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob((Job<?, ?>) project);
             if (trigger != null) {

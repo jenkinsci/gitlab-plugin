@@ -14,6 +14,7 @@ import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
@@ -44,6 +45,13 @@ public class ActionResolver {
     private static final Logger LOGGER = Logger.getLogger(ActionResolver.class.getName());
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
+    private String               requestBody;
+    private StaplerRequest       request;
+
+    public ActionResolver (StaplerRequest request) {
+        this.request = request;
+        this.requestBody = JsonUtil.getRequestBody (request);
+    }
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
         Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(request.getRestOfPath()).iterator();
@@ -52,6 +60,10 @@ public class ActionResolver {
             throw HttpResponses.notFound();
         }
         return resolveAction(project, Joiner.on('/').join(restOfPathParts), request);
+    }
+
+    public WebHookAction resolve (Item project, StaplerRequest request) {
+        return resolveAction (project, "", request);
     }
 
     private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
@@ -153,6 +165,10 @@ public class ActionResolver {
 
 
     private String getRequestBody(StaplerRequest request) {
+        if (request.equals (this.request)) {
+            return getRequestBody ();
+        }
+
         String requestBody;
         try {
             Charset charset = request.getCharacterEncoding() == null ?  UTF_8 : Charset.forName(request.getCharacterEncoding());
@@ -165,6 +181,8 @@ public class ActionResolver {
 
     private Item resolveProject(final String projectName, final Iterator<String> restOfPathParts) {
         return ACLUtil.impersonate(ACL.SYSTEM, new ACLUtil.Function<Item>() {
+
+            @Override
             public Item invoke() {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
@@ -182,8 +200,22 @@ public class ActionResolver {
         });
     }
 
+    public String getRequestBody () {
+        return requestBody;
+    }
+
+    private void setRequestBody (String requestBody) {
+        this.requestBody = requestBody;
+    }
+
     static class NoopAction implements WebHookAction {
+
+        @Override
         public void execute(StaplerResponse response) {
+        }
+
+        @Override
+        public void executeNoResponse(StaplerResponse response){
         }
     }
 }
