@@ -39,7 +39,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
     private String gitLabConnection;
     private String jobCredentialId;
-	private boolean useAlternativeCredential = false;
+    private boolean useAlternativeCredential = false;
 
     @DataBoundConstructor
     public GitLabConnectionProperty(String gitLabConnection) {
@@ -71,21 +71,26 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
     public GitLabClient getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig = (GitLabConnectionConfig) Jenkins.getActiveInstance().getDescriptor(GitLabConnectionConfig.class);
-            return connectionConfig != null ? connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId)
-                   : null;
+            if (connectionConfig != null) {
+                if (useAlternativeCredential) {
+                    return connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId);
+                } else {
+                    return connectionConfig.getClient(gitLabConnection, null, null);
+                }
+            }
+            return null;
         }
         return null;
     }
 
     public static GitLabClient getClient(@NotNull Run<?, ?> build) {
         Job<?, ?> job = build.getParent();
-        if(job != null) {
+        if (job != null) {
             final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
             if (connectionProperty != null) {
                 return connectionProperty.getClient();
             }
         }
-        
         return null;
     }
 
@@ -118,7 +123,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         }
         
         public ListBoxModel doFillJobCredentialIdItems(@AncestorInPath Item item, @QueryParameter String url,
-               @QueryParameter String jobCredentialId) {
+                @QueryParameter String jobCredentialId) {
             StandardListBoxModel result = new StandardListBoxModel();
             return result.includeEmptyValue()
                     .includeMatchingAs(ACL.SYSTEM, item, StandardCredentials.class,
@@ -131,13 +136,13 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         public FormValidation doTestConnection(@QueryParameter String jobCredentialId,
                 @QueryParameter String gitLabConnection, @AncestorInPath Item item) {
         	Jenkins.getActiveInstance().checkPermission(Jenkins.ADMINISTER);
-             try {
+            try {
                 GitLabConnection gitLabConnectionTested = null;
                 GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance()
                         .getDescriptor(GitLabConnectionConfig.class);
                 for (GitLabConnection connection : descriptor.getConnections()) {
                     if (gitLabConnection.equals(connection.getName())) {
-                         gitLabConnectionTested = connection;
+                        gitLabConnectionTested = connection;
                     }
                 }
                 if (gitLabConnectionTested == null) {
