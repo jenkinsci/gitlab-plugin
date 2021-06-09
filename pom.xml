@@ -16,7 +16,7 @@
     <revision>1.5.18</revision>
     <changelist>-SNAPSHOT</changelist>
     <java.level>8</java.level>
-    <jenkins.version>2.222.4</jenkins.version>
+    <jenkins.version>2.281</jenkins.version>
     <spotbugs.failOnError>false</spotbugs.failOnError>
     <configuration-as-code-plugin.version>1.46</configuration-as-code-plugin.version>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
@@ -314,7 +314,7 @@
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
-        <version>3.0.16.Final</version>
+        <version>[4.5.7.Final,)</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -326,7 +326,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
+        <version>[30.0-jre,)</version>
       </dependency>
       <dependency>
         <groupId>net.karneim</groupId>
