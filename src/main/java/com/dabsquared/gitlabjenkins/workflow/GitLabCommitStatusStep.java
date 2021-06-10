@@ -36,6 +36,7 @@ public class GitLabCommitStatusStep extends Step {
     private String name;
     private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>() ;
     private GitLabConnectionProperty connection;
+    private String state;
 
     @DataBoundConstructor
     public GitLabCommitStatusStep(String name){
@@ -53,6 +54,15 @@ public class GitLabCommitStatusStep extends Step {
 
     public List<GitLabBranchBuild> getBuilds() {
         return builds;
+    }
+
+    @DataBoundSetter
+    public void setState(String state){
+        this.state = StringUtils.isEmpty(state) ? null : state;
+    }
+
+    public String getState() {
+        return state;
     }
 
     @DataBoundSetter
@@ -91,16 +101,22 @@ public class GitLabCommitStatusStep extends Step {
                 .withCallback(new BodyExecutionCallback() {
                     @Override
                     public void onStart(StepContext context) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name, step.builds, step.connection);
-                        PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
-                        if (action != null) {
-                            action.startBuild(name);
+                        if (step.state == null) {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name, step.builds, step.connection);
+                            PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
+                            if (action != null) {
+                                action.startBuild(name);
+                            }
+                        } else if (step.state == "pending") {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.pending, name, step.builds, step.connection);
                         }
                     }
 
                     @Override
                     public void onSuccess(StepContext context, Object result) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name,  step.builds, step.connection);
+                        if (step == null || step.state == null || step.state != "pending") {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name,  step.builds, step.connection);
+                        }
                         context.onSuccess(result);
                     }
 
