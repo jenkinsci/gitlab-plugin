@@ -9,7 +9,7 @@ public final class BranchFilterFactory {
 
     public static BranchFilter newBranchFilter(BranchFilterConfig config) {
 		
-		if(config == null)
+		if(config == null || config.getType() == null)
 			return new AllBranchesFilter();
 		
         switch (config.getType()) {
