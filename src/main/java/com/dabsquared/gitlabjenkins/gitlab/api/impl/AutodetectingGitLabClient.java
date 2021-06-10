@@ -205,6 +205,32 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public void approveMergeRequest(final MergeRequest mr) {
+        execute(
+            new GitLabOperation<Void>() {
+                @Override
+                Void execute(GitLabClient client) {
+                    client.approveMergeRequest(mr);
+                    return null;
+                }
+            }
+        );
+    }
+
+    @Override
+    public void unapproveMergeRequest(final MergeRequest mr) {
+        execute(
+            new GitLabOperation<Void>() {
+                @Override
+                Void execute(GitLabClient client) {
+                    client.unapproveMergeRequest(mr);
+                    return null;
+                }
+            }
+        );
+    }
+
+    @Override
     public List<MergeRequest> getMergeRequests(final String projectId, final State state, final int page, final int perPage) {
         return execute(
             new GitLabOperation<List<MergeRequest>>() {
