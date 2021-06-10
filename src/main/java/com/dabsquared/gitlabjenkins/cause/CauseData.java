@@ -14,6 +14,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyList;
 
 /**
  * @author Robin Müller
@@ -42,6 +43,7 @@ public final class CauseData {
     private final String mergedByUser;
     private final String mergeRequestAssignee;
     private final Integer mergeRequestTargetProjectId;
+    private final List<String> mergeRequestLabels;
     private final String targetBranch;
     private final String targetRepoName;
     private final String targetNamespace;
@@ -67,7 +69,7 @@ public final class CauseData {
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
               String userUsername, String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
-              Integer mergeRequestIid, Integer mergeRequestTargetProjectId, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
+              Integer mergeRequestIid, Integer mergeRequestTargetProjectId, List<String> mergeRequestLabels, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
               String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
               String triggerPhrase, String mergeRequestState, String mergedByUser, String mergeRequestAssignee, String ref, String isTag,
 	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration) {
@@ -93,6 +95,7 @@ public final class CauseData {
         this.mergedByUser = mergedByUser == null ? "" : mergedByUser;
         this.mergeRequestAssignee = mergeRequestAssignee == null ? "" : mergeRequestAssignee;
         this.mergeRequestTargetProjectId = mergeRequestTargetProjectId;
+        this.mergeRequestLabels = mergeRequestLabels == null ? emptyList() : mergeRequestLabels;
         this.targetBranch = checkNotNull(targetBranch, "targetBranch must not be null.");
         this.targetRepoName = checkNotNull(targetRepoName, "targetRepoName must not be null.");
         this.targetNamespace = checkNotNull(targetNamespace, "targetNamespace must not be null.");
@@ -139,6 +142,7 @@ public final class CauseData {
         variables.putIfNotNull("gitlabMergeRequestState", mergeRequestState);
         variables.putIfNotNull("gitlabMergedByUser", mergedByUser);
         variables.putIfNotNull("gitlabMergeRequestAssignee", mergeRequestAssignee);
+        variables.put("gitlabMergeRequestLabels", mergeRequestLabels == null ? "" : StringUtils.join(mergeRequestLabels, ","));
         variables.put("gitlabTargetBranch", targetBranch);
         variables.put("gitlabTargetRepoName", targetRepoName);
         variables.put("gitlabTargetNamespace", targetNamespace);
