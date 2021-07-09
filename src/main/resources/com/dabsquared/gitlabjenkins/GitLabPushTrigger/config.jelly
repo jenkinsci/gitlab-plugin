@@ -64,7 +64,7 @@
     <f:entry title="Labels that forces builds if they are added (comma-separated)">
       <f:textbox field="labelsThatForcesBuildIfAdded"/>
     </f:entry>
-    <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
+    <f:entry title="Set build description to build cause (eg. Merge request or Git Push)" field="setBuildDescription">
       <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Build on successful pipeline events" field="triggerOnPipelineEvent">
