@@ -93,7 +93,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     @Restricted(NoExternalUse.class)
     public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this.name = name;
-        this.url = url;
+        this.url = url == null ? "" : url;
         this.globalWebhookURL = globalWebhookURL;
         this.apiTokenId = apiTokenId;
         this.clientBuilder = clientBuilder;
