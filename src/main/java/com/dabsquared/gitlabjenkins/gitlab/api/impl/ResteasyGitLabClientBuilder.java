@@ -8,9 +8,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
 import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -50,8 +48,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static java.net.Proxy.Type.HTTP;
 
@@ -168,11 +168,11 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
 
         private String toFilteredString(MultivaluedMap<String, Object> headers) {
-            return FluentIterable.from(headers.entrySet()).transform(new HeaderToFilteredString()).join(Joiner.on(",\n"));
+            return headers.entrySet().stream().map(new HeaderToFilteredString()).collect(Collectors.joining(",\n"));
         }
 
         private String toString(MultivaluedMap<String, String> headers) {
-            return FluentIterable.from(headers.entrySet()).transform(new HeaderToString()).join(Joiner.on(",\n"));
+            return headers.entrySet().stream().map(new HeaderToString()).collect(Collectors.joining(",\n"));
         }
 
         private String getPrettyPrintResponseBody(ClientResponseContext responseContext) {
