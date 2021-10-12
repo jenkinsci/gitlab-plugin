@@ -1,27 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.16</version>
+    <version>4.29</version>
     <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.5.21-SNAPSHOT</version>
+  <version>${revision}${changelist}</version>
   <name>GitLab Plugin</name>
-  <url>https://github.com/jenkinsci/gitlab-plugin/</url>
+  <url>https://github.com/jenkinsci/${project.artifactId}</url>
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.5.18</revision>
+    <revision>1.5.22</revision>
     <changelist>-SNAPSHOT</changelist>
     <java.level>8</java.level>
     <jenkins.version>2.222.4</jenkins.version>
     <spotbugs.failOnError>false</spotbugs.failOnError>
-    <configuration-as-code-plugin.version>1.46</configuration-as-code-plugin.version>
+    <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <jackson.version>2.12.1</jackson.version>
-    <jenkins-test-harness.version>2.71</jenkins-test-harness.version>
+    <jackson.version>2.12.3</jackson.version>
+    <powermock.version>2.0.9</powermock.version>
   </properties>
 
 
@@ -54,25 +55,16 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:git:ssh://github.com:jenkinsci/gitlab-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/gitlab-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/gitlab-plugin</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:https://github.com/${gitHubRepo}</connection>
+    <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
-      <id>repo.jenkins-ci.org-public</id>
+      <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-    <repository>
-      <id>repo.jenkins-ci.org-releases</id>
-      <url>https://repo.jenkins-ci.org/releases/</url>
-    </repository>
-    <repository>
-      <id>jgit-repository</id>
-      <name>Eclipse JGit Repository</name>
-      <url>https://download.eclipse.org/jgit/maven</url>
     </repository>
   </repositories>
 
@@ -81,10 +73,6 @@
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org-r</id>
-      <url>https://repo.jenkins-ci.org/releases/</url>
-    </pluginRepository>
   </pluginRepositories>
 
   <dependencies>
@@ -92,7 +80,6 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>caffeine-api</artifactId>
-      <version>2.9.1-23.v51c4e2c879c8</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -161,10 +148,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.jenkins-ci</groupId>
-      <artifactId>symbol-annotation</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
     </dependency>
@@ -178,14 +161,17 @@
     <dependency>
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
       <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+      <version>1.0.0.Final</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+      <version>3.0.16.Final</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.jaxrs</groupId>
       <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -200,10 +186,13 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+      <version>18.0</version>
     </dependency>
     <dependency>
       <groupId>net.karneim</groupId>
       <artifactId>pojobuilder</artifactId>
+      <version>3.4.0</version>
+      <!-- 'provided' scope because this is only needed during compilation -->
       <scope>provided</scope>
     </dependency>
 
@@ -231,16 +220,19 @@
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
+      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
+      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-netty</artifactId>
+      <version>3.10.2</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -264,6 +256,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
+      <version>9.4.1208</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -286,65 +279,15 @@
 
   <dependencyManagement>
     <dependencies>
-
-
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.222.x</artifactId>
-        <version>23</version>
+        <version>887.vae9c8ac09ff7</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
-
-      <!--3rd party-->
-      <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>9.4.1208</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-      <groupId>org.mock-server</groupId>
-      <artifactId>mockserver-netty</artifactId>
-      <version>3.10.2</version>
-      <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.spec.javax.ws.rs</groupId>
-        <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-        <version>1.0.0.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-client</artifactId>
-        <version>3.0.16.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>18.0</version>
-      </dependency>
-      <dependency>
-        <groupId>net.karneim</groupId>
-        <artifactId>pojobuilder</artifactId>
-        <version>3.4.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.11</version>
-      </dependency>
     </dependencies>
-
   </dependencyManagement>
 
 
