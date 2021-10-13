@@ -2,6 +2,8 @@ package com.dabsquared.gitlabjenkins.workflow;
 
 import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +24,6 @@ import org.kohsuke.stapler.export.ExportedBean;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.google.common.collect.ImmutableSet;
 
 import hudson.Extension;
 import hudson.model.Run;
@@ -138,7 +139,9 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			return ImmutableSet.of(TaskListener.class, Run.class);
+			Set<Class<?>> context = new HashSet<>();
+			Collections.addAll(context, TaskListener.class, Run.class);
+			return Collections.unmodifiableSet(context);
 		}
     }
 }

@@ -9,7 +9,6 @@ import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
-import com.google.common.base.Predicate;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
@@ -28,6 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.EnumSet;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -264,7 +264,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
 	private boolean isAllowedByConfig(MergeRequestObjectAttributes objectAttributes) {
-		return triggerConfig.apply(objectAttributes);
+		return triggerConfig.test(objectAttributes);
     }
     private boolean isBecameNoWip(MergeRequestHook hook) {
         MergeRequestChangedTitle changedTitle = Optional.of(hook).map(MergeRequestHook::getChanges).map(MergeRequestChanges::getTitle).orElse(new MergeRequestChangedTitle());
