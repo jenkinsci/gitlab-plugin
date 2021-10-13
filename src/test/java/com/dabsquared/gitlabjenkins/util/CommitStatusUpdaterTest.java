@@ -3,7 +3,10 @@ package com.dabsquared.gitlabjenkins.util;
 import static org.mockito.Matchers.any;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -15,14 +18,13 @@ import hudson.Functions;
 import hudson.Util;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
@@ -45,8 +47,6 @@ import jenkins.model.Jenkins;
 /**
  * @author Daumantas Stulgis
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({GitLabConnectionProperty.class, Jenkins.class, DisplayURLProvider.class})
 public class CommitStatusUpdaterTest {
 
 	private static final int PROJECT_ID = 1;
@@ -70,18 +70,23 @@ public class CommitStatusUpdaterTest {
 	@Mock Jenkins jenkins;
 	@Mock GitLabConnectionProperty connection;
 
+	private AutoCloseable closeable;
+	private MockedStatic<Jenkins> mockedJenkins;
+	private MockedStatic<GitLabConnectionProperty> mockedGitLabConnectionProperty;
+	private MockedStatic<DisplayURLProvider> mockedDisplayURLProvider;
+
 	CauseData causeData;
 
 	@Before
 	public void setUp() throws Exception {
-	    MockitoAnnotations.initMocks(this);
-	    PowerMockito.mockStatic(GitLabConnectionProperty.class);
-	    PowerMockito.mockStatic(Jenkins.class);
-	    when(Jenkins.getInstance()).thenReturn(jenkins);
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+	    closeable = MockitoAnnotations.openMocks(this);
+	    mockedJenkins = Mockito.mockStatic(Jenkins.class);
+	    mockedJenkins.when(Jenkins::getInstance).thenReturn(jenkins);
+	    mockedJenkins.when(Jenkins::getActiveInstance).thenReturn(jenkins);
 	    when(jenkins.getRootUrl()).thenReturn(JENKINS_URL);
 	    when(jenkins.getDescriptor(GitLabConnectionConfig.class)).thenReturn(gitLabConnectionConfig);
-	    when(GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
+	    mockedGitLabConnectionProperty = Mockito.mockStatic(GitLabConnectionProperty.class);
+	    mockedGitLabConnectionProperty.when(() -> GitLabConnectionProperty.getClient(any(Run.class))).thenReturn(client);
 	    when(gitLabConnectionConfig.getClient(any(String.class), any(Item.class), any(String.class))).thenReturn(client);
         when(connection.getClient()).thenReturn(client);
 	    when(build.getAction(BuildData.class)).thenReturn(action);
@@ -99,9 +104,9 @@ public class CommitStatusUpdaterTest {
 	    } else {
 	        when(taskListener.getLogger()).thenReturn(new PrintStream("/dev/null"));
 	    }
-	    PowerMockito.mockStatic(DisplayURLProvider.class);
+	    mockedDisplayURLProvider = Mockito.mockStatic(DisplayURLProvider.class);
 	    DisplayURLProvider urlProvider = mock(DisplayURLProvider.class);
-	    when(DisplayURLProvider.get()).thenReturn(urlProvider);
+	    mockedDisplayURLProvider.when(DisplayURLProvider::get).thenReturn(urlProvider);
 	    String url = JENKINS_URL+ Util.encode(build.getUrl());
 	    when(urlProvider.getRunURL(any())).thenReturn(url);
 
@@ -133,7 +138,15 @@ public class CommitStatusUpdaterTest {
                 .build();
 
 	    when(gitlabCause.getData()).thenReturn(causeData);
-	    PowerMockito.spy(client);
+	    spy(client);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		mockedDisplayURLProvider.close();
+		mockedGitLabConnectionProperty.close();
+		mockedJenkins.close();
+		closeable.close();
 	}
 
 	@Test
