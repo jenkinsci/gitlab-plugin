@@ -174,7 +174,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
             gitLabConfig.getConnections().add(new GitLabConnection(
                 oldConfig.gitlabHostUrl,
                     oldConfig.gitlabHostUrl,
-                    "",
                     oldConfig.gitlabApiToken,
                 "autodetect",
                     oldConfig.ignoreCertificateErrors,

@@ -51,12 +51,12 @@ public class PushBuildAction extends BuildWebHookAction {
      * @param secretToken Secret Token
      */
     public PushBuildAction(Item project, JsonNode json, String secretToken) {
+        LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
         this.project = project;
         this.pushHook = JsonUtil.read(json, PushHook.class);
         this.secretToken = secretToken;
     }
 
-    @Override
     void processForCompatibility() {
         // Fill in project if it's not defined.
         if (this.pushHook.getProject() == null && this.pushHook.getRepository() != null) {
@@ -75,7 +75,6 @@ public class PushBuildAction extends BuildWebHookAction {
         }
     }
 
-    @Override
     public void execute() {
         if (pushHook.getRepository() != null && pushHook.getRepository().getUrl() == null) {
             LOGGER.log(Level.WARNING, "No repository url found.");
@@ -98,29 +97,7 @@ public class PushBuildAction extends BuildWebHookAction {
         throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");
     }
 
-    @Override
-    public void executeNoResponse() {
-        if (pushHook.getRepository() != null && pushHook.getRepository().getUrl() == null) {
-            LOGGER.log(Level.WARNING, "No repository url found.");
-            return;
-        }
-
-        if (project instanceof Job<?, ?>) {
-            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
-                @Override
-                protected void performOnPost(GitLabPushTrigger trigger) {
-                    trigger.onPost(pushHook);
-                }
-            });
-            return;
-        }
-        if (project instanceof SCMSourceOwner) {
-            ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
-        }
-    }
-
     private class SCMSourceOwnerNotifier implements Runnable {
-        @Override
         public void run() {
             for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
                 if (scmSource instanceof GitSCMSource) {

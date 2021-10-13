@@ -21,7 +21,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
@@ -99,7 +99,7 @@ public class GitLabConnectionConfigTest {
     public void doCheckConnection_proxy() {
         jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
         GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
-        FormValidation result = descriptor.doTestConnection(gitLabUrl, "", API_TOKEN_ID, "v3", false, 10, 10);
+        FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "v3", false, 10, 10);
         assertThat(result.getMessage(), containsString("Connection refused"));
     }
 
@@ -115,7 +115,7 @@ public class GitLabConnectionConfigTest {
         mockServerClient.when(request).respond(response().withStatusCode(status.getStatusCode()));
 
         GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
-        FormValidation formValidation = descriptor.doTestConnection(gitLabUrl, null, API_TOKEN_ID, clientBuilderId, false, 10, 10);
+        FormValidation formValidation = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 10);
         mockServerClient.verify(request);
         return formValidation.getMessage();
     }
@@ -134,7 +134,7 @@ public class GitLabConnectionConfigTest {
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
         request.addHeader("X-Gitlab-Event", "Push Hook");
-        request.setEntity(new InputStreamEntity (getClass().getResourceAsStream("../postPush.json")));
+        request.setEntity(new StringEntity("{}"));
 
         CloseableHttpResponse response = client.execute(request);
 
@@ -156,7 +156,7 @@ public class GitLabConnectionConfigTest {
         request.addHeader("X-Gitlab-Event", "Push Hook");
         String auth = username + ":" + username;
         request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")))));
-        request.setEntity(new InputStreamEntity (getClass().getResourceAsStream("../postPush.json")));
+        request.setEntity(new StringEntity("{}"));
 
         CloseableHttpResponse response = client.execute(request);
 
@@ -173,7 +173,7 @@ public class GitLabConnectionConfigTest {
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
         request.addHeader("X-Gitlab-Event", "Push Hook");
-        request.setEntity(new InputStreamEntity (getClass().getResourceAsStream("../postPush.json")));
+        request.setEntity(new StringEntity("{}"));
 
         CloseableHttpResponse response = client.execute(request);
 
@@ -182,8 +182,8 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void setConnectionsTest() {
-        GitLabConnection connection1 = new GitLabConnection("1", "http://localhost", null, API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
-        GitLabConnection connection2 = new GitLabConnection("2", "http://localhost", null, API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
+        GitLabConnection connection1 = new GitLabConnection("1", "http://localhost", null, new V3GitLabClientBuilder(), false, 10, 10);
+        GitLabConnection connection2 = new GitLabConnection("2", "http://localhost", null, new V3GitLabClientBuilder(), false, 10, 10);
         GitLabConnectionConfig config = jenkins.get(GitLabConnectionConfig.class);
         List<GitLabConnection> connectionList1 = new ArrayList<>();
         connectionList1.add(connection1);
@@ -204,7 +204,7 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void getClient_is_cached() {
-        GitLabConnection connection = new GitLabConnection("test", "http://localhost", null, API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
+        GitLabConnection connection = new GitLabConnection("test", "http://localhost", API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
         GitLabConnectionConfig config = jenkins.get(GitLabConnectionConfig.class);
         List<GitLabConnection> connectionList1 = new ArrayList<>();
         connectionList1.add(connection);
