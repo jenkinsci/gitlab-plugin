@@ -4,8 +4,6 @@ import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.service.GitLabProjectBranchesService;
 import com.dabsquared.gitlabjenkins.service.GitLabProjectLabelsService;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -20,12 +18,14 @@ import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Robin Müller
@@ -83,7 +83,8 @@ public final class ProjectLabelsProvider {
     private FormValidation checkMatchingLabels(@QueryParameter String value, List<String> labels) {
         Set<String> matchingLabels = new HashSet<>();
         Set<String> unknownLabels = new HashSet<>();
-        for (String label : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
+        List<String> inputLabels = Arrays.stream(value.split(",")).filter(s -> !s.isEmpty()).map(String::trim).collect(Collectors.toList());
+        for (String label : inputLabels) {
             if (labels.contains(label)) {
                 matchingLabels.add(label);
             } else {
@@ -93,7 +94,7 @@ public final class ProjectLabelsProvider {
         if (unknownLabels.isEmpty()) {
             return FormValidation.ok(Messages.GitLabPushTrigger_LabelsMatched(matchingLabels.size()));
         } else {
-            return FormValidation.warning(Messages.GitLabPushTrigger_LabelsNotFound(Joiner.on(", ").join(unknownLabels)));
+            return FormValidation.warning(Messages.GitLabPushTrigger_LabelsNotFound(unknownLabels.stream().collect(Collectors.joining(", "))));
         }
     }
 

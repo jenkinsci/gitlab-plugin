@@ -1,10 +1,9 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
-import com.google.common.base.Splitter;
-
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Robin Müller
@@ -43,10 +42,6 @@ class MergeRequestLabelFilterImpl implements MergeRequestLabelFilter {
     }
 
     private Set<String> convert(String commaSeparatedString) {
-        Set<String> result = new HashSet<>();
-        for (String s : Splitter.on(',').omitEmptyStrings().trimResults().split(commaSeparatedString)) {
-            result.add(s);
-        }
-        return result;
+        return Arrays.stream(commaSeparatedString.split(",")).filter(s -> !s.isEmpty()).map(String::trim).collect(Collectors.toSet());
     }
 }

@@ -8,7 +8,6 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.google.common.base.Joiner;
 import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -154,7 +153,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         public void filter(ClientRequestContext context) {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.log(Level.FINEST, "Call GitLab:\nHTTP method: {0}\nURL: {1}\nRequest headers: [\n{2}\n]",
-                        LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getHeaders())));
+                        LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getStringHeaders())));
             }
         }
 
@@ -167,7 +166,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             }
         }
 
-        private String toFilteredString(MultivaluedMap<String, Object> headers) {
+        private String toFilteredString(MultivaluedMap<String, String> headers) {
             return headers.entrySet().stream().map(new HeaderToFilteredString()).collect(Collectors.joining(",\n"));
         }
 
@@ -197,16 +196,16 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             return "";
         }
 
-        private static class HeaderToFilteredString implements Function<Map.Entry<String, List<Object>>, String> {
+        private static class HeaderToFilteredString implements Function<Map.Entry<String, List<String>>, String> {
             @Nullable
             @Override
-            public String apply(@Nullable Map.Entry<String, List<Object>> input) {
+            public String apply(@Nullable Map.Entry<String, List<String>> input) {
                 if (input == null) {
                     return null;
                 } else if (input.getKey().equals(PRIVATE_TOKEN)) {
                     return input.getKey() + " = [****FILTERED****]";
                 } else {
-                    return input.getKey() + " = [" + Joiner.on(", ").join(input.getValue()) + "]";
+                    return input.getKey() + " = [" + input.getValue().stream().collect(Collectors.joining(", ")) + "]";
                 }
             }
         }
@@ -215,7 +214,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             @Nullable
             @Override
             public String apply(@Nullable Map.Entry<String, List<String>> input) {
-                return input == null ? null : input.getKey() + " = [" + Joiner.on(", ").join(input.getValue()) + "]";
+                return input == null ? null : input.getKey() + " = [" + input.getValue().stream().collect(Collectors.joining(", ")) + "]";
             }
         }
     }

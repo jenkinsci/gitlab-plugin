@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -21,8 +23,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import com.google.common.collect.ImmutableSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +164,9 @@ public class GitLabCommitStatusStep extends Step {
 
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			return ImmutableSet.of(TaskListener.class, Run.class);
+			Set<Class<?>> context = new HashSet<>();
+			Collections.addAll(context, TaskListener.class, Run.class);
+			return Collections.unmodifiableSet(context);
 		}
     }
 }
