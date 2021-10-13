@@ -9,18 +9,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public abstract class WebHook {
 
-    private Project project;
     private Repository repository;
     private String objectKind;
-
-
-    public Project getProject () {
-        return project;
-    }
-
-    public void setProject (Project project) {
-        this.project = project;
-    }
 
     public String getObjectKind() {
         return objectKind;
