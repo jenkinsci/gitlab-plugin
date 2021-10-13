@@ -6,9 +6,6 @@
     <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%e.g. http://gitlab.mydomain.com})">
       <f:textbox />
     </f:entry>
-    <f:entry title="${%Global GitLab CI Service URL Identifier}" field="globalWebhookURL" description="${%Identifier for a global GitLab CI Service URL, e.g. 'globalwebhook'. Resulting URL will be of the form http://JENKINS_URL/project/IDENTIFIER. Leave empty if not desired}">
-      <f:textbox />
-    </f:entry>
     <f:entry title="${%Credentials}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
       <c:select/>
     </f:entry>

@@ -88,7 +88,7 @@ public class GitLabRule implements TestRule {
         }
 
         GitLabConnectionConfig config = Jenkins.getInstance().getDescriptorByType(GitLabConnectionConfig.class);
-        GitLabConnection connection = new GitLabConnection("test", url, null, API_TOKEN_ID, new V3GitLabClientBuilder(), true,10, 10);
+        GitLabConnection connection = new GitLabConnection("test", url, API_TOKEN_ID, new V3GitLabClientBuilder(), true,10, 10);
         config.addConnection(connection);
         config.save();
         return new GitLabConnectionProperty(connection.getName());
