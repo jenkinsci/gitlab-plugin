@@ -17,7 +17,6 @@ import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -39,6 +38,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -155,7 +155,7 @@ public class GitLabConnectionConfigTest {
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
         request.addHeader("X-Gitlab-Event", "Push Hook");
         String auth = username + ":" + username;
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")))));
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(Charset.forName("ISO-8859-1"))));
         request.setEntity(new StringEntity("{}"));
 
         CloseableHttpResponse response = client.execute(request);
