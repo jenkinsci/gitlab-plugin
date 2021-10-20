@@ -158,11 +158,6 @@
 
     <!-- REST client dependencies -->
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-      <version>1.0.1.Final</version>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
       <version>3.15.2.Final</version>
