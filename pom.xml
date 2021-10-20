@@ -214,7 +214,7 @@
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-netty</artifactId>
-      <version>4.1.0</version>
+      <version>5.11.2</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
