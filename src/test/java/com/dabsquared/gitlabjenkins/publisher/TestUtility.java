@@ -93,7 +93,8 @@ final class TestUtility {
 
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         when(project.getProperty(GitLabConnectionProperty.class)).thenReturn(new GitLabConnectionProperty(gitLabConnection));
-        when(build.getProject()).thenReturn(project);
+        doReturn(project).when(build).getParent();
+        doReturn(project).when(build).getProject();
         return build;
     }
 

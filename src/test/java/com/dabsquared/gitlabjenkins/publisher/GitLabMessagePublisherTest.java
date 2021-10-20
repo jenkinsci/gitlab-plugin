@@ -32,6 +32,7 @@ import java.util.HashSet;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
@@ -232,7 +233,8 @@ public class GitLabMessagePublisherTest {
 
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         when(project.getProperty(GitLabConnectionProperty.class)).thenReturn(new GitLabConnectionProperty(gitLabConnection));
-        when(build.getProject()).thenReturn(project);
+        doReturn(project).when(build).getParent();
+        doReturn(project).when(build).getProject();
         EnvVars environment = mock(EnvVars.class);
         when(environment.expand(anyString())).thenAnswer(new Answer<String>() {
             @Override
