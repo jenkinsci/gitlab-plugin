@@ -129,6 +129,7 @@ public class GitLabVotePublisherTest {
         return request()
                 .withPath("/gitlab/api/v(3|4)/user")
                 .withMethod("GET")
+                .withHeader("Content-Type", "text/plain")
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
