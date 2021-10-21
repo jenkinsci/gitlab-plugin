@@ -5,7 +5,7 @@ updates:
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     ignore:
       # Newer versions require code changes
       - dependency-name: "org.jboss.resteasy:resteasy-client"
@@ -13,4 +13,4 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
