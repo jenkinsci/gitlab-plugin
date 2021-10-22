@@ -1,4 +1,4 @@
-# Gitlab Plugin
+# GitLab Plugin
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -56,9 +56,9 @@ To enable debug logging in the plugin:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
-3. Enter 'Gitlab plugin' or whatever you want for the name
+3. Enter 'GitLab plugin' or whatever you want for the name
 4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINEST, and save
-5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
+5. Then click on your GitLab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
 6. Refresh the log page and you should see output
 
 ## Known bugs/issues
