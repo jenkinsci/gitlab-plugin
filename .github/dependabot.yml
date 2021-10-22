@@ -7,6 +7,12 @@ updates:
     schedule:
       interval: "daily"
     ignore:
+      # The 2.0.0 release is the first release under the jakarta.activation.* namespace
+      - dependency-name: "jakarta.activation:jakarta.activation-api"
+        versions: [">=2.0.0"]
+      # The 3.0.0 release is the first release under the jakarta.xml.bind.* namespace
+      - dependency-name: "jakarta.xml.bind:jakarta.xml.bind-api"
+        versions: [">=3.0.0"]
       # Provided by the web container, so aligned with Jetty
       - dependency-name: "javax.servlet:javax.servlet-api"
       # Newer versions require code changes
