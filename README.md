@@ -1,4 +1,4 @@
-# Gitlab Plugin
+# GitLab Plugin
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -56,9 +56,9 @@ To enable debug logging in the plugin:
 
 1. Go to Jenkins -> Manage Jenkins -> System Log
 2. Add new log recorder
-3. Enter 'Gitlab plugin' or whatever you want for the name
+3. Enter 'GitLab plugin' or whatever you want for the name
 4. On the next page, enter 'com.dabsquared.gitlabjenkins' for Logger, set log level to FINEST, and save
-5. Then click on your Gitlab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
+5. Then click on your GitLab plugin log, click 'Clear this log' if necessary, and then use GitLab to trigger some actions
 6. Refresh the log page and you should see output
 
 ## Known bugs/issues
@@ -554,13 +554,6 @@ gitlabCommitStatus(
 ### Cancel pending builds on merge request update
 To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.
 This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
-
-## Group Webhooks
-
-To make use of GitLab EE's group webhooks you will need to have specified an identifier when you [create a GitLab connection](#jenkins-to-gitlab-authentication) in your Jenkins global configuration page. The resulting *Global GitLab CI Service URL* will be of the form ``http://JENKINS_URL/project/IDENTIFIER``. GitLab's configuration is the same as described in the [job trigger configuration section](#job-trigger-configuration), except you navigate to a group's *Settings* page and supply the URL discussed here instead of a job specific one.
-
-A webhook will fire for every relevant event of a direct child of the group, but only Jenkins projects configured for the firing GitLab connection, repository, and event type will trigger.
-The *Global GitLab CI Service URL* may of course be used in a project's settings just like a regular *GitLab CI Service URL*.
 
 ## Compatibility
 

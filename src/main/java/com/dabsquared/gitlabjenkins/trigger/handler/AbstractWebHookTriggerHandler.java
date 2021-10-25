@@ -53,7 +53,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
             setCommitStatusPendingIfNecessary(job, hook);
             scheduleBuild(job, createActions(job, hook));
         } else {
-            LOGGER.log(Level.INFO, "Source branch {0} or target branch {1} is not allowed for project {2}", new Object[]{sourceBranch, targetBranch, job.getFullName ()});
+            LOGGER.log(Level.INFO, "Source branch {0} or target branch {1} is not allowed", new Object[]{sourceBranch, targetBranch});
         }
     }
 

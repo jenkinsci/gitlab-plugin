@@ -11,7 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
@@ -129,6 +129,7 @@ public class GitLabVotePublisherTest {
         return request()
                 .withPath("/gitlab/api/v(3|4)/user")
                 .withMethod("GET")
+                .withHeader("Content-Type", "text/plain")
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 

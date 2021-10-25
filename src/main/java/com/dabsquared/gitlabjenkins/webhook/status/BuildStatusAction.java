@@ -23,18 +23,12 @@ abstract class BuildStatusAction implements WebHookAction {
         this.build = build;
     }
 
-    @Override
     public void execute(StaplerResponse response) {
         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
         if (!hasGitSCM(item)) {
             throw HttpResponses.error(409, "The project has no GitSCM configured");
         }
         writeStatusBody(response, build, getStatus(build));
-    }
-
-    @Override
-    public void executeNoResponse(StaplerResponse response){
-        execute(response);
     }
 
     protected abstract void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status);

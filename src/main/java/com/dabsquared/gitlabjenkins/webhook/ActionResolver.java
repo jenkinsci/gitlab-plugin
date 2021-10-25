@@ -12,9 +12,6 @@ import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
@@ -28,7 +25,9 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -45,25 +44,18 @@ public class ActionResolver {
     private static final Logger LOGGER = Logger.getLogger(ActionResolver.class.getName());
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
-    private String               requestBody;
-    private StaplerRequest       request;
-
-    public ActionResolver (StaplerRequest request) {
-        this.request = request;
-        this.requestBody = JsonUtil.getRequestBody (request);
-    }
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
-        Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(request.getRestOfPath()).iterator();
+        Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/")).filter(s -> !s.isEmpty()).iterator();
         Item project = resolveProject(projectName, restOfPathParts);
         if (project == null) {
             throw HttpResponses.notFound();
         }
-        return resolveAction(project, Joiner.on('/').join(restOfPathParts), request);
-    }
-
-    public WebHookAction resolve (Item project, StaplerRequest request) {
-        return resolveAction (project, "", request);
+        StringJoiner restOfPath = new StringJoiner("/");
+        while (restOfPathParts.hasNext()) {
+            restOfPath.add(restOfPathParts.next());
+        }
+        return resolveAction(project, restOfPath.toString(), request);
     }
 
     private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
@@ -165,10 +157,6 @@ public class ActionResolver {
 
 
     private String getRequestBody(StaplerRequest request) {
-        if (request.equals (this.request)) {
-            return getRequestBody ();
-        }
-
         String requestBody;
         try {
             Charset charset = request.getCharacterEncoding() == null ?  UTF_8 : Charset.forName(request.getCharacterEncoding());
@@ -181,8 +169,6 @@ public class ActionResolver {
 
     private Item resolveProject(final String projectName, final Iterator<String> restOfPathParts) {
         return ACLUtil.impersonate(ACL.SYSTEM, new ACLUtil.Function<Item>() {
-
-            @Override
             public Item invoke() {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
@@ -194,28 +180,14 @@ public class ActionResolver {
                         return item;
                     }
                 }
-                LOGGER.log(Level.FINE, "No project found: {0}, {1}", toArray(projectName, Joiner.on('/').join(restOfPathParts)));
+                LOGGER.log(Level.FINE, "No project found: {0}", toArray(projectName));
                 return null;
             }
         });
     }
 
-    public String getRequestBody () {
-        return requestBody;
-    }
-
-    private void setRequestBody (String requestBody) {
-        this.requestBody = requestBody;
-    }
-
     static class NoopAction implements WebHookAction {
-
-        @Override
         public void execute(StaplerResponse response) {
-        }
-
-        @Override
-        public void executeNoResponse(StaplerResponse response){
         }
     }
 }

@@ -41,12 +41,12 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
      * @param secretToken Secret Token
      */
     public MergeRequestBuildAction(Item project, JsonNode json, String secretToken) {
+        LOGGER.log(Level.FINE, "MergeRequest: {0}", toPrettyPrint(json));
         this.project = project;
         this.mergeRequestHook = JsonUtil.read(json, MergeRequestHook.class);
         this.secretToken = secretToken;
     }
 
-    @Override
     void processForCompatibility() {
         // url and homepage are introduced in 8.x versions of Gitlab
         final MergeRequestObjectAttributes attributes = this.mergeRequestHook.getObjectAttributes();
@@ -68,7 +68,6 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
         }
     }
 
-    @Override
     public void execute() {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Merge Request Hook is not supported for this project");
@@ -80,18 +79,5 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
             }
         });
         throw HttpResponses.ok();
-    }
-
-    @Override
-    public void executeNoResponse() {
-        if (!(project instanceof Job<?, ?>)) {
-            return;
-        }
-        ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
-            @Override
-            protected void performOnPost(GitLabPushTrigger trigger) {
-                trigger.onPost(mergeRequestHook);
-            }
-        });
     }
 }

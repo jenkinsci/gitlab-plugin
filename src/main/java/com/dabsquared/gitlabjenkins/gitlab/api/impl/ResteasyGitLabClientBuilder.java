@@ -8,22 +8,30 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
 import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
 import org.jboss.resteasy.plugins.providers.JaxrsFormProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.kohsuke.accmod.Restricted;
@@ -50,8 +58,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static java.net.Proxy.Type.HTTP;
 
@@ -100,11 +110,25 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             Proxy proxy = httpProxyConfig.createProxy(getHost(url));
             if (proxy.type() == HTTP) {
                 InetSocketAddress address = (InetSocketAddress) proxy.address();
-                builder.defaultProxy(address.getHostString().replaceFirst("^.*://", ""),
+                String hostname = address.getHostString().replaceFirst("^.*://", "");
+                builder.defaultProxy(hostname,
                     address.getPort(),
-                    address.getHostName().startsWith("https") ? "https" : "http",
-                    httpProxyConfig.getUserName(),
-                    httpProxyConfig.getPassword());
+                    address.getHostName().startsWith("https") ? "https" : "http");
+
+                if (httpProxyConfig.getUserName() != null
+                        && httpProxyConfig.getPassword() != null) {
+                    CredentialsProvider proxyCredentials = new BasicCredentialsProvider();
+                    proxyCredentials.setCredentials(
+                            new AuthScope(hostname, address.getPort()),
+                            new UsernamePasswordCredentials(
+                                    httpProxyConfig.getUserName(), httpProxyConfig.getPassword()));
+
+                    ClientHttpEngine httpEngine =
+                            new ClientHttpEngineBuilder43(proxyCredentials)
+                                    .resteasyClientBuilder(builder)
+                                    .build();
+                    builder.httpEngine(httpEngine);
+                }
             }
         }
 
@@ -154,7 +178,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         public void filter(ClientRequestContext context) {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.log(Level.FINEST, "Call GitLab:\nHTTP method: {0}\nURL: {1}\nRequest headers: [\n{2}\n]",
-                        LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getHeaders())));
+                        LoggerUtil.toArray(context.getMethod(), context.getUri(), toFilteredString(context.getStringHeaders())));
             }
         }
 
@@ -167,12 +191,12 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             }
         }
 
-        private String toFilteredString(MultivaluedMap<String, Object> headers) {
-            return FluentIterable.from(headers.entrySet()).transform(new HeaderToFilteredString()).join(Joiner.on(",\n"));
+        private String toFilteredString(MultivaluedMap<String, String> headers) {
+            return headers.entrySet().stream().map(new HeaderToFilteredString()).collect(Collectors.joining(",\n"));
         }
 
         private String toString(MultivaluedMap<String, String> headers) {
-            return FluentIterable.from(headers.entrySet()).transform(new HeaderToString()).join(Joiner.on(",\n"));
+            return headers.entrySet().stream().map(new HeaderToString()).collect(Collectors.joining(",\n"));
         }
 
         private String getPrettyPrintResponseBody(ClientResponseContext responseContext) {
@@ -197,16 +221,16 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             return "";
         }
 
-        private static class HeaderToFilteredString implements Function<Map.Entry<String, List<Object>>, String> {
+        private static class HeaderToFilteredString implements Function<Map.Entry<String, List<String>>, String> {
             @Nullable
             @Override
-            public String apply(@Nullable Map.Entry<String, List<Object>> input) {
+            public String apply(@Nullable Map.Entry<String, List<String>> input) {
                 if (input == null) {
                     return null;
                 } else if (input.getKey().equals(PRIVATE_TOKEN)) {
                     return input.getKey() + " = [****FILTERED****]";
                 } else {
-                    return input.getKey() + " = [" + Joiner.on(", ").join(input.getValue()) + "]";
+                    return input.getKey() + " = [" + input.getValue().stream().collect(Collectors.joining(", ")) + "]";
                 }
             }
         }
@@ -215,7 +239,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             @Nullable
             @Override
             public String apply(@Nullable Map.Entry<String, List<String>> input) {
-                return input == null ? null : input.getKey() + " = [" + Joiner.on(", ").join(input.getValue()) + "]";
+                return input == null ? null : input.getKey() + " = [" + input.getValue().stream().collect(Collectors.joining(", ")) + "]";
             }
         }
     }
@@ -229,27 +253,67 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
     }
 
-    private static class ResteasyClientBuilder extends org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder {
-        private CredentialsProvider proxyCredentials;
+    private static class ClientHttpEngineBuilder43 extends org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder43 {
 
-        @SuppressWarnings("UnusedReturnValue")
-        ResteasyClientBuilder defaultProxy(String hostname, int port, final String scheme, String username, String password) {
-            super.defaultProxy(hostname, port, scheme);
-            if (username != null && password != null) {
-                proxyCredentials = new BasicCredentialsProvider();
-                proxyCredentials.setCredentials(new AuthScope(hostname, port), new UsernamePasswordCredentials(username, password));
-            }
+        private final CredentialsProvider proxyCredentials;
+        private ResteasyClientBuilder that;
+
+        private ClientHttpEngineBuilder43(CredentialsProvider proxyCredentials) {
+            this.proxyCredentials = proxyCredentials;
+        }
+
+        @Override
+        public ClientHttpEngineBuilder resteasyClientBuilder(ResteasyClientBuilder resteasyClientBuilder) {
+            super.resteasyClientBuilder(resteasyClientBuilder);
+            that = resteasyClientBuilder;
             return this;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
-        protected ClientHttpEngine initDefaultEngine() {
-            ApacheHttpClient4Engine httpEngine = (ApacheHttpClient4Engine) super.initDefaultEngine();
-            if (proxyCredentials != null) {
-                ((DefaultHttpClient) httpEngine.getHttpClient()).setCredentialsProvider(proxyCredentials);
+        protected ClientHttpEngine createEngine(
+                final HttpClientConnectionManager cm,
+                final RequestConfig.Builder rcBuilder,
+                final HttpHost defaultProxy,
+                final int responseBufferSize,
+                final HostnameVerifier verifier,
+                final SSLContext theContext) {
+            final HttpClient httpClient;
+            rcBuilder.setProxy(
+                    new HttpHost(
+                            that.getDefaultProxyHostname(),
+                            that.getDefaultProxyPort(),
+                            that.getDefaultProxyScheme()));
+            if (System.getSecurityManager() == null) {
+                httpClient =
+                        HttpClientBuilder.create()
+                                .setConnectionManager(cm)
+                                .setDefaultCredentialsProvider(proxyCredentials)
+                                .setDefaultRequestConfig(rcBuilder.build())
+                                .disableContentCompression()
+                                .build();
+            } else {
+                httpClient =
+                        AccessController.doPrivileged(
+                                new PrivilegedAction<HttpClient>() {
+                                    @Override
+                                    public HttpClient run() {
+                                        return HttpClientBuilder.create()
+                                                .setConnectionManager(cm)
+                                                .setDefaultCredentialsProvider(proxyCredentials)
+                                                .setDefaultRequestConfig(rcBuilder.build())
+                                                .disableContentCompression()
+                                                .build();
+                                    }
+                                });
             }
-            return httpEngine;
+
+            ApacheHttpClient43Engine engine =
+                    (ApacheHttpClient43Engine) ApacheHttpClient4EngineFactory.create(httpClient, true);
+            engine.setResponseBufferSize(responseBufferSize);
+            engine.setHostnameVerifier(verifier);
+            engine.setSslContext(theContext);
+            engine.setFollowRedirects(that.isFollowRedirects());
+            return engine;
         }
     }
 }

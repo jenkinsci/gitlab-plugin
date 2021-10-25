@@ -3,8 +3,6 @@ package com.dabsquared.gitlabjenkins.trigger.branch;
 import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.service.GitLabProjectBranchesService;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -19,12 +17,14 @@ import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Robin Müller
@@ -83,7 +83,8 @@ public final class ProjectBranchesProvider {
         Set<String> matchingSpecs = new HashSet<>();
         Set<String> unknownSpecs = new HashSet<>();
         AntPathMatcherSet projectBranchesMatcherSet = new AntPathMatcherSet(projectBranches);
-        for (String branchSpec : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
+        List<String> branchSpecs = Arrays.stream(value.split(",")).filter(s -> !s.isEmpty()).map(String::trim).collect(Collectors.toList());
+        for (String branchSpec : branchSpecs) {
             if (projectBranchesMatcherSet.contains(branchSpec)) {
                 matchingSpecs.add(branchSpec);
             } else {
@@ -94,7 +95,7 @@ public final class ProjectBranchesProvider {
         if (unknownSpecs.isEmpty()) {
             return FormValidation.ok(Messages.GitLabPushTrigger_BranchesMatched(matchingSpecs.size()));
         } else {
-            return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(Joiner.on(", ").join(unknownSpecs)));
+            return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(unknownSpecs.stream().collect(Collectors.joining(", "))));
         }
     }
 
