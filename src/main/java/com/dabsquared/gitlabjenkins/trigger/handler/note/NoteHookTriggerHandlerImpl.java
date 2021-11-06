@@ -5,6 +5,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
@@ -31,9 +32,9 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     }
 
     @Override
-    public void handle(Job<?, ?> job, NoteHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, NoteHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter, UserNameFilter userNameFilter) {
         if (isValidTriggerPhrase(hook.getObjectAttributes().getNote())) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter, userNameFilter);
         }
     }
 
@@ -52,6 +53,11 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     @Override
     protected String getTargetBranch(NoteHook hook) {
         return hook.getMergeRequest() == null ? null : hook.getMergeRequest().getTargetBranch();
+    }
+
+    @Override
+    protected String getUserName(NoteHook hook) {
+        return hook.getUser() == null ? null : hook.getUser().getUsername();
     }
 
     @Override

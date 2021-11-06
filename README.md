@@ -287,6 +287,7 @@ properties([
             branchFilterType: "NameBasedFilter",
             includeBranchesSpec: "release/qat",
             excludeBranchesSpec: "",
+            userNameFilterType: "All",
         ]
     ])
 ])
@@ -478,7 +479,12 @@ Triggers may be filtered based on the branch name, i.e. the build will only be a
 
 **Note:** This functionality requires access to GitLab and a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to add branch filters. For Pipeline jobs, the configuration must be saved *and* the job must be run once before the list is populated.
 
-### Build when tags are pushed
+## User name filtering
+Triggers may be filtered based on the user name, i.e. the build will only be allowed for users not listed in excluded user names. On the project configuration page, when you configure the GitLab trigger, you can choose 'Filter users by name'.' Filter by name takes comma-separated lists of user names to exclude from triggering a build.
+
+**Note:** This functionality requires access to GitLab and a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to add branch filters. For Pipeline jobs, the configuration must be saved *and* the job must be run once before the list is populated.
+
+## Build when tags are pushed
 In order to build when a new tag is pushed:
 1. In the GitLab webhook configuration, add 'Tag push events'
 2. In the job configuration under 'Source code management':

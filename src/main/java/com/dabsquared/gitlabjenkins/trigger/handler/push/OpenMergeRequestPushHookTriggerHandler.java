@@ -14,6 +14,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
 import hudson.model.Action;
@@ -54,7 +55,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter, UserNameFilter userNameFilter) {
     	try {
             if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                 ParameterizedJob project = (ParameterizedJobMixIn.ParameterizedJob) job;
@@ -64,11 +65,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 	if (t instanceof GitLabPushTrigger) {
                 		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Integer projectId = hook.getProjectId();
-                        if (property != null && property.getClient() != null && projectId != null && trigger != null) {
+                        if (property != null && property.getClient() != null && projectId != null) {
                             GitLabClient client = property.getClient();
                             for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                                	handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                	handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest, userNameFilter);
                                 }
                             }
                         }
@@ -94,7 +95,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         return result;
     }
 
-    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabClient client, MergeRequest mergeRequest) {
+    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabClient client, MergeRequest mergeRequest, UserNameFilter userNameFilter) {
         if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
             LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
@@ -108,7 +109,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
         String sourceBranch = mergeRequest.getSourceBranch();
         String targetBranch = mergeRequest.getTargetBranch();
-        if (targetBranch != null && branchFilter.isBranchAllowed(sourceBranch, targetBranch) && hook.getRef().equals("refs/heads/"+targetBranch) && sourceBranch != null) {
+        String userName = mergeRequest.getAuthor().getUsername();
+        if (targetBranch != null && branchFilter.isBranchAllowed(sourceBranch, targetBranch) && hook.getRef().equals("refs/heads/"+targetBranch) && sourceBranch != null && userNameFilter.isUserNameAllowed(userName)) {
             LOGGER.log(Level.INFO, "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 

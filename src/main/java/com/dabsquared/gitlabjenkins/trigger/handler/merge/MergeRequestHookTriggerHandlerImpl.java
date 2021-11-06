@@ -6,6 +6,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
@@ -70,7 +71,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     @Override
-    public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(Job<?, ?> job, MergeRequestHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter, UserNameFilter userNameFilter) {
         if (isExecutable(job, hook)) {
             List<String> labelsNames = new ArrayList<>();
             if (hook.getLabels() != null) {
@@ -80,7 +81,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             }
 
             if (mergeRequestLabelFilter.isMergeRequestAllowed(labelsNames)) {
-                super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+                super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter, userNameFilter);
             }
         }
     }
@@ -151,6 +152,11 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     @Override
     protected String getTargetBranch(MergeRequestHook hook) {
         return hook.getObjectAttributes() == null ? null : hook.getObjectAttributes().getTargetBranch();
+    }
+
+    @Override
+    protected String getUserName(MergeRequestHook hook) {
+        return hook.getUser() == null ? null : hook.getUser().getUsername();
     }
 
     @Override

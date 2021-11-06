@@ -7,6 +7,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.testing.gitlab.rule.GitLabRule;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -68,7 +69,7 @@ public class GitLabIT {
     public void buildOnPush() throws IOException, InterruptedException, GitAPIException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
-        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnPush(true).withBranchFilterType(BranchFilterType.All).build();
+        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnPush(true).withBranchFilterType(BranchFilterType.All).withUserNameFilterType(UserNameFilterType.All).build();
         project.addTrigger(trigger);
         trigger.start(project, true);
         project.getBuildersList().add(new TestBuilder() {
@@ -91,7 +92,7 @@ public class GitLabIT {
     public void buildOnMergeRequest() throws IOException, InterruptedException, GitAPIException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
-        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnMergeRequest(true).withBranchFilterType(BranchFilterType.All).build();
+        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnMergeRequest(true).withBranchFilterType(BranchFilterType.All).withUserNameFilterType(UserNameFilterType.All).build();
         project.addTrigger(trigger);
         trigger.start(project, true);
         project.getBuildersList().add(new TestBuilder() {
@@ -118,7 +119,9 @@ public class GitLabIT {
         GitLabPushTrigger trigger = gitLabPushTrigger()
             .withTriggerOnNoteRequest(true)
             .withNoteRegex(".*test.*")
-            .withBranchFilterType(BranchFilterType.All).build();
+            .withBranchFilterType(BranchFilterType.All)
+            .withUserNameFilterType(UserNameFilterType.All)
+            .build();
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -151,6 +154,7 @@ public class GitLabIT {
         GitLabPushTrigger trigger = gitLabPushTrigger()
             .withTriggerOnPush(true)
             .withBranchFilterType(BranchFilterType.All)
+            .withUserNameFilterType(UserNameFilterType.All)
             .build();
 
         FreeStyleProject project = jenkins.createFreeStyleProject("test");

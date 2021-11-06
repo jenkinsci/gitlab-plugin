@@ -6,6 +6,8 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeReq
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterFactory;
+import com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -41,6 +43,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.P
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
+import static com.dabsquared.gitlabjenkins.trigger.filter.UserNameFilterConfig.UserNameFilterConfigBuilder.userNameFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.withConfig;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -369,7 +372,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .build()
                 )
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null),
+            UserNameFilterFactory.newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All))
+        );
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -384,7 +389,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .build()
                 )
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null),
+            UserNameFilterFactory.newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All))
+            );
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -454,7 +461,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
                     .build()
                 )
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null),
+            UserNameFilterFactory.newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All))
+            );
 
         buildTriggered.block(10000);
         return buildTriggered;
@@ -475,7 +484,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
         mergeRequestHookTriggerHandler.handle(project, mergeRequestHook()
                 .withObjectAttributes(defaultMergeRequestObjectAttributes().withDescription(MRDescription).withLastCommit(commit().withMessage(lastCommitMsg).withAuthor(user().withName("test").build()).withId("testid").build()).build())
                 .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null),
+            UserNameFilterFactory.newUserNameFilter(userNameFilterConfig().build(UserNameFilterType.All))
+            );
 
         buildTriggered.block(10000);
         return buildTriggered.isSignaled();
