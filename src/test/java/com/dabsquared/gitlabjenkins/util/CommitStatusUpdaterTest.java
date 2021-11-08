@@ -1,21 +1,34 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import static org.mockito.Matchers.any;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
+import hudson.EnvVars;
+import hudson.Functions;
+import hudson.Util;
+import hudson.model.Cause;
+import hudson.model.Cause.UpstreamCause;
+import hudson.model.Item;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.git.Revision;
+import hudson.plugins.git.util.Build;
+import hudson.plugins.git.util.BuildData;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
-import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
-import hudson.Functions;
-import hudson.Util;
+import jenkins.model.Jenkins;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.After;
@@ -25,24 +38,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-
-import hudson.EnvVars;
-import hudson.model.Cause;
-import hudson.model.Item;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.model.Cause.UpstreamCause;
-import hudson.plugins.git.Revision;
-import hudson.plugins.git.util.Build;
-import hudson.plugins.git.util.BuildData;
-import jenkins.model.Jenkins;
-
 
 /**
  * @author Daumantas Stulgis
@@ -111,7 +106,7 @@ public class CommitStatusUpdaterTest {
 	    when(urlProvider.getRunURL(any())).thenReturn(url);
 
 
-	    causeData = causeData()
+	    causeData = CauseDataBuilder.causeData()
                 .withActionType(CauseData.ActionType.NOTE)
                 .withSourceProjectId(PROJECT_ID)
                 .withTargetProjectId(PROJECT_ID)
@@ -183,7 +178,7 @@ public class CommitStatusUpdaterTest {
 
     @Test
     public void testTagEvent() {
-        causeData = causeData()
+        causeData = CauseDataBuilder.causeData()
             .withActionType(CauseData.ActionType.TAG_PUSH)
             .withSourceProjectId(PROJECT_ID)
             .withTargetProjectId(PROJECT_ID)

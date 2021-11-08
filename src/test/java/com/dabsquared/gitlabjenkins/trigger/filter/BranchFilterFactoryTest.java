@@ -1,10 +1,10 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
-import org.junit.Test;
-
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.Test;
 
 /**
  * @author Robin Müller
