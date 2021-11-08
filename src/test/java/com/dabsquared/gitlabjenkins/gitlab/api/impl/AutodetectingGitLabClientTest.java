@@ -1,6 +1,20 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.API_TOKEN;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.addGitLabApiToken;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.assertApiImpl;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.responseNotFound;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.responseOk;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.versionRequest;
+import static org.junit.Assert.fail;
+import static org.mockserver.matchers.Times.exactly;
+import static org.mockserver.matchers.Times.once;
+
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,16 +22,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.*;
-import static org.junit.Assert.fail;
-import static org.mockserver.matchers.Times.exactly;
-import static org.mockserver.matchers.Times.once;
 
 public class AutodetectingGitLabClientTest {
     @Rule

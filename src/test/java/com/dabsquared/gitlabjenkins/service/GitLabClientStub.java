@@ -1,18 +1,21 @@
 package com.dabsquared.gitlabjenkins.service;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.emptyList;
-
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 class GitLabClientStub implements GitLabClient {
     private final Map<Pair<String, Class>, List<?>> data;
@@ -171,6 +174,6 @@ class GitLabClientStub implements GitLabClient {
 
     @Override
     public List<Pipeline> getPipelines(String projectName) {
-        return emptyList();
+        return Collections.emptyList();
     }
 }

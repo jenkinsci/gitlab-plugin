@@ -1,5 +1,14 @@
 package com.dabsquared.gitlabjenkins.testing.integration;
 
+import static com.dabsquared.gitlabjenkins.builder.generated.GitLabPushTriggerBuilder.gitLabPushTrigger;
+import static com.dabsquared.gitlabjenkins.testing.gitlab.rule.builder.generated.ProjectRequestBuilder.projectRequest;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
@@ -15,6 +24,13 @@ import hudson.model.FreeStyleProject;
 import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.OneShotEvent;
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.api.Git;
@@ -30,25 +46,6 @@ import org.jvnet.hudson.test.SleepBuilder;
 import org.jvnet.hudson.test.TestBuilder;
 import org.jvnet.hudson.test.TestNotifier;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-import java.util.List;
-
-import static com.dabsquared.gitlabjenkins.builder.generated.GitLabPushTriggerBuilder.gitLabPushTrigger;
-import static com.dabsquared.gitlabjenkins.testing.gitlab.rule.builder.generated.ProjectRequestBuilder.projectRequest;
-import static java.lang.Integer.parseInt;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Robin Müller
  */
@@ -56,7 +53,7 @@ public class GitLabIT {
     private static final String GITLAB_URL = "http://localhost:" + System.getProperty("gitlab.http.port", "10080");
 
     @Rule
-    public GitLabRule gitlab = new GitLabRule(GITLAB_URL, parseInt(System.getProperty("postgres.port", "5432")));
+    public GitLabRule gitlab = new GitLabRule(GITLAB_URL, Integer.parseInt(System.getProperty("postgres.port", "5432")));
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -224,7 +221,7 @@ public class GitLabIT {
         // Once the issue is resolved, replace this implementation.
         List<String> projectIds = gitlab.getProjectIds();
         assertSame(projectIds.size(), 1);
-        return new ImmutablePair<>(parseInt(projectIds.get(0)), sha);
+        return new ImmutablePair<>(Integer.parseInt(projectIds.get(0)), sha);
     }
 
     private String initGitLabProject(String url, boolean addFeatureBranch) throws GitAPIException, IOException {

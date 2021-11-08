@@ -1,5 +1,23 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.BUILD_NUMBER;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.BUILD_URL;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.formatNote;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.preparePublisher;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import hudson.EnvVars;
@@ -10,6 +28,12 @@ import hudson.model.Result;
 import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -21,22 +45,6 @@ import org.mockito.stubbing.Answer;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashSet;
-
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 /**
  * @author Nikolay Ustinov

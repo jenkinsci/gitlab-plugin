@@ -1,5 +1,11 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -24,20 +30,15 @@ import hudson.model.Result;
 import hudson.plugins.git.util.BuildData;
 import hudson.tasks.Notifier;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.mockserver.junit.MockServerRule;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.mockserver.junit.MockServerRule;
 
 final class TestUtility {
     static final String GITLAB_CONNECTION_V3 = "GitLabV3";

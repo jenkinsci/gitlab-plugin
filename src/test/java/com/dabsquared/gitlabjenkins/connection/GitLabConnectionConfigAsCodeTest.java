@@ -1,5 +1,9 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.domains.DomainCredentials;
@@ -8,20 +12,14 @@ import io.jenkins.plugins.casc.Configurator;
 import io.jenkins.plugins.casc.ConfiguratorRegistry;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
+import io.jenkins.plugins.casc.misc.Util;
 import io.jenkins.plugins.casc.model.CNode;
-import io.jenkins.plugins.casc.model.Mapping;
 import java.util.List;
 import jenkins.model.Jenkins;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.RuleChain;
-
-import static io.jenkins.plugins.casc.misc.Util.toStringFromYamlFile;
-import static io.jenkins.plugins.casc.misc.Util.toYamlString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class GitLabConnectionConfigAsCodeTest {
     @Rule
@@ -72,8 +70,8 @@ public class GitLabConnectionConfigAsCodeTest {
         @SuppressWarnings("unchecked")
         CNode node = c.describe(globalConfiguration, context);
         assertNotNull(node);
-        String exported = toYamlString(node);
-        String expected = toStringFromYamlFile(this, "global-config-expected.yml");
+        String exported = Util.toYamlString(node);
+        String expected = Util.toStringFromYamlFile(this, "global-config-expected.yml");
         assertEquals(expected, exported);
     }
 }

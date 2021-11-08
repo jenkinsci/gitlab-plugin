@@ -1,10 +1,24 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.mockSimpleBuild;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.preparePublisher;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -14,14 +28,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 /**
  * @author Nikolay Ustinov
