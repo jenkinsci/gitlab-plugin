@@ -191,8 +191,10 @@ public class CommitStatusUpdater {
 
                 for (final BuildData buildData : buildDatas) {
                     for (final Entry<String, Build> buildByBranchName : buildData.getBuildsByBranchName().entrySet()) {
-                        if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
-                            addGitLabBranchBuild(result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
+                        if (buildByBranchName.getValue().getSHA1() != null){
+                            if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
+                                addGitLabBranchBuild(result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
+                            }
                         }
                     }
                 }
