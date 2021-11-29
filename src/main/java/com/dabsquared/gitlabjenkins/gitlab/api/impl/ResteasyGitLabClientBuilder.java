@@ -208,15 +208,16 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
 
         private String getResponseBody(ClientResponseContext context) {
-            try (InputStream entityStream = context.getEntityStream()) {
-                if (entityStream != null) {
+            // Cannot use try-with-resources here because the stream needs to remain open for reading later. Instead, we reset it when done.
+            try {
+                InputStream entityStream = context.getEntityStream();
+                if (entityStream != null && entityStream.markSupported()) {
                     byte[] bytes = IOUtils.toByteArray(entityStream);
-                    context.setEntityStream(new ByteArrayInputStream(bytes));
+                    entityStream.reset();
                     return new String(bytes);
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Failure during reading the response body", e);
-                context.setEntityStream(new ByteArrayInputStream(new byte[0]));
             }
             return "";
         }
