@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
+import com.dabsquared.gitlabjenkins.util.CauseUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -73,7 +74,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         
         @Override
         protected Void run() throws Exception {
-            GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            GitLabWebHookCause cause = CauseUtil.findCauseFromUpstreamCauses(run.getCauses(), GitLabWebHookCause.class);
             if (cause != null) {
                 MergeRequest mergeRequest = cause.getData().getMergeRequest();
                 if (mergeRequest != null) {

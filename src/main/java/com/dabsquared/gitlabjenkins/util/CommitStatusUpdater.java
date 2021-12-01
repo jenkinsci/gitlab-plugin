@@ -3,14 +3,12 @@ package com.dabsquared.gitlabjenkins.util;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.EnvVars;
 import hudson.model.*;
-import hudson.model.Cause.UpstreamCause;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
@@ -252,23 +250,14 @@ public class CommitStatusUpdater {
     }
 
     private static List<GitLabBranchBuild> findBuildsFromUpstreamCauses(List<Cause> causes) {
-        for (Cause cause : causes) {
-            if (cause instanceof UpstreamCause) {
-                List<Cause> upCauses = ((UpstreamCause) cause).getUpstreamCauses();    // Non null, returns empty list when none are set
-                for (Cause upCause : upCauses) {
-                    if (upCause instanceof GitLabWebHookCause) {
-                        GitLabWebHookCause gitlabCause = (GitLabWebHookCause) upCause;
-                        return Collections.singletonList(
-                                new GitLabBranchBuild(gitlabCause.getData().getSourceProjectId().toString(),
-                                        gitlabCause.getData().getLastCommit()));
-                    }
-                }
-                List<GitLabBranchBuild> builds = findBuildsFromUpstreamCauses(upCauses);
-                if (!builds.isEmpty()) {
-                    return builds;
-                }
-            }
+
+        GitLabWebHookCause gitlabCause = CauseUtil.findCauseFromUpstreamCauses(causes, GitLabWebHookCause.class);
+
+        if (gitlabCause != null) {
+            return Collections.singletonList(
+                new GitLabBranchBuild(gitlabCause.getData().getSourceProjectId().toString(), gitlabCause.getData().getLastCommit()));
         }
+
         return Collections.emptyList();
     }
 
