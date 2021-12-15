@@ -100,7 +100,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     protected CauseData retrieveCauseData(PipelineHook hook) {
         return causeData()
                 .withActionType(CauseData.ActionType.PIPELINE)
-                .withSourceProjectId(hook.getProjectId())
+                .withSourceProjectId(hook.getProject().getId())
                 .withBranch(getTargetBranch(hook)==null?"":getTargetBranch(hook))
                 .withSourceBranch(getTargetBranch(hook)==null?"":getTargetBranch(hook))
                 .withUserName(hook.getUser()==null||hook.getUser().getName()==null?"":hook.getUser().getName())
@@ -109,7 +109,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                 .withSourceRepoSshUrl(hook.getRepository()==null||hook.getRepository().getGitSshUrl()==null?"":hook.getRepository().getGitSshUrl())
                 .withSourceRepoHttpUrl(hook.getRepository()==null||hook.getRepository()==null?"":hook.getRepository().getGitHttpUrl())
                 .withMergeRequestTitle("")
-                .withTargetProjectId(hook.getProjectId())
+                .withTargetProjectId(hook.getProject().getId())
                 .withTargetBranch(getTargetBranch(hook)==null?"":getTargetBranch(hook))
                 .withTargetRepoName("")
                 .withTargetNamespace("")
@@ -136,7 +136,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(PipelineHook hook) {
         return buildStatusUpdate()
-            .withProjectId(hook.getProjectId())
+            .withProjectId(hook.getProject().getId())
             .withSha(hook.getObjectAttributes().getSha())
             .withRef(hook.getObjectAttributes().getRef())
             .build();

@@ -1,5 +1,55 @@
 ChangeLog
 
+1.5.21
+=====================
+* #1099: Fix inability to trigger a build of merge commit on merged Merge Request
+
+1.5.20
+=====================
+* #1111: Add possibility to delete the source branch after succeed merge
+* #1118: Fix an error blocking Multibranch Pipeline projects from being triggered
+
+1.5.19
+=====================
+* Fix broken javadoc
+
+1.5.18
+=====================
+* #1032: Set commit status to 'canceled' only when user aborts build from UI
+* #1063: Better compatibility with Configuration as Code plugin
+
+1.5.17
+=====================
+* #998: Add possibility to trigger builds only when new commits were pushed to Merge Request (prevents to trigger builds for non-code changes in Merge Requests)
+
+1.5.16
+=====================
+* #866: Better compatibility with Configuration as Code plugin (useAuthenticatedEndpoint)
+* #903: Add possibility to force build with added MR label(s)
+* #916 and #1017: Allow for project/folder level GitLab Token API credentials to be used for GitLab connection
+* #951: Fix inability to trigger builds on accepted Merge Request
+* #1002: Fix that the plugin checks only global permissions instead of both global and project-level permissions
+* #1008: Fix NPE during commit status retrieval by gitlabCommitStatus step
+* #1012: Fix NPE if SCM revision is null (probably occurs only while using with Gitlab Branch Source Plugin)
+* #1014: Fix another NPE while using this plugin with Gitlab Branch Source Plugin
+
+1.5.15
+=====================
+* #991: Add documentation for addGitLabMRComment step
+
+1.5.14
+=====================
+* #969: Add gitlabUserUsername variable
+* #977: Add possibility to handle push event with branch deletion
+
+1.5.13
+=====================
+* #972: Security fixes for jackson databind & httpclient
+
+1.5.12
+=====================
+* Fixes SECURITY-1357. When testing the connection to GitLab, require a POST operation, require that the user be an Administrator, and don't allow triggering the test via the Jenkins API.
+
 1.5.11
 =====================
 * #823: Fix gitlabCommitStatus step so that name argument is not required

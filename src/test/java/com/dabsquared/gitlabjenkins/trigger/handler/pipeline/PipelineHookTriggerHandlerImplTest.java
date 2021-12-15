@@ -1,32 +1,5 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.pipeline;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
-import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleProject;
-import hudson.util.OneShotEvent;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestBuilder;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PipelineEventObjectAttributesBuilder.pipelineEventObjectAttributes;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PipelineHookBuilder.pipelineHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
@@ -35,7 +8,32 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory.newBranchFilter;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
+import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
+import hudson.util.OneShotEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
 
 /**
  * @author Robin Müller
@@ -70,7 +68,6 @@ public class PipelineHookTriggerHandlerImplTest {
 
         pipelineHookTriggerHandler = new PipelineHookTriggerHandlerImpl(allowedStates);
         pipelineHook = pipelineHook()
-            .withProjectId(1)
             .withUser(user)
             .withRepository(repository()
                 .withName("test")
@@ -93,6 +90,7 @@ public class PipelineHookTriggerHandlerImplTest {
                 .build())
 
             .build();
+        git.close();
     }
 
     @Test
@@ -132,9 +130,17 @@ public class PipelineHookTriggerHandlerImplTest {
         project.setQuietPeriod(0);
 
         pipelineHookTriggerHandler.handle(project, pipelineHook, false, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-                                      newMergeRequestLabelFilter(null));
+            newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
+    }
+    @After
+    public void after()    {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
+
+        }
     }
 }

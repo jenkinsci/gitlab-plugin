@@ -12,6 +12,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -24,8 +25,20 @@ import java.util.logging.Logger;
 public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     private static final Logger LOGGER = Logger.getLogger(GitLabAcceptMergeRequestPublisher.class.getName());
 
+    private boolean deleteSourceBranch = false;
+
     @DataBoundConstructor
-    public GitLabAcceptMergeRequestPublisher() { }
+    public GitLabAcceptMergeRequestPublisher() {
+    }
+
+    @DataBoundSetter
+    public void setDeleteSourceBranch(boolean deleteSourceBranch) {
+        this.deleteSourceBranch = deleteSourceBranch;
+    }
+
+    public boolean isDeleteSourceBranch() { return deleteSourceBranch; }
+
+
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -49,7 +62,7 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest) {
         try {
             if (build.getResult() == Result.SUCCESS) {
-                client.acceptMergeRequest(mergeRequest, "Merge Request accepted by jenkins build success", false);
+                client.acceptMergeRequest(mergeRequest, "Merge Request accepted by jenkins build success", this.deleteSourceBranch);
             }
         } catch (WebApplicationException | ProcessingException e) {
             listener.getLogger().printf("Failed to accept merge request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());

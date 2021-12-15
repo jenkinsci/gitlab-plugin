@@ -60,6 +60,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
+import java.util.Collection;
 
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler;
@@ -78,7 +79,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private boolean triggerOnPush = true;
+    private boolean triggerToBranchDeleteRequest = false;
     private boolean triggerOnMergeRequest = true;
+    private boolean triggerOnlyIfNewCommitsPushed = false;
     private boolean triggerOnPipelineEvent = false;
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
@@ -88,6 +91,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private String noteRegex = "";
     private boolean ciSkip = true;
     private boolean skipWorkInProgressMergeRequest;
+    private String labelsThatForcesBuildIfAdded = "";
     private boolean setBuildDescription = true;
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
@@ -117,16 +121,18 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
      */
     @Deprecated
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerOnMergeRequest, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest,
+    public GitLabPushTrigger(boolean triggerOnPush, boolean triggerToBranchDeleteRequest, boolean triggerOnMergeRequest, boolean triggerOnlyIfNewCommitsPushed, boolean triggerOnAcceptedMergeRequest, boolean triggerOnClosedMergeRequest,
     						 TriggerOpenMergeRequest triggerOpenMergeRequestOnPush, boolean triggerOnNoteRequest, String noteRegex,
-    						 boolean skipWorkInProgressMergeRequest, boolean ciSkip,
+                             boolean skipWorkInProgressMergeRequest, boolean ciSkip, String labelsThatForcesBuildIfAdded,
                              boolean setBuildDescription, boolean addNoteOnMergeRequest, boolean addCiMessage, boolean addVoteOnMergeRequest,
                              boolean acceptMergeRequestOnSuccess, BranchFilterType branchFilterType,
                              String includeBranchesSpec, String excludeBranchesSpec, String sourceBranchRegex, String targetBranchRegex,
                              MergeRequestLabelFilterConfig mergeRequestLabelFilterConfig, String secretToken, boolean triggerOnPipelineEvent,
                              boolean triggerOnApprovedMergeRequest, String pendingBuildName, boolean cancelPendingBuildsOnUpdate) {
         this.triggerOnPush = triggerOnPush;
+        this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
         this.triggerOnMergeRequest = triggerOnMergeRequest;
+        this.triggerOnlyIfNewCommitsPushed = triggerOnlyIfNewCommitsPushed;
         this.triggerOnAcceptedMergeRequest = triggerOnAcceptedMergeRequest;
         this.triggerOnClosedMergeRequest = triggerOnClosedMergeRequest;
         this.triggerOnNoteRequest = triggerOnNoteRequest;
@@ -135,6 +141,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.triggerOnPipelineEvent = triggerOnPipelineEvent;
         this.ciSkip = ciSkip;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+        this.labelsThatForcesBuildIfAdded = labelsThatForcesBuildIfAdded;
         this.setBuildDescription = setBuildDescription;
         this.addNoteOnMergeRequest = addNoteOnMergeRequest;
         this.addCiMessage = addCiMessage;
@@ -213,9 +220,18 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return triggerOnPush;
     }
 
+    public boolean getTriggerToBranchDeleteRequest() {
+        return triggerToBranchDeleteRequest;
+    }
+
     @Override
     public boolean getTriggerOnMergeRequest() {
         return triggerOnMergeRequest;
+    }
+
+    @Override
+    public boolean isTriggerOnlyIfNewCommitsPushed() {
+        return triggerOnlyIfNewCommitsPushed;
     }
 
     @Override
@@ -261,6 +277,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return skipWorkInProgressMergeRequest;
     }
 
+    @Override
+    public String getLabelsThatForcesBuildIfAdded() {
+        return labelsThatForcesBuildIfAdded;
+    }
+
     public BranchFilterType getBranchFilterType() {
         return branchFilterType;
     }
@@ -302,6 +323,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
     }
+
+    @DataBoundSetter
+    public void setTriggerToBranchDeleteRequest(boolean triggerToBranchDeleteRequest) {
+        this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
+    }
     
     @DataBoundSetter
     public void setTriggerOnApprovedMergeRequest(boolean triggerOnApprovedMergeRequest) {
@@ -311,6 +337,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setTriggerOnMergeRequest(boolean triggerOnMergeRequest) {
         this.triggerOnMergeRequest = triggerOnMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnlyIfNewCommitsPushed(boolean triggerOnlyIfNewCommitsPushed) {
+        this.triggerOnlyIfNewCommitsPushed = triggerOnlyIfNewCommitsPushed;
     }
 
     @DataBoundSetter
@@ -346,6 +377,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setSkipWorkInProgressMergeRequest(boolean skipWorkInProgressMergeRequest) {
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
+    }
+
+    @DataBoundSetter
+    public void setLabelsThatForcesBuildIfAdded(String labelsThatForcesBuildIfAdded) {
+        this.labelsThatForcesBuildIfAdded = labelsThatForcesBuildIfAdded;
     }
 
     @DataBoundSetter
@@ -484,7 +520,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private void initializeTriggerHandler() {
 		mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(this);
         noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
-        pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
+        pushHookTriggerHandler = newPushHookTriggerHandler(triggerOnPush,triggerToBranchDeleteRequest, triggerOpenMergeRequestOnPush, skipWorkInProgressMergeRequest);
         pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
     }
 
@@ -516,7 +552,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         GitLabPushTrigger trigger = null;
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob p = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (Trigger t : p.getTriggers().values()) {
+            Collection<Trigger> triggerList = p.getTriggers().values();
+            for (Trigger t : triggerList) {
                 if (t instanceof GitLabPushTrigger) {
                     trigger = (GitLabPushTrigger) t;
                 }

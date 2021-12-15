@@ -23,10 +23,17 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.Bui
 class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
 
     private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
+    private boolean triggerToBranchDeleteRequest = false;
+    
+
+    public PushHookTriggerHandlerImpl(boolean triggerToBranchDeleteRequest)
+    {
+    this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
+    }
 
     @Override
     public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-        if (isNoRemoveBranchPush(hook)) {
+        if (isNoRemoveBranchPush(hook) || this.triggerToBranchDeleteRequest ) {
             super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
@@ -50,6 +57,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
                 .withBranch(getTargetBranch(hook))
                 .withSourceBranch(getTargetBranch(hook))
                 .withUserName(hook.getUserName())
+                .withUserUsername(hook.getUserUsername())
                 .withUserEmail(hook.getUserEmail())
                 .withSourceRepoHomepage(hook.getRepository().getHomepage())
                 .withSourceRepoName(hook.getRepository().getName())
@@ -108,10 +116,14 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     private String retrievePushedBy(final PushHook hook) {
-
         final String userName = hook.getUserName();
         if (!StringUtils.isEmptyOrNull(userName)) {
             return userName;
+        }
+
+        final String userUsername = hook.getUserUsername();
+        if (!StringUtils.isEmptyOrNull(userUsername)) {
+            return userUsername;
         }
 
         final List<Commit> commits = hook.getCommits();

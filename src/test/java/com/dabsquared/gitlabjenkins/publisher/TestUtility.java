@@ -1,5 +1,11 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -24,20 +30,15 @@ import hudson.model.Result;
 import hudson.plugins.git.util.BuildData;
 import hudson.tasks.Notifier;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.mockserver.junit.MockServerRule;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.mockserver.junit.MockServerRule;
 
 final class TestUtility {
     static final String GITLAB_CONNECTION_V3 = "GitLabV3";
@@ -65,14 +66,14 @@ final class TestUtility {
 
     }
 
-    static <T  extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
+    static <T extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(MatrixConfiguration.class);
         Notifier publisher = mock(publisherClass);
         MatrixBuild parentBuild = mock(MatrixBuild.class);
 
         when(build.getParent()).thenReturn(project);
-        when(((MatrixAggregatable) publisher).createAggregator(any(MatrixBuild.class), any(Launcher.class), any(BuildListener.class))).thenCallRealMethod();
+        when(((MatrixAggregatable) publisher).createAggregator(any(MatrixBuild.class), any(), any(BuildListener.class))).thenCallRealMethod();
         when(publisher.perform(any(AbstractBuild.class), any(Launcher.class), any(BuildListener.class))).thenReturn(true);
 
         MatrixAggregator aggregator = ((MatrixAggregatable) publisher).createAggregator(parentBuild, null, listener);
@@ -93,7 +94,8 @@ final class TestUtility {
 
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         when(project.getProperty(GitLabConnectionProperty.class)).thenReturn(new GitLabConnectionProperty(gitLabConnection));
-        when(build.getProject()).thenReturn(project);
+        doReturn(project).when(build).getParent();
+        doReturn(project).when(build).getProject();
         return build;
     }
 

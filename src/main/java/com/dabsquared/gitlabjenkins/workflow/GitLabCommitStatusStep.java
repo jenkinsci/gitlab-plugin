@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -21,8 +23,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import com.google.common.collect.ImmutableSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +122,14 @@ public class GitLabCommitStatusStep extends Step {
 
                     @Override
                     public void onFailure(StepContext context, Throwable t) {
-                        BuildState state = t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
+                        BuildState state = BuildState.failed;
+                        if (t instanceof FlowInterruptedException) {
+                            FlowInterruptedException ex = (FlowInterruptedException) t;
+                            if (ex.isActualInterruption()) {
+                                state = BuildState.canceled;
+                            }
+                        }
+
                         CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name,  step.builds, step.connection);
                         context.onFailure(t);
                     }
@@ -142,10 +149,10 @@ public class GitLabCommitStatusStep extends Step {
         }
 
         private TaskListener getTaskListener(StepContext context) {
-            if (!context.isReady()) {
-                return null;
-            }
             try {
+                if (!context.isReady()) {
+                    return null;
+                }
                 return context.get(TaskListener.class);
             } catch (Exception x) {
                 return null;
@@ -173,7 +180,9 @@ public class GitLabCommitStatusStep extends Step {
 
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			return ImmutableSet.of(TaskListener.class, Run.class);
+			Set<Class<?>> context = new HashSet<>();
+			Collections.addAll(context, TaskListener.class, Run.class);
+			return Collections.unmodifiableSet(context);
 		}
     }
 }

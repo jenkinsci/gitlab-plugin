@@ -4,9 +4,9 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.google.common.base.Function;
 
 import java.util.List;
+import java.util.function.Function;
 
 
 final class ResteasyGitLabClient implements GitLabClient {

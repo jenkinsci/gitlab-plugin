@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.assertApiImpl;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.buildClientWithDefaults;
+import static org.junit.Assert.assertNotNull;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import hudson.ProxyConfiguration;
@@ -7,11 +10,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.junit.MockServerRule;
-
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.assertApiImpl;
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.buildClientWithDefaults;
-import static junit.framework.TestCase.assertNotNull;
-
 
 public class ResteasyGitLabClientBuilderTest {
     @Rule

@@ -1,6 +1,8 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -15,7 +17,6 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
-import com.google.common.collect.ImmutableSet;
 
 import hudson.Extension;
 import hudson.model.Run;
@@ -76,12 +77,24 @@ public class UpdateGitLabCommitStatusStep extends Step {
         @Override
         protected Void run() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-            CommitStatusUpdater.updateCommitStatus(run, null, step.state, name);
+            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(), step.state, name);
             PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
             if (action != null) {
                 action.startBuild(name);
             }
             return null;
+        }
+
+        private TaskListener getTaskListener() {
+            StepContext context = getContext();
+            if (!context.isReady()) {
+                return null;
+            }
+            try {
+                return context.get(TaskListener.class);
+            } catch (Exception x) {
+                return null;
+            }
         }
     }
 
@@ -107,7 +120,9 @@ public class UpdateGitLabCommitStatusStep extends Step {
 
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			return ImmutableSet.of(TaskListener.class, Run.class);
+			Set<Class<?>> context = new HashSet<>();
+			Collections.addAll(context, TaskListener.class, Run.class);
+			return Collections.unmodifiableSet(context);
 		}
     }
 }

@@ -1,0 +1,18 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form"
+	xmlns:c="/lib/credentials" xmlns:st="jelly:stapler">
+	<st:include page="configure-advanced.jelly" optional="true" />
+	<f:entry title="${%GitLab Connection}" field="gitLabConnection">
+		<f:select />
+	</f:entry>
+	<f:optionalBlock title="${%Use alternative credential}" checked="${instance.useAlternativeCredential}"
+		field="useAlternativeCredential" inline="true">
+		<f:entry title="${%Credential :}"
+			field="jobCredentialId">
+			<c:select />
+		</f:entry>
+		<f:validateButton title="${%Test Connection}"
+			progress="${%Testing...}" method="testConnection"
+			with="jobCredentialId,gitLabConnection" />
+	</f:optionalBlock>
+</j:jelly>

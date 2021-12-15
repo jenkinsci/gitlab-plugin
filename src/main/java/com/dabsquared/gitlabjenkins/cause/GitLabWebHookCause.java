@@ -1,10 +1,9 @@
 package com.dabsquared.gitlabjenkins.cause;
 
 import hudson.triggers.SCMTrigger;
+import java.util.Objects;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Robin Müller
@@ -16,7 +15,7 @@ public class GitLabWebHookCause extends SCMTrigger.SCMTriggerCause {
 
     public GitLabWebHookCause(CauseData data) {
         super("");
-        this.data = checkNotNull(data, "data must not be null");
+        this.data = Objects.requireNonNull(data, "data must not be null");
     }
 
     @Exported

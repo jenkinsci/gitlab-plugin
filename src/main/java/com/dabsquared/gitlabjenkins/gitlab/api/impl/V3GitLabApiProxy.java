@@ -6,6 +6,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -41,7 +42,7 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Path("/projects/{projectId}/merge_requests")
     @Override
     MergeRequest createMergeRequest(
-        @PathParam("projectId") Integer projectId,
+        @PathParam("projectId") @Encoded Integer projectId,
         @FormParam("source_branch") String sourceBranch,
         @FormParam("target_branch") String targetBranch,
         @FormParam("title") String title);
@@ -50,28 +51,28 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectName}")
     @Override
-    Project getProject(@PathParam("projectName") String projectName);
+    Project getProject(@PathParam("projectName") @Encoded String projectName);
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}")
     @Override
-    Project updateProject(@PathParam("projectId") String projectId,
+    Project updateProject(@PathParam("projectId") @Encoded String projectId,
                           @FormParam("name") String name,
                           @FormParam("path") String path);
 
     @DELETE
     @Path("/projects/{projectId}")
     @Override
-    void deleteProject(@PathParam("projectId") String projectId);
+    void deleteProject(@PathParam("projectId") @Encoded String projectId);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/hooks")
     @Override
-    void addProjectHook(@PathParam("projectId") String projectId,
+    void addProjectHook(@PathParam("projectId") @Encoded String projectId,
                         @FormParam("url") String url,
                         @FormParam("push_events") Boolean pushEvents,
                         @FormParam("merge_requests_events") Boolean mergeRequestEvents,
@@ -82,8 +83,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/statuses/{sha}")
     @Override
-    void changeBuildStatus(@PathParam("projectId") String projectId,
-                           @PathParam("sha") String sha,
+    void changeBuildStatus(@PathParam("projectId") @Encoded String projectId,
+                           @PathParam("sha") @Encoded String sha,
                            @FormParam("state") BuildState state,
                            @FormParam("ref") String ref,
                            @FormParam("context") String context,
@@ -95,8 +96,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/statuses/{sha}")
     @Override
-    void changeBuildStatus(@PathParam("projectId") Integer projectId,
-                           @PathParam("sha") String sha,
+    void changeBuildStatus(@PathParam("projectId") @Encoded Integer projectId,
+                           @PathParam("sha") @Encoded String sha,
                            @FormParam("state") BuildState state,
                            @FormParam("ref") String ref,
                            @FormParam("context") String context,
@@ -107,7 +108,7 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/repository/commits/{sha}")
     @Override
-    void getCommit(@PathParam("projectId") String projectId, @PathParam("sha") String sha);
+    void getCommit(@PathParam("projectId") @Encoded String projectId, @PathParam("sha") @Encoded String sha);
 
 
     @PUT
@@ -115,8 +116,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/merge")
     @Override
-    void acceptMergeRequest(@PathParam("projectId") Integer projectId,
-                            @PathParam("mergeRequestId") Integer mergeRequestId,
+    void acceptMergeRequest(@PathParam("projectId") @Encoded Integer projectId,
+                            @PathParam("mergeRequestId") @Encoded Integer mergeRequestId,
                             @FormParam("merge_commit_message") String mergeCommitMessage,
                             @FormParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
 
@@ -125,8 +126,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/notes")
     @Override
-    void createMergeRequestNote(@PathParam("projectId") Integer projectId,
-                                @PathParam("mergeRequestId") Integer mergeRequestId,
+    void createMergeRequestNote(@PathParam("projectId") @Encoded Integer projectId,
+                                @PathParam("mergeRequestId") @Encoded Integer mergeRequestId,
                                 @FormParam("body") String body);
 
     @GET
@@ -134,16 +135,16 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/award_emoji")
     @Override
-    List<Awardable> getMergeRequestEmoji(@PathParam("projectId") Integer projectId,
-                              @PathParam("mergeRequestId") Integer mergeRequestId);
+    List<Awardable> getMergeRequestEmoji(@PathParam("projectId") @Encoded Integer projectId,
+                              @PathParam("mergeRequestId") @Encoded Integer mergeRequestId);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/award_emoji")
     @Override
-    void awardMergeRequestEmoji(@PathParam("projectId") Integer projectId,
-                                @PathParam("mergeRequestId") Integer mergeRequestId,
+    void awardMergeRequestEmoji(@PathParam("projectId") @Encoded Integer projectId,
+                                @PathParam("mergeRequestId") @Encoded Integer mergeRequestId,
                                 @QueryParam("name") String name);
 
     @DELETE
@@ -151,15 +152,15 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/merge_requests/{mergeRequestId}/award_emoji/{awardId}")
     @Override
-    void deleteMergeRequestEmoji(@PathParam("projectId") Integer projectId,
-                                @PathParam("mergeRequestId") Integer mergeRequestId,
-                                @PathParam("awardId") Integer awardId);
+    void deleteMergeRequestEmoji(@PathParam("projectId") @Encoded Integer projectId,
+                                @PathParam("mergeRequestId") @Encoded Integer mergeRequestId,
+                                @PathParam("awardId") @Encoded Integer awardId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/merge_requests")
     @Override
-    List<MergeRequest> getMergeRequests(@PathParam("projectId") String projectId,
+    List<MergeRequest> getMergeRequests(@PathParam("projectId") @Encoded String projectId,
                                         @QueryParam("state") State state,
                                         @QueryParam("page") int page,
                                         @QueryParam("per_page") int perPage);
@@ -168,14 +169,14 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/repository/branches")
     @Override
-    List<Branch> getBranches(@PathParam("projectId") String projectId);
+    List<Branch> getBranches(@PathParam("projectId") @Encoded String projectId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/repository/branches/{branch}")
     @Override
-    Branch getBranch(@PathParam("projectId") String projectId,
-                     @PathParam("branch") String branch);
+    Branch getBranch(@PathParam("projectId") @Encoded String projectId,
+                     @PathParam("branch") @Encoded String branch);
 
     @HEAD
     @Produces(MediaType.APPLICATION_JSON)
@@ -204,7 +205,7 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/users/{userId}")
     @Override
-    User updateUser(@PathParam("userId") String userId,
+    User updateUser(@PathParam("userId") @Encoded String userId,
                     @FormParam("email") String email,
                     @FormParam("username") String username,
                     @FormParam("name") String name,
@@ -214,11 +215,11 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/labels")
     @Override
-    List<Label> getLabels(@PathParam("projectId") String projectId);
+    List<Label> getLabels(@PathParam("projectId") @Encoded String projectId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/pipelines")
     @Override
-    List<Pipeline> getPipelines(@PathParam("projectId") String projectId);
+    List<Pipeline> getPipelines(@PathParam("projectId") @Encoded String projectId);
 }

@@ -5,7 +5,7 @@ def builds = ['pre-build', 'build']
 node('master') {
   gitlabBuilds(builds: builds) {
     gitlabCommitStatus(name: 'pre-build',
-        connection: gitLabConnection('test-connection'),
+        connection: gitLabConnection(gitLabConnection:'test-connection'),
         builds: [
             [projectId: 'test/test', revisionHash: 'master'],
             [projectId: 'test/utils', revisionHash: 'master'],
@@ -14,7 +14,7 @@ node('master') {
     }
 
     gitlabCommitStatus(name: 'build',
-        connection: gitLabConnection('test-connection'),
+        connection: gitLabConnection(gitLabConnection:'test-connection'),
         builds: [
             [projectId: 'test/test', revisionHash: 'master'],
             [projectId: 'test/utils', revisionHash: 'master'],

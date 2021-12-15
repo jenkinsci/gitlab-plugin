@@ -21,6 +21,7 @@ For more information on the supported `GitLab` versions and how to configure the
 ## Access Jenkins
 
 To see `Jenkins`, point your browser to `http://localhost:8080`. Jenkins will be able to access GitLab at `http://gitlab`
+Note: you need to change the security settings in `Admin -> Settings -> Network -> Outbound Requests -> Allow requests to the local network from hooks and services` in order for local webhooks to work.
 
 For more information on the supported `Jenkins` tags and how to configure the containers, visit https://hub.docker.com/r/jenkins/jenkins/.
 

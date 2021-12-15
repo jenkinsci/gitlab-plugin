@@ -1,15 +1,14 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
-import hudson.model.FreeStyleBuild;
-import org.apache.commons.io.IOUtils;
-import org.kohsuke.stapler.StaplerResponse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
 
+import hudson.model.FreeStyleBuild;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
+import org.apache.commons.io.IOUtils;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author Robin Müller

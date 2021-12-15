@@ -13,8 +13,6 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 import java.util.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * @author Robin Müller
  */
@@ -26,6 +24,7 @@ public final class CauseData {
     private final String branch;
     private final String sourceBranch;
     private final String userName;
+    private final String userUsername;
     private final String userEmail;
     private final String sourceRepoHomepage;
     private final String sourceRepoName;
@@ -64,26 +63,27 @@ public final class CauseData {
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
-              String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
+              String userUsername, String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
               String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
               Integer mergeRequestIid, Integer mergeRequestTargetProjectId, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
               String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
               String triggerPhrase, String mergeRequestState, String mergedByUser, String mergeRequestAssignee, String ref, String isTag,
 	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration) {
-        this.actionType = checkNotNull(actionType, "actionType must not be null.");
-        this.sourceProjectId = checkNotNull(sourceProjectId, "sourceProjectId must not be null.");
-        this.targetProjectId = checkNotNull(targetProjectId, "targetProjectId must not be null.");
-        this.branch = checkNotNull(branch, "branch must not be null.");
-        this.sourceBranch = checkNotNull(sourceBranch, "sourceBranch must not be null.");
-        this.userName = checkNotNull(userName, "userName must not be null.");
+        this.actionType = Objects.requireNonNull(actionType, "actionType must not be null.");
+        this.sourceProjectId = Objects.requireNonNull(sourceProjectId, "sourceProjectId must not be null.");
+        this.targetProjectId = Objects.requireNonNull(targetProjectId, "targetProjectId must not be null.");
+        this.branch = Objects.requireNonNull(branch, "branch must not be null.");
+        this.sourceBranch = Objects.requireNonNull(sourceBranch, "sourceBranch must not be null.");
+        this.userName = Objects.requireNonNull(userName, "userName must not be null.");
+        this.userUsername = userUsername == null ? "" : userUsername;
         this.userEmail = userEmail == null ? "" : userEmail;
         this.sourceRepoHomepage = sourceRepoHomepage == null ? "" : sourceRepoHomepage;
-        this.sourceRepoName = checkNotNull(sourceRepoName, "sourceRepoName must not be null.");
-        this.sourceNamespace = checkNotNull(sourceNamespace, "sourceNamespace must not be null.");
+        this.sourceRepoName = Objects.requireNonNull(sourceRepoName, "sourceRepoName must not be null.");
+        this.sourceNamespace = Objects.requireNonNull(sourceNamespace, "sourceNamespace must not be null.");
         this.sourceRepoUrl = sourceRepoUrl == null ? sourceRepoSshUrl : sourceRepoUrl;
-        this.sourceRepoSshUrl = checkNotNull(sourceRepoSshUrl, "sourceRepoSshUrl must not be null.");
-        this.sourceRepoHttpUrl = checkNotNull(sourceRepoHttpUrl, "sourceRepoHttpUrl must not be null.");
-        this.mergeRequestTitle = checkNotNull(mergeRequestTitle, "mergeRequestTitle must not be null.");
+        this.sourceRepoSshUrl = Objects.requireNonNull(sourceRepoSshUrl, "sourceRepoSshUrl must not be null.");
+        this.sourceRepoHttpUrl = Objects.requireNonNull(sourceRepoHttpUrl, "sourceRepoHttpUrl must not be null.");
+        this.mergeRequestTitle = Objects.requireNonNull(mergeRequestTitle, "mergeRequestTitle must not be null.");
         this.mergeRequestDescription = mergeRequestDescription == null ? "" : mergeRequestDescription;
         this.mergeRequestId = mergeRequestId;
         this.mergeRequestIid = mergeRequestIid;
@@ -91,15 +91,15 @@ public final class CauseData {
         this.mergedByUser = mergedByUser == null ? "" : mergedByUser;
         this.mergeRequestAssignee = mergeRequestAssignee == null ? "" : mergeRequestAssignee;
         this.mergeRequestTargetProjectId = mergeRequestTargetProjectId;
-        this.targetBranch = checkNotNull(targetBranch, "targetBranch must not be null.");
-        this.targetRepoName = checkNotNull(targetRepoName, "targetRepoName must not be null.");
-        this.targetNamespace = checkNotNull(targetNamespace, "targetNamespace must not be null.");
-        this.targetRepoSshUrl = checkNotNull(targetRepoSshUrl, "targetRepoSshUrl must not be null.");
-        this.targetRepoHttpUrl = checkNotNull(targetRepoHttpUrl, "targetRepoHttpUrl must not be null.");
-        this.triggeredByUser = checkNotNull(triggeredByUser, "triggeredByUser must not be null.");
+        this.targetBranch = Objects.requireNonNull(targetBranch, "targetBranch must not be null.");
+        this.targetRepoName = Objects.requireNonNull(targetRepoName, "targetRepoName must not be null.");
+        this.targetNamespace = Objects.requireNonNull(targetNamespace, "targetNamespace must not be null.");
+        this.targetRepoSshUrl = Objects.requireNonNull(targetRepoSshUrl, "targetRepoSshUrl must not be null.");
+        this.targetRepoHttpUrl = Objects.requireNonNull(targetRepoHttpUrl, "targetRepoHttpUrl must not be null.");
+        this.triggeredByUser = Objects.requireNonNull(triggeredByUser, "triggeredByUser must not be null.");
         this.before = before == null ? "" : before;
         this.after = after == null ? "" : after;
-        this.lastCommit = checkNotNull(lastCommit, "lastCommit must not be null");
+        this.lastCommit = Objects.requireNonNull(lastCommit, "lastCommit must not be null");
         this.targetProjectUrl = targetProjectUrl;
         this.triggerPhrase = triggerPhrase;
         this.ref = ref;
@@ -120,6 +120,7 @@ public final class CauseData {
         variables.put("gitlabSourceBranch", sourceBranch);
         variables.put("gitlabActionType", actionType.name());
         variables.put("gitlabUserName", userName);
+        variables.put("gitlabUserUsername", userUsername == null ? "" : userUsername);
         variables.put("gitlabUserEmail", userEmail);
         variables.put("gitlabSourceRepoHomepage", sourceRepoHomepage);
         variables.put("gitlabSourceRepoName", sourceRepoName);
@@ -184,6 +185,11 @@ public final class CauseData {
     @Exported
     public String getUserName() {
         return userName;
+    }
+
+    @Exported
+    public String getUserUsername() {
+        return userUsername;
     }
 
     @Exported
@@ -369,6 +375,7 @@ public final class CauseData {
             .append(branch, causeData.branch)
             .append(sourceBranch, causeData.sourceBranch)
             .append(userName, causeData.userName)
+            .append(userUsername, causeData.userUsername)
             .append(userEmail, causeData.userEmail)
             .append(sourceRepoHomepage, causeData.sourceRepoHomepage)
             .append(sourceRepoName, causeData.sourceRepoName)
@@ -415,6 +422,7 @@ public final class CauseData {
             .append(branch)
             .append(sourceBranch)
             .append(userName)
+            .append(userUsername)
             .append(userEmail)
             .append(sourceRepoHomepage)
             .append(sourceRepoName)
@@ -461,6 +469,7 @@ public final class CauseData {
             .append("branch", branch)
             .append("sourceBranch", sourceBranch)
             .append("userName", userName)
+            .append("userUsername", userUsername)
             .append("userEmail", userEmail)
             .append("sourceRepoHomepage", sourceRepoHomepage)
             .append("sourceRepoName", sourceRepoName)
