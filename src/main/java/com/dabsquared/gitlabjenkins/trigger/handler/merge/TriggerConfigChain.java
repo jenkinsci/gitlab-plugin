@@ -4,7 +4,6 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -52,7 +51,7 @@ public class TriggerConfigChain implements Predicate<MergeRequestObjectAttribute
     }
 
     @Override
-    public boolean test(@Nullable MergeRequestObjectAttributes mergeRequestObjectAttributes) {
+    public boolean test(MergeRequestObjectAttributes mergeRequestObjectAttributes) {
         for (Predicate<MergeRequestObjectAttributes> predicate : rejectRules) {
             if (predicate.test(mergeRequestObjectAttributes)) {
                 return false;

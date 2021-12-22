@@ -6,7 +6,7 @@ import jenkins.model.Jenkins;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +40,16 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
         this.ordinal = ordinal;
     }
 
-    @Nonnull
+    @NonNull
     public final String id() {
         return id;
     }
 
-    @Nonnull
+    @NonNull
     public abstract GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout);
 
     @Override
-    public final int compareTo(@Nonnull GitLabClientBuilder other) {
+    public final int compareTo(@NonNull GitLabClientBuilder other) {
         int o = ordinal - other.ordinal;
         return o != 0 ? o : id().compareTo(other.id());
     }

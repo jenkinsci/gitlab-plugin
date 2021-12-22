@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
@@ -123,7 +123,7 @@ public class GitLabCommitStatusStep extends Step {
         }
 
         @Override
-        public void stop(@Nonnull Throwable cause) throws Exception {
+        public void stop(@NonNull Throwable cause) throws Exception {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
