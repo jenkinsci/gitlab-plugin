@@ -229,6 +229,13 @@
       <artifactId>mockserver-netty</artifactId>
       <version>${mockserver.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- Provided by Jenkins core -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
