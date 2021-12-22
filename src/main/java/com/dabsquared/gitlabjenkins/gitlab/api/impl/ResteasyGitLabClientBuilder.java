@@ -8,6 +8,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -37,8 +38,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
@@ -85,7 +85,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         this.mergeRequestIdProvider = mergeRequestIdProvider;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public final GitLabClient buildClient(String url, String apiToken, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         return buildClient(
@@ -223,9 +223,9 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
 
         private static class HeaderToFilteredString implements Function<Map.Entry<String, List<String>>, String> {
-            @Nullable
+            @CheckForNull
             @Override
-            public String apply(@Nullable Map.Entry<String, List<String>> input) {
+            public String apply(@CheckForNull Map.Entry<String, List<String>> input) {
                 if (input == null) {
                     return null;
                 } else if (input.getKey().equals(PRIVATE_TOKEN)) {
@@ -237,9 +237,9 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
 
         private static class HeaderToString implements Function<Map.Entry<String, List<String>>, String> {
-            @Nullable
+            @CheckForNull
             @Override
-            public String apply(@Nullable Map.Entry<String, List<String>> input) {
+            public String apply(Map.Entry<String, List<String>> input) {
                 return input == null ? null : input.getKey() + " = [" + input.getValue().stream().collect(Collectors.joining(", ")) + "]";
             }
         }

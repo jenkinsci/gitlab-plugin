@@ -7,7 +7,7 @@ import hudson.Extension;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -20,7 +20,7 @@ public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
     }
 
     @Override
-    @Nonnull
+    @NonNull
     public GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         Collection<GitLabClientBuilder> candidates = new ArrayList<>(getAllGitLabClientBuilders());
         candidates.remove(this);

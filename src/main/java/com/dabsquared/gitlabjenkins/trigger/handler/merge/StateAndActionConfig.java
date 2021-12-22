@@ -4,7 +4,6 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -30,20 +29,10 @@ class StateAndActionConfig implements Predicate<MergeRequestObjectAttributes> {
     }
 
     static <T> Predicate<T> nullOrContains(final Collection<T> collection) {
-        return collection == null ? unused -> true : new Predicate<T>() {
-            @Override
-            public boolean test(@Nullable T t) {
-                return t == null || collection.contains(t);
-            }
-        };
+        return collection == null ? unused -> true : (t -> t == null || collection.contains(t));
     }
 
     static <T> Predicate<T> notEqual(final T value) {
-        return new Predicate<T>() {
-            @Override
-            public boolean test(@Nullable T t) {
-                return !Objects.equals(t, value);
-            }
-        };
+        return t -> !Objects.equals(t, value);
     }
 }
