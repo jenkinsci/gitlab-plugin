@@ -186,7 +186,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
-      <version>2.13.1-242.v1a45bad25ceb</version>
+      <version>2.13.1-244.v773c36c5b330</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
