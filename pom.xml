@@ -17,7 +17,7 @@
     <revision>1.5.27</revision>
     <changelist>-SNAPSHOT</changelist>
     <java.level>8</java.level>
-    <jenkins.version>2.249.1</jenkins.version>
+    <jenkins.version>2.289.1</jenkins.version>
     <spotbugs.failOnError>false</spotbugs.failOnError>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
@@ -184,9 +184,12 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>jersey2-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
-      <version>2.13.1-246.va8a9f3eaf46a</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -281,8 +284,8 @@
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.249.x</artifactId>
-        <version>984.vb5eaac999a7e</version>
+        <artifactId>bom-2.289.x</artifactId>
+        <version>1090.v0a_33df40457a_</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
