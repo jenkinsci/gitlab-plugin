@@ -200,7 +200,7 @@
     <dependency>
       <groupId>net.karneim</groupId>
       <artifactId>pojobuilder</artifactId>
-      <version>4.2.3</version>
+      <version>4.3.0</version>
       <!-- 'provided' scope because this is only needed during compilation -->
       <scope>provided</scope>
     </dependency>
