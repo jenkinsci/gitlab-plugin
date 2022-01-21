@@ -103,7 +103,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
 
     @Override
     protected RevisionParameterAction createRevisionParameter(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook, gitSCM), retrieveUrIish(hook));
+        return new RevisionParameterAction(retrieveRevisionToBuild(hook, gitSCM), true, retrieveUrIish(hook));
     }
 
     @Override
