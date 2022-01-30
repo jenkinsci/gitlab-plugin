@@ -17,7 +17,7 @@
     <revision>1.5.28</revision>
     <changelist>-SNAPSHOT</changelist>
     <java.level>8</java.level>
-    <jenkins.version>2.289.1</jenkins.version>
+    <jenkins.version>2.289.3</jenkins.version>
     <spotbugs.failOnError>false</spotbugs.failOnError>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
@@ -220,6 +220,12 @@
       <groupId>io.jenkins.configuration-as-code</groupId>
       <artifactId>test-harness</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jetbrains</groupId>
+          <artifactId>annotations</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -285,7 +291,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.289.x</artifactId>
-        <version>1117.v62a_f6a_01de98</version>
+        <version>1135.va_4eeca_ea_21c1</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
