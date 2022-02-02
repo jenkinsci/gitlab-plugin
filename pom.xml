@@ -291,7 +291,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.289.x</artifactId>
-        <version>1135.va_4eeca_ea_21c1</version>
+        <version>1142.v043a_03ff60a_7</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
