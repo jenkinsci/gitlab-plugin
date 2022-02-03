@@ -70,7 +70,7 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
-    public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, boolean shouldRemoveSourceBranch) {
+    public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, Boolean shouldRemoveSourceBranch) {
 
     }
 

@@ -26,7 +26,7 @@ public interface GitLabClient {
 
     void getCommit(String projectId, String sha);
 
-    void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, boolean shouldRemoveSourceBranch);
+    void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, Boolean shouldRemoveSourceBranch);
 
     void createMergeRequestNote(MergeRequest mr, String body);
 

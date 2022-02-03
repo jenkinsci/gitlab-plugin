@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     private static final Logger LOGGER = Logger.getLogger(GitLabAcceptMergeRequestPublisher.class.getName());
 
-    private boolean deleteSourceBranch = false;
+    private Boolean deleteSourceBranch;
 
     @DataBoundConstructor
     public GitLabAcceptMergeRequestPublisher() {

@@ -69,8 +69,8 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
         mockServerClient.verify(
-            prepareAcceptMergeRequestWithSuccessResponse("v3", MERGE_REQUEST_ID),
-            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID));
+            prepareAcceptMergeRequestWithSuccessResponse("v3", MERGE_REQUEST_ID, null),
+            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID, null));
     }
 
     @Test
@@ -86,17 +86,22 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publisher.perform(build, null, listener);
     }
 
-    private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(String apiLevel, int mergeRequestId) throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId);
+    private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(String apiLevel, int mergeRequestId, Boolean shouldRemoveSourceBranch) throws UnsupportedEncodingException {
+        HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId, shouldRemoveSourceBranch);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareAcceptMergeRequest(String apiLevel, int mergeRequestId) throws UnsupportedEncodingException {
+    private HttpRequest prepareAcceptMergeRequest(String apiLevel, int mergeRequestId, Boolean removeSourceBranch) throws UnsupportedEncodingException {
+        String body = "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success";
+        if (removeSourceBranch != null)
+        {
+            body += "&should_remove_source_branch=" + removeSourceBranch;
+        }
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/merge")
                 .withMethod("PUT")
                 .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody("merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&should_remove_source_branch=false");
+                .withBody(body);
     }
 }
