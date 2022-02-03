@@ -119,7 +119,7 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     void acceptMergeRequest(@PathParam("projectId") @Encoded Integer projectId,
                             @PathParam("mergeRequestIid") @Encoded Integer mergeRequestIid,
                             @FormParam("merge_commit_message") String mergeCommitMessage,
-                            @FormParam("should_remove_source_branch") boolean shouldRemoveSourceBranch);
+                            @FormParam("should_remove_source_branch") Boolean shouldRemoveSourceBranch);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

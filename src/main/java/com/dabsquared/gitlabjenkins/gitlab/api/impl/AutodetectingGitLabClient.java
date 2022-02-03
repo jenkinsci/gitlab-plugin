@@ -140,7 +140,7 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
-    public void acceptMergeRequest(final MergeRequest mr, final String mergeCommitMessage, final boolean shouldRemoveSourceBranch) {
+    public void acceptMergeRequest(final MergeRequest mr, final String mergeCommitMessage, final Boolean shouldRemoveSourceBranch) {
         execute(
             new GitLabOperation<Void>() {
                 @Override
