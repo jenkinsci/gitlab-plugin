@@ -1,0 +1,18 @@
+# Jenkins Security Scan
+# For more information, see: https://www.jenkins.io/doc/developer/security/scan/
+
+name: Jenkins Security Scan
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    uses: jenkins-infra/jenkins-security-scan/.github/workflows/jenkins-security-scan.yaml@v1
+    with:
+      java-version: 11
