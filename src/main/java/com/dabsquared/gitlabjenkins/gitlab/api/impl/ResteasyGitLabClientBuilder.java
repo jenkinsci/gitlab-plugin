@@ -7,7 +7,6 @@ import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
@@ -28,6 +27,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -137,7 +137,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             .maxPooledPerRoute(30)
             .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
             .socketTimeout(readTimeout, TimeUnit.SECONDS)
-            .register(new JacksonJsonProvider())
+            .register(new JacksonFeature())
             .register(new JacksonConfig())
             .register(new ApiHeaderTokenFilter(apiToken))
             .register(new LoggingFilter())

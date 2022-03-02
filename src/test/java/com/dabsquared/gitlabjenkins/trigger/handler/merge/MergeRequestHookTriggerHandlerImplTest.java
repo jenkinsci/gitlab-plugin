@@ -26,6 +26,8 @@ import hudson.util.OneShotEvent;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
@@ -514,7 +516,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
 	public void  after()
     {
         try {
-            Thread.sleep(5000);
+            if (SystemUtils.IS_OS_WINDOWS) {
+                Thread.sleep(5000);
+            }
         } catch (InterruptedException ignored) {
 
         }

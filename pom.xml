@@ -186,10 +186,12 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
+      <version>2.35-5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
+      <version>2.13.1-999999-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
