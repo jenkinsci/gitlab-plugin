@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -135,12 +136,21 @@ public class PipelineHookTriggerHandlerImplTest {
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
     }
-    @After
-    public void after()    {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException ignored) {
 
+    @After
+    public void after() {
+        /*
+         * Add Thread.sleep(5000) to avoid the following error on Windows:
+         *
+         *     Unable to delete 'C:\Jenkins\workspace\Plugins_gitlab-plugin_PR-1121\target\tmp\j h4861043637706712359'.
+         *     Tried 3 times (of a maximum of 3) waiting 0.1 sec between attempts.
+         */
+        if (Functions.isWindows()) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
     }
 }
