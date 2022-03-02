@@ -17,6 +17,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeReq
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -507,16 +508,20 @@ public class MergeRequestHookTriggerHandlerImplTest {
 		        .build());
 	}
 
-	@After
-    /* Add sleep(5000) on after to avoid following error on Windows test
-        Unable to delete 'C:\Jenkins\workspace\Plugins_gitlab-plugin_PR-1121\target\tmp\j h4861043637706712359'. Tried 3 times (of a maximum of 3) waiting 0.1 sec between attempts.
-     */
-	public void  after()
-    {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException ignored) {
-
+    @After
+    public void after() {
+        /*
+         * Add Thread.sleep(5000) to avoid the following error on Windows:
+         *
+         *     Unable to delete 'C:\Jenkins\workspace\Plugins_gitlab-plugin_PR-1121\target\tmp\j h4861043637706712359'.
+         *     Tried 3 times (of a maximum of 3) waiting 0.1 sec between attempts.
+         */
+        if (Functions.isWindows()) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
     }
 }
