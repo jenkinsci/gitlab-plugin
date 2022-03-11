@@ -8,7 +8,7 @@
     <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>1.5.29</version>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
   <packaging>hpi</packaging>
@@ -57,7 +57,7 @@
     <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
-    <tag>${scmTag}</tag>
+    <tag>gitlab-plugin-1.5.29</tag>
   </scm>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
