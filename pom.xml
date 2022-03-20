@@ -21,7 +21,7 @@
     <spotbugs.failOnError>false</spotbugs.failOnError>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <mockserver.version>5.11.2</mockserver.version>
+    <mockserver.version>5.13.0</mockserver.version>
   </properties>
 
 
@@ -301,16 +301,6 @@
         <type>pom</type>
       </dependency>
       <dependency>
-        <groupId>jakarta.activation</groupId>
-        <artifactId>jakarta.activation-api</artifactId>
-        <version>1.2.2</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>2.3.3</version>
-      </dependency>
-      <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>3.1.0</version>
@@ -349,6 +339,8 @@
               <rules>
                 <requireUpperBoundDeps>
                   <excludes combine.children="append">
+                    <exclude>com.sun.activation:jakarta.activation</exclude>
+                    <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
                     <exclude>javax.servlet:javax.servlet-api</exclude>
                   </excludes>
                 </requireUpperBoundDeps>
