@@ -21,7 +21,7 @@
     <spotbugs.failOnError>false</spotbugs.failOnError>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <mockserver.version>5.13.0</mockserver.version>
+    <mockserver.version>5.13.1</mockserver.version>
   </properties>
 
 
