@@ -16,7 +16,6 @@
   <properties>
     <revision>1.5.30</revision>
     <changelist>-SNAPSHOT</changelist>
-    <java.level>8</java.level>
     <jenkins.version>2.289.3</jenkins.version>
     <spotbugs.failOnError>false</spotbugs.failOnError>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
