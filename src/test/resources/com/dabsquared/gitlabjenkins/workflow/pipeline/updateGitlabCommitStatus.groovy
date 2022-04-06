@@ -4,7 +4,7 @@ properties([
     gitLabConnection('test-connection')
 ])
 
-node('master') {
+node {
   updateGitlabCommitStatus name: 'build', state: 'pending'
   echo 'this is simple jenkins-build'
   updateGitlabCommitStatus name: 'build', state: 'success'
