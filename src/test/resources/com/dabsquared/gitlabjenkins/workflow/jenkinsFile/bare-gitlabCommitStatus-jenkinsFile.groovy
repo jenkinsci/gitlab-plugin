@@ -4,7 +4,7 @@ properties([
     gitLabConnection('test-connection')
 ])
 
-node('master') {
+node {
   git 'http://gitlab/test/test.git'
   gitlabCommitStatus {
     echo 'this is pre-build stage'
