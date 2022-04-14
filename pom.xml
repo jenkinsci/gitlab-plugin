@@ -185,7 +185,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
-      <version>2.35-6</version>
+      <version>2.35-7-rc39.1c80918c8b_a_6</version> <!-- TODO https://github.com/jenkinsci/jersey2-api-plugin/pull/19 -->
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
