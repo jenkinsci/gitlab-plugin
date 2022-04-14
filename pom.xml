@@ -185,10 +185,12 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
+      <version>2.35-6</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
+      <version>2.13.2.20220328-273.v11d70a_b_a_1a_52</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
