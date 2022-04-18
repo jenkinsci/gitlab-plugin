@@ -185,12 +185,10 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
-      <version>2.35-6</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
-      <version>2.13.2.20220328-273.v11d70a_b_a_1a_52</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -297,7 +295,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.289.x</artifactId>
-        <version>1246.va_b_50630c1d19</version>
+        <version>1280.vd669827e38cd</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
