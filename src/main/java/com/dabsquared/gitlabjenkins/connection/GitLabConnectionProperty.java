@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.connection;
 
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
@@ -125,6 +126,15 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         public ListBoxModel doFillJobCredentialIdItems(@AncestorInPath Item item, @QueryParameter String url,
                 @QueryParameter String jobCredentialId) {
             StandardListBoxModel result = new StandardListBoxModel();
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                  return result.includeCurrentValue(jobCredentialId);
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(jobCredentialId);
+                }
+            }
             return result.includeEmptyValue()
                     .includeMatchingAs(ACL.SYSTEM, item, StandardCredentials.class,
                             URIRequirementBuilder.fromUri(url).build(), new GitLabCredentialMatcher())

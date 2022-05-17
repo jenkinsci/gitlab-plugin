@@ -14,7 +14,7 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.5.32</revision>
+    <revision>1.5.33</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.289.3</jenkins.version>
     <spotbugs.failOnError>false</spotbugs.failOnError>
