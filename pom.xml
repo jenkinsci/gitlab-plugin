@@ -180,6 +180,16 @@
           <groupId>com.sun.activation</groupId>
           <artifactId>jakarta.activation</artifactId>
         </exclusion>
+        <!-- Provided by javax-activation-api plugin -->
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <!-- Provided by jaxb plugin -->
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
         <!-- Provided by apache-httpcomponents-client-4-api plugin -->
         <exclusion>
           <groupId>org.apache.httpcomponents</groupId>
@@ -190,6 +200,10 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>javax-activation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>jaxb</artifactId>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -257,6 +271,11 @@
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
+        <!-- Provided by jaxb plugin -->
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -304,7 +323,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.289.x</artifactId>
-        <version>1362.v59f2f3db_80ee</version>
+        <version>1382.v7d694476f340</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
