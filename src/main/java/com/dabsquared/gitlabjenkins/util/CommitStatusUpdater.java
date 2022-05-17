@@ -56,12 +56,15 @@ public class CommitStatusUpdater {
             return;
         }
 
-        if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty()) {
-            try {
-                gitLabBranchBuilds = retrieveGitlabProjectIds(build, build.getEnvironment(listener));
-            } catch (IOException | InterruptedException e) {
-                printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
-            }
+        EnvVars environment = null;
+        try {
+            environment = build.getEnvironment(listener);
+        } catch (IOException | InterruptedException e) {
+            printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
+        }
+
+        if ((gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty()) && environment != null) {
+            gitLabBranchBuilds = retrieveGitlabProjectIds(build, environment);
         }
 
         final String buildUrl = getBuildUrl(build);
@@ -82,7 +85,7 @@ public class CommitStatusUpdater {
 
                 if (existsCommit(current_client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
                     LOGGER.log(Level.INFO, String.format("Updating build '%s' to '%s'", gitLabBranchBuild.getProjectId(),state));
-                    current_client.changeBuildStatus(gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash(), state, getBuildBranchOrTag(build), current_build_name, buildUrl, state.name());
+                    current_client.changeBuildStatus(gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash(), state, getBuildBranchOrTag(build, environment), current_build_name, buildUrl, state.name());
                 }
             } catch (WebApplicationException | ProcessingException e) {
                 printf(listener, "Failed to update Gitlab commit status for project '%s': %s%n", gitLabBranchBuild.getProjectId(), e.getMessage());
@@ -126,10 +129,10 @@ public class CommitStatusUpdater {
         }
     }
 
-    private static String getBuildBranchOrTag(Run<?, ?> build) {
+    private static String getBuildBranchOrTag(Run<?, ?> build, EnvVars environment) {
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
         if (cause == null) {
-            return null;
+            return environment == null ? null : environment.get("BRANCH_NAME", null);
         }
         if (cause.getData().getActionType() == CauseData.ActionType.TAG_PUSH) {
             return StringUtils.removeStart(cause.getData().getSourceBranch(), "refs/tags/");
