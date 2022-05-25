@@ -55,6 +55,7 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -214,7 +215,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 if (entityStream != null && entityStream.markSupported()) {
                     byte[] bytes = IOUtils.toByteArray(entityStream);
                     entityStream.reset();
-                    return new String(bytes);
+                    return new String(bytes, StandardCharsets.UTF_8);
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Failure during reading the response body", e);
