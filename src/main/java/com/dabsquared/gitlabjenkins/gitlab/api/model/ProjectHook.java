@@ -105,36 +105,6 @@ public class ProjectHook {
 	private Boolean enableSslVerification;
 	
 	/**
-	 * Default Constructor
-	 */
-	public ProjectHook() {}
-	
-	public ProjectHook(Integer id, String projectId, String url, Boolean pushEvents, Boolean tagPushEvents,
-			Boolean mergeRequestsEvents, Boolean repositoryUpdateEvents, Boolean issuesEvents,
-			Boolean confidentialIssuesEvents, Boolean noteEvents, Boolean confidentialNoteEvents,
-			Boolean pipelineEvents, Boolean wikiPageEvents, Boolean deploymentEvents, Boolean jobEvents,
-			Boolean releasesEvents, String pushEventsBranchFilter, Boolean enableSslVerification) {
-		this.id = id;
-		this.projectId = projectId;
-		this.url = url;
-		this.pushEvents = pushEvents;
-		this.tagPushEvents = tagPushEvents;
-		this.mergeRequestsEvents = mergeRequestsEvents;
-		this.repositoryUpdateEvents = repositoryUpdateEvents;
-		this.issuesEvents = issuesEvents;
-		this.confidentialIssuesEvents = confidentialIssuesEvents;
-		this.noteEvents = noteEvents;
-		this.confidentialNoteEvents = confidentialNoteEvents;
-		this.pipelineEvents = pipelineEvents;
-		this.wikiPageEvents = wikiPageEvents;
-		this.deploymentEvents = deploymentEvents;
-		this.jobEvents = jobEvents;
-		this.releasesEvents = releasesEvents;
-		this.pushEventsBranchFilter = pushEventsBranchFilter;
-		this.enableSslVerification = enableSslVerification;
-	}
-	
-	/**
 	 * Method used to get the value of field "id"
 	 * @return Value of field "id"
 	 */
@@ -493,21 +463,29 @@ public class ProjectHook {
 		// Update value
 		this.enableSslVerification = enableSslVerification;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object parameter) {
+		
+		// If Objects references are the same
+		if (this == parameter) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass()) {
+		
+		// If Given Parameter is Null or class don't match with actual object instance
+		if (parameter == null || getClass() != parameter.getClass()) {
 			return false;
 		}
-		ProjectHook project = (ProjectHook) o;
+		
+		// Cast to Target Class
+		ProjectHook casted = (ProjectHook) parameter;
+		
+		// Return ID Comparison
 		return new EqualsBuilder()
-				.append(id, project.id)
+				.append(id, casted.id)
 				.isEquals();
 	}
 	
@@ -516,6 +494,8 @@ public class ProjectHook {
 	 */
 	@Override
 	public int hashCode() {
+		
+		// Return ID Hashcode
 		return new HashCodeBuilder(17, 37)
 				.append(id)
 				.toHashCode();
@@ -526,9 +506,11 @@ public class ProjectHook {
 	 */
 	@Override
 	public String toString() {
+		
+		// Build and Return Fields Values on Builder
 		return new ToStringBuilder(this)
 				.append("id", id)
-				.append("name", projectId)
+				.append("projectId", projectId)
 				.append("callBack", url)
 				.append("PushEvent", pushEvents)
 				.append("mergeRequestsEvents", mergeRequestsEvents)

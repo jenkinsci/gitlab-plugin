@@ -29,6 +29,17 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabApiProxy.ID;
 interface V4GitLabApiProxy extends GitLabApiProxy {
     String ID = "v4";
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/groups")
+    @Override
+    List<Group> getGroups(
+    	@QueryParam("all_available") Boolean allAvailable,
+    	@QueryParam("top_level_only") Boolean topLevelOnly,
+    	@QueryParam("order_by") String orderBy,
+    	@QueryParam("sort") String sort
+	);
+    
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

@@ -7,7 +7,11 @@ import java.util.List;
 
 public interface GitLabClient {
     String getHostUrl();
-
+    
+    List<Group> getGroups();
+    
+    List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, GroupOrderType orderBy, GroupSortType sort);
+    
     Project createProject(String projectName);
 
     MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title);

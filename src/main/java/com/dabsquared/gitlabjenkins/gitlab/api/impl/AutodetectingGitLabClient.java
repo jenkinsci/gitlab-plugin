@@ -36,6 +36,28 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public List<Group> getGroups() {
+        return execute(
+                new GitLabOperation<List<Group>>() {
+                    @Override
+                    List<Group> execute(GitLabClient client) {
+                        return client.getGroups();
+                    }
+                });
+        }
+    
+    @Override
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, GroupOrderType orderBy, GroupSortType sort) {
+        return execute(
+                new GitLabOperation<List<Group>>() {
+                    @Override
+                    List<Group> execute(GitLabClient client) {
+                        return client.getGroups(allAvailable, topLevelOnly, orderBy, sort);
+                    }
+                });
+        }
+    
+    @Override
     public Project createProject(final String projectName) {
         return execute(
             new GitLabOperation<Project>() {

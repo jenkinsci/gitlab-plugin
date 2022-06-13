@@ -12,6 +12,9 @@ import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Group;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.GroupOrderType;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.GroupSortType;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
@@ -80,6 +83,17 @@ class GitLabClientStub implements GitLabClient {
 
     /************** no implementation below ********************************/
 
+    @Override
+    public List<Group> getGroups() {
+    	return null;
+    }
+    
+    @Override
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, GroupOrderType orderBy,
+    		GroupSortType sort) {
+    	return null;
+    }
+    
     @Override
     public Project createProject(String projectName) {
         return null;

@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Group;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
@@ -37,6 +38,17 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 @Path("/api/" + ID)
 interface V3GitLabApiProxy extends GitLabApiProxy {
     String ID = "v3";
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/groups")
+    @Override
+    List<Group> getGroups(
+    	@QueryParam("all_available") Boolean allAvailable,
+    	@QueryParam("top_level_only") Boolean topLevelOnly,
+    	@QueryParam("order_by") String orderBy,
+    	@QueryParam("sort") String sort
+	);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
