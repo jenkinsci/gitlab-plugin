@@ -23,7 +23,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabApiProxy.ID;
 
 
 /**
- * @author Robin Müller
+ * @author Robin Müller.
  */
 @Path("/api/" + ID)
 interface V4GitLabApiProxy extends GitLabApiProxy {
