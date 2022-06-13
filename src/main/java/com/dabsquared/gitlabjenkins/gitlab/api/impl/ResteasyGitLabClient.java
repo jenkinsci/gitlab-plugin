@@ -1,13 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
 import java.util.List;
 import java.util.function.Function;
-
 
 final class ResteasyGitLabClient implements GitLabClient {
     private final String hostUrl;
@@ -23,6 +20,49 @@ final class ResteasyGitLabClient implements GitLabClient {
     @Override
     public final String getHostUrl() {
         return hostUrl;
+    }
+
+    @Override
+    public List<Group> getGroups() {
+        return api.getGroups(
+            true,
+            false,
+            OrderType.path.name(),
+            SortType.asc.name()
+        );
+    }
+
+    @Override
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort) {
+        return api.getGroups(
+            allAvailable,
+            topLevelOnly,
+            orderBy == null ? OrderType.path.name() : orderBy.name(),
+            sort == null ? SortType.asc.name() : sort.name()
+        );
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId) {
+        return api.getGroupProjects(
+            groupId,
+            Boolean.FALSE,
+            null,
+            OrderType.path.name(),
+            SortType.asc.name()
+        );
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
+            OrderType orderBy, SortType sort) {
+        return api.getGroupProjects(
+            groupId,
+            includeSubgroups == null ? Boolean.FALSE : includeSubgroups,
+            visibility == null ? null : visibility.getValue(),
+            orderBy == null ? OrderType.path.name() : orderBy.name(),
+            sort == null ? SortType.asc.name() : sort.name()
+        );
     }
 
     @Override
@@ -51,8 +91,18 @@ final class ResteasyGitLabClient implements GitLabClient {
     }
 
     @Override
+    public List<ProjectHook> getProjectHooks(String projectName) {
+        return api.getProjectHooks(projectName);
+    }
+
+    @Override
     public void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
         api.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
+    }
+
+    @Override
+    public void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
+        api.addProjectHook(projectId, url, secretToken, pushEvents, mergeRequestEvents, noteEvents);
     }
 
     @Override

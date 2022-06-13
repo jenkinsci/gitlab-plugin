@@ -2,11 +2,17 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
 import java.util.List;
 
 public interface GitLabClient {
     String getHostUrl();
+
+    List<Group> getGroups();
+
+    List<Project> getGroupProjects(String groupId);
+    List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility, OrderType orderBy, SortType sort);
+
+    List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort);
 
     Project createProject(String projectName);
 
@@ -18,7 +24,11 @@ public interface GitLabClient {
 
     void deleteProject(String projectId);
 
+    List<ProjectHook> getProjectHooks(String projectName);
+
     void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
+
+    void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
 
     void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
 
