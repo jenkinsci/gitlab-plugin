@@ -9,8 +9,10 @@ public interface GitLabClient {
     String getHostUrl();
     
     List<Group> getGroups();
+    List<Project> getGroupProjects(String groupId);
+    List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility, OrderType orderBy, SortType sort);
     
-    List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, GroupOrderType orderBy, GroupSortType sort);
+    List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort);
     
     Project createProject(String projectName);
 

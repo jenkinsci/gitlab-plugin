@@ -30,18 +30,41 @@ final class ResteasyGitLabClient implements GitLabClient {
     	return api.getGroups(
 			true,
 			false,
-			GroupOrderType.path.name(),
-			GroupSortType.asc.name()
+			OrderType.path.name(),
+			SortType.asc.name()
 		);
     }
     
     @Override
-    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, GroupOrderType orderBy, GroupSortType sort) {
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort) {
     	return api.getGroups(
 			allAvailable,
 			topLevelOnly,
-			orderBy == null ? GroupOrderType.path.name() : orderBy.name(),
-			sort == null ? GroupSortType.asc.name() : sort.name()
+			orderBy == null ? OrderType.path.name() : orderBy.name(),
+			sort == null ? SortType.asc.name() : sort.name()
+		);
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId) {
+    	return api.getGroupProjects(
+    		groupId,
+    		Boolean.FALSE,
+    		null,
+    		OrderType.path.name(),
+			SortType.asc.name()
+		);
+    }
+    
+    @Override
+    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
+    		OrderType orderBy, SortType sort) {
+    	return api.getGroupProjects(
+    		groupId,
+    		includeSubgroups == null ? Boolean.FALSE : includeSubgroups,
+    		visibility == null ? null : visibility.getValue(),
+			orderBy == null ? OrderType.path.name() : orderBy.name(),
+			sort == null ? SortType.asc.name() : sort.name()
 		);
     }
     

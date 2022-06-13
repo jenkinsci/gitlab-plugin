@@ -39,6 +39,18 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     	@QueryParam("order_by") String orderBy,
     	@QueryParam("sort") String sort
 	);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/groups/{groupId}/projects")
+    @Override
+    List<Project> getGroupProjects(
+		@PathParam("groupId") @Encoded String groupId,
+		@QueryParam("include_subgroups") Boolean includeSubgroups,
+		@QueryParam("visibility") String visibility,
+		@QueryParam("order_by") String orderBy,
+		@QueryParam("sort") String sort
+	);
     
     @POST
     @Produces(MediaType.APPLICATION_JSON)

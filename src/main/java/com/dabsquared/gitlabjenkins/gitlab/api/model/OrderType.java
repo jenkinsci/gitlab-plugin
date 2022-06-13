@@ -1,10 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 /**
- * Groups Sort Type (Used on Fetch Groups) 
+ * Groups Order Type (Used on Fetch Groups) 
  * @author <a href="mailto:jetune@kube-cloud.com">Jean-Jacques ETUNE NGI (Java EE Technical Lead / Enterprise Architect)</a>
- * @since Mon, 2022-06-13 - 08:01:18
+ * @since Mon, 2022-06-13 - 07:53:35
  */
-public enum GroupSortType {
-	asc, desc;
+public enum OrderType {
+	name, path, id, similarity;
 }

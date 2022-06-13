@@ -9,6 +9,7 @@ import java.util.List;
 
 interface GitLabApiProxy {
 	List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, String orderBy, String sort);
+    List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, String visibility, String orderBy, String sort);
 	
     Project createProject(String projectName);
 

@@ -13,13 +13,14 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Group;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.GroupOrderType;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.GroupSortType;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.OrderType;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.SortType;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.ProjectHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.ProjectVisibilityType;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
@@ -89,8 +90,19 @@ class GitLabClientStub implements GitLabClient {
     }
     
     @Override
-    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, GroupOrderType orderBy,
-    		GroupSortType sort) {
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy,
+    		SortType sort) {
+    	return null;
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId) {
+    	return null;
+    }
+    
+    @Override
+    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
+    		OrderType orderBy, SortType sort) {
     	return null;
     }
     
