@@ -19,6 +19,8 @@ public interface GitLabClient {
     void deleteProject(String projectId);
 
     void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
+    
+    void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
 
     void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
 

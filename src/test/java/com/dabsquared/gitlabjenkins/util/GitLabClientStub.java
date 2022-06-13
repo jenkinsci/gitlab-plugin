@@ -55,6 +55,11 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
+    public void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
+
+    }
+
+    @Override
     public void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
 
     }

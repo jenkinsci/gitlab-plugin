@@ -104,6 +104,18 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public void addProjectHook(final String projectId, final String url, String secretToken, final Boolean pushEvents, final Boolean mergeRequestEvents, final Boolean noteEvents) {
+        execute(
+            new GitLabOperation<Void>() {
+                @Override
+                Void execute(GitLabClient client) {
+                    client.addProjectHook(projectId, url, secretToken, pushEvents, mergeRequestEvents, noteEvents);
+                    return null;
+                }
+            });
+    }
+
+    @Override
     public void changeBuildStatus(final String projectId, final String sha, final BuildState state, final String ref, final String context, final String targetUrl, final String description) {
         execute(
             new GitLabOperation<Void>() {

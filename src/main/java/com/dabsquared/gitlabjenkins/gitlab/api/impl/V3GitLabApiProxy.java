@@ -81,6 +81,18 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/hooks")
+    @Override
+    void addProjectHook(@PathParam("projectId") @Encoded String projectId,
+                        @FormParam("url") String url,
+                        @FormParam("token") String secretToken,
+                        @FormParam("push_events") Boolean pushEvents,
+                        @FormParam("merge_requests_events") Boolean mergeRequestEvents,
+                        @FormParam("note_events") Boolean noteEvents);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/projects/{projectId}/statuses/{sha}")
     @Override
     void changeBuildStatus(@PathParam("projectId") @Encoded String projectId,
