@@ -69,6 +69,17 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public List<ProjectHook> getProjectHooks(String projectName) {
+        return execute(
+                new GitLabOperation<List<ProjectHook>>() {
+                    @Override
+                    List<ProjectHook> execute(GitLabClient client) {
+                        return client.getProjectHooks(projectName);
+                    }
+                });
+        }
+    
+    @Override
     public Project updateProject(final String projectId, final String name, final String path) {
         return execute(
             new GitLabOperation<Project>() {

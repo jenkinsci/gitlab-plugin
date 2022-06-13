@@ -1,8 +1,9 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabApiProxy.ID;
+
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -17,9 +18,17 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabApiProxy.ID;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.ProjectHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 
 /**
@@ -66,6 +75,12 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Path("/projects/{projectId}")
     @Override
     void deleteProject(@PathParam("projectId") @Encoded String projectId);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectName}/hooks")
+    @Override
+    List<ProjectHook> getProjectHooks(@PathParam("projectName") @Encoded String projectName);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

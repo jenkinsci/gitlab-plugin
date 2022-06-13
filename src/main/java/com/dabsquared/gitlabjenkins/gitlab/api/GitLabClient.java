@@ -13,11 +13,13 @@ public interface GitLabClient {
     MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title);
 
     Project getProject(String projectName);
-
+    
     Project updateProject(String projectId, String name, String path);
 
     void deleteProject(String projectId);
-
+    
+    List<ProjectHook> getProjectHooks(String projectName);
+    
     void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
     
     void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);

@@ -18,6 +18,8 @@ interface GitLabApiProxy {
 
     void deleteProject(String projectId);
 
+    List<ProjectHook> getProjectHooks(String projectName);
+    
     void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
     
     void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);

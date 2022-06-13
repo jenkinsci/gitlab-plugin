@@ -67,6 +67,12 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     @Override
     void deleteProject(@PathParam("projectId") @Encoded String projectId);
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectName}/hooks")
+    @Override
+    List<ProjectHook> getProjectHooks(@PathParam("projectName") @Encoded String projectName);
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

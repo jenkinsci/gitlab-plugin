@@ -49,7 +49,12 @@ final class ResteasyGitLabClient implements GitLabClient {
     public void deleteProject(String projectId) {
         api.deleteProject(projectId);
     }
-
+    
+    @Override
+    public List<ProjectHook> getProjectHooks(String projectName) {
+    	return api.getProjectHooks(projectName);
+    }
+    
     @Override
     public void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
         api.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
