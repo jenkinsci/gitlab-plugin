@@ -36,6 +36,10 @@ interface GitLabApiProxy {
 
     void deleteMergeRequestEmoji(Integer projectId, Integer mergeRequestId, Integer awardId);
 
+    void approveMergeRequest(Integer projectId, Integer mergeRequestId);
+
+    void unapproveMergeRequest(Integer projectId, Integer mergeRequestId);
+
     List<MergeRequest> getMergeRequests(String projectId, State state, int page, int perPage);
 
     List<Branch> getBranches(String projectId);

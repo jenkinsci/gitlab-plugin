@@ -47,6 +47,20 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
         @FormParam("target_branch") String targetBranch,
         @FormParam("title") String title);
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/approve")
+    @Override
+    void approveMergeRequest(@PathParam("projectId") Integer projectId, @PathParam("mergeRequestIid") Integer mergeRequestId);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/merge_requests/{mergeRequestIid}/unapprove")
+    @Override
+    void unapproveMergeRequest(@PathParam("projectId") Integer  projectId, @PathParam("mergeRequestIid") Integer mergeRequestId);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectName}")
