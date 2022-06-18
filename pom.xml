@@ -16,7 +16,7 @@
   <properties>
     <revision>1.5.34</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.289.3</jenkins.version>
+    <jenkins.version>2.332.1</jenkins.version>
     <spotbugs.threshold>High</spotbugs.threshold> <!-- TODO fix violations -->
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
@@ -278,6 +278,13 @@
       <artifactId>postgresql</artifactId>
       <version>42.4.0</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- Upper bounds with Guava -->
+        <exclusion>
+          <groupId>org.checkerframework</groupId>
+          <artifactId>checker-qual</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -305,11 +312,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>18.0</version>
-      </dependency>
-      <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.11.0</version>
@@ -317,7 +319,7 @@
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.289.x</artifactId>
+        <artifactId>bom-2.332.x</artifactId>
         <version>1409.v7659b_c072f18</version>
         <scope>import</scope>
         <type>pom</type>
