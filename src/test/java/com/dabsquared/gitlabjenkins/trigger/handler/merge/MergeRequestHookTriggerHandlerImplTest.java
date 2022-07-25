@@ -368,7 +368,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
             .setTriggerOnAcceptedMergeRequest(true)
             .setTriggerOnClosedMergeRequest(true)
-            .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.never)
+            .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.source)
             .build();
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
