@@ -393,6 +393,9 @@ pipeline {
       success {
         updateGitlabCommitStatus name: 'build', state: 'success'
       }
+      aborted {
+        updateGitlabCommitStatus name: 'build', state: 'canceled'
+      }
     }
     options {
       gitLabConnection('your-gitlab-connection-name')
@@ -403,6 +406,7 @@ pipeline {
     stages {
       stage("build") {
         steps {
+          updateGitlabCommitStatus name: 'build', state: 'running'
           echo "hello world"
         }
       }
