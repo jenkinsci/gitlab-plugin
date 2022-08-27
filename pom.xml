@@ -14,7 +14,7 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.5.34</revision>
+    <revision>1.5.36</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.332.1</jenkins.version>
     <spotbugs.threshold>High</spotbugs.threshold> <!-- TODO fix violations -->
@@ -320,7 +320,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.332.x</artifactId>
-        <version>1409.v7659b_c072f18</version>
+        <version>1438.v6a_2c29d73f82</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
