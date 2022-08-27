@@ -1,0 +1,16 @@
+# Using an updated Gitpod docker image (when using a non default JDK or tools)
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: sdk default java  11.0.15-tem && mvn clean verify
+
+vscode:
+  extensions:
+    - bierner.markdown-preview-github-styles
+    - vscjava.vscode-java-pack
+    - redhat.java
+    - vscjava.vscode-java-debug
+    - vscjava.vscode-java-dependency
+    - vscjava.vscode-java-test
+    - vscjava.vscode-maven
