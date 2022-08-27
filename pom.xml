@@ -20,7 +20,7 @@
     <spotbugs.threshold>High</spotbugs.threshold> <!-- TODO fix violations -->
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <mockserver.version>5.13.0</mockserver.version>
+    <mockserver.version>5.14.0</mockserver.version>
   </properties>
 
 
