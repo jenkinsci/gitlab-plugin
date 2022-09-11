@@ -340,7 +340,6 @@
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>9.3</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
