@@ -17,7 +17,9 @@
     <revision>1.5.37</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.346.3</jenkins.version>
-    <spotbugs.threshold>High</spotbugs.threshold> <!-- TODO fix violations -->
+    <spotbugs.effort>Max</spotbugs.effort>
+    <spotbugs.threshold>Low</spotbugs.threshold>
+    <spotbugs.excludeFilterFile>${project.basedir}/src/spotbugs/spotbugs-excludes.xml</spotbugs.excludeFilterFile>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <mockserver.version>5.14.0</mockserver.version>

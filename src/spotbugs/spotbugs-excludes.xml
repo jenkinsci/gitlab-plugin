@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!--
+    Exclusions in this section have been triaged and determined to be false positives.
+  -->
+
+  <!--
+    Here lies technical debt. Exclusions in this section have not yet been triaged. When working on
+    on this section, pick an exclusion to triage, then:
+    - If it is a false positive, add a @SuppressFBWarnings(value = "[…]", justification = "[…]")
+      annotation indicating the reason why it is a false positive, then remove the exclusion from
+      this section.
+    - If it is not a false positive, fix the bug, then remove the exclusion from this section.
+   -->
+  <Match>
+    <Bug pattern="DM_CONVERT_CASE"/>
+    <Class name="com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider"/>
+    <Method name="doAutoCompleteBranchesSpec"/>
+  </Match>
+  <Match>
+    <Bug pattern="DM_CONVERT_CASE"/>
+    <Class name="com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider"/>
+    <Method name="doAutoCompleteLabels"/>
+  </Match>
+  <Match>
+    <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS"/>
+    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder"/>
+  </Match>
+  <Match>
+    <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
+    <Class name="com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause"/>
+  </Match>
+  <Match>
+    <Bug pattern="LI_LAZY_INIT_STATIC"/>
+    <Class name="com.dabsquared.gitlabjenkins.service.GitLabProjectLabelsService"/>
+    <Field name="instance"/>
+  </Match>
+  <Match>
+    <Bug pattern="LI_LAZY_INIT_STATIC"/>
+    <Class name="com.dabsquared.gitlabjenkins.service.GitLabProjectBranchesService"/>
+    <Field name="gitLabProjectBranchesService"/>
+  </Match>
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.GitLabPushTrigger"/>
+    <Method name="migrateJobs"/>
+  </Match>
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty$DescriptorImpl"/>
+    <Method name="doFillGitLabConnectionItems"/>
+  </Match>
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty$DescriptorImpl"/>
+    <Method name="doTestConnection"/>
+  </Match>
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher"/>
+    <Method name="getNote"/>
+  </Match>
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.webhook.build.BuildWebHookAction$TriggerNotifier"/>
+    <Method name="checkPermission"/>
+  </Match>
+  <Match>
+    <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty$DescriptorImpl"/>
+  </Match>
+  <Match>
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.util.CommitStatusUpdater"/>
+  </Match>
+  <Match>
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty"/>
+  </Match>
+  <Match>
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
+    <Class name="com.dabsquared.gitlabjenkins.trigger.handler.push.OpenMergeRequestPushHookTriggerHandler"/>
+  </Match>
+  <Match>
+    <Bug pattern="SE_BAD_FIELD"/>
+    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.impl.ResteasyGitLabClientBuilder"/>
+    <Field name="mergeRequestIdProvider"/>
+  </Match>
+  <Match>
+    <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnection"/>
+    <Field name="apiToken"/>
+  </Match>
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP"/>
+  </Match>
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Bug pattern="NM_CONFUSING"/>
+  </Match>
+  <Match>
+    <Bug pattern="REC_CATCH_EXCEPTION"/>
+  </Match>
+  <Match>
+    <Bug pattern="SE_INNER_CLASS"/>
+  </Match>
+  <Match>
+    <Bug pattern="SE_NO_SERIALVERSIONID"/>
+  </Match>
+  <Match>
+    <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED"/>
+  </Match>
+  <Match>
+    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+  </Match>
+  <Match>
+    <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
+  </Match>
+</FindBugsFilter>
