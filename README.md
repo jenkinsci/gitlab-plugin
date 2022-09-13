@@ -70,6 +70,10 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
 * [#730](https://github.com/jenkinsci/gitlab-plugin/issues/730) - GitLab 10.5.6 introduced an issue which can cause HTTP 500 errors when webhooks are triggered if the webhook is pointing to http://localhost or http://127.0.0.1. See the linked issue for a workaround.
 
+## Report an Issue
+
+Please report issues and enhancements through the [GitHub issue tracker](https://github.com/jenkinsci/gitlab-plugin/issues/new/choose).
+
 ## Defined variables
 
 When GitLab triggers a build via the plugin, various environment variables are set based on the JSON payload that GitLab sends. You can use these throughout your job configuration. The available variables are:
