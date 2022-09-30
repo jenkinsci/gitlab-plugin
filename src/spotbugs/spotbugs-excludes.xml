@@ -92,6 +92,16 @@
     <Field name="apiToken"/>
   </Match>
   <Match>
+    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.impl.ResteasyGitLabClientBuilder$ClientHttpEngineBuilder43"/>
+    <Field name="that"/>
+  </Match>
+  <Match>
+    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    <Class name="com.dabsquared.gitlabjenkins.workflow.GitLabBuildsStep"/>
+    <Field name="builds"/>
+  </Match>
+  <Match>
     <Bug pattern="EI_EXPOSE_REP"/>
   </Match>
   <Match>
