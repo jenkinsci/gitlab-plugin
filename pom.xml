@@ -16,7 +16,7 @@
   <properties>
     <revision>1.5.36</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.332.4</jenkins.version>
+    <jenkins.version>2.346.3</jenkins.version>
     <spotbugs.threshold>High</spotbugs.threshold> <!-- TODO fix violations -->
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
@@ -323,7 +323,7 @@
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.332.x</artifactId>
+        <artifactId>bom-2.346.x</artifactId>
         <version>1607.va_c1576527071</version>
         <scope>import</scope>
         <type>pom</type>
