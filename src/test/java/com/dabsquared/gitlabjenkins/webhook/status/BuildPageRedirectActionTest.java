@@ -1,9 +1,16 @@
 package com.dabsquared.gitlabjenkins.webhook.status;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -15,15 +22,7 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Robin Müller

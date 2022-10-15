@@ -1,27 +1,33 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.mockSimpleBuild;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.preparePublisher;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
+import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.*;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 /**
  * @author Nikolay Ustinov
@@ -63,8 +69,8 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
         mockServerClient.verify(
-            prepareAcceptMergeRequestWithSuccessResponse("v3", MERGE_REQUEST_ID),
-            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID));
+            prepareAcceptMergeRequestWithSuccessResponse("v3", MERGE_REQUEST_ID, null),
+            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID, null));
     }
 
     @Test
@@ -80,17 +86,22 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publisher.perform(build, null, listener);
     }
 
-    private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(String apiLevel, int mergeRequestId) throws UnsupportedEncodingException {
-        HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId);
+    private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(String apiLevel, int mergeRequestId, Boolean shouldRemoveSourceBranch) throws UnsupportedEncodingException {
+        HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId, shouldRemoveSourceBranch);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareAcceptMergeRequest(String apiLevel, int mergeRequestId) throws UnsupportedEncodingException {
+    private HttpRequest prepareAcceptMergeRequest(String apiLevel, int mergeRequestId, Boolean removeSourceBranch) throws UnsupportedEncodingException {
+        String body = "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success";
+        if (removeSourceBranch != null)
+        {
+            body += "&should_remove_source_branch=" + removeSourceBranch;
+        }
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/merge")
                 .withMethod("PUT")
                 .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody("merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&should_remove_source_branch=false");
+                .withBody(body);
     }
 }

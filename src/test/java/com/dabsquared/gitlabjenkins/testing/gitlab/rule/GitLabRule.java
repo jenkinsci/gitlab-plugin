@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.testing.gitlab.rule;
 
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
@@ -16,14 +15,6 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,6 +23,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * @author Robin Müller

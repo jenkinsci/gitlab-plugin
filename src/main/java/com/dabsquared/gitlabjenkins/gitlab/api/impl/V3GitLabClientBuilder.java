@@ -2,8 +2,8 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.google.common.base.Function;
 import hudson.Extension;
+import java.util.function.Function;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 

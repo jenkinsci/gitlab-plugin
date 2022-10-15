@@ -1,23 +1,20 @@
 package com.dabsquared.gitlabjenkins.service;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.BranchBuilder.branch;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.dabsquared.gitlabjenkins.gitlab.api.model.builder.generated.BranchBuilder.branch;
-import static java.util.Arrays.asList;
-import static junit.framework.TestCase.assertEquals;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-
 public class GitLabProjectBranchesServiceTest {
-    private final static List<String> BRANCH_NAMES_PROJECT_B = asList("master", "B-branch-1", "B-branch-2");
+    private final static List<String> BRANCH_NAMES_PROJECT_B = Arrays.asList("master", "B-branch-1", "B-branch-2");
 
     private GitLabProjectBranchesService branchesService;
 
@@ -26,7 +23,7 @@ public class GitLabProjectBranchesServiceTest {
     @Before
     public void setUp() throws IOException {
         clientStub = new GitLabClientStub();
-        clientStub.addBranches("groupOne/A", convert(asList("master", "A-branch-1")));
+        clientStub.addBranches("groupOne/A", convert(Arrays.asList("master", "A-branch-1")));
         clientStub.addBranches("groupOne/B", convert(BRANCH_NAMES_PROJECT_B));
 
 

@@ -12,7 +12,9 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.ProcessingException;
@@ -60,7 +62,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     private final boolean ignoreCertificateErrors;
     private final Integer connectionTimeout;
     private final Integer readTimeout;
-    private transient GitLabClient apiCache;
+    private transient Map<String, GitLabClient> clientCache;
 
     public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
@@ -90,12 +92,13 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     @Restricted(NoExternalUse.class)
     public GitLabConnection(String name, String url, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this.name = name;
-        this.url = url;
+        this.url = url == null ? "" : url;
         this.apiTokenId = apiTokenId;
         this.clientBuilder = clientBuilder;
         this.ignoreCertificateErrors = ignoreCertificateErrors;
         this.connectionTimeout = connectionTimeout;
         this.readTimeout = readTimeout;
+        clientCache = new HashMap<>();
     }
 
     public String getName() {
@@ -127,16 +130,29 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     }
 
     public GitLabClient getClient(Item item, String jobCredentialId) {
-        if (apiCache == null) {
-            apiCache = clientBuilder.buildClient(url, null == jobCredentialId ? getApiToken(apiTokenId, null) : getApiToken(jobCredentialId, item), ignoreCertificateErrors,
-                    connectionTimeout, readTimeout);
+        final String clientId;
+        final String token;
+        if ((jobCredentialId == null) || jobCredentialId.equals(apiTokenId)) {
+            clientId = "global";
+            token = getApiToken(apiTokenId, null);
+        } else {
+            // Add prefix to credential ID to avoid collision with "global"
+            clientId = "alternative-" + jobCredentialId;
+            token = getApiToken(jobCredentialId, item);
         }
-        return apiCache;
+
+        if (!clientCache.containsKey(clientId)) {
+            clientCache.put(
+                clientId,
+                clientBuilder.buildClient(url, token, ignoreCertificateErrors, connectionTimeout, readTimeout)
+            );
+        }
+        return clientCache.get(clientId);
     }
 
     @Restricted(NoExternalUse.class)
     private String getApiToken(String apiTokenId, Item item) {
-        ItemGroup<?> context = null != item ? item.getParent() : Jenkins.get();
+        ItemGroup<?> context = item != null ? item.getParent() : Jenkins.get();
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
             lookupCredentials(
                     StandardCredentials.class,
@@ -161,6 +177,9 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         }
         if (clientBuilder == null) {
             return new GitLabConnection(name, url, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, connectionTimeout, readTimeout);
+        }
+        if (clientCache == null) {
+            clientCache = new HashMap<>();
         }
 
         return this;

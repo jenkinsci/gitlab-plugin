@@ -1,18 +1,42 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder.mergeRequestObjectAttributes;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.*;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Repository;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestHookBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.model.FreeStyleProject;
-import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Project;
 import hudson.model.Queue;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.After;
 import org.junit.Before;
@@ -21,19 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder.mergeRequestObjectAttributes;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PendingBuildsHandlerTest {

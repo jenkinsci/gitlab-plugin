@@ -1,8 +1,26 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
-         xmlns:f="/lib/form">
+         xmlns:f="/lib/form"
+         xmlns:d="jelly:define"
+         xmlns:local="local">
+  <d:taglib uri="local">
+    <d:tag name="blockWrapperTable">
+      <j:choose>
+        <j:when test="${divBasedFormLayout}">
+          <div>
+            <d:invokeBody/>
+          </div>
+        </j:when>
+        <j:otherwise>
+          <table>
+            <d:invokeBody/>
+          </table>
+        </j:otherwise>
+      </j:choose>
+    </d:tag>
+  </d:taglib>
   <f:entry title="Enabled GitLab triggers">
-    <table>
+    <local:blockWrapperTable>
       <f:entry title="Push Events" field="triggerOnPush">
         <f:checkbox default="true"/>
       </f:entry>
@@ -34,7 +52,7 @@
       <f:entry title="Comment (regex) for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
         <f:textbox field="noteRegex" default="Jenkins please retry a build"/>
       </f:entry>
-    </table>
+    </local:blockWrapperTable>
   </f:entry>
   <f:advanced>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
@@ -46,7 +64,7 @@
     <f:entry title="Labels that forces builds if they are added (comma-separated)">
       <f:textbox field="labelsThatForcesBuildIfAdded"/>
     </f:entry>
-    <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
+    <f:entry title="Set build description to build cause (eg. Merge request or Git Push)" field="setBuildDescription">
       <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Build on successful pipeline events" field="triggerOnPipelineEvent">
@@ -60,7 +78,7 @@
     </f:entry>
 
     <f:entry title="Allowed branches">
-      <table>
+      <local:blockWrapperTable>
         <!--<f:section title="">-->
         <f:radioBlock name="branchFilterType" value="All" title="Allow all branches to trigger this job"
                       checked="${instance.branchFilterType == null || instance.branchFilterType == 'All'}"
@@ -98,14 +116,14 @@
                        autoCompleteDelimChar=","/>
           </f:entry>
         </f:optionalBlock>
-      </table>
+      </local:blockWrapperTable>
     </f:entry>
     <f:entry title="${%Secret token}" help="/plugin/gitlab-plugin/help/help-secretToken.html">
-      <table>
+      <local:blockWrapperTable>
         <f:readOnlyTextbox field="secretToken" id="secretToken"/>
         <f:validateButton title="${%Generate}" method="generateSecretToken"/>
         <f:validateButton title="${%Clear}" method="clearSecretToken"/>
-      </table>
+      </local:blockWrapperTable>
     </f:entry>
   </f:advanced>
 </j:jelly>

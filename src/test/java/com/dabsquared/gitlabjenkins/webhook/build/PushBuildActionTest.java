@@ -1,10 +1,27 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import hudson.model.FreeStyleProject;
+import java.io.IOException;
+import java.util.Collections;
+import jenkins.plugins.git.GitSCMSource;
+import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
+import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,16 +32,7 @@ import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import static org.hamcrest.CoreMatchers.containsString;
-
-import java.io.IOException;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Robin Müller
@@ -88,5 +96,25 @@ public class PushBuildActionTest {
 
     private String getJson(String name) throws IOException {
         return IOUtils.toString(getClass().getResourceAsStream(name));
+    }
+
+    @Test
+    public void scmSourceOnUpdateExecuted() {
+        GitSCMSource source = new GitSCMSource("http://test");
+        SCMSourceOwner item = mock(SCMSourceOwner.class);
+        when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
+        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
+
+    }
+
+    @Test
+    public void scmSourceOnUpdateNotExecuted() {
+        GitSCMSource source = new GitSCMSource("http://test");
+        source.getTraits().add(new IgnoreOnPushNotificationTrait());
+        SCMSourceOwner item = mock(SCMSourceOwner.class);
+        when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
+        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        verify(item, never()).onSCMSourceUpdated(isA(GitSCMSource.class));
     }
 }

@@ -3,13 +3,12 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.google.common.base.Predicate;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class TriggerConfigChain implements Predicate<MergeRequestObjectAttributes> {
     private final List<Predicate<MergeRequestObjectAttributes>> acceptRules = new ArrayList<>();
@@ -52,15 +51,15 @@ public class TriggerConfigChain implements Predicate<MergeRequestObjectAttribute
     }
 
     @Override
-    public boolean apply(@Nullable MergeRequestObjectAttributes mergeRequestObjectAttributes) {
+    public boolean test(MergeRequestObjectAttributes mergeRequestObjectAttributes) {
         for (Predicate<MergeRequestObjectAttributes> predicate : rejectRules) {
-            if (predicate.apply(mergeRequestObjectAttributes)) {
+            if (predicate.test(mergeRequestObjectAttributes)) {
                 return false;
             }
         }
 
         for (Predicate<MergeRequestObjectAttributes> predicate : acceptRules) {
-            if (predicate.apply(mergeRequestObjectAttributes)) {
+            if (predicate.test(mergeRequestObjectAttributes)) {
                 return true;
             }
         }

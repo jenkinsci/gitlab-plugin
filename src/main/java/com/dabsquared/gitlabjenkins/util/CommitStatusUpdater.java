@@ -188,11 +188,17 @@ public class CommitStatusUpdater {
                     return result;
                 }
                 scmRevisionHash = ((AbstractGitSCMSource.SCMRevisionImpl) scmRevision).getHash();
+                if (scmRevisionHash == null) {
+                    LOGGER.log(Level.INFO, "Build does not contain SCM revision hash.");
+                    return result;
+                }
 
                 for (final BuildData buildData : buildDatas) {
                     for (final Entry<String, Build> buildByBranchName : buildData.getBuildsByBranchName().entrySet()) {
-                        if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
-                            addGitLabBranchBuild(result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
+                        if (buildByBranchName.getValue().getSHA1() != null){
+                            if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
+                                addGitLabBranchBuild(result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
+                            }
                         }
                     }
                 }

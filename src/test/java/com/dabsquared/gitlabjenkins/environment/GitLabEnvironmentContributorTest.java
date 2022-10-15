@@ -1,5 +1,9 @@
 package com.dabsquared.gitlabjenkins.environment;
 
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.EnvVars;
@@ -9,35 +13,17 @@ import hudson.matrix.MatrixProject;
 import hudson.matrix.MatrixRun;
 import hudson.matrix.TextAxis;
 import hudson.model.BuildListener;
-import hudson.model.FreeStyleProject;
 import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.StreamBuildListener;
-import jenkins.model.Jenkins;
-import org.junit.After;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Evgeni Golov

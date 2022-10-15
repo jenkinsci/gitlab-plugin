@@ -1,10 +1,12 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
@@ -19,8 +21,6 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
 
 import hudson.Extension;
 import hudson.model.Run;
@@ -48,8 +48,10 @@ public class GitLabBuildsStep extends Step {
     public void setBuilds(List<String> builds) {
         if (builds != null && builds.size() == 1) {
             this.builds = new ArrayList<>();
-            for (String build : Splitter.on(",").omitEmptyStrings().trimResults().split(builds.get(0))) {
-                this.builds.add(build);
+            for (String build : builds.get(0).split(",")) {
+                if (!build.isEmpty()) {
+                    this.builds.add(build.trim());
+                }
             }
         } else {
             this.builds = builds;
@@ -116,7 +118,7 @@ public class GitLabBuildsStep extends Step {
         }
 
         @Override
-        public void stop(@Nonnull Throwable cause) throws Exception {
+        public void stop(@NonNull Throwable cause) throws Exception {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
                 PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
@@ -160,7 +162,9 @@ public class GitLabBuildsStep extends Step {
 
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			return ImmutableSet.of(TaskListener.class, Run.class);
+			Set<Class<?>> context = new HashSet<>();
+			Collections.addAll(context, TaskListener.class, Run.class);
+			return Collections.unmodifiableSet(context);
 		}
     }
 }

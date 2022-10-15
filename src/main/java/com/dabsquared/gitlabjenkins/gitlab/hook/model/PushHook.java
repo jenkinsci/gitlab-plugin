@@ -70,7 +70,7 @@ public class PushHook extends WebHook {
         return userUsername;
     }
 
-    public void setUserUserName(String userUsername) {
+    public void setUserUsername(String userUsername) {
         this.userUsername = userUsername;
     }
 

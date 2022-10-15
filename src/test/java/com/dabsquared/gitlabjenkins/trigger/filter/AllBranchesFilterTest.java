@@ -1,10 +1,10 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Robin Müller

@@ -1,9 +1,20 @@
 package com.dabsquared.gitlabjenkins.util;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Group;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.OrderType;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.ProjectHook;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.ProjectVisibilityType;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.SortType;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
 import java.util.List;
 
 class GitLabClientStub implements GitLabClient {
@@ -16,6 +27,28 @@ class GitLabClientStub implements GitLabClient {
     @Override
     public String getHostUrl() {
         return url;
+    }
+
+    @Override
+    public List<Group> getGroups() {
+        return null;
+    }
+
+    @Override
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy,
+            SortType sort) {
+        return null;
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId) {
+        return null;
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
+            OrderType orderBy, SortType sort) {
+        return null;
     }
 
     @Override
@@ -49,6 +82,16 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
+    public List<ProjectHook> getProjectHooks(String projectName) {
+        return null;
+    }
+
+    @Override
+    public void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
+
+    }
+
+    @Override
     public void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
 
     }
@@ -64,7 +107,7 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
-    public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, boolean shouldRemoveSourceBranch) {
+    public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, Boolean shouldRemoveSourceBranch) {
 
     }
 
