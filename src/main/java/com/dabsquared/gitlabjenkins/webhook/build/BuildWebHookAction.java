@@ -1,10 +1,14 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import hudson.model.Item;
 import hudson.model.Job;
-import hudson.security.Messages;
 import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import jenkins.model.Jenkins;
@@ -34,13 +38,43 @@ abstract class BuildWebHookAction implements WebHookAction {
     protected abstract static class TriggerNotifier implements Runnable {
 
         private final Item project;
-        private final String secretToken;
+        private final byte[] hashedSecretToken;
         private final Authentication authentication;
 
         public TriggerNotifier(Item project, String secretToken, Authentication authentication) {
             this.project = project;
-            this.secretToken = secretToken;
+            /* secretToken may be null, but we want constant time comparison of tokens */
+            /* Remember secretToken was passed as null, then handle it as non-matchinng later */
+            this.hashedSecretToken = secretToken != null ? hashedBytes(secretToken) : null;
             this.authentication = authentication;
+        }
+
+        @NonNull
+        private static byte[] hashedBytes(@NonNull String token) {
+            final String HASH_ALGORITHM = "SHA-256";
+            try {
+                MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
+                return digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            } catch (NoSuchAlgorithmException e) {
+                throw new AssertionError("Hash algorithm " + HASH_ALGORITHM + " not found", e);
+            }
+        }
+
+        /* Constant time comparison of token argument and secretToken that was
+         * passed to the constructor. If a null secretToken was passed to the
+         * constructor, this method must still perform constant time comparison.
+         */
+        private boolean tokenMatches(@NonNull String token) {
+            byte[] tokenBytes = hashedBytes(token);
+            if (hashedSecretToken != null) {
+                return MessageDigest.isEqual(tokenBytes, hashedSecretToken);
+            }
+
+            // assure the isEqual comparison compares same number of bytes
+            byte [] secretTokenBytes = tokenBytes.clone();
+            // change last byte to assure the isEqual comparison will not match
+            secretTokenBytes[secretTokenBytes.length - 1] ^= 1 << 3;
+            return MessageDigest.isEqual(tokenBytes, secretTokenBytes);
         }
 
         public void run() {
@@ -48,7 +82,7 @@ abstract class BuildWebHookAction implements WebHookAction {
             if (trigger != null) {
                 if (StringUtils.isEmpty(trigger.getSecretToken())) {
                     checkPermission(Item.BUILD, project);
-                } else if (!StringUtils.equals(trigger.getSecretToken(), secretToken)) {
+                } else if (!tokenMatches(trigger.getSecretToken())) {
                     throw HttpResponses.errorWithoutStack(401, "Invalid token");
                 }
                 performOnPost(trigger);
