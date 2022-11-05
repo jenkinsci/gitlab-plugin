@@ -1,26 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form"
-         xmlns:d="jelly:define"
-         xmlns:local="local">
-  <d:taglib uri="local">
-    <d:tag name="blockWrapperTable">
-      <j:choose>
-        <j:when test="${divBasedFormLayout}">
-          <div>
-            <d:invokeBody/>
-          </div>
-        </j:when>
-        <j:otherwise>
-          <table>
-            <d:invokeBody/>
-          </table>
-        </j:otherwise>
-      </j:choose>
-    </d:tag>
-  </d:taglib>
+         xmlns:d="jelly:define">
   <f:entry title="Enabled GitLab triggers">
-    <local:blockWrapperTable>
+    <div>
       <f:entry title="Push Events" field="triggerOnPush">
         <f:checkbox default="true"/>
       </f:entry>
@@ -52,7 +35,7 @@
       <f:entry title="Comment (regex) for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
         <f:textbox field="noteRegex" default="Jenkins please retry a build"/>
       </f:entry>
-    </local:blockWrapperTable>
+    </div>
   </f:entry>
   <f:advanced>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
@@ -78,7 +61,7 @@
     </f:entry>
 
     <f:entry title="Allowed branches">
-      <local:blockWrapperTable>
+      <div>
         <!--<f:section title="">-->
         <f:radioBlock name="branchFilterType" value="All" title="Allow all branches to trigger this job"
                       checked="${instance.branchFilterType == null || instance.branchFilterType == 'All'}"
@@ -116,14 +99,14 @@
                        autoCompleteDelimChar=","/>
           </f:entry>
         </f:optionalBlock>
-      </local:blockWrapperTable>
+      </div>
     </f:entry>
     <f:entry title="${%Secret token}" help="/plugin/gitlab-plugin/help/help-secretToken.html">
-      <local:blockWrapperTable>
+      <div>
         <f:readOnlyTextbox field="secretToken" id="secretToken"/>
         <f:validateButton title="${%Generate}" method="generateSecretToken"/>
         <f:validateButton title="${%Clear}" method="clearSecretToken"/>
-      </local:blockWrapperTable>
+      </div>
     </f:entry>
   </f:advanced>
 </j:jelly>
