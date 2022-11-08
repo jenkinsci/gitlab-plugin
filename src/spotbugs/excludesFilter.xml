@@ -3,6 +3,13 @@
   <!--
     Exclusions in this section have been triaged and determined to be false positives.
   -->
+  <Match>
+    <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR"/>
+    <Or>
+      <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig"/>
+      <Class name="com.dabsquared.gitlabjenkins.GitLabPushTrigger$DescriptorImpl"/>
+    </Or>
+  </Match>
 
   <!--
     Here lies technical debt. Exclusions in this section have not yet been triaged. When working on
