@@ -120,7 +120,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                 .withRef(hook.getObjectAttributes().getRef()==null?"":hook.getObjectAttributes().getRef())
                 .withSha(hook.getObjectAttributes().getSha()==null?"":hook.getObjectAttributes().getSha())
                 .withBeforeSha(hook.getObjectAttributes().getBeforeSha()==null?"":hook.getObjectAttributes().getBeforeSha())
-                .withStatus(hook.getObjectAttributes().getStatus()==null?"":hook.getObjectAttributes().getStatus().toString())
+                .withStatus(hook.getObjectAttributes().getStatus()==null?"":hook.getObjectAttributes().getStatus())
                 .withStages(hook.getObjectAttributes().getStages()==null?"":hook.getObjectAttributes().getStages().toString())
                 .withCreatedAt(hook.getObjectAttributes().getCreatedAt()==null?"":hook.getObjectAttributes().getCreatedAt().toString())
                 .withFinishedAt(hook.getObjectAttributes().getFinishedAt()==null?"":hook.getObjectAttributes().getFinishedAt().toString())
