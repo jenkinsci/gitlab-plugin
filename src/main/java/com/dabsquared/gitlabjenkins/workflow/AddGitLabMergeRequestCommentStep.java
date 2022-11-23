@@ -1,16 +1,14 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import hudson.Extension;
+import hudson.model.Cause;
+import hudson.model.Cause.UpstreamCause;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -21,13 +19,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
@@ -74,6 +75,15 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         @Override
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            // @ Alceatraz Warprays BEGIN
+            if (cause == null) {
+                List<GitLabWebHookCause> gitLabWebHookCauses =
+                    retrieveCauseRecursive(run.getCauses());
+                if (!CollectionUtils.isEmpty(gitLabWebHookCauses)) {
+                    cause = gitLabWebHookCauses.get(0);
+                }
+            }
+            // @ Alceatraz Warprays END
             if (cause != null) {
                 MergeRequest mergeRequest = cause.getData().getMergeRequest();
                 if (mergeRequest != null) {
@@ -90,6 +100,12 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                     }
                 }
             }
+            // @ Alceatraz Warprays BEGIN
+            else {
+                LOGGER.log(Level.WARNING, "Add MR comment failure, Can't " +
+                  "retrieve GitLab MR context: Can't find GitLabWebHookCause");
+            }
+            // @ Alceatraz Warprays END
             return null;
         }
 
@@ -143,5 +159,38 @@ public class AddGitLabMergeRequestCommentStep extends Step {
 			Collections.addAll(context, TaskListener.class, Run.class);
 			return Collections.unmodifiableSet(context);
 		}
+    }
+
+
+    /**
+     * Retrieve cause recursively for nested job.
+     * <p>
+     * If child task invoked by parent, getCause(GitLabWebHookCause.class) will
+     * return nothing due to task not triggered by Gitlab. So retrieve cause
+     * from upstream task is needed.
+     * <p>
+     * Notice: Only retrieve the first founded GitLabWebHookCause instance.
+     *
+     * @param causes current level cause
+     *
+     * @return cause from parent
+     *
+     * @author Alceatraz Warprays
+     */
+    private static List<GitLabWebHookCause> retrieveCauseRecursive(List<Cause>
+                                                                       causes) {
+        for (Cause cause : causes) {
+            if (!(cause instanceof UpstreamCause)) continue;
+            List<Cause> upstreamCauses = ((UpstreamCause) cause)
+                                             .getUpstreamCauses();
+            for (Cause upCause : upstreamCauses) {
+                if (!(upCause instanceof GitLabWebHookCause)) continue;
+                return Collections.singletonList((GitLabWebHookCause) upCause);
+            }
+            List<GitLabWebHookCause> builds =
+                retrieveCauseRecursive(upstreamCauses);
+            if (!builds.isEmpty()) return builds;
+        }
+        return Collections.emptyList();
     }
 }
