@@ -93,7 +93,7 @@ public class GitLabConnectionConfigSSLTest {
         // including things like choosing the particular certificate out of a
         // keystore to be used.
 
-        SslContextFactory sslContextFactory = new SslContextFactory();
+        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
         sslContextFactory.setKeyStorePath("src/test/resources/keystore");
         sslContextFactory.setKeyStorePassword("password");
 
