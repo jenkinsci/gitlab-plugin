@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.51</version>
+    <version>4.52</version>
     <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
@@ -16,7 +16,7 @@
   <properties>
     <revision>1.6.1</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.346.3</jenkins.version>
+    <jenkins.version>2.361.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
@@ -296,7 +296,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.0</version>
+      <version>42.5.1</version>
       <scope>test</scope>
       <exclusions>
         <!-- Upper bounds with Guava -->
@@ -313,8 +313,8 @@
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.346.x</artifactId>
-        <version>1706.vc166d5f429f8</version>
+        <artifactId>bom-2.361.x</artifactId>
+        <version>1750.v0071fa_4c4a_e3</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
