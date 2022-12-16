@@ -11,8 +11,7 @@ buildPlugin(
   artifactCachingProxyEnabled: true,
   // Test Java 11 with a recent LTS, Java 17 even more recent
   configurations: [
-    [platform: 'linux',   jdk: '17', jenkins: '2.380'],
-    [platform: 'linux',   jdk: '11', jenkins: '2.375.1'],
-    [platform: 'windows', jdk: '11']
+    [platform: 'linux', jdk: 17],
+    [platform: 'windows', jdk: 11],
   ]
 )
