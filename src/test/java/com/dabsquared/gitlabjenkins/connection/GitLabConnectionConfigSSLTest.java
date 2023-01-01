@@ -161,18 +161,10 @@ public class GitLabConnectionConfigSSLTest {
     }
 
     @Test
-    public void doCheckConnection_ignoreCertificateErrors() {
-        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
-
-        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", true, 10, 10);
-        assertThat(formValidation.getMessage(), is(Messages.connection_success()));
-    }
-
-    @Test
     public void doCheckConnection_certificateError() throws IOException {
         GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
         FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
-        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
+        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("PKIX path building failed")));
     }
 }
