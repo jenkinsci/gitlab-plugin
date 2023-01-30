@@ -5,7 +5,7 @@ updates:
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       # The 2.0.0 release is the first release under the jakarta.activation.* namespace
       - dependency-name: "jakarta.activation:jakarta.activation-api"
@@ -21,4 +21,4 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
