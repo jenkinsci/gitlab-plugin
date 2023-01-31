@@ -60,6 +60,7 @@ public final class CauseData {
     private final String createdAt;
     private final String finishedAt;
     private final String buildDuration;
+    private final String commentAuthor;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
@@ -68,7 +69,7 @@ public final class CauseData {
               Integer mergeRequestIid, Integer mergeRequestTargetProjectId, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
               String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
               String triggerPhrase, String mergeRequestState, String mergedByUser, String mergeRequestAssignee, String ref, String isTag,
-	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration) {
+	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration, String commentAuthor) {
         this.actionType = Objects.requireNonNull(actionType, "actionType must not be null.");
         this.sourceProjectId = Objects.requireNonNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = Objects.requireNonNull(targetProjectId, "targetProjectId must not be null.");
@@ -111,6 +112,7 @@ public final class CauseData {
         this.createdAt = createdAt;
         this.finishedAt = finishedAt;
         this.buildDuration = buildDuration;
+        this.commentAuthor = commentAuthor;
     }
 
     @Exported
@@ -144,6 +146,7 @@ public final class CauseData {
         variables.put("gitlabTargetRepoHttpUrl", targetRepoHttpUrl);
         variables.put("gitlabBefore", before);
         variables.put("gitlabAfter", after);
+        variables.putIfNotNull("gitlabCommentAuthor", commentAuthor);
         variables.put("ref", ref);
         variables.put("beforeSha", beforeSha);
         variables.put("isTag", isTag);
@@ -329,6 +332,9 @@ public final class CauseData {
     @Exported
     public String getBuildDuration() { return buildDuration; }
 
+    @Exported
+    public String getCommentAuthor() { return commentAuthor; }
+
 
     String getShortDescription() {
         return actionType.getShortDescription(this);
@@ -410,6 +416,7 @@ public final class CauseData {
             .append(createdAt, causeData.getCreatedAt())
             .append(finishedAt, causeData.getFinishedAt())
             .append(buildDuration, causeData.getBuildDuration())
+            .append(commentAuthor, causeData.getCommentAuthor())
             .isEquals();
     }
 
@@ -457,6 +464,7 @@ public final class CauseData {
             .append(createdAt)
             .append(finishedAt)
             .append(buildDuration)
+            .append(commentAuthor)
             .toHashCode();
     }
 
@@ -504,6 +512,7 @@ public final class CauseData {
             .append("createdAt", createdAt)
             .append("finishedAt", finishedAt)
             .append("duration", buildDuration)
+            .append("commentAuthor", commentAuthor)
             .toString();
     }
 
