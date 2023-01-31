@@ -21,7 +21,7 @@ import net.sf.json.JSONObject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
@@ -84,7 +84,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         return null;
     }
 
-    public static GitLabClient getClient(@NotNull Run<?, ?> build) {
+    public static GitLabClient getClient(@NonNull Run<?, ?> build) {
         Job<?, ?> job = build.getParent();
         if (job != null) {
             final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
