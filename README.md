@@ -70,6 +70,10 @@ This is not an exhaustive list of issues, but rather a place for us to note sign
 * [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
 * [#730](https://github.com/jenkinsci/gitlab-plugin/issues/730) - GitLab 10.5.6 introduced an issue which can cause HTTP 500 errors when webhooks are triggered if the webhook is pointing to http://localhost or http://127.0.0.1. See the linked issue for a workaround.
 
+## Report an Issue
+
+Please report issues and enhancements through the [GitHub issue tracker](https://github.com/jenkinsci/gitlab-plugin/issues/new/choose).
+
 ## Defined variables
 
 When GitLab triggers a build via the plugin, various environment variables are set based on the JSON payload that GitLab sends. You can use these throughout your job configuration. The available variables are:
@@ -345,7 +349,7 @@ Also make sure you have chosen the appropriate GitLab instance from the 'GitLab 
         }
     }
     ```
-* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented here: https://docs.gitlab.com/ce/api/pipelines.html
+* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented here: https://docs.gitlab.com/ee/api/commits.html#post-the-build-status-to-a-commit
     ```groovy
     node() {
         stage('Checkout') { checkout <your-scm-config> }
@@ -393,6 +397,9 @@ pipeline {
       success {
         updateGitlabCommitStatus name: 'build', state: 'success'
       }
+      aborted {
+        updateGitlabCommitStatus name: 'build', state: 'canceled'
+      }
     }
     options {
       gitLabConnection('your-gitlab-connection-name')
@@ -403,6 +410,7 @@ pipeline {
     stages {
       stage("build") {
         steps {
+          updateGitlabCommitStatus name: 'build', state: 'running'
           echo "hello world"
         }
       }
@@ -559,41 +567,14 @@ This saves time in projects where builds can stay long time in a build queue and
 
 Version 1.2.1 of the plugin introduces a backwards-incompatible change
 for Pipeline jobs. They will need to be manually reconfigured when you
-upgrade to this version. Freestyle jobs are not impacted. Please see the
-README for details.
-
+upgrade to this version. Freestyle jobs are not impacted.
 
 ## Contributing to the Plugin
 
-Plugin source code is hosted on [GitHub](https://github.com/jenkinsci/gitlab-plugin).
-New feature proposals and bug fix proposals should be submitted as
-[GitHub pull requests](https://help.github.com/articles/creating-a-pull-request).
-Fork the repository on GitHub, prepare your change on your forked
-copy, and submit a pull request (see [here](https://github.com/jenkinsci/gitlab-plugin/pulls) for open pull requests). Your pull request will be evaluated by the [plugin's CI job](https://ci.jenkins.io/blue/organizations/jenkins/Plugins%2Fgitlab-plugin/).
-
-If you are adding new features please make sure that they support Jenkins Pipeline jobs.
-See [here](https://github.com/jenkinsci/workflow-plugin/blob/master/COMPATIBILITY.md) for some information.
-
-
-Before submitting your change make sure that:
-* your changes work with the oldest and latest supported GitLab version
-* new features are provided with tests
-* refactored code is provided with regression tests
-* the code formatting follows the plugin standard
-* imports are organised
-* you updated the help docs
-* you updated the README
-* you have used findbugs to see if you haven't introduced any new warnings
-
-## Testing With Docker
-
-See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md 🙂
-
-## Release Workflow
-
-To perform a full plugin release, maintainers can run ``mvn release:prepare release:perform`` To release a snapshot, e.g. with a bug fix for users to test, just run ``mvn deploy``
+Detailed instructions for code and documentation contributions to the plugin are available in the [contributing guide](CONTRIBUTING.md).
 
 ## Changelog
+
 For recent versions, see [GitHub Releases](https://github.com/jenkinsci/gitlab-plugin/releases).
 
-For versions 1.5.14 and older, see [CHANGELOG.md](CHANGELOG.md).
+For versions 1.5.21 and older, see the [historical changelog](https://github.com/jenkinsci/gitlab-plugin/blob/gitlab-plugin-1.5.34/CHANGELOG.md).

@@ -1,16 +1,17 @@
-/*
- * See the documentation for more options:
- * https://github.com/jenkins-infra/pipeline-library/
- */
-buildPlugin(useContainerAgent: true, configurations: [
-  // Test the long-term support end of the compatibility spectrum (i.e., the minimum required
-  // Jenkins version).
-  [ platform: 'linux', jdk: '8', jenkins: null ],
+#!/usr/bin/env groovy
 
-  // Test the common case (i.e., a recent LTS release) on both Linux and Windows.
-  [ platform: 'linux', jdk: '11', jenkins: '2.332.1' ],
-  [ platform: 'windows', jdk: '11', jenkins: '2.332.1' ],
-
-  // Test the bleeding edge of the compatibility spectrum (i.e., the latest supported Java runtime).
-  [ platform: 'linux', jdk: '17', jenkins: '2.342' ],
-])
+/* `buildPlugin` step provided by: https://github.com/jenkins-infra/pipeline-library */
+buildPlugin(
+  // Container agents start faster and are easier to administer
+  useContainerAgent: true,
+  // Show failures on all configurations
+  failFast: false,
+  // Opt-in to the Artifact Caching Proxy, to be removed when it will be in opt-out.
+  // See https://github.com/jenkins-infra/helpdesk/issues/2752 for more details and updates.
+  artifactCachingProxyEnabled: true,
+  // Test Java 11 with a recent LTS, Java 17 on Windows (not ready to test newer LTS versions)
+  configurations: [
+    [platform: 'linux',   jdk: '11'], // Linux first for coverage report on ci.jenkins.io
+    [platform: 'windows', jdk: '17'],
+  ]
+)

@@ -1,9 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabApiProxy.ID;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Encoded;
@@ -17,17 +18,36 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabApiProxy.ID;
-
 
 /**
- * @author Robin Müller
+ * @author Robin Müller.
  */
 @Path("/api/" + ID)
 interface V4GitLabApiProxy extends GitLabApiProxy {
     String ID = "v4";
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/groups")
+    @Override
+    List<Group> getGroups(
+        @QueryParam("all_available") Boolean allAvailable,
+        @QueryParam("top_level_only") Boolean topLevelOnly,
+        @QueryParam("order_by") String orderBy,
+        @QueryParam("sort") String sort
+    );
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/groups/{groupId}/projects")
+    @Override
+    List<Project> getGroupProjects(
+        @PathParam("groupId") @Encoded String groupId,
+        @QueryParam("include_subgroups") Boolean includeSubgroups,
+        @QueryParam("visibility") String visibility,
+        @QueryParam("order_by") String orderBy,
+        @QueryParam("sort") String sort
+    );
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -67,6 +87,12 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     @Override
     void deleteProject(@PathParam("projectId") @Encoded String projectId);
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectName}/hooks")
+    @Override
+    List<ProjectHook> getProjectHooks(@PathParam("projectName") @Encoded String projectName);
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -74,6 +100,18 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     @Override
     void addProjectHook(@PathParam("projectId") @Encoded String projectId,
                         @FormParam("url") String url,
+                        @FormParam("push_events") Boolean pushEvents,
+                        @FormParam("merge_requests_events") Boolean mergeRequestEvents,
+                        @FormParam("note_events") Boolean noteEvents);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("/projects/{projectId}/hooks")
+    @Override
+    void addProjectHook(@PathParam("projectId") @Encoded String projectId,
+                        @FormParam("url") String url,
+                        @FormParam("token") String secretToken,
                         @FormParam("push_events") Boolean pushEvents,
                         @FormParam("merge_requests_events") Boolean mergeRequestEvents,
                         @FormParam("note_events") Boolean noteEvents);

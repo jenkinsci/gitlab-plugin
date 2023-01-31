@@ -1,15 +1,12 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
-import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
-
+import javax.ws.rs.NotFoundException;
 
 final class AutodetectingGitLabClient implements GitLabClient {
     private final Iterable<GitLabClientBuilder> builders;
@@ -33,6 +30,51 @@ final class AutodetectingGitLabClient implements GitLabClient {
     @Override
     public String getHostUrl() {
         return url;
+    }
+
+    @Override
+    public List<Group> getGroups() {
+        return execute(
+                new GitLabOperation<List<Group>>() {
+                    @Override
+                    List<Group> execute(GitLabClient client) {
+                        return client.getGroups();
+                    }
+                });
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId) {
+        return execute(
+                new GitLabOperation<List<Project>>() {
+                    @Override
+                    List<Project> execute(GitLabClient client) {
+                        return client.getGroupProjects(groupId);
+                    }
+                });
+    }
+
+    @Override
+    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
+            OrderType orderBy, SortType sort) {
+        return execute(
+                new GitLabOperation<List<Project>>() {
+                    @Override
+                    List<Project> execute(GitLabClient client) {
+                        return client.getGroupProjects(groupId, includeSubgroups, visibility, orderBy, sort);
+                    }
+                });
+    }
+
+    @Override
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort) {
+        return execute(
+                new GitLabOperation<List<Group>>() {
+                    @Override
+                    List<Group> execute(GitLabClient client) {
+                        return client.getGroups(allAvailable, topLevelOnly, orderBy, sort);
+                    }
+                });
     }
 
     @Override
@@ -69,6 +111,17 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public List<ProjectHook> getProjectHooks(String projectName) {
+        return execute(
+                new GitLabOperation<List<ProjectHook>>() {
+                    @Override
+                    List<ProjectHook> execute(GitLabClient client) {
+                        return client.getProjectHooks(projectName);
+                    }
+                });
+    }
+
+    @Override
     public Project updateProject(final String projectId, final String name, final String path) {
         return execute(
             new GitLabOperation<Project>() {
@@ -98,6 +151,18 @@ final class AutodetectingGitLabClient implements GitLabClient {
                 @Override
                 Void execute(GitLabClient client) {
                     client.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
+                    return null;
+                }
+            });
+    }
+
+    @Override
+    public void addProjectHook(final String projectId, final String url, String secretToken, final Boolean pushEvents, final Boolean mergeRequestEvents, final Boolean noteEvents) {
+        execute(
+            new GitLabOperation<Void>() {
+                @Override
+                Void execute(GitLabClient client) {
+                    client.addProjectHook(projectId, url, secretToken, pushEvents, mergeRequestEvents, noteEvents);
                     return null;
                 }
             });
@@ -176,7 +241,6 @@ final class AutodetectingGitLabClient implements GitLabClient {
             }
         );
     }
-
 
     @Override
     public void awardMergeRequestEmoji(final MergeRequest mr, final String body) {
@@ -292,7 +356,6 @@ final class AutodetectingGitLabClient implements GitLabClient {
             });
     }
 
-
     private GitLabClient delegate(boolean reset) {
         if (reset || delegate == null) {
             delegate = autodetectOrDie();
@@ -328,7 +391,6 @@ final class AutodetectingGitLabClient implements GitLabClient {
         return operation.execute(false);
     }
 
-
     private abstract class GitLabOperation<R> {
         private R execute(boolean reset) {
             try {
@@ -341,7 +403,6 @@ final class AutodetectingGitLabClient implements GitLabClient {
                 return execute(true);
             }
         }
-
 
         abstract R execute(GitLabClient client);
     }

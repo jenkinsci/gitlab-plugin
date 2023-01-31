@@ -74,7 +74,7 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
                 client.awardMergeRequestEmoji(mergeRequest, getResultIcon(build.getResult()));
             }
         } catch (NotFoundException e) {
-            String message = String.format("Failed to add vote on Merge Request for project '%s'\n" +
+            String message = String.format("Failed to add vote on Merge Request for project '%s'%n" +
                 "Got unexpected 404, are you using the wrong API version or trying to vote on your own merge request?", mergeRequest.getProjectId());
             listener.getLogger().println(message);
             LOGGER.log(Level.WARNING, message, e);

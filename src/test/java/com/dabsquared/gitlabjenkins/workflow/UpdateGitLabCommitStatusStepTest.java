@@ -48,7 +48,9 @@ public class UpdateGitLabCommitStatusStepTest {
         String pipelineText =
                 IOUtils.toString(
                         getClass().getResourceAsStream("pipeline/updateGitlabCommitStatus.groovy"));
-        rr.then(j -> _updateGitlabCommitStatus(j, port, pipelineText));
+        rr.then(j -> {
+            _updateGitlabCommitStatus(j, port, pipelineText);
+        });
     }
 
     private static void _updateGitlabCommitStatus(JenkinsRule j, int port, String pipelineText)
