@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.52</version>
+    <version>4.54</version>
     <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
@@ -21,7 +21,7 @@
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <mockserver.version>5.14.0</mockserver.version>
+    <mockserver.version>5.15.0</mockserver.version>
   </properties>
 
 
@@ -314,7 +314,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1750.v0071fa_4c4a_e3</version>
+        <version>1798.vc671fe94856f</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -416,7 +416,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.40.2</version>
+            <version>0.40.3</version>
             <configuration>
               <verbose>true</verbose>
               <images>
