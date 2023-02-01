@@ -14,7 +14,7 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.6.1</revision>
+    <revision>1.7.2</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.361.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
