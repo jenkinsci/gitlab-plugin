@@ -14,9 +14,9 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.7.2</revision>
+    <revision>1.7.1</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.361.4</jenkins.version>
+    <jenkins.version>2.375.2</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
