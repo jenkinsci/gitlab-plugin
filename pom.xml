@@ -24,7 +24,6 @@
     <mockserver.version>5.15.0</mockserver.version>
   </properties>
 
-
   <licenses>
     <license>
       <name>GPL v2.0 License</name>
