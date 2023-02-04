@@ -16,7 +16,7 @@
   <properties>
     <revision>1.7.2</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.375.2</jenkins.version>
+    <jenkins.version>2.361.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
@@ -141,7 +141,6 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
     </dependency>
-
 
     <!-- REST client dependencies -->
     <dependency>
