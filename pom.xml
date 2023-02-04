@@ -142,7 +142,6 @@
       <artifactId>workflow-step-api</artifactId>
     </dependency>
 
-
     <!-- REST client dependencies -->
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
