@@ -129,7 +129,7 @@ public class GitLabCommitStatusStep extends Step {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name,  step.builds, step.connection);
+                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name, step.builds, step.connection);
                 body.cancel(cause);
             }
         }
@@ -149,6 +149,7 @@ public class GitLabCommitStatusStep extends Step {
     @Extension
     public static final class DescriptorImpl extends StepDescriptor {
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Update the commit status in GitLab depending on the build status";
@@ -166,9 +167,9 @@ public class GitLabCommitStatusStep extends Step {
 
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			Set<Class<?>> context = new HashSet<>();
-			Collections.addAll(context, TaskListener.class, Run.class);
-			return Collections.unmodifiableSet(context);
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, TaskListener.class, Run.class);
+            return Collections.unmodifiableSet(context);
 		}
     }
 }

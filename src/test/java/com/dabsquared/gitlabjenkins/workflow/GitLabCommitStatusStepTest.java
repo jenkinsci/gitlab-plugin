@@ -19,7 +19,7 @@ public class GitLabCommitStatusStepTest {
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/bare-gitlabCommitStatus-pipeline.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
+        Run<?, ?> build = j.buildAndAssertSuccess(project);
         j.assertLogContains("this is simple jenkins-build", build);
     }
 
@@ -29,7 +29,7 @@ public class GitLabCommitStatusStepTest {
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/named-simple-pipeline-builds-as-LString.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
+        Run<?, ?> build = j.buildAndAssertSuccess(project);
         j.assertLogContains("this is pre-build stage", build);
     }
 
@@ -39,7 +39,7 @@ public class GitLabCommitStatusStepTest {
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/named-simple-pipeline-builds-as-String.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
+        Run<?, ?> build = j.buildAndAssertSuccess(project);
         j.assertLogContains("this is pre-build stage", build);
     }
 
@@ -49,7 +49,7 @@ public class GitLabCommitStatusStepTest {
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/multisite-pipeline.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
+        Run<?, ?> build = j.buildAndAssertSuccess(project);
         j.assertLogContains("this is stage3", build);
     }
 
@@ -59,7 +59,7 @@ public class GitLabCommitStatusStepTest {
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/multiproject-specific-connection-pipeline.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
+        Run<?, ?> build = j.buildAndAssertSuccess(project);
         j.assertLogContains("this is pre-build stage", build);
     }
 
@@ -69,7 +69,7 @@ public class GitLabCommitStatusStepTest {
         String pipelineText =  IOUtils.toString(getClass().getResourceAsStream(
             "pipeline/multiproject-pipeline.groovy"));
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-        Run build = j.buildAndAssertSuccess(project);
+        Run<?, ?> build = j.buildAndAssertSuccess(project);
         j.assertLogContains("this is pre-build stage", build);
     }
 }
