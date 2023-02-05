@@ -56,7 +56,9 @@ public class CommitStatusUpdater {
 
         if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty()) {
             try {
-                gitLabBranchBuilds = retrieveGitlabProjectIds(build, build.getEnvironment(listener));
+                if (!build.getEnvironment(listener).isEmpty()) {
+                    gitLabBranchBuilds = retrieveGitlabProjectIds(build, build.getEnvironment(listener));
+                }
             } catch (IOException | InterruptedException e) {
                 printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
             }
