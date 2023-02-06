@@ -13,7 +13,7 @@ To start the containers for Linux, run `docker-compose up -d` from the `docker` 
 
 You need to modify the example docker-compose file available at `gitlab-plugin/src/docker` to set up instances of the latest `GitLab` and `Jenkins` versions for MacOS/arm64. 
 
-Due to Apple's System Integrity Protection, you need to use the home directory as a root for the new directories to be created.
+Due to Apple's System Integrity Protection (SIP), the suggested paths cannot be simply created and accessed, so you may need to use the home directory (~) as a root for the new directories to be created.
 
 In the `docker-compose.yml` file :
     1. Change the ports to 
