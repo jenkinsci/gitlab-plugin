@@ -36,7 +36,7 @@ Like the instructions for Linux, for macOS users to start the containers, run `d
 ## Access GitLab
 
 To access `GitLab`, you first need to create a user - `root` with some password. To do so, follow the following steps :
-    1. In the Gitlab containers terminal inside Docker Desktop, type `gitlab-rails console` and wait for atleast 5 minutes for the console to start. 
+    1. In the Gitlab containers terminal inside Docker Desktop, type `gitlab-rails console` and wait for at least a few minutes for the console to start. 
     2. Once the console is started successfully, run the following commands in sequence at the console, noting that there are certain security rules to the password choice:
         a. `user = User.new(username: 'root', email: 'root@root.com', name: 'root', password: 'setyourown', password_confirmation: 'setyourown')`
         b. `user.skip_confirmation!` 
