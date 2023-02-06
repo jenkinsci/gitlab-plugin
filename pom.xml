@@ -14,7 +14,7 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.6.1</revision>
+    <revision>1.7.5</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.361.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -23,7 +23,6 @@
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <mockserver.version>5.15.0</mockserver.version>
   </properties>
-
 
   <licenses>
     <license>
@@ -142,7 +141,6 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
     </dependency>
-
 
     <!-- REST client dependencies -->
     <dependency>
@@ -296,7 +294,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.1</version>
+      <version>42.5.3</version>
       <scope>test</scope>
       <exclusions>
         <!-- Upper bounds with Guava -->
@@ -314,7 +312,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1792.v0295db_e7c548</version>
+        <version>1798.vc671fe94856f</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>

@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 public class GitLabBranchBuild extends AbstractDescribableImpl<GitLabBranchBuild> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitLabBranchBuild.class);
-
 
     private String name;
     private String projectId;
@@ -70,10 +70,9 @@ public class GitLabBranchBuild extends AbstractDescribableImpl<GitLabBranchBuild
         return connection;
     }
 
-
-
     @Extension
     public static class DescriptorImpl extends Descriptor<GitLabBranchBuild> {
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Gitlab Branch Build";
