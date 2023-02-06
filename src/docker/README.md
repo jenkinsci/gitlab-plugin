@@ -8,7 +8,7 @@ If they don't already exist, create the following directories and make sure the 
 * /srv/docker/gitlab/gitlab
 * /srv/docker/gitlab/redis
 * /srv/docker/jenkins
-
+To start the containers for Linux, run `docker-compose up -d` from the `docker` folder. If you have problems accessing the services in the containers, run `docker-compose up` by itself to see output from the services as they start, and the latter command is the verbose version of the former. 
 ## Quick test environment setup using Docker for MacOS/arm64
 
 You need to modify the example docker-compose file available at `gitlab-plugin/src/docker` to set up instances of the latest `GitLab` and `Jenkins` versions for MacOS/arm64. 
