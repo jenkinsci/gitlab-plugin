@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: "no"
+    hostname: 'localhost'
+    ports:
+      - '55580:80'
+      - '55522:22'
+      - '55443:443'
+    volumes:
+      -  '/srv/docker/gitlab/config:/etc/gitlab'
+      -  '/srv/docker/gitlab/logs:/var/log/gitlab'
+      -  '/srv/docker/gitlab/data:/var/opt/gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+        gitlab_rails['gitlab_shell_ssh_port'] = 10022
+        gitlab_rails['initial_root_password'] = 'password'
+    shm_size: '5gb'
+
+  jenkins:
+    restart: "no"
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - /srv/docker/jenkins:/var/jenkins_home
