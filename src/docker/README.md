@@ -28,7 +28,7 @@ In the `docker-compose.yml` file :
         `/Users/yourusername/srv/docker/gitlab/data:/var/opt/gitlab`
     3. Change the jenkins volumes to 
         `/Users/yourusername/srv/docker/jenkins:/var/jenkins_home`
-    4. In your Docker-Desktop go to `Settings > General > Choose file sharing   implementation for your containers` and switch to osxfs(Legacy). osxfs(Legacy) utilizes more resources of the system so make sure that the assigned resources are sufficient by going to `Settings > Resources` otherwise Docker-Desktop may go to forever start mode on Restarting.
+    4. In your Docker-Desktop go to `Settings > General > Choose file sharing implementation for your containers` and switch to osxfs (Legacy). As `osxfs (Legacy)` utilizes more resources of the system, make sure the assigned resources are sufficient by going to `Settings > Resources` and make suitable adjustments where necessary, otherwise Docker Desktop may go on start mode forever on restarting.
     5. Add `shm_size: '5gb'`under gitlab services.
 
 Like the instructions for Linux, for macOS users to start the containers, run `docker-compose up -d` from the `docker` folder. If you have any problems accessing the services in the containers, run `docker-compose up` by itself to see output from the services as they start.
