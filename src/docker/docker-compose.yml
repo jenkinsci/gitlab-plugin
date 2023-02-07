@@ -10,7 +10,7 @@ services:
       - '55522:22'
       - '55443:443'
     volumes:
-      -  '/srv/docker/gitlab/config:/etc/gitlab'
+      - '/srv/docker/gitlab/config:/etc/gitlab'
       - '/srv/docker/gitlab/logs:/var/log/gitlab'
       - '/srv/docker/gitlab/data:/var/opt/gitlab'
     environment:
