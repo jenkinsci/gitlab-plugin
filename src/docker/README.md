@@ -48,6 +48,7 @@ To access `GitLab`, you first need to create a user - `root` with some password.
 If you have trouble cloning a GitLab repository, it may be because you have a leftover host key from an SSH connection to a previous installation of GitLab in Docker. To troubleshoot, run `ssh -vT git@localhost -p port`.
 
 Please note that it is no longer recommended to use ports 10080 and 10022 even for local testing, as more modern browsers have policies set to block the use of such ports. 
+
 ## Access Jenkins
 
 To see `Jenkins`, point your browser to `http://localhost:8080`. Jenkins will be able to access GitLab at `http://gitlab`.
