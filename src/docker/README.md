@@ -22,15 +22,15 @@ In the `docker-compose.yml` file:
     - '55580:80'
     - '55522:22'
     - '55443:443'
-      as the browser may block the ports in original docker-compose file.
-    2. Change the gitlab volumes to 
-        `/Users/yourusername/srv/docker/gitlab/config:/etc/gitlab`
-        `/Users/yourusername/srv/docker/gitlab/logs:/var/log/gitlab`
-        `/Users/yourusername/srv/docker/gitlab/data:/var/opt/gitlab`
-    3. Change the jenkins volumes to 
-        `/Users/yourusername/srv/docker/jenkins:/var/jenkins_home`
-    4. In your Docker-Desktop go to `Settings > General > Choose file sharing implementation for your containers` and switch to osxfs (Legacy). As `osxfs (Legacy)` utilizes more resources of the system, make sure the assigned resources are sufficient by going to `Settings > Resources` and make suitable adjustments where necessary, otherwise Docker Desktop may go on start mode forever on restarting.
-    5. Add `shm_size: '5gb'`under gitlab services.
+as the browser may block the ports in original docker-compose file.
+2. Change the gitlab volumes to 
+    `/Users/yourusername/srv/docker/gitlab/config:/etc/gitlab`
+    `/Users/yourusername/srv/docker/gitlab/logs:/var/log/gitlab`
+    `/Users/yourusername/srv/docker/gitlab/data:/var/opt/gitlab`
+3. Change the jenkins volumes to 
+    `/Users/yourusername/srv/docker/jenkins:/var/jenkins_home`
+4. In your Docker-Desktop go to `Settings > General > Choose file sharing implementation for your containers` and switch to osxfs (Legacy). As `osxfs (Legacy)` utilizes more resources of the system, make sure the assigned resources are sufficient by going to `Settings > Resources` and make suitable adjustments where necessary, otherwise Docker Desktop may go on start mode forever on restarting.
+5. Add `shm_size: '5gb'`under gitlab services.
 
 Like the instructions for Linux, for macOS users to start the containers, run `docker-compose up -d` from the `docker` folder. If you have any problems accessing the services in the containers, run `docker-compose up` by itself to see output from the services as they start.
 
