@@ -17,7 +17,7 @@ You need to modify the example docker-compose file available at `gitlab-plugin/s
 
 Due to Apple's System Integrity Protection (SIP), the suggested paths cannot be simply created and accessed, so you may need to use the home directory (~) as a root for the new directories to be created.
 
-In the `docker-compose.yml` file :
+In the `docker-compose.yml` file:
     1. Change the ports to 
        - '55580:80'
        - '55522:22'
