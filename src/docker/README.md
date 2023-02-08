@@ -1,4 +1,5 @@
 In order to test the plugin on different versions of `GitLab` and `Jenkins` you may want to use `Docker` containers.
+
 # Quick test environment setup using Docker for Linux/amd64
 
 An example docker-compose file is available at `gitlab-plugin/src/docker` which the user can use to set up instances of the latest `GitLab` version and latest `Jenkins` LTS version for linux/amd64.
