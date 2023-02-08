@@ -44,7 +44,6 @@ To access `GitLab`, you first need to create a user - `root` with some password.
         c. `user.save!`
     3. Now, point your browser to `http://localhost:55580` and log in with `root` as the username and `setyourown` as the password. Then create a user for Jenkins, impersonate that user, get its API key, set up test repos, etc. When creating webhooks to trigger Jenkins jobs, use `http://jenkins:8080` as the base URL.
 
-
 If you have trouble cloning a GitLab repository, it may be because you have a leftover host key from an SSH connection to a previous installation of GitLab in Docker. To troubleshoot, run `ssh -vT git@localhost -p 55522`.
 
 Please note that it is no longer recommended to use ports 10080 and 10022 even for local testing, as more modern browsers have policies set to block the use of such ports. 
