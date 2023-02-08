@@ -20,7 +20,7 @@ Due to Apple's System Integrity Protection (SIP), the suggested paths cannot be 
 In the `docker-compose.yml` file:
 1. Change the ports to 
        - '55580:80'
-       - '55522:22'
+    - '55522:22'
     - '55443:443'
       as the browser may block the ports in original docker-compose file.
     2. Change the gitlab volumes to 
