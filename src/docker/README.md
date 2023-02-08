@@ -39,7 +39,7 @@ Like the instructions for Linux, for macOS users to start the containers, run `d
 To access `GitLab`, you first need to create a user - `root` with some password. To do so, follow the following steps :
 1. In the GitLab containers terminal inside Docker Desktop, type `gitlab-rails console` and wait for at least a few minutes for the console to start.
     2. Once the console is started successfully, run the following commands in sequence at the console, noting that there are certain security rules to the password choice:
-        a. `user = User.new(username: 'root', email: 'root@root.com', name: 'root', password: 'setyourown', password_confirmation: 'setyourown')`
+    a. `user = User.new(username: 'root', email: 'root@root.com', name: 'root', password: 'setyourown', password_confirmation: 'setyourown')`
         b. `user.skip_confirmation!` 
     c. `user.save!`
 3. Now, point your browser to `http://localhost:55580` and log in with `root` as the username and `setyourown` as the password. Then create a user for Jenkins, impersonate that user, get its API key, set up test repos, etc. When creating webhooks to trigger Jenkins jobs, use `http://jenkins:8080` as the base URL.
