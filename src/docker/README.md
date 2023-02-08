@@ -34,7 +34,6 @@ In the `docker-compose.yml` file :
 
 Like the instructions for Linux, for macOS users to start the containers, run `docker-compose up -d` from the `docker` folder. If you have any problems accessing the services in the containers, run `docker-compose up` by itself to see output from the services as they start.
 
-
 ## Access GitLab
 
 To access `GitLab`, you first need to create a user - `root` with some password. To do so, follow the following steps :
