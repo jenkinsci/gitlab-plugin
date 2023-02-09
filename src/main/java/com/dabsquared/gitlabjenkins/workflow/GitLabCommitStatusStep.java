@@ -109,7 +109,7 @@ public class GitLabCommitStatusStep extends Step {
                     @Override
                     public void onFailure(StepContext context, Throwable t) {
                         BuildState state = BuildState.failed;
-                        if (!t.getMessage().isBlank()) {
+                        if (t != null) {
                             if (t instanceof FlowInterruptedException) {
                                 FlowInterruptedException ex = (FlowInterruptedException) t;
                                 if (ex.isActualInterruption()) {
