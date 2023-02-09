@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core">
   <!-- SECURITY-2316: This used to show the HTML-formatted it.shortDescription, but that does not properly neutralize user-provided input -->
-  <span>Triggered by GitLab Webhook</span>
+  <span><j:out value="${it.shortDescription}" /></span>
 </j:jelly>
