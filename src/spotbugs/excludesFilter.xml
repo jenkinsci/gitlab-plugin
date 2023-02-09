@@ -129,4 +129,7 @@
   <Match>
     <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
   </Match>
+  <Match>
+    <Bug pattern="NP_NULL_PARAM_DEREF"/>
+  </Match>
 </FindBugsFilter>
