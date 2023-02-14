@@ -100,9 +100,11 @@ public class GitLabCommitStatusStep extends Step {
 
                     @Override
                     public void onSuccess(StepContext context, Object result) {
-                        if (context.hasBody()) {
+                        try {
                             CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name, step.builds, step.connection);
                             context.onSuccess(result);
+                        } catch (NullPointerException e) {
+                            e.getMessage();
                         }
                     }
 
