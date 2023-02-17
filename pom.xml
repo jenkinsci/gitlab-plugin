@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.54</version>
+    <version>4.55</version>
     <relativePath/>
   </parent>
   <artifactId>gitlab-plugin</artifactId>
@@ -315,6 +315,16 @@
         <version>1836.vfe602c266c05</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.10.5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
