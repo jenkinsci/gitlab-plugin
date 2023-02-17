@@ -316,6 +316,16 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
+      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.10.5</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
