@@ -5,7 +5,7 @@
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>4.54</version>
-    <relativePath />
+    <relativePath/>
   </parent>
   <artifactId>gitlab-plugin</artifactId>
   <version>${revision}${changelist}</version>
@@ -312,7 +312,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1834.vc26f653a_a_b_10</version>
+        <version>1836.vfe602c266c05</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
