@@ -62,22 +62,26 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     protected abstract boolean isCiSkip(H hook);
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
-        String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
-        if (StringUtils.isNotBlank(buildName)) {
-            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
-            BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
-            try {
-                if (client == null) {
-                    LOGGER.log(Level.SEVERE, "No GitLab connection configured");
-                } else {
-                    String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
-                    String targetUrl = DisplayURLProvider.get().getJobURL(job);
-                    client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
-                        BuildState.pending, ref, buildName, targetUrl, BuildState.pending.name());
+        try {
+            String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
+            if (StringUtils.isNotBlank(buildName)) {
+                GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
+                BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
+                try {
+                    if (client == null) {
+                        LOGGER.log(Level.SEVERE, "No GitLab connection configured");
+                    } else {
+                        String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
+                        String targetUrl = DisplayURLProvider.get().getJobURL(job);
+                        client.changeBuildStatus(buildStatusUpdate.getProjectId(), buildStatusUpdate.getSha(),
+                                BuildState.pending, ref, buildName, targetUrl, BuildState.pending.name());
+                    }
+                } catch (WebApplicationException | ProcessingException e) {
+                    LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
                 }
-            } catch (WebApplicationException | ProcessingException e) {
-                LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
+        } catch (NullPointerException e) {
+            e.getMessage();
         }
     }
 
