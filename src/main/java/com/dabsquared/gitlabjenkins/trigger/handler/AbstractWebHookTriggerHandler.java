@@ -81,7 +81,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                 }
             }
         } catch (NullPointerException e) {
-            e.getMessage();
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
 
