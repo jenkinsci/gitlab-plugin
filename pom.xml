@@ -4,8 +4,8 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.54</version>
-    <relativePath />
+    <version>4.55</version>
+    <relativePath/>
   </parent>
   <artifactId>gitlab-plugin</artifactId>
   <version>${revision}${changelist}</version>
@@ -294,7 +294,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.3</version>
+      <version>42.5.4</version>
       <scope>test</scope>
       <exclusions>
         <!-- Upper bounds with Guava -->
@@ -312,9 +312,19 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1834.vc26f653a_a_b_10</version>
+        <version>1836.vfe602c266c05</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.12.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
