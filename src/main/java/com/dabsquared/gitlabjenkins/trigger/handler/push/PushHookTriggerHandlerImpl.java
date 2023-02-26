@@ -14,6 +14,9 @@ import org.eclipse.jgit.util.StringUtils;
 
 import java.util.List;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
 
@@ -24,16 +27,17 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
 
     private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
     private boolean triggerToBranchDeleteRequest = false;
-    
 
-    public PushHookTriggerHandlerImpl(boolean triggerToBranchDeleteRequest)
-    {
-    this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
+    private static final Logger LOGGER = Logger.getLogger(PushHookTriggerHandlerImpl.class.getName());
+
+    public PushHookTriggerHandlerImpl(boolean triggerToBranchDeleteRequest) {
+        this.triggerToBranchDeleteRequest = triggerToBranchDeleteRequest;
     }
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-        if (isNoRemoveBranchPush(hook) || this.triggerToBranchDeleteRequest ) {
+    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter,
+            MergeRequestLabelFilter mergeRequestLabelFilter) {
+        if (isNoRemoveBranchPush(hook) || this.triggerToBranchDeleteRequest) {
             super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
@@ -42,48 +46,54 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     protected boolean isCiSkip(PushHook hook) {
         List<Commit> commits = hook.getCommits();
         return commits != null &&
-               !commits.isEmpty() &&
-               commits.get(commits.size() - 1).getMessage() != null &&
-               commits.get(commits.size() - 1).getMessage().contains("[ci-skip]");
+                !commits.isEmpty() &&
+                commits.get(commits.size() - 1).getMessage() != null &&
+                commits.get(commits.size() - 1).getMessage().contains("[ci-skip]");
     }
 
     @Override
     protected CauseData retrieveCauseData(PushHook hook) {
-        CauseData.ActionType actionType = hook.getObjectKind().equals("tag_push") ? CauseData.ActionType.TAG_PUSH : CauseData.ActionType.PUSH;
-        return causeData()
-                .withActionType(actionType)
-                .withSourceProjectId(hook.getProjectId())
-                .withTargetProjectId(hook.getProjectId())
-                .withBranch(getTargetBranch(hook))
-                .withSourceBranch(getTargetBranch(hook))
-                .withUserName(hook.getUserName())
-                .withUserUsername(hook.getUserUsername())
-                .withUserEmail(hook.getUserEmail())
-                .withSourceRepoHomepage(hook.getRepository().getHomepage())
-                .withSourceRepoName(hook.getRepository().getName())
-                .withSourceNamespace(hook.getProject().getNamespace())
-                .withSourceRepoUrl(hook.getRepository().getUrl())
-                .withSourceRepoSshUrl(hook.getRepository().getGitSshUrl())
-                .withSourceRepoHttpUrl(hook.getRepository().getGitHttpUrl())
-                .withMergeRequestTitle("")
-                .withMergeRequestDescription("")
-                .withMergeRequestId(null)
-                .withMergeRequestIid(null)
-                .withMergeRequestState(null)
-                .withMergedByUser("")
-                .withMergeRequestAssignee("")
-                .withMergeRequestTargetProjectId(null)
-                .withTargetBranch(getTargetBranch(hook))
-                .withTargetRepoName("")
-                .withTargetNamespace("")
-                .withTargetRepoSshUrl("")
-                .withTargetRepoHttpUrl("")
-                .withTriggeredByUser(retrievePushedBy(hook))
-                .withBefore(hook.getBefore())
-                .withAfter(hook.getAfter())
-                .withLastCommit(hook.getAfter())
-                .withTargetProjectUrl(hook.getProject().getWebUrl())
-                .build();
+        try {
+            CauseData.ActionType actionType = hook.getObjectKind().equals("tag_push") ? CauseData.ActionType.TAG_PUSH
+                    : CauseData.ActionType.PUSH;
+            return causeData()
+                    .withActionType(actionType)
+                    .withSourceProjectId(hook.getProjectId())
+                    .withTargetProjectId(hook.getProjectId())
+                    .withBranch(getTargetBranch(hook))
+                    .withSourceBranch(getTargetBranch(hook))
+                    .withUserName(hook.getUserName())
+                    .withUserUsername(hook.getUserUsername())
+                    .withUserEmail(hook.getUserEmail())
+                    .withSourceRepoHomepage(hook.getRepository().getHomepage())
+                    .withSourceRepoName(hook.getRepository().getName())
+                    .withSourceNamespace(hook.getProject().getNamespace())
+                    .withSourceRepoUrl(hook.getRepository().getUrl())
+                    .withSourceRepoSshUrl(hook.getRepository().getGitSshUrl())
+                    .withSourceRepoHttpUrl(hook.getRepository().getGitHttpUrl())
+                    .withMergeRequestTitle("")
+                    .withMergeRequestDescription("")
+                    .withMergeRequestId(null)
+                    .withMergeRequestIid(null)
+                    .withMergeRequestState(null)
+                    .withMergedByUser("")
+                    .withMergeRequestAssignee("")
+                    .withMergeRequestTargetProjectId(null)
+                    .withTargetBranch(getTargetBranch(hook))
+                    .withTargetRepoName("")
+                    .withTargetNamespace("")
+                    .withTargetRepoSshUrl("")
+                    .withTargetRepoHttpUrl("")
+                    .withTriggeredByUser(retrievePushedBy(hook))
+                    .withBefore(hook.getBefore())
+                    .withAfter(hook.getAfter())
+                    .withLastCommit(hook.getAfter())
+                    .withTargetProjectUrl(hook.getProject().getWebUrl())
+                    .build();
+        } catch (NullPointerException e) {
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override
@@ -102,17 +112,18 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
+    protected RevisionParameterAction createRevisionParameter(PushHook hook, GitSCM gitSCM)
+            throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook, gitSCM), retrieveUrIish(hook));
     }
 
     @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(PushHook hook) {
         return buildStatusUpdate()
-            .withProjectId(hook.getProjectId())
-            .withSha(hook.getAfter())
-            .withRef(getTargetBranch(hook))
-            .build();
+                .withProjectId(hook.getProjectId())
+                .withSha(hook.getAfter())
+                .withRef(getTargetBranch(hook))
+                .build();
     }
 
     private String retrievePushedBy(final PushHook hook) {
