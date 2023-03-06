@@ -312,7 +312,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1883.vcb_768a_7c3610</version>
+        <version>1886.va_11c9f461054</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
