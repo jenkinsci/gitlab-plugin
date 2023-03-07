@@ -100,14 +100,18 @@ public class GitLabCommitStatusStep extends Step {
 
                     @Override
                     public void onSuccess(StepContext context, Object result) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name, step.builds, step.connection);
-                        context.onSuccess(result);
+                        try {
+                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name, step.builds, step.connection);
+                            context.onSuccess(result);
+                        } catch (NullPointerException e) {
+                            e.getMessage();
+                        }
                     }
 
                     @Override
                     public void onFailure(StepContext context, Throwable t) {
                         BuildState state = BuildState.failed;
-                        if (!t.getMessage().isBlank()) {
+                        if (t != null) {
                             if (t instanceof FlowInterruptedException) {
                                 FlowInterruptedException ex = (FlowInterruptedException) t;
                                 if (ex.isActualInterruption()) {
@@ -129,7 +133,7 @@ public class GitLabCommitStatusStep extends Step {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name,  step.builds, step.connection);
+                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name, step.builds, step.connection);
                 body.cancel(cause);
             }
         }
@@ -149,6 +153,7 @@ public class GitLabCommitStatusStep extends Step {
     @Extension
     public static final class DescriptorImpl extends StepDescriptor {
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Update the commit status in GitLab depending on the build status";
@@ -166,9 +171,9 @@ public class GitLabCommitStatusStep extends Step {
 
 		@Override
 		public Set<Class<?>> getRequiredContext() {
-			Set<Class<?>> context = new HashSet<>();
-			Collections.addAll(context, TaskListener.class, Run.class);
-			return Collections.unmodifiableSet(context);
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, TaskListener.class, Run.class);
+            return Collections.unmodifiableSet(context);
 		}
     }
 }

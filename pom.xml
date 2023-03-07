@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.54</version>
+    <version>4.55</version>
     <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
@@ -14,7 +14,7 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.7.3</revision>
+    <revision>1.7.9</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.361.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -146,7 +146,7 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
-      <version>3.15.3.Final</version>
+      <version>3.15.6.Final</version>
       <exclusions>
         <!-- Provided by Jenkins core -->
         <exclusion>
@@ -294,7 +294,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.1</version>
+      <version>42.5.4</version>
       <scope>test</scope>
       <exclusions>
         <!-- Upper bounds with Guava -->
@@ -312,9 +312,19 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1798.vc671fe94856f</version>
+        <version>1887.vda_d0ddb_c15c4</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.12.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -414,7 +424,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.40.3</version>
+            <version>0.42.0</version>
             <configuration>
               <verbose>true</verbose>
               <images>
