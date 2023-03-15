@@ -18,6 +18,7 @@ services:
         external_url 'http://localhost'
         gitlab_rails['gitlab_shell_ssh_port'] = 55522
         gitlab_rails['initial_root_password'] = 'p@ssw0rd'
+    shm_size: '5gb'
 
   jenkins:
     restart: "no"
