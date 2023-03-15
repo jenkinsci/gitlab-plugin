@@ -28,3 +28,4 @@ services:
       - "50000:50000"
     volumes:
       - '/srv/docker/jenkins:/var/jenkins_home'
+    shm_size: '5gb'
