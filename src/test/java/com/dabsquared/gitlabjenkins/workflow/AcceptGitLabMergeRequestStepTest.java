@@ -67,7 +67,6 @@ public class AcceptGitLabMergeRequestStepTest {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
-    
     private static void _acceptGitlabMergeRequest(JenkinsRule r, int port, String pipelineText)
             throws Throwable {
         setupGitLabConnections(r, port);
