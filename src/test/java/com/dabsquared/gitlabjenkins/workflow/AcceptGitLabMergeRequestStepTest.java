@@ -75,7 +75,6 @@ public class AcceptGitLabMergeRequestStepTest {
         Run build = r.buildAndAssertSuccess(project);
         r.assertLogContains("this is simple jenkins-build", build);
     }
-    
     private static void setupGitLabConnections(JenkinsRule r, int port) throws Throwable {
         GitLabConnectionConfig connectionConfig = r.get(GitLabConnectionConfig.class);
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(r.jenkins)) {
