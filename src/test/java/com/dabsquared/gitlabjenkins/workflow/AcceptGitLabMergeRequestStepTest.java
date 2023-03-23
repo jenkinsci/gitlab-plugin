@@ -53,9 +53,8 @@ public class AcceptGitLabMergeRequestStepTest {
 
     @Test
     public void acceptGitlabMergeRequest() throws Throwable {
-        try {
-            int port = mockServer.getPort();
-            String pipelineText = "properties([\n" +
+        int port = mockServer.getPort();
+        String pipelineText = "properties([\n" +
             "   gitLabConnection('test-connection')\n" +
             "])\n" +
             "\n" +
@@ -67,12 +66,11 @@ public class AcceptGitLabMergeRequestStepTest {
             "   )\n" +
             "       echo 'this is simple jenkins-build'\n" +
             "}";
-            rr.then(r -> {
+        rr.then(r -> {
                 _acceptGitlabMergeRequest(r, port, pipelineText);
             });
-        } catch (NullPointerException e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);}
     }
+
     private static void _acceptGitlabMergeRequest(JenkinsRule r, int port, String pipelineText)
             throws Throwable {
         setupGitLabConnections(r, port);
@@ -81,6 +79,7 @@ public class AcceptGitLabMergeRequestStepTest {
         Run build = r.buildAndAssertSuccess(project);
         r.assertLogContains("this is simple jenkins-build", build);
     }
+
     private static void setupGitLabConnections(JenkinsRule r, int port) throws Throwable {
         GitLabConnectionConfig connectionConfig = r.get(GitLabConnectionConfig.class);
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(r.jenkins)) {
