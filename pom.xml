@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.55</version>
+    <version>4.57</version>
     <relativePath />
   </parent>
   <artifactId>gitlab-plugin</artifactId>
@@ -14,7 +14,7 @@
   <packaging>hpi</packaging>
 
   <properties>
-    <revision>1.7.9</revision>
+    <revision>1.7.10</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.375.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -294,7 +294,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.4</version>
+      <version>42.6.0</version>
       <scope>test</scope>
       <exclusions>
         <!-- Upper bounds with Guava -->
@@ -312,7 +312,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1887.vda_d0ddb_c15c4</version>
+        <version>1945.v13a_1306588ff</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -324,7 +324,7 @@
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
-        <version>2.12.2</version>
+        <version>2.12.4</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -372,7 +372,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>2.22.2</version>
+            <version>3.0.0</version>
             <executions>
               <execution>
                 <goals>
