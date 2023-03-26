@@ -19,6 +19,7 @@ Before submitting your change make sure that:
 * you updated the help docs
 * you updated the README
 * you have used spotbugs to see if you haven't introduced any new warnings
+* you have run `mvn spotless:apply` for confirming that the code formatting is correct
 
 ## Testing With Docker
 
