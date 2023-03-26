@@ -332,6 +332,52 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.35.0</version>
+        <configuration>
+          <!-- define a language-specific format -->
+          <java>
+            <!-- no need to specify files, inferred automatically -->
+            <!-- apply a specific flavor of google-java-format -->
+            <googleJavaFormat>
+              <version>1.15.0</version>
+              <style>AOSP</style>
+            </googleJavaFormat>
+            <endWithNewline />
+            <removeUnusedImports />
+            <trimTrailingWhitespace />
+          </java>
+          <pom>
+            <indent>
+              <spaces>true</spaces>
+            </indent>
+            <includes>
+              <include>pom.xml</include>
+            </includes>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+              <sortDependencies>groupId,artifactId</sortDependencies>
+              <sortDependencyExclusions>groupId,artifactId</sortDependencyExclusions>
+              <sortExecutions>true</sortExecutions>
+              <sortModules>true</sortModules>
+              <sortPlugins>groupId,artifactId</sortPlugins>
+              <sortProperties>true</sortProperties>
+              <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+            </sortPom>
+          </pom>
+        </configuration>
+        <executions>
+          <execution>
+            <!-- Runs in verify phase by default -->
+            <goals>
+              <!-- Can be disabled using -Dspotless.check.skip -->
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
