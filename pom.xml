@@ -9,20 +9,9 @@
   </parent>
   <artifactId>gitlab-plugin</artifactId>
   <version>${revision}${changelist}</version>
+  <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
-  <packaging>hpi</packaging>
-
-  <properties>
-    <revision>1.7.10</revision>
-    <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.375.4</jenkins.version>
-    <spotbugs.effort>Max</spotbugs.effort>
-    <spotbugs.threshold>Low</spotbugs.threshold>
-    <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
-    <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <mockserver.version>5.15.0</mockserver.version>
-  </properties>
 
   <licenses>
     <license>
@@ -39,6 +28,13 @@
     </developer>
   </developers>
 
+  <scm>
+    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <tag>${scmTag}</tag>
+    <url>https://github.com/${gitHubRepo}</url>
+  </scm>
+
   <distributionManagement>
     <repository>
       <id>maven.jenkins-ci.org</id>
@@ -52,26 +48,39 @@
     </snapshotRepository>
   </distributionManagement>
 
-  <scm>
-    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
-    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-    <url>https://github.com/${gitHubRepo}</url>
-    <tag>${scmTag}</tag>
-  </scm>
-  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
+  <properties>
+    <revision>1.7.10</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <jenkins.version>2.375.4</jenkins.version>
+    <spotbugs.effort>Max</spotbugs.effort>
+    <spotbugs.threshold>Low</spotbugs.threshold>
+    <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
+    <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
+    <mockserver.version>5.15.0</mockserver.version>
+  </properties>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-2.361.x</artifactId>
+        <version>1945.v13a_1306588ff</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.12.4</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- Jenkins dependencies -->
@@ -305,29 +314,20 @@
       </exclusions>
     </dependency>
   </dependencies>
+  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
-        <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.361.x</artifactId>
-        <version>1945.v13a_1306588ff</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
-        <version>2.12.4</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <plugins>
@@ -339,30 +339,14 @@
           <!-- define a language-specific format -->
           <java>
             <!-- no need to specify files, inferred automatically -->
-            <!-- apply a specific flavor of google-java-format -->
-            <googleJavaFormat>
-              <version>1.15.0</version>
-              <style>AOSP</style>
-            </googleJavaFormat>
             <endWithNewline />
             <removeUnusedImports />
-            <trimTrailingWhitespace />
           </java>
           <pom>
-            <indent>
-              <spaces>true</spaces>
-            </indent>
-            <includes>
-              <include>pom.xml</include>
-            </includes>
             <sortPom>
+              <encoding>${project.build.sourceEncoding}</encoding>
+              <lineSeparator>\n</lineSeparator>
               <expandEmptyElements>false</expandEmptyElements>
-              <sortDependencies>groupId,artifactId</sortDependencies>
-              <sortDependencyExclusions>groupId,artifactId</sortDependencyExclusions>
-              <sortExecutions>true</sortExecutions>
-              <sortModules>true</sortModules>
-              <sortPlugins>groupId,artifactId</sortPlugins>
-              <sortProperties>true</sortProperties>
               <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
             </sortPom>
           </pom>
@@ -446,10 +430,10 @@
             <version>1.2</version>
             <executions>
               <execution>
-                <phase>pre-integration-test</phase>
                 <goals>
                   <goal>allocate-ports</goal>
                 </goals>
+                <phase>pre-integration-test</phase>
                 <configuration>
                   <ports>
                     <port>
@@ -534,19 +518,19 @@
             <executions>
               <execution>
                 <id>start</id>
-                <phase>pre-integration-test</phase>
                 <goals>
                   <goal>build</goal>
                   <goal>start</goal>
                 </goals>
+                <phase>pre-integration-test</phase>
               </execution>
               <execution>
                 <id>stop</id>
-                <phase>post-integration-test</phase>
                 <goals>
                   <goal>stop</goal>
                   <goal>remove</goal>
                 </goals>
+                <phase>post-integration-test</phase>
               </execution>
             </executions>
           </plugin>
@@ -558,10 +542,10 @@
             <executions>
               <execution>
                 <id>add-source</id>
-                <phase>generate-sources</phase>
                 <goals>
                   <goal>add-source</goal>
                 </goals>
+                <phase>generate-sources</phase>
                 <configuration>
                   <sources>
                     <source>${basedir}/target/generated-sources</source>
@@ -570,10 +554,10 @@
               </execution>
               <execution>
                 <id>add-test-source</id>
-                <phase>generate-test-sources</phase>
                 <goals>
                   <goal>add-test-source</goal>
                 </goals>
+                <phase>generate-test-sources</phase>
                 <configuration>
                   <sources>
                     <source>${basedir}/target/generated-test-sources</source>
