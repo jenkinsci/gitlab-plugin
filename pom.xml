@@ -312,7 +312,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1935.v530f4395930f</version>
+        <version>1945.v13a_1306588ff</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -324,7 +324,7 @@
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
-        <version>2.12.2</version>
+        <version>2.12.4</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
