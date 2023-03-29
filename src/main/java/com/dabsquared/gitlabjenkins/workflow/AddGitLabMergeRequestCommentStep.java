@@ -165,7 +165,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
      * return nothing due to task not triggered by Gitlab. So retrieve cause
      * from upstream task is needed.
      * <p>
-     * Notice: Only retrieve the first founded GitLabWebHookCause instance.
+     * Notice: Only retrieve the first found GitLabWebHookCause instance.
      *
      * @param causes current level cause
      *
