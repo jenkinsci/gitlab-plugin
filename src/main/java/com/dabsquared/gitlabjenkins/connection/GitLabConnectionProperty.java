@@ -145,7 +145,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         @Restricted(DoNotUse.class)
         public FormValidation doTestConnection(@QueryParameter String jobCredentialId,
                 @QueryParameter String gitLabConnection, @AncestorInPath Item item) {
-            item.checkPermission(Jenkins.READ);
+        	Jenkins.getActiveInstance().checkPermission(Jenkins.ADMINISTER);
             try {
                 GitLabConnection gitLabConnectionTested = null;
                 GitLabConnectionConfig descriptor = (GitLabConnectionConfig) Jenkins.getInstance()
