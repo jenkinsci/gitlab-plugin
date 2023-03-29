@@ -75,7 +75,6 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         @Override
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
-            // @ Alceatraz Warprays BEGIN
             if (cause == null) {
                 List<GitLabWebHookCause> gitLabWebHookCauses =
                     retrieveCauseRecursive(run.getCauses());
@@ -83,7 +82,6 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                     cause = gitLabWebHookCauses.get(0);
                 }
             }
-            // @ Alceatraz Warprays END
             if (cause != null) {
                 MergeRequest mergeRequest = cause.getData().getMergeRequest();
                 if (mergeRequest != null) {
@@ -100,12 +98,10 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                     }
                 }
             }
-            // @ Alceatraz Warprays BEGIN
             else {
-                LOGGER.log(Level.WARNING, "Add MR comment failure, Can't " +
-                  "retrieve GitLab MR context: Can't find GitLabWebHookCause");
+                LOGGER.log(Level.WARNING, "Add MR comment failure, " +
+                  "Cannot retrieve GitLab MR context: Cannot find GitLabWebHookCause");
             }
-            // @ Alceatraz Warprays END
             return null;
         }
 
@@ -177,8 +173,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
      *
      * @author Alceatraz Warprays
      */
-    private static List<GitLabWebHookCause> retrieveCauseRecursive(List<Cause>
-                                                                       causes) {
+    private static List<GitLabWebHookCause> retrieveCauseRecursive(List<Cause> causes) {
         for (Cause cause : causes) {
             if (!(cause instanceof UpstreamCause)) continue;
             List<Cause> upstreamCauses = ((UpstreamCause) cause)
