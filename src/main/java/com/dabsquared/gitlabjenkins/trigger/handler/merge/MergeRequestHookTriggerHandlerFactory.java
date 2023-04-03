@@ -13,7 +13,6 @@ import static org.apache.commons.lang.StringUtils.trimToEmpty;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Robin Müller

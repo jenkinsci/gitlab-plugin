@@ -34,8 +34,8 @@
   - [Cancel pending builds on merge request update](#cancel-pending-builds-on-merge-request-update)
 - [Compatibility](#compatibility)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
-- [Testing With Docker](#testing-with-docker)
-- [Release Workflow](#release-workflow)
+- [Testing With Docker](src/docker/README.md#quick-test-environment-setup-using-docker-for-linuxamd64)
+- [Release Workflow](CONTRIBUTING.md#release-workflow)
 - [Changelog](#changelog)
 
 ## Introduction

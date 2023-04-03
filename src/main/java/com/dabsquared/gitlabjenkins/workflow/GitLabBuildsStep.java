@@ -37,8 +37,7 @@ public class GitLabBuildsStep extends Step {
     @DataBoundConstructor
     public GitLabBuildsStep() {
     }
-    
-    
+
 	@Override
 	public StepExecution start(StepContext context) throws Exception {
 		return new GitLabBuildStepExecution(context, this);

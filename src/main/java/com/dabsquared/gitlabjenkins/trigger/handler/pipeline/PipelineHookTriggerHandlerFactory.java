@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.pipeline;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 
 import java.util.ArrayList;
 import java.util.List;
