@@ -418,7 +418,7 @@ pipeline {
    [...]
 }
 ```
-
+Although it is mentioned on the documentation page of jenkins under section "updateGitlabCommitStatus" that the supported values by GitLab are ( pending, running, canceled, success, failed ) only. Using skipped as commit status will return HTTP 400 Bad Request because it is not supported by GitLab.
 If:
 1. You use the *"Merge When Pipeline Succeeds"* option for Merge Requests in GitLab, and
 2. Your Declarative Pipeline jobs have more than one stage, and
