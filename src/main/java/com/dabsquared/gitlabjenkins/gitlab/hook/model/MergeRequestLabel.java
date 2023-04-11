@@ -1,11 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import java.util.Date;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import java.util.Date;
 
 /**
  * @author Benjamin ROBIN
@@ -126,48 +125,48 @@ public class MergeRequestLabel {
         }
         MergeRequestLabel that = (MergeRequestLabel) o;
         return new EqualsBuilder()
-            .append(id, that.id)
-            .append(title, that.title)
-            .append(color, that.color)
-            .append(projectId, that.projectId)
-            .append(createdAt, that.createdAt)
-            .append(updatedAt, that.updatedAt)
-            .append(template, that.template)
-            .append(description, that.description)
-            .append(type, that.type)
-            .append(groupId, that.groupId)
-            .isEquals();
+                .append(id, that.id)
+                .append(title, that.title)
+                .append(color, that.color)
+                .append(projectId, that.projectId)
+                .append(createdAt, that.createdAt)
+                .append(updatedAt, that.updatedAt)
+                .append(template, that.template)
+                .append(description, that.description)
+                .append(type, that.type)
+                .append(groupId, that.groupId)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(id)
-            .append(title)
-            .append(color)
-            .append(projectId)
-            .append(createdAt)
-            .append(updatedAt)
-            .append(template)
-            .append(description)
-            .append(type)
-            .append(groupId)
-            .toHashCode();
+                .append(id)
+                .append(title)
+                .append(color)
+                .append(projectId)
+                .append(createdAt)
+                .append(updatedAt)
+                .append(template)
+                .append(description)
+                .append(type)
+                .append(groupId)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("id", id)
-            .append("title", title)
-            .append("color", color)
-            .append("projectId", projectId)
-            .append("createdAt", createdAt)
-            .append("updatedAt", updatedAt)
-            .append("template", template)
-            .append("description", description)
-            .append("type", type)
-            .append("groupId", groupId)
-            .toString();
+                .append("id", id)
+                .append("title", title)
+                .append("color", color)
+                .append("projectId", projectId)
+                .append("createdAt", createdAt)
+                .append("updatedAt", updatedAt)
+                .append("template", template)
+                .append("description", description)
+                .append("type", type)
+                .append("groupId", groupId)
+                .toString();
     }
 }

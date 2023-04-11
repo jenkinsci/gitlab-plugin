@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.note;
 
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
@@ -9,13 +12,9 @@ import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandle
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
-import org.apache.commons.lang.StringUtils;
-
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Nikolay Ustinov
@@ -31,7 +30,12 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     }
 
     @Override
-    public void handle(Job<?, ?> job, NoteHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(
+            Job<?, ?> job,
+            NoteHook hook,
+            boolean ciSkip,
+            BranchFilter branchFilter,
+            MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (isValidTriggerPhrase(hook.getObjectAttributes().getNote())) {
             super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
@@ -68,7 +72,8 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
                 .withBranch(hook.getMergeRequest().getSourceBranch())
                 .withSourceBranch(hook.getMergeRequest().getSourceBranch())
                 .withUserName(hook.getMergeRequest().getLastCommit().getAuthor().getName())
-                .withUserEmail(hook.getMergeRequest().getLastCommit().getAuthor().getEmail())
+                .withUserEmail(
+                        hook.getMergeRequest().getLastCommit().getAuthor().getEmail())
                 .withSourceRepoHomepage(hook.getMergeRequest().getSource().getHomepage())
                 .withSourceRepoName(hook.getMergeRequest().getSource().getName())
                 .withSourceNamespace(hook.getMergeRequest().getSource().getNamespace())
@@ -85,26 +90,29 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
                 .withTargetNamespace(hook.getMergeRequest().getTarget().getNamespace())
                 .withTargetRepoSshUrl(hook.getMergeRequest().getTarget().getSshUrl())
                 .withTargetRepoHttpUrl(hook.getMergeRequest().getTarget().getHttpUrl())
-                .withTriggeredByUser(hook.getMergeRequest().getLastCommit().getAuthor().getName())
+                .withTriggeredByUser(
+                        hook.getMergeRequest().getLastCommit().getAuthor().getName())
                 .withLastCommit(hook.getMergeRequest().getLastCommit().getId())
                 .withTargetProjectUrl(hook.getMergeRequest().getTarget().getWebUrl())
                 .withTriggerPhrase(hook.getObjectAttributes().getNote())
-                .withCommentAuthor(hook.getUser() == null ? null : hook.getUser().getUsername())
+                .withCommentAuthor(
+                        hook.getUser() == null ? null : hook.getUser().getUsername())
                 .build();
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(NoteHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
+    protected RevisionParameterAction createRevisionParameter(NoteHook hook, GitSCM gitSCM)
+            throws NoRevisionToBuildException {
         return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
     }
 
     @Override
     protected BuildStatusUpdate retrieveBuildStatusUpdate(NoteHook hook) {
         return buildStatusUpdate()
-            .withProjectId(hook.getMergeRequest().getSourceProjectId())
-            .withSha(hook.getMergeRequest().getLastCommit().getId())
-            .withRef(hook.getMergeRequest().getSourceBranch())
-            .build();
+                .withProjectId(hook.getMergeRequest().getSourceProjectId())
+                .withSha(hook.getMergeRequest().getLastCommit().getId())
+                .withRef(hook.getMergeRequest().getSourceBranch())
+                .build();
     }
 
     private String retrieveRevisionToBuild(NoteHook hook) throws NoRevisionToBuildException {

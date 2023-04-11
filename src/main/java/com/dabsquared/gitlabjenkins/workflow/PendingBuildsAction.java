@@ -1,8 +1,6 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-
 import hudson.model.Action;
-
 import java.io.Serializable;
 import java.util.List;
 

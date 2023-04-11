@@ -16,7 +16,8 @@ import org.kohsuke.stapler.StaplerResponse;
 public abstract class StatusPngActionTest extends BuildStatusActionTest {
 
     @Override
-    protected void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException {
         verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
@@ -24,7 +25,8 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException {
         verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
@@ -32,7 +34,8 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException {
         verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
@@ -40,7 +43,8 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException {
         verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");
@@ -48,7 +52,8 @@ public abstract class StatusPngActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException {
         verify(response).setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
         verify(response).setHeader("Cache-Control", "no-cache, private");
         verify(response).setHeader("Content-Type", "image/png");

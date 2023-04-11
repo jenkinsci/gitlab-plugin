@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.pipeline;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +10,7 @@ public final class PipelineHookTriggerHandlerFactory {
 
     public static final String SUCCESS = "success";
 
-    private PipelineHookTriggerHandlerFactory() {
-    }
+    private PipelineHookTriggerHandlerFactory() {}
 
     public static PipelineHookTriggerHandler newPipelineHookTriggerHandler(boolean triggerOnPipelineEvent) {
         if (triggerOnPipelineEvent) {
@@ -21,7 +19,6 @@ public final class PipelineHookTriggerHandlerFactory {
             return new NopPipelineHookTriggerHandler();
         }
     }
-
 
     private static List<String> retrieve(boolean triggerOnPipelineEvent) {
         List<String> result = new ArrayList<>();

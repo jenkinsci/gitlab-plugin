@@ -4,28 +4,23 @@
  */
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
-
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Project;
 import hudson.security.ACL;
-
 import org.acegisecurity.Authentication;
-
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
 import org.kohsuke.stapler.HttpResponses.HttpResponseException;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test the BuildWebHookAction class
@@ -40,8 +35,7 @@ public class BuildWebHookActionTest {
     private FreeStyleProject project;
     private GitLabPushTrigger trigger;
 
-    public BuildWebHookActionTest() {
-    }
+    public BuildWebHookActionTest() {}
 
     @Before
     public void confgureGitLabConnection() throws Exception {
@@ -73,11 +67,9 @@ public class BuildWebHookActionTest {
         trigger.setSecretToken(triggerToken);
         String actionToken = triggerToken + "-no-match"; // Won't match
         BuildWebHookActionImpl action = new BuildWebHookActionImpl(project, actionToken);
-        assertThrows(HttpResponseException.class,
-                () -> {
-                    action.runNotifier();
-                }
-        );
+        assertThrows(HttpResponseException.class, () -> {
+            action.runNotifier();
+        });
         assertFalse("performOnPost was called, unexpected token match?", action.performOnPostCalled);
     }
 
@@ -88,11 +80,9 @@ public class BuildWebHookActionTest {
         trigger.setSecretToken(triggerToken);
         String actionToken = null;
         BuildWebHookActionImpl action = new BuildWebHookActionImpl(project, actionToken);
-        assertThrows(HttpResponseException.class,
-                () -> {
-                    action.runNotifier();
-                }
-        );
+        assertThrows(HttpResponseException.class, () -> {
+            action.runNotifier();
+        });
         assertFalse("performOnPost was called, unexpected token match?", action.performOnPostCalled);
     }
 
@@ -139,11 +129,9 @@ public class BuildWebHookActionTest {
         }
 
         @Override
-        public void processForCompatibility() {
-        }
+        public void processForCompatibility() {}
 
         @Override
-        public void execute() {
-        }
+        public void execute() {}
     }
 }

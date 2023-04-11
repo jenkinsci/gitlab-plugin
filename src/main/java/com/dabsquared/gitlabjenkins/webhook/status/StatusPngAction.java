@@ -3,10 +3,9 @@ package com.dabsquared.gitlabjenkins.webhook.status;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.HttpResponses;
+import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerResponse;
-
-import java.io.InputStream;
 
 /**
  * @author Robin Müller

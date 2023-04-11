@@ -24,45 +24,36 @@ final class ResteasyGitLabClient implements GitLabClient {
 
     @Override
     public List<Group> getGroups() {
-        return api.getGroups(
-            true,
-            false,
-            OrderType.path.name(),
-            SortType.asc.name()
-        );
+        return api.getGroups(true, false, OrderType.path.name(), SortType.asc.name());
     }
 
     @Override
     public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort) {
         return api.getGroups(
-            allAvailable,
-            topLevelOnly,
-            orderBy == null ? OrderType.path.name() : orderBy.name(),
-            sort == null ? SortType.asc.name() : sort.name()
-        );
+                allAvailable,
+                topLevelOnly,
+                orderBy == null ? OrderType.path.name() : orderBy.name(),
+                sort == null ? SortType.asc.name() : sort.name());
     }
 
     @Override
     public List<Project> getGroupProjects(String groupId) {
-        return api.getGroupProjects(
-            groupId,
-            Boolean.FALSE,
-            null,
-            OrderType.path.name(),
-            SortType.asc.name()
-        );
+        return api.getGroupProjects(groupId, Boolean.FALSE, null, OrderType.path.name(), SortType.asc.name());
     }
 
     @Override
-    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
-            OrderType orderBy, SortType sort) {
+    public List<Project> getGroupProjects(
+            String groupId,
+            Boolean includeSubgroups,
+            ProjectVisibilityType visibility,
+            OrderType orderBy,
+            SortType sort) {
         return api.getGroupProjects(
-            groupId,
-            includeSubgroups == null ? Boolean.FALSE : includeSubgroups,
-            visibility == null ? null : visibility.getValue(),
-            orderBy == null ? OrderType.path.name() : orderBy.name(),
-            sort == null ? SortType.asc.name() : sort.name()
-        );
+                groupId,
+                includeSubgroups == null ? Boolean.FALSE : includeSubgroups,
+                visibility == null ? null : visibility.getValue(),
+                orderBy == null ? OrderType.path.name() : orderBy.name(),
+                sort == null ? SortType.asc.name() : sort.name());
     }
 
     @Override
@@ -96,22 +87,43 @@ final class ResteasyGitLabClient implements GitLabClient {
     }
 
     @Override
-    public void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
+    public void addProjectHook(
+            String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
         api.addProjectHook(projectId, url, pushEvents, mergeRequestEvents, noteEvents);
     }
 
     @Override
-    public void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
+    public void addProjectHook(
+            String projectId,
+            String url,
+            String secretToken,
+            Boolean pushEvents,
+            Boolean mergeRequestEvents,
+            Boolean noteEvents) {
         api.addProjectHook(projectId, url, secretToken, pushEvents, mergeRequestEvents, noteEvents);
     }
 
     @Override
-    public void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
+    public void changeBuildStatus(
+            String projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description) {
         api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
     }
 
     @Override
-    public void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
+    public void changeBuildStatus(
+            Integer projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description) {
         api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
     }
 
@@ -122,7 +134,8 @@ final class ResteasyGitLabClient implements GitLabClient {
 
     @Override
     public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, Boolean shouldRemoveSourceBranch) {
-        api.acceptMergeRequest(mr.getProjectId(), mergeRequestIdProvider.apply(mr), mergeCommitMessage, shouldRemoveSourceBranch);
+        api.acceptMergeRequest(
+                mr.getProjectId(), mergeRequestIdProvider.apply(mr), mergeCommitMessage, shouldRemoveSourceBranch);
     }
 
     @Override

@@ -10,7 +10,12 @@ import hudson.model.Job;
  */
 class NopNoteHookTriggerHandler implements NoteHookTriggerHandler {
     @Override
-    public void handle(Job<?, ?> job, NoteHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
+    public void handle(
+            Job<?, ?> job,
+            NoteHook hook,
+            boolean ciSkip,
+            BranchFilter branchFilter,
+            MergeRequestLabelFilter mergeRequestLabelFilter) {
         // nothing to do
     }
 }

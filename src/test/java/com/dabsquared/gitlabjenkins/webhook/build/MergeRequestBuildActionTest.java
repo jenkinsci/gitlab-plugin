@@ -69,13 +69,13 @@ public class MergeRequestBuildActionTest {
         QueueListener ql = new QueueListener() {
             @Override
             public void onEnterWaiting(Queue.WaitingItem wi) {
-                System.out.println("Got "+wi+" : "+wi.getCausesDescription());
+                System.out.println("Got " + wi + " : " + wi.getCausesDescription());
                 wouldFire = true;
             }
 
             @Override
             public void onEnterBuildable(Queue.BuildableItem bi) {
-                System.out.println("Is buildable: "+bi.getCausesDescription());
+                System.out.println("Is buildable: " + bi.getCausesDescription());
             }
         };
         jenkins.getInstance().getExtensionList(QueueListener.class).add(ql);
@@ -94,7 +94,6 @@ public class MergeRequestBuildActionTest {
         // some defaults of the trigger
         trigger.setBranchFilterType(BranchFilterType.All);
     }
-
 
     @Test
     public void build() throws IOException {
@@ -117,8 +116,7 @@ public class MergeRequestBuildActionTest {
 
             trigger.start(testProject, false);
 
-            new MergeRequestBuildAction(testProject, json, null)
-                .execute(response);
+            new MergeRequestBuildAction(testProject, json, null).execute(response);
         } catch (HttpResponses.HttpResponseException hre) {
             // Test for OK status of a response.
             try {
@@ -169,7 +167,8 @@ public class MergeRequestBuildActionTest {
         trigger.setTriggerOnMergeRequest(false);
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
+        QueueTaskFuture<?> future = testProject.scheduleBuild2(
+                0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
         future.get();
 
         executeMergeRequestAction(testProject, getJson("MergeRequestEvent_merged.json"));
@@ -177,35 +176,38 @@ public class MergeRequestBuildActionTest {
     }
 
     @Test
-    public void build_alreadyBuiltMR_differentTargetBranch() throws IOException, ExecutionException, InterruptedException {
+    public void build_alreadyBuiltMR_differentTargetBranch()
+            throws IOException, ExecutionException, InterruptedException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        QueueTaskFuture<?> future = testProject.scheduleBuild2(0, new GitLabWebHookCause(causeData()
-                .withActionType(CauseData.ActionType.MERGE)
-                .withSourceProjectId(1)
-                .withTargetProjectId(1)
-                .withBranch("feature")
-                .withSourceBranch("feature")
-                .withUserName("")
-                .withSourceRepoHomepage("https://gitlab.org/test")
-                .withSourceRepoName("test")
-                .withSourceNamespace("test-namespace")
-                .withSourceRepoUrl("git@gitlab.org:test.git")
-                .withSourceRepoSshUrl("git@gitlab.org:test.git")
-                .withSourceRepoHttpUrl("https://gitlab.org/test.git")
-                .withMergeRequestTitle("Test")
-                .withMergeRequestId(1)
-                .withMergeRequestIid(1)
-                .withTargetBranch("master")
-                .withTargetRepoName("test")
-                .withTargetNamespace("test-namespace")
-                .withTargetRepoSshUrl("git@gitlab.org:test.git")
-                .withTargetRepoHttpUrl("https://gitlab.org/test.git")
-                .withTriggeredByUser("test")
-                .withLastCommit("123")
-                .withTargetProjectUrl("https://gitlab.org/test")
-                .build()));
+        QueueTaskFuture<?> future = testProject.scheduleBuild2(
+                0,
+                new GitLabWebHookCause(causeData()
+                        .withActionType(CauseData.ActionType.MERGE)
+                        .withSourceProjectId(1)
+                        .withTargetProjectId(1)
+                        .withBranch("feature")
+                        .withSourceBranch("feature")
+                        .withUserName("")
+                        .withSourceRepoHomepage("https://gitlab.org/test")
+                        .withSourceRepoName("test")
+                        .withSourceNamespace("test-namespace")
+                        .withSourceRepoUrl("git@gitlab.org:test.git")
+                        .withSourceRepoSshUrl("git@gitlab.org:test.git")
+                        .withSourceRepoHttpUrl("https://gitlab.org/test.git")
+                        .withMergeRequestTitle("Test")
+                        .withMergeRequestId(1)
+                        .withMergeRequestIid(1)
+                        .withTargetBranch("master")
+                        .withTargetRepoName("test")
+                        .withTargetNamespace("test-namespace")
+                        .withTargetRepoSshUrl("git@gitlab.org:test.git")
+                        .withTargetRepoHttpUrl("https://gitlab.org/test.git")
+                        .withTriggeredByUser("test")
+                        .withLastCommit("123")
+                        .withTargetProjectUrl("https://gitlab.org/test")
+                        .build()));
         future.get();
 
         executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR_differentTargetBranch.json"));

@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
@@ -10,15 +13,10 @@ import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandle
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
-import org.eclipse.jgit.util.StringUtils;
-
 import java.util.List;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+import java.util.logging.Logger;
+import org.eclipse.jgit.util.StringUtils;
 
 /**
  * @author Robin Müller
@@ -35,7 +33,11 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter,
+    public void handle(
+            Job<?, ?> job,
+            PushHook hook,
+            boolean ciSkip,
+            BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
         if (isNoRemoveBranchPush(hook) || this.triggerToBranchDeleteRequest) {
             super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
@@ -45,17 +47,17 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     @Override
     protected boolean isCiSkip(PushHook hook) {
         List<Commit> commits = hook.getCommits();
-        return commits != null &&
-                !commits.isEmpty() &&
-                commits.get(commits.size() - 1).getMessage() != null &&
-                commits.get(commits.size() - 1).getMessage().contains("[ci-skip]");
+        return commits != null
+                && !commits.isEmpty()
+                && commits.get(commits.size() - 1).getMessage() != null
+                && commits.get(commits.size() - 1).getMessage().contains("[ci-skip]");
     }
 
     @Override
     protected CauseData retrieveCauseData(PushHook hook) {
         try {
-            CauseData.ActionType actionType = hook.getObjectKind().equals("tag_push") ? CauseData.ActionType.TAG_PUSH
-                    : CauseData.ActionType.PUSH;
+            CauseData.ActionType actionType =
+                    hook.getObjectKind().equals("tag_push") ? CauseData.ActionType.TAG_PUSH : CauseData.ActionType.PUSH;
             return causeData()
                     .withActionType(actionType)
                     .withSourceProjectId(hook.getProjectId())

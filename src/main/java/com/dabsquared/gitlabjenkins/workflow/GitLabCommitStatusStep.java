@@ -1,17 +1,17 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
@@ -24,9 +24,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
@@ -34,18 +31,18 @@ import java.util.List;
 public class GitLabCommitStatusStep extends Step {
 
     private String name;
-    private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>() ;
+    private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>();
     private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
-    public GitLabCommitStatusStep(String name){
+    public GitLabCommitStatusStep(String name) {
         this.name = StringUtils.isEmpty(name) ? null : name;
     }
 
-	@Override
-	public StepExecution start(StepContext context) throws Exception {
-		return new GitLabCommitStatusStepExecution(context, this);
-	}
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new GitLabCommitStatusStepExecution(context, this);
+    }
 
     public String getName() {
         return name;
@@ -83,48 +80,62 @@ public class GitLabCommitStatusStep extends Step {
             this.step = step;
             run = context.get(Run.class);
         }
-        
+
         @Override
         public boolean start() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-            body = getContext().newBodyInvoker()
-                .withCallback(new BodyExecutionCallback() {
-                    @Override
-                    public void onStart(StepContext context) {
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.running, name, step.builds, step.connection);
-                        PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
-                        if (action != null) {
-                            action.startBuild(name);
-                        }
-                    }
-
-                    @Override
-                    public void onSuccess(StepContext context, Object result) {
-                        try {
-                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.success, name, step.builds, step.connection);
-                            context.onSuccess(result);
-                        } catch (NullPointerException e) {
-                            e.getMessage();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(StepContext context, Throwable t) {
-                        BuildState state = BuildState.failed;
-                        if (t != null) {
-                            if (t instanceof FlowInterruptedException) {
-                                FlowInterruptedException ex = (FlowInterruptedException) t;
-                                if (ex.isActualInterruption()) {
-                                    state = BuildState.canceled;
-                                }
+            body = getContext()
+                    .newBodyInvoker()
+                    .withCallback(new BodyExecutionCallback() {
+                        @Override
+                        public void onStart(StepContext context) {
+                            CommitStatusUpdater.updateCommitStatus(
+                                    run,
+                                    getTaskListener(context),
+                                    BuildState.running,
+                                    name,
+                                    step.builds,
+                                    step.connection);
+                            PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
+                            if (action != null) {
+                                action.startBuild(name);
                             }
                         }
 
-                        CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name, step.builds, step.connection);
-                        context.onFailure(t);
-                    }
-                })
-                .start();
+                        @Override
+                        public void onSuccess(StepContext context, Object result) {
+                            try {
+                                CommitStatusUpdater.updateCommitStatus(
+                                        run,
+                                        getTaskListener(context),
+                                        BuildState.success,
+                                        name,
+                                        step.builds,
+                                        step.connection);
+                                context.onSuccess(result);
+                            } catch (NullPointerException e) {
+                                e.getMessage();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(StepContext context, Throwable t) {
+                            BuildState state = BuildState.failed;
+                            if (t != null) {
+                                if (t instanceof FlowInterruptedException) {
+                                    FlowInterruptedException ex = (FlowInterruptedException) t;
+                                    if (ex.isActualInterruption()) {
+                                        state = BuildState.canceled;
+                                    }
+                                }
+                            }
+
+                            CommitStatusUpdater.updateCommitStatus(
+                                    run, getTaskListener(context), state, name, step.builds, step.connection);
+                            context.onFailure(t);
+                        }
+                    })
+                    .start();
             return false;
         }
 
@@ -133,7 +144,8 @@ public class GitLabCommitStatusStep extends Step {
             // should be no need to do anything special (but verify in JENKINS-26148)
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
-                CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name, step.builds, step.connection);
+                CommitStatusUpdater.updateCommitStatus(
+                        run, null, BuildState.canceled, name, step.builds, step.connection);
                 body.cancel(cause);
             }
         }
@@ -169,11 +181,11 @@ public class GitLabCommitStatusStep extends Step {
             return true;
         }
 
-		@Override
-		public Set<Class<?>> getRequiredContext() {
+        @Override
+        public Set<Class<?>> getRequiredContext() {
             Set<Class<?>> context = new HashSet<>();
             Collections.addAll(context, TaskListener.class, Run.class);
             return Collections.unmodifiableSet(context);
-		}
+        }
     }
 }

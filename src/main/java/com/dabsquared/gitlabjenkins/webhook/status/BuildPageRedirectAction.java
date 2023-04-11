@@ -3,10 +3,9 @@ package com.dabsquared.gitlabjenkins.webhook.status;
 import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Run;
 import hudson.util.HttpResponses;
+import java.io.IOException;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerResponse;
-
-import java.io.IOException;
 
 /**
  * @author Robin Müller

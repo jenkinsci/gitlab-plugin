@@ -5,13 +5,12 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
  */
 public final class BranchFilterFactory {
 
-    private BranchFilterFactory() { }
+    private BranchFilterFactory() {}
 
     public static BranchFilter newBranchFilter(BranchFilterConfig config) {
-		
-		if(config == null || config.getType() == null)
-			return new AllBranchesFilter();
-		
+
+        if (config == null || config.getType() == null) return new AllBranchesFilter();
+
         switch (config.getType()) {
             case NameBasedFilter:
                 return new NameBasedFilter(config.getIncludeBranchesSpec(), config.getExcludeBranchesSpec());

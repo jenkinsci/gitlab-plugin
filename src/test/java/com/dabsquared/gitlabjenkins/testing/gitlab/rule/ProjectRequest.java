@@ -15,8 +15,13 @@ public class ProjectRequest {
     private final boolean pipelineHook;
 
     @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-    public ProjectRequest(String name, String webHookUrl, boolean pushHook, boolean mergeRequestHook, boolean noteHook,
-                          boolean pipelineHook) {
+    public ProjectRequest(
+            String name,
+            String webHookUrl,
+            boolean pushHook,
+            boolean mergeRequestHook,
+            boolean noteHook,
+            boolean pipelineHook) {
         this.name = name;
         this.webHookUrl = webHookUrl;
         this.pushHook = pushHook;

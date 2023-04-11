@@ -69,28 +69,27 @@ public class PipelineHookTriggerHandlerImplTest {
 
         pipelineHookTriggerHandler = new PipelineHookTriggerHandlerImpl(allowedStates);
         pipelineHook = pipelineHook()
-            .withUser(user)
-            .withRepository(repository()
-                .withName("test")
-                .withHomepage("https://gitlab.org/test")
-                .withUrl("git@gitlab.org:test.git")
-                .withGitSshUrl("git@gitlab.org:test.git")
-                .withGitHttpUrl("https://gitlab.org/test.git")
-                .build())
-            .withProject(project()
-                .withNamespace("test-namespace")
-                .withWebUrl("https://gitlab.org/test")
-                .withId(1)
-                .build())
-            .withObjectAttributes(pipelineEventObjectAttributes()
-                .withId(1)
-                .withStatus("success")
-                .withSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
-                .withStages(new ArrayList<String>())
-                .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
-                .build())
-
-            .build();
+                .withUser(user)
+                .withRepository(repository()
+                        .withName("test")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withGitSshUrl("git@gitlab.org:test.git")
+                        .withGitHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                .withProject(project()
+                        .withNamespace("test-namespace")
+                        .withWebUrl("https://gitlab.org/test")
+                        .withId(1)
+                        .build())
+                .withObjectAttributes(pipelineEventObjectAttributes()
+                        .withId(1)
+                        .withStatus("success")
+                        .withSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
+                        .withStages(new ArrayList<String>())
+                        .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
+                        .build())
+                .build();
         git.close();
     }
 
@@ -103,14 +102,19 @@ public class PipelineHookTriggerHandlerImplTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
         });
         project.setQuietPeriod(0);
-        pipelineHookTriggerHandler.handle(project, pipelineHook , true, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+        pipelineHookTriggerHandler.handle(
+                project,
+                pipelineHook,
+                true,
+                newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
@@ -123,15 +127,20 @@ public class PipelineHookTriggerHandlerImplTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
         });
         project.setQuietPeriod(0);
 
-        pipelineHookTriggerHandler.handle(project, pipelineHook, false, newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-            newMergeRequestLabelFilter(null));
+        pipelineHookTriggerHandler.handle(
+                project,
+                pipelineHook,
+                false,
+                newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));

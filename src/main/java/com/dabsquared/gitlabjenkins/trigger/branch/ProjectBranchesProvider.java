@@ -9,14 +9,6 @@ import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
 import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
-import jenkins.triggers.SCMTriggerItem;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,6 +17,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import jenkins.model.Jenkins;
+import jenkins.triggers.SCMTriggerItem;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * @author Robin Müller
@@ -34,8 +33,7 @@ public final class ProjectBranchesProvider {
     private static final Logger LOGGER = Logger.getLogger(ProjectBranchesProvider.class.getName());
     private static final ProjectBranchesProvider INSTANCE = new ProjectBranchesProvider();
 
-    private ProjectBranchesProvider() {
-    }
+    private ProjectBranchesProvider() {}
 
     public static ProjectBranchesProvider instance() {
         return INSTANCE;
@@ -45,9 +43,13 @@ public final class ProjectBranchesProvider {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
-            return GitLabProjectBranchesService.instance().getBranches(connectionProperty.getClient(), sourceRepository.toString());
+            return GitLabProjectBranchesService.instance()
+                    .getBranches(connectionProperty.getClient(), sourceRepository.toString());
         } else {
-            LOGGER.log(Level.WARNING, "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
+            LOGGER.log(
+                    Level.WARNING,
+                    "getProjectBranches: gitlabHostUrl hasn't been configured globally. Job {0}.",
+                    project.getFullName());
             return Collections.emptyList();
         }
     }
@@ -67,7 +69,8 @@ public final class ProjectBranchesProvider {
         return result;
     }
 
-    public FormValidation doCheckBranchesSpec(@AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
+    public FormValidation doCheckBranchesSpec(
+            @AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
         if (!project.hasPermission(Item.CONFIGURE) || containsNoBranches(value)) {
             return FormValidation.ok();
         }
@@ -75,7 +78,9 @@ public final class ProjectBranchesProvider {
         try {
             return checkMatchingBranches(value, getProjectBranches(project));
         } catch (GitLabProjectBranchesService.BranchLoadingException e) {
-            return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? e : null, Messages.GitLabPushTrigger_CannotCheckBranches());
+            return FormValidation.warning(
+                    project.hasPermission(Jenkins.ADMINISTER) ? e : null,
+                    Messages.GitLabPushTrigger_CannotCheckBranches());
         }
     }
 
@@ -83,7 +88,10 @@ public final class ProjectBranchesProvider {
         Set<String> matchingSpecs = new HashSet<>();
         Set<String> unknownSpecs = new HashSet<>();
         AntPathMatcherSet projectBranchesMatcherSet = new AntPathMatcherSet(projectBranches);
-        List<String> branchSpecs = Arrays.stream(value.split(",")).filter(s -> !s.isEmpty()).map(String::trim).collect(Collectors.toList());
+        List<String> branchSpecs = Arrays.stream(value.split(","))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .collect(Collectors.toList());
         for (String branchSpec : branchSpecs) {
             if (projectBranchesMatcherSet.contains(branchSpec)) {
                 matchingSpecs.add(branchSpec);
@@ -95,25 +103,27 @@ public final class ProjectBranchesProvider {
         if (unknownSpecs.isEmpty()) {
             return FormValidation.ok(Messages.GitLabPushTrigger_BranchesMatched(matchingSpecs.size()));
         } else {
-            return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(unknownSpecs.stream().collect(Collectors.joining(", "))));
+            return FormValidation.warning(Messages.GitLabPushTrigger_BranchesNotFound(
+                    unknownSpecs.stream().collect(Collectors.joining(", "))));
         }
     }
 
     private boolean containsNoBranches(@QueryParameter String value) {
-        return StringUtils.isEmpty(value) || StringUtils.containsOnly(value, new char[]{',', ' '});
+        return StringUtils.isEmpty(value) || StringUtils.containsOnly(value, new char[] {',', ' '});
     }
-
 
     private String[] getProjectBranchesAsArray(Job<?, ?> job) {
         try {
             List<String> branches = getProjectBranches(job);
             return branches.toArray(new String[branches.size()]);
         } catch (GitLabProjectBranchesService.BranchLoadingException e) {
-            LOGGER.log(Level.FINEST, "Failed to load branch names from GitLab. Please check the logs and your configuration.", e);
+            LOGGER.log(
+                    Level.FINEST,
+                    "Failed to load branch names from GitLab. Please check the logs and your configuration.",
+                    e);
         }
         return new String[0];
     }
-
 
     /**
      * Get the URL of the first declared repository in the project configuration.
@@ -126,7 +136,9 @@ public final class ProjectBranchesProvider {
         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
         GitSCM gitSCM = getGitSCM(item);
         if (gitSCM == null) {
-            LOGGER.log(Level.WARNING, "Could not find GitSCM for project. Project = {1}, next build = {2}",
+            LOGGER.log(
+                    Level.WARNING,
+                    "Could not find GitSCM for project. Project = {1}, next build = {2}",
                     array(job.getName(), String.valueOf(job.getNextBuildNumber())));
             throw new IllegalStateException("This project does not use git:" + job.getName());
         }
