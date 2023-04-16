@@ -449,6 +449,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.acceptMergeRequestOnSuccess = acceptMergeRequestOnSuccess;
     }
 
+    public boolean getAcceptMergeRequestOnSuccess() {
+        return this.acceptMergeRequestOnSuccess;
+    }
+
     @DataBoundSetter
     public void setTriggerOnPipelineEvent(boolean triggerOnPipelineEvent) {
         this.triggerOnPipelineEvent = triggerOnPipelineEvent;
