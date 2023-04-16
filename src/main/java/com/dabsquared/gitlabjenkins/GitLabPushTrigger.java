@@ -453,6 +453,26 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return this.acceptMergeRequestOnSuccess;
     }
 
+    public boolean getAddCiMessage() {
+        return this.addCiMessage;
+    }
+
+    public boolean getAddNoteOnMergeRequest() {
+        return this.addNoteOnMergeRequest;
+    }
+
+    public boolean getAddVoteOnMergeRequest() {
+        return this.addVoteOnMergeRequest;
+    }
+
+    public boolean getSkipWorkInProgressMergeRequest() {
+        return this.skipWorkInProgressMergeRequest;
+    }
+
+    public String getBranchFilterName() {
+        return this.branchFilterName;
+    }
+
     @DataBoundSetter
     public void setTriggerOnPipelineEvent(boolean triggerOnPipelineEvent) {
         this.triggerOnPipelineEvent = triggerOnPipelineEvent;
