@@ -11,13 +11,13 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class Label {
     /*
-          "name" : "bug",
-      "color" : "#d9534f",
-      "description": "Bug reported by user",
-      "open_issues_count": 1,
-      "closed_issues_count": 0,
-      "open_merge_requests_count": 1
-     */
+         "name" : "bug",
+     "color" : "#d9534f",
+     "description": "Bug reported by user",
+     "open_issues_count": 1,
+     "closed_issues_count": 0,
+     "open_merge_requests_count": 1
+    */
     private String name;
     private String color;
     private String description;
@@ -83,36 +83,36 @@ public class Label {
         }
         Label label = (Label) o;
         return new EqualsBuilder()
-            .append(openIssuesCount, label.openIssuesCount)
-            .append(closedIssuesCount, label.closedIssuesCount)
-            .append(openMergeRequestsCount, label.openMergeRequestsCount)
-            .append(name, label.name)
-            .append(color, label.color)
-            .append(description, label.description)
-            .isEquals();
+                .append(openIssuesCount, label.openIssuesCount)
+                .append(closedIssuesCount, label.closedIssuesCount)
+                .append(openMergeRequestsCount, label.openMergeRequestsCount)
+                .append(name, label.name)
+                .append(color, label.color)
+                .append(description, label.description)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(name)
-            .append(color)
-            .append(description)
-            .append(openIssuesCount)
-            .append(closedIssuesCount)
-            .append(openMergeRequestsCount)
-            .toHashCode();
+                .append(name)
+                .append(color)
+                .append(description)
+                .append(openIssuesCount)
+                .append(closedIssuesCount)
+                .append(openMergeRequestsCount)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("name", name)
-            .append("color", color)
-            .append("description", description)
-            .append("openIssuesCount", openIssuesCount)
-            .append("closedIssuesCount", closedIssuesCount)
-            .append("openMergeRequestsCount", openMergeRequestsCount)
-            .toString();
+                .append("name", name)
+                .append("color", color)
+                .append("description", description)
+                .append("openIssuesCount", openIssuesCount)
+                .append("closedIssuesCount", closedIssuesCount)
+                .append("openMergeRequestsCount", openMergeRequestsCount)
+                .toString();
     }
 }

@@ -119,7 +119,8 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Merge Request Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -133,7 +134,8 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -147,7 +149,8 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -161,7 +164,8 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -203,7 +207,8 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Tag Push Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -238,7 +243,6 @@ public class ActionResolverTest {
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
 
-
     private static class ResourceServletInputStream extends ServletInputStream {
 
         private final InputStream input;
@@ -253,17 +257,16 @@ public class ActionResolverTest {
         }
 
         @Override
-        public boolean isReady(){
+        public boolean isReady() {
             return true;
         }
 
         @Override
-        public boolean isFinished(){
+        public boolean isFinished() {
             return true;
         }
 
         @Override
-        public void setReadListener(ReadListener var1){
-        }
+        public void setReadListener(ReadListener var1) {}
     }
 }

@@ -26,9 +26,11 @@ import org.mockserver.junit.MockServerRule;
 
 public class UpdateGitLabCommitStatusStepTest {
 
-    @Rule public RealJenkinsRule rr = new RealJenkinsRule();
+    @Rule
+    public RealJenkinsRule rr = new RealJenkinsRule();
 
-    @Rule public MockServerRule mockServer = new MockServerRule(new Object());
+    @Rule
+    public MockServerRule mockServer = new MockServerRule(new Object());
 
     private MockServerClient mockServerClient;
 
@@ -46,15 +48,13 @@ public class UpdateGitLabCommitStatusStepTest {
     public void updateGitlabCommitStatus() throws Throwable {
         int port = mockServer.getPort();
         String pipelineText =
-                IOUtils.toString(
-                        getClass().getResourceAsStream("pipeline/updateGitlabCommitStatus.groovy"));
+                IOUtils.toString(getClass().getResourceAsStream("pipeline/updateGitlabCommitStatus.groovy"));
         rr.then(j -> {
             _updateGitlabCommitStatus(j, port, pipelineText);
         });
     }
 
-    private static void _updateGitlabCommitStatus(JenkinsRule j, int port, String pipelineText)
-            throws Throwable {
+    private static void _updateGitlabCommitStatus(JenkinsRule j, int port, String pipelineText) throws Throwable {
         setupGitLabConnections(j, port);
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
@@ -77,14 +77,13 @@ public class UpdateGitLabCommitStatusStepTest {
                                 Secret.fromString("secret")));
             }
         }
-        connectionConfig.addConnection(
-                new GitLabConnection(
-                        "test-connection",
-                        "http://localhost:" + port + "/gitlab",
-                        "apiTokenId",
-                        new V4GitLabClientBuilder(),
-                        false,
-                        10,
-                        10));
+        connectionConfig.addConnection(new GitLabConnection(
+                "test-connection",
+                "http://localhost:" + port + "/gitlab",
+                "apiTokenId",
+                new V4GitLabClientBuilder(),
+                false,
+                10,
+                10));
     }
 }

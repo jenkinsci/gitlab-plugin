@@ -33,7 +33,8 @@ public class MergeRequestLabelFilterImplTest {
 
     @Test
     public void includeAndExcludeLabels() {
-        MergeRequestLabelFilterImpl mergeRequestLabelFilter = new MergeRequestLabelFilterImpl("include, include2", "exclude, exclude2");
+        MergeRequestLabelFilterImpl mergeRequestLabelFilter =
+                new MergeRequestLabelFilterImpl("include, include2", "exclude, exclude2");
 
         assertThat(mergeRequestLabelFilter.isMergeRequestAllowed(Collections.singleton("include")), is(true));
         assertThat(mergeRequestLabelFilter.isMergeRequestAllowed(Collections.singleton("include2")), is(true));

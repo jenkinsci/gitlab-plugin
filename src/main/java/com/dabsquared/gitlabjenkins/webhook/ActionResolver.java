@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
@@ -17,12 +20,6 @@ import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import jenkins.model.Jenkins;
-import jenkins.scm.api.SCMSourceOwner;
-import org.apache.commons.io.IOUtils;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -32,9 +29,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import jenkins.model.Jenkins;
+import jenkins.scm.api.SCMSourceOwner;
+import org.apache.commons.io.IOUtils;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author Robin Müller
@@ -46,7 +45,9 @@ public class ActionResolver {
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
-        Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/")).filter(s -> !s.isEmpty()).iterator();
+        Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
+                .filter(s -> !s.isEmpty())
+                .iterator();
         Item project = resolveProject(projectName, restOfPathParts);
         if (project == null) {
             throw HttpResponses.notFound();
@@ -155,11 +156,11 @@ public class ActionResolver {
         }
     }
 
-
     private String getRequestBody(StaplerRequest request) {
         String requestBody;
         try {
-            Charset charset = request.getCharacterEncoding() == null ?  UTF_8 : Charset.forName(request.getCharacterEncoding());
+            Charset charset =
+                    request.getCharacterEncoding() == null ? UTF_8 : Charset.forName(request.getCharacterEncoding());
             requestBody = IOUtils.toString(request.getInputStream(), charset);
         } catch (IOException e) {
             throw HttpResponses.error(500, "Failed to read request body");
@@ -173,7 +174,9 @@ public class ActionResolver {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
                     Item item = jenkins.getItemByFullName(projectName);
-                    while (item instanceof ItemGroup<?> && !(item instanceof Job<?, ?> || item instanceof SCMSourceOwner) && restOfPathParts.hasNext()) {
+                    while (item instanceof ItemGroup<?>
+                            && !(item instanceof Job<?, ?> || item instanceof SCMSourceOwner)
+                            && restOfPathParts.hasNext()) {
                         item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
                     }
                     if (item instanceof Job<?, ?> || item instanceof SCMSourceOwner) {
@@ -187,7 +190,6 @@ public class ActionResolver {
     }
 
     static class NoopAction implements WebHookAction {
-        public void execute(StaplerResponse response) {
-        }
+        public void execute(StaplerResponse response) {}
     }
 }

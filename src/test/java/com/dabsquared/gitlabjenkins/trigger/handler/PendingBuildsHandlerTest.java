@@ -76,14 +76,22 @@ public class PendingBuildsHandlerTest {
 
     @Test
     public void projectCanBeConfiguredToSendPendingBuildStatusWhenTriggered() throws IOException {
-        Project project = freestyleProject("freestyleProject1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
+        Project project =
+                freestyleProject("freestyleProject1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
 
         gitLabPushTrigger.onPost(pushHook(1, "branch1", "commit1"));
 
-        verify(gitLabClient).changeBuildStatus(eq(1), eq("commit1"), eq(BuildState.pending), eq("branch1"), eq(GITLAB_BUILD_NAME),
-            contains("/freestyleProject1/"), eq(BuildState.pending.name()));
+        verify(gitLabClient)
+                .changeBuildStatus(
+                        eq(1),
+                        eq("commit1"),
+                        eq(BuildState.pending),
+                        eq("branch1"),
+                        eq(GITLAB_BUILD_NAME),
+                        contains("/freestyleProject1/"),
+                        eq(BuildState.pending.name()));
         verifyNoMoreInteractions(gitLabClient);
     }
 
@@ -91,13 +99,20 @@ public class PendingBuildsHandlerTest {
     public void workflowJobCanConfiguredToSendToPendingBuildStatusWhenTriggered() throws IOException {
         WorkflowJob workflowJob = workflowJob();
 
-        GitLabPushTrigger gitLabPushTrigger =  gitLabPushTrigger(workflowJob);
+        GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(workflowJob);
         gitLabPushTrigger.setPendingBuildName(GITLAB_BUILD_NAME);
 
         gitLabPushTrigger.onPost(mergeRequestHook(1, "branch1", "commit1"));
 
-        verify(gitLabClient).changeBuildStatus(eq(1), eq("commit1"), eq(BuildState.pending), eq("branch1"), eq(GITLAB_BUILD_NAME),
-            contains("/workflowJob/"), eq(BuildState.pending.name()));
+        verify(gitLabClient)
+                .changeBuildStatus(
+                        eq(1),
+                        eq("commit1"),
+                        eq(BuildState.pending),
+                        eq("branch1"),
+                        eq(GITLAB_BUILD_NAME),
+                        contains("/workflowJob/"),
+                        eq(BuildState.pending.name()));
         verifyNoMoreInteractions(gitLabClient);
     }
 
@@ -116,10 +131,24 @@ public class PendingBuildsHandlerTest {
         gitLabPushTrigger.onPost(mergeRequestHook(1, "anotherBranch", "commit4"));
         gitLabPushTrigger.onPost(mergeRequestHook(2, "sourceBranch", "commit5"));
 
-        verify(gitLabClient).changeBuildStatus(eq(1), eq("commit1"), eq(BuildState.canceled), eq("sourceBranch"),
-            eq("Jenkins"), contains("project1"), eq(BuildState.canceled.name()));
-        verify(gitLabClient).changeBuildStatus(eq(1), eq("commit2"), eq(BuildState.canceled), eq("sourceBranch"),
-            eq("Jenkins"), contains("project1"), eq(BuildState.canceled.name()));
+        verify(gitLabClient)
+                .changeBuildStatus(
+                        eq(1),
+                        eq("commit1"),
+                        eq(BuildState.canceled),
+                        eq("sourceBranch"),
+                        eq("Jenkins"),
+                        contains("project1"),
+                        eq(BuildState.canceled.name()));
+        verify(gitLabClient)
+                .changeBuildStatus(
+                        eq(1),
+                        eq("commit2"),
+                        eq(BuildState.canceled),
+                        eq("sourceBranch"),
+                        eq("Jenkins"),
+                        contains("project1"),
+                        eq(BuildState.canceled.name()));
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
     }
@@ -150,65 +179,67 @@ public class PendingBuildsHandlerTest {
 
     private MergeRequestHook mergeRequestHook(int projectId, String branch, String commitId) {
         return MergeRequestHookBuilder.mergeRequestHook()
-            .withObjectAttributes(mergeRequestObjectAttributes()
-                .withAction(Action.update)
-                .withState(State.updated)
-                .withIid(1)
-                .withTitle("test")
-                .withTargetProjectId(1)
-                .withTargetBranch("targetBranch")
-                .withSourceBranch(branch)
-                .withSourceProjectId(projectId)
-                .withLastCommit(commit().withAuthor(user().withName("author").build()).withId(commitId).build())
-                .withSource(ProjectBuilder.project()
-                    .withName("test")
-                    .withNamespace("test-namespace")
-                    .withHomepage("https://gitlab.org/test")
-                    .withUrl("git@gitlab.org:test.git")
-                    .withSshUrl("git@gitlab.org:test.git")
-                    .withHttpUrl("https://gitlab.org/test.git")
-                    .build())
-                .withTarget(ProjectBuilder.project()
-                    .withName("test")
-                    .withNamespace("test-namespace")
-                    .withHomepage("https://gitlab.org/test")
-                    .withUrl("git@gitlab.org:test.git")
-                    .withSshUrl("git@gitlab.org:test.git")
-                    .withHttpUrl("https://gitlab.org/test.git")
-                    .build())
-                .build())
-            .withProject(ProjectBuilder.project()
-                .withWebUrl("https://gitlab.org/test.git")
-                .build()
-            )
-            .build();
+                .withObjectAttributes(mergeRequestObjectAttributes()
+                        .withAction(Action.update)
+                        .withState(State.updated)
+                        .withIid(1)
+                        .withTitle("test")
+                        .withTargetProjectId(1)
+                        .withTargetBranch("targetBranch")
+                        .withSourceBranch(branch)
+                        .withSourceProjectId(projectId)
+                        .withLastCommit(
+                                commit().withAuthor(user().withName("author").build())
+                                        .withId(commitId)
+                                        .build())
+                        .withSource(ProjectBuilder.project()
+                                .withName("test")
+                                .withNamespace("test-namespace")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withSshUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
+                                .build())
+                        .withTarget(ProjectBuilder.project()
+                                .withName("test")
+                                .withNamespace("test-namespace")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withSshUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
+                                .build())
+                        .build())
+                .withProject(ProjectBuilder.project()
+                        .withWebUrl("https://gitlab.org/test.git")
+                        .build())
+                .build();
     }
 
     private PushHook pushHook(int projectId, String branch, String commitId) {
-        User user = new UserBuilder()
-            .withName("username")
-            .build();
+        User user = new UserBuilder().withName("username").build();
 
         Repository repository = new RepositoryBuilder()
-            .withName("repository")
-            .withGitSshUrl("sshUrl")
-            .withGitHttpUrl("httpUrl")
-            .build();
+                .withName("repository")
+                .withGitSshUrl("sshUrl")
+                .withGitHttpUrl("httpUrl")
+                .build();
 
         return new PushHookBuilder()
-            .withProjectId(projectId)
-            .withRef(branch)
-            .withAfter(commitId)
-            .withRepository(new Repository())
-            .withProject(ProjectBuilder.project().withNamespace("namespace").build())
-            .withCommits(Arrays.asList(CommitBuilder.commit().withId(commitId).withAuthor(user).build()))
-            .withRepository(repository)
-            .withObjectKind("push")
-            .withUserName("username")
-            .build();
+                .withProjectId(projectId)
+                .withRef(branch)
+                .withAfter(commitId)
+                .withRepository(new Repository())
+                .withProject(ProjectBuilder.project().withNamespace("namespace").build())
+                .withCommits(Arrays.asList(
+                        CommitBuilder.commit().withId(commitId).withAuthor(user).build()))
+                .withRepository(repository)
+                .withObjectKind("push")
+                .withUserName("username")
+                .build();
     }
 
-    private Project freestyleProject(String name, GitLabCommitStatusPublisher gitLabCommitStatusPublisher) throws IOException {
+    private Project freestyleProject(String name, GitLabCommitStatusPublisher gitLabCommitStatusPublisher)
+            throws IOException {
         FreeStyleProject project = jenkins.createFreeStyleProject(name);
         project.setQuietPeriod(5000);
         project.getPublishersList().add(gitLabCommitStatusPublisher);

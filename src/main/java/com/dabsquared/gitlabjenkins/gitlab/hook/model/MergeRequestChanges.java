@@ -24,16 +24,18 @@ public class MergeRequestChanges {
         this.labels = labels;
     }
 
-
-
     /*
         "title": {...}
     */
     private MergeRequestChangedTitle title;
 
-    public MergeRequestChangedTitle getTitle() { return title; }
+    public MergeRequestChangedTitle getTitle() {
+        return title;
+    }
 
-    public void setTitle(MergeRequestChangedTitle title) { this.title = title; }
+    public void setTitle(MergeRequestChangedTitle title) {
+        this.title = title;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -44,22 +46,16 @@ public class MergeRequestChanges {
             return false;
         }
         MergeRequestChanges that = (MergeRequestChanges) o;
-        return new EqualsBuilder()
-            .append(labels, that.labels)
-            .isEquals();
+        return new EqualsBuilder().append(labels, that.labels).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-            .append(labels)
-            .toHashCode();
+        return new HashCodeBuilder(17, 37).append(labels).toHashCode();
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("labels", labels)
-            .toString();
+        return new ToStringBuilder(this).append("labels", labels).toString();
     }
 }

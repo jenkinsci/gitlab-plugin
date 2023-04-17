@@ -1,12 +1,11 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import java.util.Date;
+import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Robin Müller

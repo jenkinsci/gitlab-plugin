@@ -1,11 +1,9 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 public class GitLabCredentialMatcher implements CredentialsMatcher {
 

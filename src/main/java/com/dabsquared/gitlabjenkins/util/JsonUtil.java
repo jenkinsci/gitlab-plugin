@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +26,7 @@ public final class JsonUtil {
             .configure(SerializationFeature.INDENT_OUTPUT, true)
             .registerModule(new DateModule());
 
-    private JsonUtil() { }
+    private JsonUtil() {}
 
     public static String toPrettyPrint(String json) {
         try {
@@ -71,17 +70,21 @@ public final class JsonUtil {
 
     private static class DateModule extends SimpleModule {
         private static final String[] DATE_FORMATS = new String[] {
-                "yyyy-MM-dd HH:mm:ss Z", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ssX", "yyyy-MM-dd'T'HH:mm:ss.SSSX", "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            "yyyy-MM-dd HH:mm:ss Z",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ssX",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
         };
 
         private DateModule() {
             addDeserializer(Date.class, new com.fasterxml.jackson.databind.JsonDeserializer<Date>() {
                 @Override
-                public Date deserialize(com.fasterxml.jackson.core.JsonParser p, DeserializationContext ctxt) throws IOException {
+                public Date deserialize(com.fasterxml.jackson.core.JsonParser p, DeserializationContext ctxt)
+                        throws IOException {
                     for (String format : DATE_FORMATS) {
                         try {
-                            return new SimpleDateFormat(format, Locale.US)
-                                    .parse(p.getValueAsString());
+                            return new SimpleDateFormat(format, Locale.US).parse(p.getValueAsString());
                         } catch (ParseException e) {
                             // nothing to do
                         }

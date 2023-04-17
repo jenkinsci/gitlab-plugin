@@ -26,8 +26,10 @@ import org.mockserver.model.HttpRequest;
 public class AutodetectingGitLabClientTest {
     @Rule
     public MockServerRule mockServer = new MockServerRule(this);
+
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
+
     private MockServerClient mockServerClient;
     private String gitLabUrl;
     private GitLabClientBuilder clientBuilder;
@@ -40,7 +42,8 @@ public class AutodetectingGitLabClientTest {
         gitLabUrl = "http://localhost:" + mockServer.getPort() + "/gitlab";
         addGitLabApiToken();
 
-        List<GitLabClientBuilder> builders = Arrays.<GitLabClientBuilder>asList(new V3GitLabClientBuilder(), new V4GitLabClientBuilder());
+        List<GitLabClientBuilder> builders =
+                Arrays.<GitLabClientBuilder>asList(new V3GitLabClientBuilder(), new V4GitLabClientBuilder());
         api = new AutodetectingGitLabClient(builders, gitLabUrl, API_TOKEN, true, 10, 10);
 
         v3Request = versionRequest(V3GitLabApiProxy.ID);

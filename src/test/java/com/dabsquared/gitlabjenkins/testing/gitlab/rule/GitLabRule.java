@@ -68,8 +68,14 @@ public class GitLabRule implements TestRule {
     public String createProject(ProjectRequest request) {
         Project project = client().createProject(request.getName());
         projectIds.add(project.getId().toString());
-        if (request.getWebHookUrl() != null && (request.isPushHook() || request.isMergeRequestHook() || request.isNoteHook())) {
-            client().addProjectHook(project.getId().toString(), request.getWebHookUrl(), request.isPushHook(), request.isMergeRequestHook(), request.isNoteHook());
+        if (request.getWebHookUrl() != null
+                && (request.isPushHook() || request.isMergeRequestHook() || request.isNoteHook())) {
+            client().addProjectHook(
+                            project.getId().toString(),
+                            request.getWebHookUrl(),
+                            request.isPushHook(),
+                            request.isMergeRequestHook(),
+                            request.isNoteHook());
         }
         return project.getHttpUrlToRepo();
     }
@@ -78,22 +84,26 @@ public class GitLabRule implements TestRule {
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
-                credentialsStore.addCredentials(domains.get(0),
-                    new StringCredentialsImpl(CredentialsScope.SYSTEM, API_TOKEN_ID, "GitLab API Token", Secret.fromString(getApiToken())));
+                credentialsStore.addCredentials(
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                API_TOKEN_ID,
+                                "GitLab API Token",
+                                Secret.fromString(getApiToken())));
             }
         }
 
         GitLabConnectionConfig config = Jenkins.getInstance().getDescriptorByType(GitLabConnectionConfig.class);
-        GitLabConnection connection = new GitLabConnection("test", url, API_TOKEN_ID, new V3GitLabClientBuilder(), true,10, 10);
+        GitLabConnection connection =
+                new GitLabConnection("test", url, API_TOKEN_ID, new V3GitLabClientBuilder(), true, 10, 10);
         config.addConnection(connection);
         config.save();
         return new GitLabConnectionProperty(connection.getName());
     }
 
-    public MergeRequest createMergeRequest(final Integer projectId,
-                                           final String sourceBranch,
-                                           final String targetBranch,
-                                           final String title) {
+    public MergeRequest createMergeRequest(
+            final Integer projectId, final String sourceBranch, final String targetBranch, final String title) {
         return client().createMergeRequest(projectId, sourceBranch, targetBranch, title);
     }
 
@@ -121,8 +131,11 @@ public class GitLabRule implements TestRule {
     private String getApiToken() {
         try {
             Class.forName("org.postgresql.Driver");
-            try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:" + postgresPort + "/gitlabhq_production", "gitlab", "password")) {
-                ResultSet resultSet = connection.createStatement().executeQuery("SELECT authentication_token FROM users WHERE username = 'root'");
+            try (Connection connection = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:" + postgresPort + "/gitlabhq_production", "gitlab", "password")) {
+                ResultSet resultSet = connection
+                        .createStatement()
+                        .executeQuery("SELECT authentication_token FROM users WHERE username = 'root'");
                 resultSet.next();
                 return resultSet.getString("authentication_token");
             }

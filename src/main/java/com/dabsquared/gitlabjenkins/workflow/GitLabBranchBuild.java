@@ -20,8 +20,7 @@ public class GitLabBranchBuild extends AbstractDescribableImpl<GitLabBranchBuild
     private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
-    public GitLabBranchBuild() {
-    }
+    public GitLabBranchBuild() {}
 
     public GitLabBranchBuild(String projectId, String revisionHash) {
         this.name = null;

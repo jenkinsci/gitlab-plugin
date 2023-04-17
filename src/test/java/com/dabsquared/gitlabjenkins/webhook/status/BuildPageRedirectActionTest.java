@@ -35,10 +35,13 @@ public abstract class BuildPageRedirectActionTest {
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
+
     protected String commitSha1;
     protected String branch = "master";
+
     @Mock
     private StaplerResponse response;
+
     private String gitRepoUrl;
 
     @Before
@@ -66,14 +69,17 @@ public abstract class BuildPageRedirectActionTest {
     }
 
     @Test
-    public void redirectToBuildStatusUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void redirectToBuildStatusUrl()
+            throws IOException, ExecutionException, InterruptedException, TimeoutException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);
         QueueTaskFuture<FreeStyleBuild> future = testProject.scheduleBuild2(0);
         FreeStyleBuild build = future.get(15, TimeUnit.SECONDS);
 
-        doThrow(IOException.class).when(response).sendRedirect2(jenkins.getInstance().getRootUrl() + build.getUrl());
+        doThrow(IOException.class)
+                .when(response)
+                .sendRedirect2(jenkins.getInstance().getRootUrl() + build.getUrl());
         getBuildPageRedirectAction(testProject).execute(response);
 
         verify(response).sendRedirect2(jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());

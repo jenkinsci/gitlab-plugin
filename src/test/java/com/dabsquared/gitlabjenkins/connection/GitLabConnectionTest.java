@@ -3,9 +3,6 @@ package com.dabsquared.gitlabjenkins.connection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
@@ -14,6 +11,8 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import hudson.util.Secret;
+import java.io.IOException;
+import java.util.List;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.BeforeClass;
@@ -31,42 +30,30 @@ public class GitLabConnectionTest {
 
     private static GitLabConnection connection;
 
-
     @BeforeClass
     public static void setup() throws IOException {
         for (final CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.get())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 final List<Domain> domains = credentialsStore.getDomains();
                 credentialsStore.addCredentials(
-                    domains.get(0),
-                    new StringCredentialsImpl(
-                        CredentialsScope.SYSTEM,
-                        API_TOKEN_ID,
-                        "GitLab API Token",
-                        Secret.fromString(API_TOKEN)
-                    )
-                );
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                API_TOKEN_ID,
+                                "GitLab API Token",
+                                Secret.fromString(API_TOKEN)));
                 credentialsStore.addCredentials(
-                    domains.get(0),
-                    new StringCredentialsImpl(
-                        CredentialsScope.SYSTEM,
-                        API_TOKEN_ID_2,
-                        "GitLab API Token 2",
-                        Secret.fromString(API_TOKEN)
-                    )
-                );
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                API_TOKEN_ID_2,
+                                "GitLab API Token 2",
+                                Secret.fromString(API_TOKEN)));
             }
         }
 
         connection = new GitLabConnection(
-            "test",
-            "http://localhost",
-            API_TOKEN_ID,
-            new V3GitLabClientBuilder(),
-            false,
-            10,
-            10
-        );
+                "test", "http://localhost", API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
     }
 
     @Test
@@ -82,7 +69,6 @@ public class GitLabConnectionTest {
         assertThat(client, notNullValue());
         assertThat(connection.getClient(null, API_TOKEN_ID), sameInstance(client));
     }
-
 
     @Test
     public void getClient_differentCredentialId_differentClient() {

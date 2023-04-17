@@ -11,7 +11,12 @@ public final class BranchFilterConfig {
     private final String sourceBranchRegex;
     private final String targetBranchRegex;
 
-    private BranchFilterConfig(BranchFilterType type, String includeBranchesSpec, String excludeBranchesSpec, String sourceBranchRegex, String targetBranchRegex) {
+    private BranchFilterConfig(
+            BranchFilterType type,
+            String includeBranchesSpec,
+            String excludeBranchesSpec,
+            String sourceBranchRegex,
+            String targetBranchRegex) {
         this.type = type;
         this.includeBranchesSpec = includeBranchesSpec;
         this.excludeBranchesSpec = excludeBranchesSpec;
@@ -70,7 +75,8 @@ public final class BranchFilterConfig {
         }
 
         public BranchFilterConfig build(BranchFilterType type) {
-            return new BranchFilterConfig(type, includeBranchesSpec, excludeBranchesSpec, sourceBranchRegex, targetBranchRegex);
+            return new BranchFilterConfig(
+                    type, includeBranchesSpec, excludeBranchesSpec, sourceBranchRegex, targetBranchRegex);
         }
     }
 }

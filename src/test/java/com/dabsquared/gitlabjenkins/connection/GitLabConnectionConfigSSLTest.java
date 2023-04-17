@@ -80,8 +80,7 @@ public class GitLabConnectionConfigSSLTest {
         // the http configuration we configured above so it can get things like
         // the output buffer size, etc. We also set the port (8080) and
         // configure an idle timeout.
-        ServerConnector http = new ServerConnector(server,
-            new HttpConnectionFactory(http_config));
+        ServerConnector http = new ServerConnector(server, new HttpConnectionFactory(http_config));
         http.setPort(_http_port);
         http.setIdleTimeout(30000);
 
@@ -99,8 +98,8 @@ public class GitLabConnectionConfigSSLTest {
         // OPTIONAL: Un-comment the following to use Conscrypt for SSL instead of
         // the native JSSE implementation.
 
-        //Security.addProvider(new OpenSSLProvider());
-        //sslContextFactory.setProvider("Conscrypt");
+        // Security.addProvider(new OpenSSLProvider());
+        // sslContextFactory.setProvider("Conscrypt");
 
         // HTTPS Configuration
         // A new HttpConfiguration object is needed for the next connector and
@@ -119,19 +118,22 @@ public class GitLabConnectionConfigSSLTest {
         // We create a second ServerConnector, passing in the http configuration
         // we just made along with the previously created ssl context factory.
         // Next we set the port and a longer idle timeout.
-        ServerConnector https = new ServerConnector(server,
-            new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-            new HttpConnectionFactory(https_config));
+        ServerConnector https = new ServerConnector(
+                server,
+                new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+                new HttpConnectionFactory(https_config));
         https.setPort(port);
         https.setIdleTimeout(500000);
 
         // Set the connectors
-        server.setConnectors(new Connector[] { http, https });
+        server.setConnectors(new Connector[] {http, https});
 
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.setHandlers(new Handler[] {
             new AbstractHandler() {
-                public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+                public void handle(
+                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                        throws IOException, ServletException {
                     response.setStatus(HttpServletResponse.SC_OK);
                     baseRequest.setHandled(true);
                 }
@@ -139,8 +141,6 @@ public class GitLabConnectionConfigSSLTest {
         });
         server.setHandler(handlerCollection);
         server.start();
-
-
     }
 
     @AfterClass
@@ -153,17 +153,24 @@ public class GitLabConnectionConfigSSLTest {
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
-                credentialsStore.addCredentials(domains.get(0),
-                    new StringCredentialsImpl(CredentialsScope.SYSTEM, API_TOKEN_ID, "GitLab API Token", Secret.fromString(API_TOKEN_ID)));
+                credentialsStore.addCredentials(
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                API_TOKEN_ID,
+                                "GitLab API Token",
+                                Secret.fromString(API_TOKEN_ID)));
             }
         }
     }
 
     @Test
     public void doCheckConnection_certificateError() throws IOException {
-        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
+        GitLabConnection.DescriptorImpl descriptor =
+                (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
+        FormValidation formValidation =
+                descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
         assertThat(formValidation.getMessage(), containsString(Messages.connection_error("PKIX path building failed")));
     }
 }

@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
@@ -8,6 +10,14 @@ import hudson.model.Cause;
 import hudson.model.Cause.UpstreamCause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
@@ -18,17 +28,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
@@ -45,11 +44,11 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         this.comment = StringUtils.isEmpty(comment) ? null : comment;
     }
 
-	@Override
-	public StepExecution start(StepContext context) throws Exception {
-		return new AddGitLabMergeRequestCommentStepExecution(context, this);
-	}
-	
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new AddGitLabMergeRequestCommentStepExecution(context, this);
+    }
+
     public String getComment() {
         return comment;
     }
@@ -66,18 +65,18 @@ public class AddGitLabMergeRequestCommentStep extends Step {
 
         private final transient AddGitLabMergeRequestCommentStep step;
 
-        AddGitLabMergeRequestCommentStepExecution(StepContext context, AddGitLabMergeRequestCommentStep step) throws Exception {
+        AddGitLabMergeRequestCommentStepExecution(StepContext context, AddGitLabMergeRequestCommentStep step)
+                throws Exception {
             super(context);
             this.step = step;
             run = context.get(Run.class);
         }
-        
+
         @Override
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause == null) {
-                List<GitLabWebHookCause> gitLabWebHookCauses =
-                    retrieveCauseRecursive(run.getCauses());
+                List<GitLabWebHookCause> gitLabWebHookCauses = retrieveCauseRecursive(run.getCauses());
                 if (!CollectionUtils.isEmpty(gitLabWebHookCauses)) {
                     cause = gitLabWebHookCauses.get(0);
                 }
@@ -92,15 +91,23 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                         try {
                             client.createMergeRequestNote(mergeRequest, step.getComment());
                         } catch (WebApplicationException | ProcessingException e) {
-                            printf("Failed to add comment on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
-                            LOGGER.log(Level.SEVERE, String.format("Failed to add comment on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
+                            printf(
+                                    "Failed to add comment on Merge Request for project '%s': %s%n",
+                                    mergeRequest.getProjectId(), e.getMessage());
+                            LOGGER.log(
+                                    Level.SEVERE,
+                                    String.format(
+                                            "Failed to add comment on Merge Request for project '%s'",
+                                            mergeRequest.getProjectId()),
+                                    e);
                         }
                     }
                 }
-            }
-            else {
-                LOGGER.log(Level.WARNING, "Add MR comment failure, " +
-                  "Cannot retrieve GitLab MR context: Cannot find GitLabWebHookCause");
+            } else {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Add MR comment failure, "
+                                + "Cannot retrieve GitLab MR context: Cannot find GitLabWebHookCause");
             }
             return null;
         }
@@ -117,7 +124,10 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         private void printf(String message, Object... args) {
             TaskListener listener = getTaskListener();
             if (listener == null) {
-                LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", String.format(message, args));
+                LOGGER.log(
+                        Level.FINE,
+                        "failed to print message {0} due to null TaskListener",
+                        String.format(message, args));
             } else {
                 listener.getLogger().printf(message, args);
             }
@@ -148,15 +158,14 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         public String getFunctionName() {
             return "addGitLabMRComment";
         }
-        
-		@Override
-		public Set<Class<?>> getRequiredContext() {
-			Set<Class<?>> context = new HashSet<>();
-			Collections.addAll(context, TaskListener.class, Run.class);
-			return Collections.unmodifiableSet(context);
-		}
-    }
 
+        @Override
+        public Set<Class<?>> getRequiredContext() {
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, TaskListener.class, Run.class);
+            return Collections.unmodifiableSet(context);
+        }
+    }
 
     /**
      * Retrieve cause recursively for nested job.
@@ -176,14 +185,12 @@ public class AddGitLabMergeRequestCommentStep extends Step {
     private static List<GitLabWebHookCause> retrieveCauseRecursive(List<Cause> causes) {
         for (Cause cause : causes) {
             if (!(cause instanceof UpstreamCause)) continue;
-            List<Cause> upstreamCauses = ((UpstreamCause) cause)
-                                             .getUpstreamCauses();
+            List<Cause> upstreamCauses = ((UpstreamCause) cause).getUpstreamCauses();
             for (Cause upCause : upstreamCauses) {
                 if (!(upCause instanceof GitLabWebHookCause)) continue;
                 return Collections.singletonList((GitLabWebHookCause) upCause);
             }
-            List<GitLabWebHookCause> builds =
-                retrieveCauseRecursive(upstreamCauses);
+            List<GitLabWebHookCause> builds = retrieveCauseRecursive(upstreamCauses);
             if (!builds.isEmpty()) return builds;
         }
         return Collections.emptyList();
