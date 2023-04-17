@@ -25,7 +25,7 @@ Before submitting your change make sure that:
 
 See https://github.com/jenkinsci/gitlab-plugin/tree/master/src/docker/README.md
 
-## Using INTELLiJ's Debugger
+## Using IntelliJ's Debugger
 
 When testing with a Docker Jenkins instance, the debugger can be setup in the following way:
 * From the main menu, select Run -> Edit Configurations.
