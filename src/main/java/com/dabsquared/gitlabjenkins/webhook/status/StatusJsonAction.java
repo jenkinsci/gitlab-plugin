@@ -4,11 +4,10 @@ import com.dabsquared.gitlabjenkins.util.BuildUtil;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.util.HttpResponses;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author Robin Müller

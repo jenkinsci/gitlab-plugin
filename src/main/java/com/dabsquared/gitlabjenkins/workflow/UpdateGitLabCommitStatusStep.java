@@ -1,10 +1,15 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.util.ListBoxModel;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -14,14 +19,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
-
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.util.ListBoxModel;
 
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
@@ -37,11 +34,11 @@ public class UpdateGitLabCommitStatusStep extends Step {
         this.name = StringUtils.isEmpty(name) ? null : name;
         this.state = state;
     }
-    
-	@Override
-	public StepExecution start(StepContext context) throws Exception {
-		return new UpdateGitLabCommitStatusStepExecution(context, this);
-	}
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new UpdateGitLabCommitStatusStepExecution(context, this);
+    }
 
     public String getName() {
         return name;
@@ -73,7 +70,7 @@ public class UpdateGitLabCommitStatusStep extends Step {
             this.step = step;
             run = context.get(Run.class);
         }
-        
+
         @Override
         protected Void run() throws Exception {
             final String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
@@ -118,11 +115,11 @@ public class UpdateGitLabCommitStatusStep extends Step {
             return options;
         }
 
-		@Override
-		public Set<Class<?>> getRequiredContext() {
-			Set<Class<?>> context = new HashSet<>();
-			Collections.addAll(context, TaskListener.class, Run.class);
-			return Collections.unmodifiableSet(context);
-		}
+        @Override
+        public Set<Class<?>> getRequiredContext() {
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, TaskListener.class, Run.class);
+            return Collections.unmodifiableSet(context);
+        }
     }
 }

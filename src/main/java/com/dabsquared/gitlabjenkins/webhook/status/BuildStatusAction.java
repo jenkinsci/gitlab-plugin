@@ -61,7 +61,12 @@ abstract class BuildStatusAction implements WebHookAction {
     }
 
     protected enum BuildStatus {
-        NOT_FOUND("not_found"), RUNNING("running"), CANCELED("canceled"), SUCCESS("success"), FAILED("failed"), UNSTABLE("failed");
+        NOT_FOUND("not_found"),
+        RUNNING("running"),
+        CANCELED("canceled"),
+        SUCCESS("success"),
+        FAILED("failed"),
+        UNSTABLE("failed");
 
         private String value;
 

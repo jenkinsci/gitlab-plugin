@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class GitLabProjectLabelsServiceTest {
 
-    private final static List<String> LABELS_PROJECT_B = Arrays.asList("label1", "label2", "label3");
+    private static final List<String> LABELS_PROJECT_B = Arrays.asList("label1", "label2", "label3");
 
     private GitLabProjectLabelsService labelsService;
 

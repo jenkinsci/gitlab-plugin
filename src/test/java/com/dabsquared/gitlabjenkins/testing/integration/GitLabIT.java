@@ -53,7 +53,8 @@ public class GitLabIT {
     private static final String GITLAB_URL = "http://localhost:" + System.getProperty("gitlab.http.port", "10080");
 
     @Rule
-    public GitLabRule gitlab = new GitLabRule(GITLAB_URL, Integer.parseInt(System.getProperty("postgres.port", "5432")));
+    public GitLabRule gitlab =
+            new GitLabRule(GITLAB_URL, Integer.parseInt(System.getProperty("postgres.port", "5432")));
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -65,42 +66,49 @@ public class GitLabIT {
     public void buildOnPush() throws IOException, InterruptedException, GitAPIException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
-        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnPush(true).withBranchFilterType(BranchFilterType.All).build();
+        GitLabPushTrigger trigger = gitLabPushTrigger()
+                .withTriggerOnPush(true)
+                .withBranchFilterType(BranchFilterType.All)
+                .build();
         project.addTrigger(trigger);
         trigger.start(project, true);
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
         });
         project.setQuietPeriod(0);
 
-        createGitLabProject(false,true, true, false);
+        createGitLabProject(false, true, true, false);
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 
-
     @Test
     public void buildOnMergeRequest() throws IOException, InterruptedException, GitAPIException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
-        GitLabPushTrigger trigger = gitLabPushTrigger().withTriggerOnMergeRequest(true).withBranchFilterType(BranchFilterType.All).build();
+        GitLabPushTrigger trigger = gitLabPushTrigger()
+                .withTriggerOnMergeRequest(true)
+                .withBranchFilterType(BranchFilterType.All)
+                .build();
         project.addTrigger(trigger);
         trigger.start(project, true);
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
         });
         project.setQuietPeriod(0);
 
-        Pair<Integer, String> gitlabData = createGitLabProject(true,false, false, true);
+        Pair<Integer, String> gitlabData = createGitLabProject(true, false, false, true);
 
         gitlab.createMergeRequest(gitlabData.getLeft(), "feature", "master", "Merge feature branch to master.");
 
@@ -113,12 +121,14 @@ public class GitLabIT {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
         GitLabPushTrigger trigger = gitLabPushTrigger()
-            .withTriggerOnNoteRequest(true)
-            .withNoteRegex(".*test.*")
-            .withBranchFilterType(BranchFilterType.All).build();
+                .withTriggerOnNoteRequest(true)
+                .withNoteRegex(".*test.*")
+                .withBranchFilterType(BranchFilterType.All)
+                .build();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
@@ -128,7 +138,8 @@ public class GitLabIT {
         Pair<Integer, String> gitlabData = createGitLabProject(true, false, true, false);
 
         // create merge-request
-        MergeRequest mr = gitlab.createMergeRequest(gitlabData.getLeft(), "feature", "master", "Merge feature branch to master.");
+        MergeRequest mr =
+                gitlab.createMergeRequest(gitlabData.getLeft(), "feature", "master", "Merge feature branch to master.");
 
         // add trigger after push/merge-request so it may only receive the note-hook
         project.addTrigger(trigger);
@@ -146,9 +157,9 @@ public class GitLabIT {
         final OneShotEvent buildReported = new OneShotEvent();
 
         GitLabPushTrigger trigger = gitLabPushTrigger()
-            .withTriggerOnPush(true)
-            .withBranchFilterType(BranchFilterType.All)
-            .build();
+                .withTriggerOnPush(true)
+                .withBranchFilterType(BranchFilterType.All)
+                .build();
 
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
         project.addProperty(gitlab.createGitLabConnectionProperty());
@@ -156,7 +167,8 @@ public class GitLabIT {
 
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
@@ -167,7 +179,8 @@ public class GitLabIT {
         publishers.add(new GitLabCommitStatusPublisher("integration-test", false));
         publishers.add(new TestNotifier() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildReported.signal();
                 return true;
             }
@@ -175,8 +188,7 @@ public class GitLabIT {
         trigger.start(project, true);
         project.setQuietPeriod(0);
 
-
-        Pair<Integer, String> gitlabData = createGitLabProject(false,true, true, false);
+        Pair<Integer, String> gitlabData = createGitLabProject(false, true, true, false);
         assertThat(gitlab.getPipelines(gitlabData.getLeft()), empty());
 
         buildTriggered.block(20000);
@@ -199,17 +211,20 @@ public class GitLabIT {
         assertEquals(status, pipeline.getStatus());
     }
 
-    private Pair<Integer, String> createGitLabProject(boolean addFeatureBranch, boolean withPushHook, boolean withNoteHook, boolean withMergeRequestHook) throws IOException, GitAPIException {
+    private Pair<Integer, String> createGitLabProject(
+            boolean addFeatureBranch, boolean withPushHook, boolean withNoteHook, boolean withMergeRequestHook)
+            throws IOException, GitAPIException {
         // check for clean slate
         assertTrue(gitlab.getProjectIds().isEmpty());
 
         String url = gitlab.createProject(projectRequest()
-            .withName("test")
-            .withWebHookUrl("http://" + getDocker0Ip() + ":" + jenkins.getURL().getPort() + "/jenkins/project/test")
-            .withPushHook(withPushHook)
-            .withNoteHook(withNoteHook)
-            .withMergeRequestHook(withMergeRequestHook)
-            .build());
+                .withName("test")
+                .withWebHookUrl(
+                        "http://" + getDocker0Ip() + ":" + jenkins.getURL().getPort() + "/jenkins/project/test")
+                .withPushHook(withPushHook)
+                .withNoteHook(withNoteHook)
+                .withMergeRequestHook(withMergeRequestHook)
+                .build());
 
         String sha = initGitLabProject(url, addFeatureBranch);
 
@@ -237,17 +252,23 @@ public class GitLabIT {
         git.add().addFilepattern("test");
         RevCommit commit = git.commit().setMessage("test").call();
         git.push()
-            .setRemote("origin").add("master")
-            .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
-            .call();
+                .setRemote("origin")
+                .add("master")
+                .setCredentialsProvider(
+                        new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
+                .call();
 
         if (addFeatureBranch) {
             // Setup remote feature branch
             git.checkout().setName("feature").setCreateBranch(true).call();
             tmp.newFile("feature");
             commit = git.commit().setMessage("feature").call();
-            git.push().setRemote("origin").add("feature").setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
-                .call();
+            git.push()
+                    .setRemote("origin")
+                    .add("feature")
+                    .setCredentialsProvider(
+                            new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
+                    .call();
         }
 
         return commit.getName();
@@ -255,7 +276,8 @@ public class GitLabIT {
 
     private String getDocker0Ip() {
         try {
-            Enumeration<InetAddress> docker0Addresses = NetworkInterface.getByName("docker0").getInetAddresses();
+            Enumeration<InetAddress> docker0Addresses =
+                    NetworkInterface.getByName("docker0").getInetAddresses();
             while (docker0Addresses.hasMoreElements()) {
                 InetAddress inetAddress = docker0Addresses.nextElement();
                 if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {

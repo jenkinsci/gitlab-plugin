@@ -1,14 +1,13 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import java.util.List;
 
 /**
  * @author Robin Müller
@@ -35,13 +34,22 @@ public class MergeRequest {
     private Boolean mergeWhenBuildSucceeds;
     private String mergeStatus;
 
-    public MergeRequest() { /* default-constructor for Resteasy-based-api-proxies */ }
+    public MergeRequest() {
+        /* default-constructor for Resteasy-based-api-proxies */
+    }
 
-    public MergeRequest(int id, int iid, String sourceBranch, String targetBranch, String title,
-                        int sourceProjectId, int targetProjectId,
-                        String description, String mergeStatus) {
+    public MergeRequest(
+            int id,
+            int iid,
+            String sourceBranch,
+            String targetBranch,
+            String title,
+            int sourceProjectId,
+            int targetProjectId,
+            String description,
+            String mergeStatus) {
         this.id = id;
-        this.iid= iid;
+        this.iid = iid;
         this.sourceBranch = sourceBranch;
         this.targetBranch = targetBranch;
         this.title = title;

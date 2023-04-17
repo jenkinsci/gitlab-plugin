@@ -80,15 +80,13 @@ class GitLabClientStub implements GitLabClient {
     }
 
     /************** no implementation below ********************************/
-
     @Override
     public List<Group> getGroups() {
         return null;
     }
 
     @Override
-    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy,
-            SortType sort) {
+    public List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort) {
         return null;
     }
 
@@ -98,8 +96,12 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
-    public List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility,
-            OrderType orderBy, SortType sort) {
+    public List<Project> getGroupProjects(
+            String groupId,
+            Boolean includeSubgroups,
+            ProjectVisibilityType visibility,
+            OrderType orderBy,
+            SortType sort) {
         return null;
     }
 
@@ -124,9 +126,7 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
-    public void deleteProject(String projectId) {
-
-    }
+    public void deleteProject(String projectId) {}
 
     @Override
     public List<ProjectHook> getProjectHooks(String projectName) {
@@ -134,31 +134,43 @@ class GitLabClientStub implements GitLabClient {
     }
 
     @Override
-    public void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
-
-    }
-
-    @Override
-    public void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {
-
-    }
+    public void addProjectHook(
+            String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents) {}
 
     @Override
-    public void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
-
-    }
+    public void addProjectHook(
+            String projectId,
+            String url,
+            String secretToken,
+            Boolean pushEvents,
+            Boolean mergeRequestEvents,
+            Boolean noteEvents) {}
 
     @Override
-    public void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description) {
+    public void changeBuildStatus(
+            String projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description) {}
 
-    }
+    @Override
+    public void changeBuildStatus(
+            Integer projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description) {}
 
     @Override
     public void getCommit(String projectId, String sha) {}
 
     @Override
-    public void acceptMergeRequest(
-            MergeRequest mr, String mergeCommitMessage, Boolean shouldRemoveSourceBranch) {}
+    public void acceptMergeRequest(MergeRequest mr, String mergeCommitMessage, Boolean shouldRemoveSourceBranch) {}
 
     @Override
     public void createMergeRequestNote(MergeRequest mr, String body) {}

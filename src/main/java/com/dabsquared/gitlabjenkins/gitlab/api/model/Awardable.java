@@ -1,8 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-
 import net.karneim.pojobuilder.GeneratePojoBuilder;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -14,7 +12,9 @@ public class Awardable {
     private User user;
     private Integer awardableId;
 
-    public Awardable() { /* default-constructor for Resteasy-based-api-proxies */ }
+    public Awardable() {
+        /* default-constructor for Resteasy-based-api-proxies */
+    }
 
     public Awardable(Integer id, String name, User user, Integer awardable_id) {
         this.id = id;

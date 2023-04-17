@@ -45,10 +45,7 @@ public abstract class WebHook {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(repository)
-                .append(objectKind)
-                .toHashCode();
+        return new HashCodeBuilder(17, 37).append(repository).append(objectKind).toHashCode();
     }
 
     @Override

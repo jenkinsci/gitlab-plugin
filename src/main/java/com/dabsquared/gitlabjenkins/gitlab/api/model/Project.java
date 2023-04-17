@@ -76,33 +76,33 @@ public class Project {
         }
         Project project = (Project) o;
         return new EqualsBuilder()
-            .append(id, project.id)
-            .append(name, project.name)
-            .append(webUrl, project.webUrl)
-            .append(sshUrlToRepo, project.sshUrlToRepo)
-            .append(httpUrlToRepo, project.httpUrlToRepo)
-            .isEquals();
+                .append(id, project.id)
+                .append(name, project.name)
+                .append(webUrl, project.webUrl)
+                .append(sshUrlToRepo, project.sshUrlToRepo)
+                .append(httpUrlToRepo, project.httpUrlToRepo)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(id)
-            .append(name)
-            .append(webUrl)
-            .append(sshUrlToRepo)
-            .append(httpUrlToRepo)
-            .toHashCode();
+                .append(id)
+                .append(name)
+                .append(webUrl)
+                .append(sshUrlToRepo)
+                .append(httpUrlToRepo)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("id", id)
-            .append("name", name)
-            .append("webUrl", webUrl)
-            .append("sshUrlToRepo", sshUrlToRepo)
-            .append("httpUrlToRepo", httpUrlToRepo)
-            .toString();
+                .append("id", id)
+                .append("name", name)
+                .append("webUrl", webUrl)
+                .append("sshUrlToRepo", sshUrlToRepo)
+                .append("httpUrlToRepo", httpUrlToRepo)
+                .toString();
     }
 }

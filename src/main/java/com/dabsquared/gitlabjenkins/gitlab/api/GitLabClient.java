@@ -10,7 +10,13 @@ public interface GitLabClient {
     List<Group> getGroups();
 
     List<Project> getGroupProjects(String groupId);
-    List<Project> getGroupProjects(String groupId, Boolean includeSubgroups, ProjectVisibilityType visibility, OrderType orderBy, SortType sort);
+
+    List<Project> getGroupProjects(
+            String groupId,
+            Boolean includeSubgroups,
+            ProjectVisibilityType visibility,
+            OrderType orderBy,
+            SortType sort);
 
     List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, OrderType orderBy, SortType sort);
 
@@ -26,13 +32,34 @@ public interface GitLabClient {
 
     List<ProjectHook> getProjectHooks(String projectName);
 
-    void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
+    void addProjectHook(
+            String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
 
-    void addProjectHook(String projectId, String url, String secretToken, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
+    void addProjectHook(
+            String projectId,
+            String url,
+            String secretToken,
+            Boolean pushEvents,
+            Boolean mergeRequestEvents,
+            Boolean noteEvents);
 
-    void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
+    void changeBuildStatus(
+            String projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description);
 
-    void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
+    void changeBuildStatus(
+            Integer projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description);
 
     void getCommit(String projectId, String sha);
 

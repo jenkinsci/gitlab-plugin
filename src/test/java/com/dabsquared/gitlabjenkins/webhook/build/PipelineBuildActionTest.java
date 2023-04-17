@@ -42,13 +42,13 @@ public class PipelineBuildActionTest {
     FreeStyleProject testProject;
 
     @Before
-    public void setUp() throws IOException{
+    public void setUp() throws IOException {
         testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
     }
 
     @Test
-    public void buildOnSuccess () throws IOException {
+    public void buildOnSuccess() throws IOException {
         exception.expect(HttpResponses.HttpResponseException.class);
         new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response);
 

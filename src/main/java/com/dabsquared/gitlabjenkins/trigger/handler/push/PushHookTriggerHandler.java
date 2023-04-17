@@ -6,4 +6,4 @@ import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerHandler;
 /**
  * @author Robin Müller
  */
-public interface PushHookTriggerHandler extends WebHookTriggerHandler<PushHook> { }
+public interface PushHookTriggerHandler extends WebHookTriggerHandler<PushHook> {}

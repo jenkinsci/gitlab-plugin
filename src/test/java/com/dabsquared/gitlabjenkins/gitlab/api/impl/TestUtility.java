@@ -34,14 +34,22 @@ class TestUtility {
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
-                credentialsStore.addCredentials(domains.get(0),
-                    new StringCredentialsImpl(CredentialsScope.SYSTEM, API_TOKEN_ID, "GitLab API Token", Secret.fromString(API_TOKEN)));
+                credentialsStore.addCredentials(
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                API_TOKEN_ID,
+                                "GitLab API Token",
+                                Secret.fromString(API_TOKEN)));
             }
         }
     }
 
     static HttpRequest versionRequest(String id) {
-        return request().withMethod(HttpMethod.GET).withPath("/gitlab/api/" + id + "/.*").withHeader("PRIVATE-TOKEN", API_TOKEN);
+        return request()
+                .withMethod(HttpMethod.GET)
+                .withPath("/gitlab/api/" + id + "/.*")
+                .withHeader("PRIVATE-TOKEN", API_TOKEN);
     }
 
     static HttpResponse responseOk() {
@@ -66,11 +74,14 @@ class TestUtility {
         assertThat(apiField.get(client), instanceOf(apiImplClass));
     }
 
-    static void assertApiImpl(AutodetectingGitLabClient api, Class<? extends GitLabApiProxy> apiImplClass) throws Exception {
+    static void assertApiImpl(AutodetectingGitLabClient api, Class<? extends GitLabApiProxy> apiImplClass)
+            throws Exception {
         Field delegate = api.getClass().getDeclaredField("delegate");
         delegate.setAccessible(true);
         assertApiImpl((GitLabClient) delegate.get(api), apiImplClass);
     }
 
-    private TestUtility() { /* utility class */ }
+    private TestUtility() {
+        /* utility class */
+    }
 }

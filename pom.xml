@@ -7,6 +7,7 @@
     <version>4.59</version>
     <relativePath />
   </parent>
+
   <artifactId>gitlab-plugin</artifactId>
   <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
@@ -69,11 +70,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- depdendencies added to satisfy new requirements from enforcer plugin in plugin pom 4.55 -->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-      </dependency>
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
@@ -83,7 +79,6 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- Jenkins dependencies -->
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>caffeine-api</artifactId>
@@ -99,6 +94,47 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>3.15.6.Final</version>
+      <exclusions>
+        <!-- Provided by Jenkins core -->
+        <exclusion>
+          <groupId>com.github.stephenc.jcip</groupId>
+          <artifactId>jcip-annotations</artifactId>
+        </exclusion>
+        <!-- Provided by javax-activation-api plugin -->
+        <exclusion>
+          <groupId>com.sun.activation</groupId>
+          <artifactId>jakarta.activation</artifactId>
+        </exclusion>
+        <!-- Provided by Jenkins core -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+        <!-- Provided by javax-activation-api plugin -->
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <!-- Provided by jaxb plugin -->
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+        <!-- Provided by apache-httpcomponents-client-4-api plugin -->
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -150,51 +186,6 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
     </dependency>
-
-    <!-- REST client dependencies -->
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-client</artifactId>
-      <version>3.15.6.Final</version>
-      <exclusions>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
-          <groupId>com.github.stephenc.jcip</groupId>
-          <artifactId>jcip-annotations</artifactId>
-        </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
-        <exclusion>
-          <groupId>com.sun.activation</groupId>
-          <artifactId>jakarta.activation</artifactId>
-        </exclusion>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-        </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
-        <exclusion>
-          <groupId>jakarta.activation</groupId>
-          <artifactId>jakarta.activation-api</artifactId>
-        </exclusion>
-        <!-- Provided by jaxb plugin -->
-        <exclusion>
-          <groupId>jakarta.xml.bind</groupId>
-          <artifactId>jakarta.xml.bind-api</artifactId>
-        </exclusion>
-        <!-- Provided by apache-httpcomponents-client-4-api plugin -->
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <!-- util dependencies -->
     <dependency>
       <groupId>net.karneim</groupId>
       <artifactId>pojobuilder</artifactId>
@@ -202,8 +193,6 @@
       <!-- 'provided' scope because this is only needed during compilation -->
       <scope>provided</scope>
     </dependency>
-
-    <!-- test dependencies -->
     <dependency>
       <groupId>io.jenkins</groupId>
       <artifactId>configuration-as-code</artifactId>
@@ -314,6 +303,7 @@
       </exclusions>
     </dependency>
   </dependencies>
+
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
@@ -331,36 +321,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.36.0</version>
-        <configuration>
-          <!-- define a language-specific format -->
-          <java>
-            <!-- no need to specify files, inferred automatically -->
-            <endWithNewline />
-            <removeUnusedImports />
-          </java>
-          <pom>
-            <sortPom>
-              <encoding>${project.build.sourceEncoding}</encoding>
-              <lineSeparator>\n</lineSeparator>
-              <expandEmptyElements>false</expandEmptyElements>
-              <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
-            </sortPom>
-          </pom>
-        </configuration>
-        <executions>
-          <execution>
-            <!-- Runs in verify phase by default -->
-            <goals>
-              <!-- Can be disabled using -Dspotless.check.skip -->
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>

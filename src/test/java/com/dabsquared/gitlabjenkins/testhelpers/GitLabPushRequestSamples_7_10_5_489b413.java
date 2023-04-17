@@ -43,7 +43,8 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
                         .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
                         .build())
                 .withRef("refs/heads/test-new-branch1")
-                .withBefore(ZERO_SHA).withAfter(COMMIT_7A)
+                .withBefore(ZERO_SHA)
+                .withAfter(COMMIT_7A)
                 // no commit on new branches
                 .build();
     }
@@ -61,7 +62,8 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
                 .withRef("refs/heads/test-new-branch1")
                 .withBefore(COMMIT_7A)
                 .withAfter(COMMIT_21)
-                .withCommits(Collections.singletonList(commit().withId(COMMIT_21).build()))
+                .withCommits(
+                        Collections.singletonList(commit().withId(COMMIT_21).build()))
                 .build();
     }
 
@@ -80,9 +82,9 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
                 .withAfter(COMMIT_9d)
                 .withCommits(Arrays.asList(
                         commit().withId(COMMIT_21).build(),
-                        commit().withId("c04c8822d1df397fb7e6dd3dd133018a0af567a8").build(),
-                        commit().withId(COMMIT_9d).build())
-                )
+                        commit().withId("c04c8822d1df397fb7e6dd3dd133018a0af567a8")
+                                .build(),
+                        commit().withId(COMMIT_9d).build()))
                 .build();
     }
 
@@ -99,7 +101,8 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
                 .withRef("refs/tags/test-tag-1")
                 .withBefore(ZERO_SHA)
                 .withAfter(COMMIT_21)
-                .withCommits(Collections.singletonList(commit().withId(COMMIT_21).build()))
+                .withCommits(
+                        Collections.singletonList(commit().withId(COMMIT_21).build()))
                 .build();
     }
 
@@ -114,8 +117,8 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
                         .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
                         .build())
                 .withRef("refs/heads/test-branch-3-delete")
-                .withBefore("c34984ff6ed9935b3d843237947adbaaa85fc5f9").withAfter(ZERO_SHA)
+                .withBefore("c34984ff6ed9935b3d843237947adbaaa85fc5f9")
+                .withAfter(ZERO_SHA)
                 .build();
     }
-
 }

@@ -1,11 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import java.util.Date;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import java.util.Date;
 
 /**
  * @author Robin Müller
@@ -163,9 +162,13 @@ public class MergeRequestObjectAttributes {
         this.lastCommit = lastCommit;
     }
 
-    public String getOldrev() { return oldrev; }
+    public String getOldrev() {
+        return oldrev;
+    }
 
-    public void setOldrev(String oldrev) { this.oldrev = oldrev; }
+    public void setOldrev(String oldrev) {
+        this.oldrev = oldrev;
+    }
 
     public String getMergeStatus() {
         return mergeStatus;
@@ -209,80 +212,80 @@ public class MergeRequestObjectAttributes {
         }
         MergeRequestObjectAttributes that = (MergeRequestObjectAttributes) o;
         return new EqualsBuilder()
-            .append(id, that.id)
-            .append(iid, that.iid)
-            .append(sourceBranch, that.sourceBranch)
-            .append(targetBranch, that.targetBranch)
-            .append(sourceProjectId, that.sourceProjectId)
-            .append(targetProjectId, that.targetProjectId)
-            .append(authorId, that.authorId)
-            .append(assigneeId, that.assigneeId)
-            .append(title, that.title)
-            .append(createdAt, that.createdAt)
-            .append(updatedAt, that.updatedAt)
-            .append(state, that.state)
-            .append(description, that.description)
-            .append(source, that.source)
-            .append(target, that.target)
-            .append(lastCommit, that.lastCommit)
-            .append(mergeStatus, that.mergeStatus)
-            .append(url, that.url)
-            .append(action, that.action)
-            .append(oldrev, that.oldrev)
-            .append(workInProgress, that.workInProgress)
-            .isEquals();
+                .append(id, that.id)
+                .append(iid, that.iid)
+                .append(sourceBranch, that.sourceBranch)
+                .append(targetBranch, that.targetBranch)
+                .append(sourceProjectId, that.sourceProjectId)
+                .append(targetProjectId, that.targetProjectId)
+                .append(authorId, that.authorId)
+                .append(assigneeId, that.assigneeId)
+                .append(title, that.title)
+                .append(createdAt, that.createdAt)
+                .append(updatedAt, that.updatedAt)
+                .append(state, that.state)
+                .append(description, that.description)
+                .append(source, that.source)
+                .append(target, that.target)
+                .append(lastCommit, that.lastCommit)
+                .append(mergeStatus, that.mergeStatus)
+                .append(url, that.url)
+                .append(action, that.action)
+                .append(oldrev, that.oldrev)
+                .append(workInProgress, that.workInProgress)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(id)
-            .append(iid)
-            .append(sourceBranch)
-            .append(targetBranch)
-            .append(sourceProjectId)
-            .append(targetProjectId)
-            .append(authorId)
-            .append(assigneeId)
-            .append(title)
-            .append(createdAt)
-            .append(updatedAt)
-            .append(state)
-            .append(description)
-            .append(source)
-            .append(target)
-            .append(lastCommit)
-            .append(mergeStatus)
-            .append(url)
-            .append(action)
-            .append(workInProgress)
-            .toHashCode();
+                .append(id)
+                .append(iid)
+                .append(sourceBranch)
+                .append(targetBranch)
+                .append(sourceProjectId)
+                .append(targetProjectId)
+                .append(authorId)
+                .append(assigneeId)
+                .append(title)
+                .append(createdAt)
+                .append(updatedAt)
+                .append(state)
+                .append(description)
+                .append(source)
+                .append(target)
+                .append(lastCommit)
+                .append(mergeStatus)
+                .append(url)
+                .append(action)
+                .append(workInProgress)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("id", id)
-            .append("iid", iid)
-            .append("sourceBranch", sourceBranch)
-            .append("targetBranch", targetBranch)
-            .append("sourceProjectId", sourceProjectId)
-            .append("targetProjectId", targetProjectId)
-            .append("authorId", authorId)
-            .append("assigneeId", assigneeId)
-            .append("title", title)
-            .append("createdAt", createdAt)
-            .append("updatedAt", updatedAt)
-            .append("state", state)
-            .append("description", description)
-            .append("source", source)
-            .append("target", target)
-            .append("lastCommit", lastCommit)
-            .append("mergeStatus", mergeStatus)
-            .append("url", url)
-            .append("action", action)
-            .append("oldrev", oldrev)
-            .append("workInProgress", workInProgress)
-            .toString();
+                .append("id", id)
+                .append("iid", iid)
+                .append("sourceBranch", sourceBranch)
+                .append("targetBranch", targetBranch)
+                .append("sourceProjectId", sourceProjectId)
+                .append("targetProjectId", targetProjectId)
+                .append("authorId", authorId)
+                .append("assigneeId", assigneeId)
+                .append("title", title)
+                .append("createdAt", createdAt)
+                .append("updatedAt", updatedAt)
+                .append("state", state)
+                .append("description", description)
+                .append("source", source)
+                .append("target", target)
+                .append("lastCommit", lastCommit)
+                .append("mergeStatus", mergeStatus)
+                .append("url", url)
+                .append("action", action)
+                .append("oldrev", oldrev)
+                .append("workInProgress", workInProgress)
+                .toString();
     }
 }

@@ -57,13 +57,13 @@ public class GitLabEnvironmentContributorTest {
         GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData());
         // set up 2x2 matrix
         AxisList axes = new AxisList();
-        axes.add(new TextAxis("db","mysql","oracle"));
-        axes.add(new TextAxis("direction","north","south"));
+        axes.add(new TextAxis("db", "mysql", "oracle"));
+        axes.add(new TextAxis("direction", "north", "south"));
         p.setAxes(axes);
 
         MatrixBuild build = p.scheduleBuild2(0, cause).get();
         List<MatrixRun> runs = build.getRuns();
-        assertEquals(4,runs.size());
+        assertEquals(4, runs.size());
         for (MatrixRun run : runs) {
             env = run.getEnvironment(listener);
             assertNotNull(env.get("db"));

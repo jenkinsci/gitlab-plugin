@@ -60,26 +60,33 @@ public class NoteHookTriggerHandlerImplTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
         });
         Date currentDate = new Date();
         project.setQuietPeriod(0);
-        noteHookTriggerHandler.handle(project, noteHook()
-                .withObjectAttributes(noteObjectAttributes()
-                    .withId(1)
-                    .withNote("ci-run")
-                    .withAuthorId(1)
-                    .withProjectId(1)
-                    .withCreatedAt(currentDate)
-                    .withUpdatedAt(currentDate)
-                    .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
-                    .build())
-                .withMergeRequest(mergeRequestObjectAttributes().withDescription("[ci-skip]").build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-                                      newMergeRequestLabelFilter(null));
+        noteHookTriggerHandler.handle(
+                project,
+                noteHook()
+                        .withObjectAttributes(noteObjectAttributes()
+                                .withId(1)
+                                .withNote("ci-run")
+                                .withAuthorId(1)
+                                .withProjectId(1)
+                                .withCreatedAt(currentDate)
+                                .withUpdatedAt(currentDate)
+                                .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
+                                .build())
+                        .withMergeRequest(mergeRequestObjectAttributes()
+                                .withDescription("[ci-skip]")
+                                .build())
+                        .build(),
+                true,
+                BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -100,53 +107,62 @@ public class NoteHookTriggerHandlerImplTest {
         project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildTriggered.signal();
                 return true;
             }
         });
         Date currentDate = new Date();
         project.setQuietPeriod(0);
-        noteHookTriggerHandler.handle(project, noteHook()
-                .withObjectAttributes(noteObjectAttributes()
-                    .withId(1)
-                    .withNote("ci-run")
-                    .withAuthorId(1)
-                    .withProjectId(1)
-                    .withCreatedAt(currentDate)
-                    .withUpdatedAt(currentDate)
-                    .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
-                    .build())
-                .withMergeRequest(mergeRequestObjectAttributes()
-                    .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
-                    .withState(State.opened)
-                    .withIid(1)
-                    .withTitle("test")
-                    .withTargetProjectId(1)
-                    .withSourceProjectId(1)
-                    .withSourceBranch("feature")
-                    .withTargetBranch("master")
-                    .withLastCommit(commit().withAuthor(user().withName("test").build()).withId(commit.getName()).build())
-                    .withSource(project()
-                        .withName("test")
-                        .withNamespace("test-namespace")
-                        .withHomepage("https://gitlab.org/test")
-                        .withUrl("git@gitlab.org:test.git")
-                        .withSshUrl("git@gitlab.org:test.git")
-                        .withHttpUrl("https://gitlab.org/test.git")
-                        .build())
-                    .withTarget(project()
-                        .withName("test")
-                        .withNamespace("test-namespace")
-                        .withHomepage("https://gitlab.org/test")
-                        .withUrl("git@gitlab.org:test.git")
-                        .withSshUrl("git@gitlab.org:test.git")
-                        .withHttpUrl("https://gitlab.org/test.git")
-                        .withWebUrl("https://gitlab.org/test.git")
-                        .build())
-                    .build())
-                .build(), true, BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
-                                      newMergeRequestLabelFilter(null));
+        noteHookTriggerHandler.handle(
+                project,
+                noteHook()
+                        .withObjectAttributes(noteObjectAttributes()
+                                .withId(1)
+                                .withNote("ci-run")
+                                .withAuthorId(1)
+                                .withProjectId(1)
+                                .withCreatedAt(currentDate)
+                                .withUpdatedAt(currentDate)
+                                .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
+                                .build())
+                        .withMergeRequest(mergeRequestObjectAttributes()
+                                .withTargetBranch("refs/heads/"
+                                        + git.nameRev().add(head).call().get(head))
+                                .withState(State.opened)
+                                .withIid(1)
+                                .withTitle("test")
+                                .withTargetProjectId(1)
+                                .withSourceProjectId(1)
+                                .withSourceBranch("feature")
+                                .withTargetBranch("master")
+                                .withLastCommit(commit().withAuthor(
+                                                user().withName("test").build())
+                                        .withId(commit.getName())
+                                        .build())
+                                .withSource(project()
+                                        .withName("test")
+                                        .withNamespace("test-namespace")
+                                        .withHomepage("https://gitlab.org/test")
+                                        .withUrl("git@gitlab.org:test.git")
+                                        .withSshUrl("git@gitlab.org:test.git")
+                                        .withHttpUrl("https://gitlab.org/test.git")
+                                        .build())
+                                .withTarget(project()
+                                        .withName("test")
+                                        .withNamespace("test-namespace")
+                                        .withHomepage("https://gitlab.org/test")
+                                        .withUrl("git@gitlab.org:test.git")
+                                        .withSshUrl("git@gitlab.org:test.git")
+                                        .withHttpUrl("https://gitlab.org/test.git")
+                                        .withWebUrl("https://gitlab.org/test.git")
+                                        .build())
+                                .build())
+                        .build(),
+                true,
+                BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));

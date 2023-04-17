@@ -1,12 +1,11 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import java.util.Date;
+import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Milena Zachow
@@ -97,9 +96,6 @@ public class PipelineEventObjectAttributes {
         this.duration = duration;
     }
 
-
-
-
     public Integer getId() {
         return id;
     }
@@ -107,7 +103,6 @@ public class PipelineEventObjectAttributes {
     public void setId(Integer id) {
         this.id = id;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -119,48 +114,48 @@ public class PipelineEventObjectAttributes {
         }
         PipelineEventObjectAttributes that = (PipelineEventObjectAttributes) o;
         return new EqualsBuilder()
-            .append(id, that.id)
-            .append(ref, that.ref)
-            .append(tag, that.tag)
-            .append(sha, that.sha)
-            .append(beforeSha, that.beforeSha)
-            .append(status, that.status)
-            .append(stages, that.stages)
-            .append(createdAt, that.createdAt)
-            .append(finishedAt, that.finishedAt)
-            .append(duration, that.duration)
-            .isEquals();
+                .append(id, that.id)
+                .append(ref, that.ref)
+                .append(tag, that.tag)
+                .append(sha, that.sha)
+                .append(beforeSha, that.beforeSha)
+                .append(status, that.status)
+                .append(stages, that.stages)
+                .append(createdAt, that.createdAt)
+                .append(finishedAt, that.finishedAt)
+                .append(duration, that.duration)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(id)
-            .append(ref)
-            .append(tag)
-            .append(sha)
-            .append(beforeSha)
-            .append(status)
-            .append(stages)
-            .append(createdAt)
-            .append(finishedAt)
-            .append(duration)
-            .toHashCode();
+                .append(id)
+                .append(ref)
+                .append(tag)
+                .append(sha)
+                .append(beforeSha)
+                .append(status)
+                .append(stages)
+                .append(createdAt)
+                .append(finishedAt)
+                .append(duration)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("id", id)
-            .append("ref", ref)
-            .append("tag", tag)
-            .append("sha", sha)
-            .append("beforeSha", beforeSha)
-            .append("status", status)
-            .append("stages", stages)
-            .append("createdAt", createdAt)
-            .append("finishedAt", finishedAt)
-            .append("duration", duration)
-            .toString();
+                .append("id", id)
+                .append("ref", ref)
+                .append("tag", tag)
+                .append("sha", sha)
+                .append("beforeSha", beforeSha)
+                .append("status", status)
+                .append("stages", stages)
+                .append("createdAt", createdAt)
+                .append("finishedAt", finishedAt)
+                .append("duration", duration)
+                .toString();
     }
 }

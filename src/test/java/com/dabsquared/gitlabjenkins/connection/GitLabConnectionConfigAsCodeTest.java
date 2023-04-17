@@ -23,9 +23,9 @@ import org.junit.rules.RuleChain;
 
 public class GitLabConnectionConfigAsCodeTest {
     @Rule
-    public RuleChain chain = RuleChain.outerRule(new EnvironmentVariables()
-        .set("BIND_TOKEN", "qwertyuiopasdfghjklzxcvbnm"))
-        .around(new JenkinsConfiguredWithCodeRule());
+    public RuleChain chain = RuleChain.outerRule(
+                    new EnvironmentVariables().set("BIND_TOKEN", "qwertyuiopasdfghjklzxcvbnm"))
+            .around(new JenkinsConfiguredWithCodeRule());
 
     @Test
     @ConfiguredWithCode("global-config.yml")
@@ -36,7 +36,8 @@ public class GitLabConnectionConfigAsCodeTest {
         final DomainCredentials gitLabCredential = domainCredentials.get(0);
         assertEquals(Domain.global(), gitLabCredential.getDomain());
         assertEquals(1, gitLabCredential.getCredentials().size());
-        final GitLabApiToken apiToken = (GitLabApiToken)gitLabCredential.getCredentials().get(0);
+        final GitLabApiToken apiToken =
+                (GitLabApiToken) gitLabCredential.getCredentials().get(0);
         assertEquals("gitlab_token", apiToken.getId());
         assertEquals("qwertyuiopasdfghjklzxcvbnm", apiToken.getApiToken().getPlainText());
         assertEquals("Gitlab Token", apiToken.getDescription());
@@ -48,7 +49,8 @@ public class GitLabConnectionConfigAsCodeTest {
         final Jenkins jenkins = Jenkins.get();
         final GitLabConnectionConfig gitLabConnections = jenkins.getDescriptorByType(GitLabConnectionConfig.class);
         assertEquals(1, gitLabConnections.getConnections().size());
-        final GitLabConnection gitLabConnection = gitLabConnections.getConnections().get(0);
+        final GitLabConnection gitLabConnection =
+                gitLabConnections.getConnections().get(0);
         assertEquals("gitlab_token", gitLabConnection.getApiTokenId());
         assertEquals("my_gitlab_server", gitLabConnection.getName());
         assertEquals("autodetect", gitLabConnection.getClientBuilderId());

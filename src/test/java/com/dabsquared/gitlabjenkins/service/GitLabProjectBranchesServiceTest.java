@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class GitLabProjectBranchesServiceTest {
-    private final static List<String> BRANCH_NAMES_PROJECT_B = Arrays.asList("master", "B-branch-1", "B-branch-2");
+    private static final List<String> BRANCH_NAMES_PROJECT_B = Arrays.asList("master", "B-branch-1", "B-branch-2");
 
     private GitLabProjectBranchesService branchesService;
 
@@ -25,7 +25,6 @@ public class GitLabProjectBranchesServiceTest {
         clientStub = new GitLabClientStub();
         clientStub.addBranches("groupOne/A", convert(Arrays.asList("master", "A-branch-1")));
         clientStub.addBranches("groupOne/B", convert(BRANCH_NAMES_PROJECT_B));
-
 
         // never expire cache for tests
         branchesService = new GitLabProjectBranchesService();

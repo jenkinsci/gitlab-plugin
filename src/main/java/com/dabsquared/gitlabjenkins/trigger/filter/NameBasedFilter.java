@@ -1,11 +1,10 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
-import org.springframework.util.AntPathMatcher;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * @author Robin Müller
@@ -50,9 +49,11 @@ class NameBasedFilter implements BranchFilter {
     }
 
     private List<String> convert(String commaSeparatedString) {
-        if (commaSeparatedString == null)
-            return Collections.EMPTY_LIST;
+        if (commaSeparatedString == null) return Collections.EMPTY_LIST;
 
-        return Arrays.stream(commaSeparatedString.split(",")).filter(s -> !s.isEmpty()).map(String::trim).collect(Collectors.toList());
+        return Arrays.stream(commaSeparatedString.split(","))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 }

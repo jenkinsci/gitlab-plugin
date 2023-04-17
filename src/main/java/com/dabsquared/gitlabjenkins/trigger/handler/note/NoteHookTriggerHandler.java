@@ -6,4 +6,4 @@ import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerHandler;
 /**
  * @author Nikolay Ustinov
  */
-public interface NoteHookTriggerHandler extends WebHookTriggerHandler<NoteHook> { }
+public interface NoteHookTriggerHandler extends WebHookTriggerHandler<NoteHook> {}
