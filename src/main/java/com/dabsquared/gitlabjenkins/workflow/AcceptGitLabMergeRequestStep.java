@@ -56,11 +56,11 @@ public class AcceptGitLabMergeRequestStep extends Step {
     }
 
     public Boolean getRemoveSourceBranch() {
-        return removeSourceBranch;
+        return this.removeSourceBranch;
     }
 
     public boolean getUseMRDescription() {
-        return useMRDescription;
+        return this.useMRDescription;
     }
 
     @DataBoundSetter
