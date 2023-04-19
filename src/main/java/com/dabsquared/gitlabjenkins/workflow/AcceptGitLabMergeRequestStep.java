@@ -55,6 +55,14 @@ public class AcceptGitLabMergeRequestStep extends Step {
         return mergeCommitMessage;
     }
 
+    public Boolean getRemoveSourceBranch() {
+        return this.removeSourceBranch;
+    }
+
+    public boolean getUseMRDescription() {
+        return this.useMRDescription;
+    }
+
     @DataBoundSetter
     public void setMergeCommitMessage(String mergeCommitMessage) {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
