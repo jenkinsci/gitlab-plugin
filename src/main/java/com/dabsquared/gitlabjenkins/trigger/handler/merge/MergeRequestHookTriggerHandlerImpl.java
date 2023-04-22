@@ -321,7 +321,8 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         boolean wasDraft = hasDraftIndicator(previous) && !hasDraftIndicator(current);
 
         // The support of "WIP" is to be removed in GitLab 14.0
-        // See here: https://docs.gitlab.com/13.12/ee/user/project/merge_requests/drafts.html#mark-merge-requests-as-drafts
+        // See here:
+        // https://docs.gitlab.com/13.12/ee/user/project/merge_requests/drafts.html#mark-merge-requests-as-drafts
         boolean wasWip = previous.contains("WIP") && !current.contains("WIP");
 
         return wasDraft || wasWip;
