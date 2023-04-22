@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -133,7 +134,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 return true;
             } else {
                 if (isLastCommitNotYetBuild(job, hook)) {
-                    return isNewCommitPushed(hook) || isBecameNoWip(hook);
+                    return isNewCommitPushed(hook) || isChangedToNotDraft(hook);
                 }
             }
         }
@@ -305,15 +306,40 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         return triggerConfig.test(objectAttributes);
     }
 
-    private boolean isBecameNoWip(MergeRequestHook hook) {
+    /**
+     * Checks if the MR Title had the 'Draft' keyword removed
+     * @param hook The hook
+     * @return True if the 'Draft' keyword was removed from the MR title
+     */
+    private boolean isChangedToNotDraft(MergeRequestHook hook) {
         MergeRequestChangedTitle changedTitle = Optional.of(hook)
                 .map(MergeRequestHook::getChanges)
                 .map(MergeRequestChanges::getTitle)
                 .orElse(new MergeRequestChangedTitle());
         String current = changedTitle.getCurrent() != null ? changedTitle.getCurrent() : "";
         String previous = changedTitle.getPrevious() != null ? changedTitle.getPrevious() : "";
+        boolean wasDraft = hasDraftIndicator(previous) && !hasDraftIndicator(current);
 
-        return previous.contains("WIP") && !current.contains("WIP");
+        // The support of "WIP" is to be removed in GitLab 14.0
+        // See here: https://docs.gitlab.com/13.12/ee/user/project/merge_requests/drafts.html#mark-merge-requests-as-drafts
+        boolean wasWip = previous.contains("WIP") && !current.contains("WIP");
+
+        return wasDraft || wasWip;
+    }
+
+    /**
+     * Checks if given text has the appropriate 'Draft' syntax
+     *
+     * This is intended to be used on a MR Title.
+     *
+     * The 'Draft' syntax was based off the following documentation:
+     * https://docs.gitlab.com/13.12/ee/user/project/merge_requests/drafts.html#mark-merge-requests-as-drafts
+     * @param title The title to check
+     * @return true if the title starts with the appropriate 'Draft' syntax, else false.
+     */
+    private static boolean hasDraftIndicator(String title) {
+        Pattern draftPattern = Pattern.compile("\\s*(Draft:|\\[Draft\\]|\\(Draft\\)).*");
+        return draftPattern.matcher(title).matches();
     }
 
     private boolean isForcedByAddedLabel(MergeRequestHook hook) {
