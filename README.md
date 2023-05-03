@@ -487,7 +487,7 @@ On a similar note, the regular expression `^(?!.*master).*$` will mean - all bra
 
     ^: Anchors the match to the beginning of the string.
     (: Starts a group that will be used for the negative lookahead.
-    ?!: Indicates a negative lookahead assertion - find all that doesnt match.
+    ?!: Indicates a negative lookahead assertion - find all that does not match.
     .*: Matches any number of characters (except for newline) zero or more times.
     master: should not match master.
     ): Ends the group.
@@ -495,7 +495,7 @@ On a similar note, the regular expression `^(?!.*master).*$` will mean - all bra
     
 Keep in mind that the RegexBasedFilter feature is case-sensitive by default. If you want to make it case-insensitive, you can use the `(?i)` flag at the beginning of your regular expression pattern. For example: `^(?i)(?:(?!feature).)*$`.
     
-Here is an example pipeline script that shows how to use the RegexBasedFilter feature in the gitlab trigger:
+Here is an example pipeline script that shows how to use the RegexBasedFilter feature in the GitLab trigger:
 
 ```triggers {
     gitlab(
