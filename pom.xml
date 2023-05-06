@@ -283,6 +283,11 @@
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
+        <!-- Banned via the exclude/include list -->
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>javax.servlet-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
