@@ -487,8 +487,8 @@ On a similar note, the regular expression `^(?!.*master).*$` will mean - all bra
 
     ^: Anchors the match to the beginning of the string.
     (: Starts a group that will be used for the negative lookahead.
-    ?!: Indicates a negative lookahead assertion - find all that does not match.
-    .*: Matches any number of characters (except for newline) zero or more times.
+    ?!: Indicates a negative lookahead assertion - finds all that does not match.
+    .*: Matches any number of characters (except for a newline) zero or more times.
     master: should not match master.
     ): Ends the group.
     $: Anchors the match to the end of the string.
