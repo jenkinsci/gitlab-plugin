@@ -283,7 +283,7 @@
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
-        <!-- Banned via the exclude/include list -->
+        <!-- Banned via the exclude/include list in parent pom 4.62 -->
         <exclusion>
           <groupId>javax.servlet</groupId>
           <artifactId>javax.servlet-api</artifactId>
