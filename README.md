@@ -482,7 +482,31 @@ This plugin can be used with Matrix/Multi-configuration jobs together with the [
 
 ## Advanced features
 ### Branch filtering
-Triggers may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, when you configure the GitLab trigger, you can choose 'Filter branches by name' or 'Filter branches by regex.' Filter by name takes comma-separated lists of branch names to include and/or exclude from triggering a build. Filter by regex takes a Java regular expression to include and/or exclude.
+Triggers may be filtered based on the branch name, i.e. the build will only be allowed for selected branches. On the project configuration page, when you configure the GitLab trigger, you can choose 'Filter branches by name' or 'Filter branches by regex.' Filter by name takes comma-separated lists of branch names to include and/or exclude from triggering a build. Filter by regex takes a Java regular expression to include and/or exclude. For example, to exclude all branches containing the word "feature", you can use the following regular expression: `^(?:(?!feature).)*$`.
+On a similar note, the regular expression `^(?!.*master).*$` will mean - all branches not matching master. This is a regular expression that uses negative lookahead to match any string that does not contain the word "master". Here's a breakdown of how it works:
+
+    ^: Anchors the match to the beginning of the string.
+    (: Starts a group that will be used for the negative lookahead.
+    ?!: Indicates a negative lookahead assertion - finds all that does not match.
+    .*: Matches any number of characters (except for a newline) zero or more times.
+    master: should not match master.
+    ): Ends the group.
+    $: Anchors the match to the end of the string.
+    
+Keep in mind that the `RegexBasedFilter` feature is case-sensitive by default. If you want to make it case-insensitive, you can use the `(?i)` flag at the beginning of your regular expression pattern. For example: `^(?i)(?:(?!feature).)*$`.
+    
+Here is an example pipeline script that shows how to use the `RegexBasedFilter` feature in the GitLab trigger:
+
+```
+triggers {
+    gitlab(
+        triggerOnPush: true, 
+        triggerOnMergeRequest: false, 
+        branchFilterType: "RegexBasedFilter", 
+        targetBranchRegex: '^(?:(?!feature).)*$'
+    )
+}
+```
 
 **Note:** This functionality requires access to GitLab and a git repository url already saved in the project configuration. In other words, when creating a new project, the configuration needs to be saved *once* before being able to add branch filters. For Pipeline jobs, the configuration must be saved *and* the job must be run once before the list is populated.
 
