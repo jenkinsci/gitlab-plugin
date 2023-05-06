@@ -497,7 +497,8 @@ Keep in mind that the RegexBasedFilter feature is case-sensitive by default. If 
     
 Here is an example pipeline script that shows how to use the RegexBasedFilter feature in the GitLab trigger:
 
-```triggers {
+```
+triggers {
     gitlab(
         triggerOnPush: true, 
         triggerOnMergeRequest: false, 
