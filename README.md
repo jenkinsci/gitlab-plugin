@@ -493,9 +493,9 @@ On a similar note, the regular expression `^(?!.*master).*$` will mean - all bra
     ): Ends the group.
     $: Anchors the match to the end of the string.
     
-Keep in mind that the RegexBasedFilter feature is case-sensitive by default. If you want to make it case-insensitive, you can use the `(?i)` flag at the beginning of your regular expression pattern. For example: `^(?i)(?:(?!feature).)*$`.
+Keep in mind that the `RegexBasedFilter` feature is case-sensitive by default. If you want to make it case-insensitive, you can use the `(?i)` flag at the beginning of your regular expression pattern. For example: `^(?i)(?:(?!feature).)*$`.
     
-Here is an example pipeline script that shows how to use the RegexBasedFilter feature in the GitLab trigger:
+Here is an example pipeline script that shows how to use the `RegexBasedFilter` feature in the GitLab trigger:
 
 ```
 triggers {
