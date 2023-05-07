@@ -30,6 +30,7 @@ public class MergeRequestObjectAttributes {
     private Commit lastCommit;
     private String oldrev;
     private String mergeStatus;
+    private String mergeCommitSha;
     private String url;
     private Action action;
     private Boolean workInProgress;
@@ -170,6 +171,14 @@ public class MergeRequestObjectAttributes {
         this.oldrev = oldrev;
     }
 
+    public String getMergeCommitSha() {
+        return mergeCommitSha;
+    }
+
+    public void setMergeCommitSha(String mergeCommitSha) {
+        this.mergeCommitSha = mergeCommitSha;
+    }
+
     public String getMergeStatus() {
         return mergeStatus;
     }
@@ -228,6 +237,7 @@ public class MergeRequestObjectAttributes {
                 .append(source, that.source)
                 .append(target, that.target)
                 .append(lastCommit, that.lastCommit)
+                .append(mergeCommitSha, that.mergeCommitSha)
                 .append(mergeStatus, that.mergeStatus)
                 .append(url, that.url)
                 .append(action, that.action)
@@ -255,6 +265,7 @@ public class MergeRequestObjectAttributes {
                 .append(source)
                 .append(target)
                 .append(lastCommit)
+                .append(mergeCommitSha)
                 .append(mergeStatus)
                 .append(url)
                 .append(action)
@@ -281,6 +292,7 @@ public class MergeRequestObjectAttributes {
                 .append("source", source)
                 .append("target", target)
                 .append("lastCommit", lastCommit)
+                .append("mergeCommitSha", mergeCommitSha)
                 .append("mergeStatus", mergeStatus)
                 .append("url", url)
                 .append("action", action)

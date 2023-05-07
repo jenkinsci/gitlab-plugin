@@ -131,7 +131,7 @@ final class TestUtility {
     static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build) {
         P spyPublisher = spy(publisher);
         MergeRequest mergeRequest =
-                new MergeRequest(MERGE_REQUEST_ID, MERGE_REQUEST_IID, "", "", "", PROJECT_ID, PROJECT_ID, "", "");
+                new MergeRequest(MERGE_REQUEST_ID, MERGE_REQUEST_IID, "", "", "", "", PROJECT_ID, PROJECT_ID, "", "");
         doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
         return spyPublisher;
     }
