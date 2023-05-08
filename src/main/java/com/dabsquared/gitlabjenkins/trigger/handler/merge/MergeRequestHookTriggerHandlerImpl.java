@@ -196,10 +196,9 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withTargetProjectId(hook.getObjectAttributes().getTargetProjectId())
                 .withBranch(hook.getObjectAttributes().getSourceBranch())
                 .withSourceBranch(hook.getObjectAttributes().getSourceBranch())
-                .withUserName(
-                        hook.getObjectAttributes().getLastCommit().getAuthor().getName())
-                .withUserEmail(
-                        hook.getObjectAttributes().getLastCommit().getAuthor().getEmail())
+                .withUserName(hook.getUser().getName())
+                .withUserUsername(hook.getUser().getUsername())
+                .withUserEmail(hook.getUser().getEmail())
                 .withSourceRepoHomepage(hook.getObjectAttributes().getSource().getHomepage())
                 .withSourceRepoName(hook.getObjectAttributes().getSource().getName())
                 .withSourceNamespace(hook.getObjectAttributes().getSource().getNamespace())

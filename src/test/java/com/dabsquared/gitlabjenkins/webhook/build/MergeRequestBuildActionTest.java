@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -107,6 +108,9 @@ public class MergeRequestBuildActionTest {
             verify(mockTrigger).onPost(pushHookArgumentCaptor.capture());
             assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
             assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getUser(), is(notNullValue()));
+            assertThat(pushHookArgumentCaptor.getValue().getUser().getName(), containsString("Administrator"));
+            assertThat(pushHookArgumentCaptor.getValue().getUser().getUsername(), containsString("root"));
         }
     }
 
