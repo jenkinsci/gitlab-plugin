@@ -44,6 +44,7 @@ final class TestUtility {
     static final String GITLAB_CONNECTION_V3 = "GitLabV3";
     static final String GITLAB_CONNECTION_V4 = "GitLabV4";
     static final String BUILD_URL = "/build/123";
+    static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
     static final int BUILD_NUMBER = 1;
     static final int PROJECT_ID = 3;
     static final int MERGE_REQUEST_ID = 1;
@@ -130,8 +131,8 @@ final class TestUtility {
 
     static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build) {
         P spyPublisher = spy(publisher);
-        MergeRequest mergeRequest =
-                new MergeRequest(MERGE_REQUEST_ID, MERGE_REQUEST_IID, "", "", "", "", PROJECT_ID, PROJECT_ID, "", "");
+        MergeRequest mergeRequest = new MergeRequest(
+                MERGE_REQUEST_ID, MERGE_REQUEST_IID, MERGE_COMMIT_SHA, "", "", "", PROJECT_ID, PROJECT_ID, "", "");
         doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
         return spyPublisher;
     }
