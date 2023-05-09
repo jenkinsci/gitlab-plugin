@@ -1,6 +1,10 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -28,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -68,13 +73,19 @@ public class NoteBuildActionTest {
 
     @Test
     public void build() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.addTrigger(trigger);
+        try {
+            FreeStyleProject testProject = jenkins.createFreeStyleProject();
+            testProject.addTrigger(trigger);
 
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new NoteBuildAction(testProject, getJson("NoteEvent.json"), null).execute(response);
-
-        verify(trigger).onPost(any(NoteHook.class));
+            exception.expect(HttpResponses.HttpResponseException.class);
+            new NoteBuildAction(testProject, getJson("NoteEvent.json"), null).execute(response);
+        } finally {
+            ArgumentCaptor<NoteHook> noteHookArgumentCaptor = ArgumentCaptor.forClass(NoteHook.class);
+            verify(trigger).onPost(noteHookArgumentCaptor.capture());
+            assertThat(noteHookArgumentCaptor.getValue().getUser(), is(notNullValue()));
+            assertThat(noteHookArgumentCaptor.getValue().getUser().getName(), containsString("Administrator"));
+            assertThat(noteHookArgumentCaptor.getValue().getUser().getUsername(), containsString("root"));
+        }
     }
 
     @Test

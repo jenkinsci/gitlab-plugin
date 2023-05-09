@@ -159,6 +159,13 @@ public class NoteHookTriggerHandlerImplTest {
                                         .withWebUrl("https://gitlab.org/test.git")
                                         .build())
                                 .build())
+                        .withUser(user().withId(1)
+                                .withName("User")
+                                .withUsername("user")
+                                .withEmail("user@gitlab.com")
+                                .withAvatarUrl(
+                                        "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon")
+                                .build())
                         .build(),
                 true,
                 BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
