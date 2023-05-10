@@ -1,10 +1,8 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Awardable;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -13,13 +11,12 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
-import org.kohsuke.stapler.DataBoundConstructor;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author Robin Müller
@@ -28,7 +25,7 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
     private static final Logger LOGGER = Logger.getLogger(GitLabVotePublisher.class.getName());
 
     @DataBoundConstructor
-    public GitLabVotePublisher() { }
+    public GitLabVotePublisher() {}
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -65,8 +62,15 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
                 }
             }
         } catch (WebApplicationException | ProcessingException e) {
-            listener.getLogger().printf("Failed to remove vote on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
-            LOGGER.log(Level.SEVERE, String.format("Failed to remove vote on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
+            listener.getLogger()
+                    .printf(
+                            "Failed to remove vote on Merge Request for project '%s': %s%n",
+                            mergeRequest.getProjectId(), e.getMessage());
+            LOGGER.log(
+                    Level.SEVERE,
+                    String.format(
+                            "Failed to remove vote on Merge Request for project '%s'", mergeRequest.getProjectId()),
+                    e);
         }
 
         try {
@@ -74,16 +78,23 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
                 client.awardMergeRequestEmoji(mergeRequest, getResultIcon(build.getResult()));
             }
         } catch (NotFoundException e) {
-            String message = String.format("Failed to add vote on Merge Request for project '%s'%n" +
-                "Got unexpected 404, are you using the wrong API version or trying to vote on your own merge request?", mergeRequest.getProjectId());
+            String message = String.format(
+                    "Failed to add vote on Merge Request for project '%s'%n"
+                            + "Got unexpected 404, are you using the wrong API version or trying to vote on your own merge request?",
+                    mergeRequest.getProjectId());
             listener.getLogger().println(message);
             LOGGER.log(Level.WARNING, message, e);
         } catch (WebApplicationException | ProcessingException e) {
-            listener.getLogger().printf("Failed to add vote on Merge Request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
-            LOGGER.log(Level.SEVERE, String.format("Failed to add vote on Merge Request for project '%s'", mergeRequest.getProjectId()), e);
+            listener.getLogger()
+                    .printf(
+                            "Failed to add vote on Merge Request for project '%s': %s%n",
+                            mergeRequest.getProjectId(), e.getMessage());
+            LOGGER.log(
+                    Level.SEVERE,
+                    String.format("Failed to add vote on Merge Request for project '%s'", mergeRequest.getProjectId()),
+                    e);
         }
     }
-
 
     private boolean isSuccessful(Result result) {
         if (result == Result.SUCCESS) {

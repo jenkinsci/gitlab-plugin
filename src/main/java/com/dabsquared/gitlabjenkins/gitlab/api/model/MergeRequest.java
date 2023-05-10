@@ -1,14 +1,13 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import java.util.List;
 
 /**
  * @author Robin Müller
@@ -18,6 +17,7 @@ import java.util.List;
 public class MergeRequest {
     private Integer id;
     private Integer iid;
+    private String commitSha;
     private String sourceBranch;
     private String targetBranch;
     private Integer projectId;
@@ -35,13 +35,24 @@ public class MergeRequest {
     private Boolean mergeWhenBuildSucceeds;
     private String mergeStatus;
 
-    public MergeRequest() { /* default-constructor for Resteasy-based-api-proxies */ }
+    public MergeRequest() {
+        /* default-constructor for Resteasy-based-api-proxies */
+    }
 
-    public MergeRequest(int id, int iid, String sourceBranch, String targetBranch, String title,
-                        int sourceProjectId, int targetProjectId,
-                        String description, String mergeStatus) {
+    public MergeRequest(
+            int id,
+            int iid,
+            String commitSha,
+            String sourceBranch,
+            String targetBranch,
+            String title,
+            int sourceProjectId,
+            int targetProjectId,
+            String description,
+            String mergeStatus) {
         this.id = id;
-        this.iid= iid;
+        this.iid = iid;
+        this.commitSha = commitSha;
         this.sourceBranch = sourceBranch;
         this.targetBranch = targetBranch;
         this.title = title;
@@ -67,6 +78,15 @@ public class MergeRequest {
 
     public void setIid(Integer iid) {
         this.iid = iid;
+    }
+
+    @Exported
+    public String getCommitSha() {
+        return commitSha;
+    }
+
+    public void setCommitSha(String commitSha) {
+        this.commitSha = commitSha;
     }
 
     @Exported
@@ -225,6 +245,7 @@ public class MergeRequest {
         return new EqualsBuilder()
                 .append(id, that.id)
                 .append(iid, that.iid)
+                .append(commitSha, that.commitSha)
                 .append(sourceBranch, that.sourceBranch)
                 .append(targetBranch, that.targetBranch)
                 .append(projectId, that.projectId)
@@ -249,6 +270,7 @@ public class MergeRequest {
         return new HashCodeBuilder(17, 37)
                 .append(id)
                 .append(iid)
+                .append(commitSha)
                 .append(sourceBranch)
                 .append(targetBranch)
                 .append(projectId)
@@ -273,6 +295,7 @@ public class MergeRequest {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("iid", iid)
+                .append("commitSha", commitSha)
                 .append("sourceBranch", sourceBranch)
                 .append("targetBranch", targetBranch)
                 .append("projectId", projectId)

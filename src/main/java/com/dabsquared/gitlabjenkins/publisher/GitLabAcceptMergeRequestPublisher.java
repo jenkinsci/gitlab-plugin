@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
@@ -11,13 +10,12 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * @author Robin Müller
@@ -28,17 +26,16 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     private Boolean deleteSourceBranch;
 
     @DataBoundConstructor
-    public GitLabAcceptMergeRequestPublisher() {
-    }
+    public GitLabAcceptMergeRequestPublisher() {}
 
     @DataBoundSetter
     public void setDeleteSourceBranch(boolean deleteSourceBranch) {
         this.deleteSourceBranch = deleteSourceBranch;
     }
 
-    public boolean isDeleteSourceBranch() { return deleteSourceBranch; }
-
-
+    public boolean isDeleteSourceBranch() {
+        return deleteSourceBranch;
+    }
 
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
@@ -62,11 +59,18 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest) {
         try {
             if (build.getResult() == Result.SUCCESS) {
-                client.acceptMergeRequest(mergeRequest, "Merge Request accepted by jenkins build success", this.deleteSourceBranch);
+                client.acceptMergeRequest(
+                        mergeRequest, "Merge Request accepted by jenkins build success", this.deleteSourceBranch);
             }
         } catch (WebApplicationException | ProcessingException e) {
-            listener.getLogger().printf("Failed to accept merge request for project '%s': %s%n", mergeRequest.getProjectId(), e.getMessage());
-            LOGGER.log(Level.SEVERE, String.format("Failed to accept merge request for project '%s'", mergeRequest.getProjectId()), e);
+            listener.getLogger()
+                    .printf(
+                            "Failed to accept merge request for project '%s': %s%n",
+                            mergeRequest.getProjectId(), e.getMessage());
+            LOGGER.log(
+                    Level.SEVERE,
+                    String.format("Failed to accept merge request for project '%s'", mergeRequest.getProjectId()),
+                    e);
         }
     }
 }

@@ -42,6 +42,9 @@ class MergeRequestLabelFilterImpl implements MergeRequestLabelFilter {
     }
 
     private Set<String> convert(String commaSeparatedString) {
-        return Arrays.stream(commaSeparatedString.split(",")).filter(s -> !s.isEmpty()).map(String::trim).collect(Collectors.toSet());
+        return Arrays.stream(commaSeparatedString.split(","))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .collect(Collectors.toSet());
     }
 }

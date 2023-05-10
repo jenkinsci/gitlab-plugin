@@ -1,18 +1,16 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.Item;
-import jenkins.model.GlobalConfiguration;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jenkins.model.GlobalConfiguration;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * @author Robin Müller
@@ -53,7 +51,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public void setConnections(List<GitLabConnection> newConnections) {
         connections = new ArrayList<>();
         connectionMap = new HashMap<>();
-        for (GitLabConnection connection: newConnections){
+        for (GitLabConnection connection : newConnections) {
             addConnection(connection);
         }
         save();
@@ -73,7 +71,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         }
     }
 
-    //For backwards compatibility. ReadResolve is called on startup
+    // For backwards compatibility. ReadResolve is called on startup
     protected GitLabConnectionConfig readResolve() {
         if (useAuthenticatedEndpoint == null) {
             setUseAuthenticatedEndpoint(false);

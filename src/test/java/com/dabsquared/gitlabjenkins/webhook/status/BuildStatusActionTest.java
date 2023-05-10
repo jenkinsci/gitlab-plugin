@@ -80,7 +80,8 @@ public abstract class BuildStatusActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 build.setResult(Result.FAILURE);
                 return true;
             }
@@ -102,7 +103,8 @@ public abstract class BuildStatusActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 buildStarted.signal();
                 keepRunning.block();
                 return true;
@@ -125,7 +127,8 @@ public abstract class BuildStatusActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 try {
                     build.doStop();
                 } catch (ServletException e) {
@@ -149,7 +152,8 @@ public abstract class BuildStatusActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 build.setResult(Result.UNSTABLE);
                 return true;
             }
@@ -168,7 +172,6 @@ public abstract class BuildStatusActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
 
-
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         mockResponse(out);
         getBuildStatusAction(testProject).execute(response);
@@ -178,15 +181,20 @@ public abstract class BuildStatusActionTest {
 
     protected abstract BuildStatusAction getBuildStatusAction(FreeStyleProject project);
 
-    protected abstract void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertSuccessfulBuild(
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException;
 
-    protected abstract void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertRunningBuild(
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertCanceledBuild(
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
-    protected abstract void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertUnstableBuild(
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
     protected abstract void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse response) throws IOException;
 
@@ -196,16 +204,14 @@ public abstract class BuildStatusActionTest {
             public void write(int b) throws IOException {
                 out.write(b);
             }
+
             @Override
-            public void setWriteListener(javax.servlet.WriteListener writeListener) {
-            }
+            public void setWriteListener(javax.servlet.WriteListener writeListener) {}
 
             @Override
             public boolean isReady() {
                 return true;
             }
-
-
         };
         when(response.getOutputStream()).thenReturn(servletOutputStream);
         when(response.getWriter()).thenReturn(new PrintWriter(servletOutputStream));

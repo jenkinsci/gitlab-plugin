@@ -1,19 +1,16 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
-import com.dabsquared.gitlabjenkins.MergeRequestTriggerConfig;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
-
 import static java.util.EnumSet.of;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang.StringUtils.split;
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
+import com.dabsquared.gitlabjenkins.MergeRequestTriggerConfig;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Robin Müller
@@ -22,40 +19,49 @@ public final class MergeRequestHookTriggerHandlerFactory {
 
     private MergeRequestHookTriggerHandlerFactory() {}
 
-    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(boolean triggerOnMergeRequest,
-    		                                                                       boolean triggerOnlyWithNewCommitsPushed,
-    		                                                                       boolean triggerOnAcceptedMergeRequest,
-    		                                                                       boolean triggerOnClosedMergeRequest,
-                                                                                   TriggerOpenMergeRequest triggerOpenMergeRequest,
-                                                                                   boolean skipWorkInProgressMergeRequest,
-                                                                                   String labelsThatForcesBuildIfAdded,
-                                                                                   boolean triggerOnApprovedMergeRequest,
-                                                                                   boolean cancelPendingBuildsOnUpdate) {
+    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(
+            boolean triggerOnMergeRequest,
+            boolean triggerOnlyWithNewCommitsPushed,
+            boolean triggerOnAcceptedMergeRequest,
+            boolean triggerOnClosedMergeRequest,
+            TriggerOpenMergeRequest triggerOpenMergeRequest,
+            boolean skipWorkInProgressMergeRequest,
+            String labelsThatForcesBuildIfAdded,
+            boolean triggerOnApprovedMergeRequest,
+            boolean cancelPendingBuildsOnUpdate) {
 
         TriggerConfigChain chain = new TriggerConfigChain();
-        chain
-            .acceptOnlyIf(triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.opened, State.updated), of(Action.update))
-            .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
-            .acceptIf(triggerOnMergeRequest, of(State.opened, State.reopened), null)
-            .acceptIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
-            .acceptIf(triggerOnClosedMergeRequest, null, of(Action.close))
-            .acceptIf(triggerOnClosedMergeRequest, of(State.closed), null)
-        ;
+        chain.acceptOnlyIf(
+                        triggerOpenMergeRequest != TriggerOpenMergeRequest.never,
+                        of(State.opened, State.updated),
+                        of(Action.update))
+                .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
+                .acceptIf(triggerOnMergeRequest, of(State.opened, State.reopened), null)
+                .acceptIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
+                .acceptIf(triggerOnClosedMergeRequest, null, of(Action.close))
+                .acceptIf(triggerOnClosedMergeRequest, of(State.closed), null);
 
-        Set<String> labelsThatForcesBuildIfAddedSet = Stream.of(split(trimToEmpty(labelsThatForcesBuildIfAdded), ",")).collect(toSet());
-        return new MergeRequestHookTriggerHandlerImpl(chain, triggerOnlyWithNewCommitsPushed, skipWorkInProgressMergeRequest, labelsThatForcesBuildIfAddedSet, cancelPendingBuildsOnUpdate);
+        Set<String> labelsThatForcesBuildIfAddedSet =
+                Stream.of(split(trimToEmpty(labelsThatForcesBuildIfAdded), ",")).collect(toSet());
+        return new MergeRequestHookTriggerHandlerImpl(
+                chain,
+                triggerOnlyWithNewCommitsPushed,
+                skipWorkInProgressMergeRequest,
+                labelsThatForcesBuildIfAddedSet,
+                cancelPendingBuildsOnUpdate);
     }
 
     public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(MergeRequestTriggerConfig config) {
-        return newMergeRequestHookTriggerHandler(config.getTriggerOnMergeRequest(),
-            config.isTriggerOnlyIfNewCommitsPushed(),
-            config.isTriggerOnAcceptedMergeRequest(),
-            config.isTriggerOnClosedMergeRequest(),
-            config.getTriggerOpenMergeRequestOnPush(),
-            config.isSkipWorkInProgressMergeRequest(),
-            config.getLabelsThatForcesBuildIfAdded(),
-            config.isTriggerOnApprovedMergeRequest(),
-            config.getCancelPendingBuildsOnUpdate());
+        return newMergeRequestHookTriggerHandler(
+                config.getTriggerOnMergeRequest(),
+                config.isTriggerOnlyIfNewCommitsPushed(),
+                config.isTriggerOnAcceptedMergeRequest(),
+                config.isTriggerOnClosedMergeRequest(),
+                config.getTriggerOpenMergeRequestOnPush(),
+                config.isSkipWorkInProgressMergeRequest(),
+                config.getLabelsThatForcesBuildIfAdded(),
+                config.isTriggerOnApprovedMergeRequest(),
+                config.getCancelPendingBuildsOnUpdate());
     }
 
     public static Config withConfig() {

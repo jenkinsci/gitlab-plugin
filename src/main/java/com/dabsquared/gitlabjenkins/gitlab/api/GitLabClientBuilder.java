@@ -1,18 +1,16 @@
 package com.dabsquared.gitlabjenkins.gitlab.api;
 
-
-import hudson.ExtensionPoint;
-import jenkins.model.Jenkins;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
+import static java.util.Collections.sort;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.ExtensionPoint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static java.util.Collections.sort;
+import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 @Restricted(NoExternalUse.class)
 public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuilder>, ExtensionPoint, Serializable {
@@ -27,7 +25,8 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
     }
 
     public static List<GitLabClientBuilder> getAllGitLabClientBuilders() {
-        List<GitLabClientBuilder> builders = new ArrayList<>(Jenkins.getInstance().getExtensionList(GitLabClientBuilder.class));
+        List<GitLabClientBuilder> builders =
+                new ArrayList<>(Jenkins.getInstance().getExtensionList(GitLabClientBuilder.class));
         sort(builders);
         return builders;
     }
@@ -46,7 +45,8 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
     }
 
     @NonNull
-    public abstract GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout);
+    public abstract GitLabClient buildClient(
+            String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout);
 
     @Override
     public final int compareTo(@NonNull GitLabClientBuilder other) {

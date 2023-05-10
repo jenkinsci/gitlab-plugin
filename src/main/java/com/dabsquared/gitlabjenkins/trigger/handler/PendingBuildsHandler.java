@@ -12,13 +12,12 @@ import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PendingBuildsHandler {
 
@@ -56,7 +55,8 @@ public class PendingBuildsHandler {
 
     private void cancel(Queue.Item item, Queue queue, String branch) {
         try {
-            LOGGER.log(Level.INFO, "Cancelling job {0} for branch {1}", LoggerUtil.toArray(item.task.getName(), branch));
+            LOGGER.log(
+                    Level.INFO, "Cancelling job {0} for branch {1}", LoggerUtil.toArray(item.task.getName(), branch));
             queue.cancel(item);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error cancelling queued build", e);
@@ -72,8 +72,14 @@ public class PendingBuildsHandler {
         GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
         String ref = StringUtils.removeStart(causeData.getSourceBranch(), "refs/tags/");
         try {
-            client.changeBuildStatus(causeData.getSourceProjectId(), causeData.getLastCommit(), BuildState.canceled,
-                ref, buildName, targetUrl, BuildState.canceled.name());
+            client.changeBuildStatus(
+                    causeData.getSourceProjectId(),
+                    causeData.getLastCommit(),
+                    BuildState.canceled,
+                    ref,
+                    buildName,
+                    targetUrl,
+                    BuildState.canceled.name());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
         }
@@ -81,8 +87,8 @@ public class PendingBuildsHandler {
 
     public static String resolvePendingBuildName(Job<?, ?> job) {
         if (job instanceof AbstractProject) {
-            GitLabCommitStatusPublisher publisher =
-                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+            GitLabCommitStatusPublisher publisher = (GitLabCommitStatusPublisher)
+                    ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
             if (publisher != null) {
                 return publisher.getName();
             }

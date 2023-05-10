@@ -1,30 +1,28 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Logger;
-
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
+import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import edu.umd.cs.findbugs.annotations.NonNull;
-
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.Permission;
 import hudson.util.HttpResponses;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerResponse;
-import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
-import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 
 /**
  * @author Xinran Xiao
  */
 abstract class BuildWebHookAction implements WebHookAction {
 
-    private final static Logger LOGGER = Logger.getLogger(BuildWebHookAction.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BuildWebHookAction.class.getName());
 
     abstract void processForCompatibility();
 
@@ -71,7 +69,7 @@ abstract class BuildWebHookAction implements WebHookAction {
             }
 
             // assure the isEqual comparison compares same number of bytes
-            byte [] secretTokenBytes = tokenBytes.clone();
+            byte[] secretTokenBytes = tokenBytes.clone();
             // change last byte to assure the isEqual comparison will not match
             secretTokenBytes[secretTokenBytes.length - 1] ^= 1 << 3;
             return MessageDigest.isEqual(tokenBytes, secretTokenBytes);
@@ -90,9 +88,12 @@ abstract class BuildWebHookAction implements WebHookAction {
         }
 
         private void checkPermission(Permission permission, Item project) {
-            if (((GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class)).isUseAuthenticatedEndpoint()) {
+            if (((GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class))
+                    .isUseAuthenticatedEndpoint()) {
                 if (!project.getACL().hasPermission(authentication, permission)) {
-                    String message =  String.format("%s is missing the %s/%s permission", authentication.getName(), permission.group.title, permission.name);
+                    String message = String.format(
+                            "%s is missing the %s/%s permission",
+                            authentication.getName(), permission.group.title, permission.name);
                     LOGGER.finest("Unauthorized (Did you forget to add API Token to the web hook ?)");
                     throw HttpResponses.errorWithoutStack(403, message);
                 }

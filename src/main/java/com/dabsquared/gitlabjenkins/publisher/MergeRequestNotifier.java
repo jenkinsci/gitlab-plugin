@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
@@ -13,10 +15,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
-
 import java.io.IOException;
-
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author Robin Müller
@@ -27,7 +26,8 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+            throws InterruptedException, IOException {
         GitLabClient client = getClient(build);
         if (client == null) {
             listener.getLogger().println("No GitLab connection configured");
@@ -51,11 +51,11 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
         };
     }
 
-    protected abstract void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest);
+    protected abstract void perform(
+            Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest);
 
     MergeRequest getMergeRequest(Run<?, ?> run) {
         GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
         return cause == null ? null : cause.getData().getMergeRequest();
-
     }
 }

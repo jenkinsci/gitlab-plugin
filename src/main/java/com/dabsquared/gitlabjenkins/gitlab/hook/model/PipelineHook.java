@@ -1,12 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import java.util.List;
-
 
 /**
  * @author Milena Zachow
@@ -58,7 +56,6 @@ public class PipelineHook extends WebHook {
 
     public void setObjectAttributes(PipelineEventObjectAttributes objectAttributes) {
         this.objectAttributes = objectAttributes;
-
     }
 
     @Override

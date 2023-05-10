@@ -3,21 +3,19 @@ package com.dabsquared.gitlabjenkins.webhook;
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
 import hudson.security.csrf.CrumbExclusion;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author Daniel Brooks
  */
-
 @Extension
 public class GitLabWebHook implements UnprotectedRootAction {
 
@@ -25,7 +23,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabWebHook.class.getName());
 
-    private transient final ActionResolver actionResolver = new ActionResolver();
+    private final transient ActionResolver actionResolver = new ActionResolver();
 
     public String getIconFileName() {
         return null;
@@ -47,7 +45,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
     @Extension
     public static class GitlabWebHookCrumbExclusion extends CrumbExclusion {
         @Override
-        public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws IOException, ServletException {
+        public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
+                throws IOException, ServletException {
             String pathInfo = req.getPathInfo();
             if (pathInfo != null && pathInfo.startsWith('/' + WEBHOOK_URL + '/')) {
                 chain.doFilter(req, resp);

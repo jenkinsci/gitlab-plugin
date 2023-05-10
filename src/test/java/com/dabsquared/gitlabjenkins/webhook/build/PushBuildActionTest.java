@@ -103,9 +103,10 @@ public class PushBuildActionTest {
         GitSCMSource source = new GitSCMSource("http://test");
         SCMSourceOwner item = mock(SCMSourceOwner.class);
         when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
-        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        Assert.assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
         verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
-
     }
 
     @Test
@@ -114,7 +115,9 @@ public class PushBuildActionTest {
         source.getTraits().add(new IgnoreOnPushNotificationTrait());
         SCMSourceOwner item = mock(SCMSourceOwner.class);
         when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
-        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        Assert.assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
         verify(item, never()).onSCMSourceUpdated(isA(GitSCMSource.class));
     }
 }

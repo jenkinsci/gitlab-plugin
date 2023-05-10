@@ -32,19 +32,21 @@ public class PushHookTriggerHandlerGitlabServerTest {
 
     @DataPoints
     public static GitLabPushRequestSamples[] samples = {
-            new GitLabPushRequestSamples_7_5_1_36679b5(),
-            new GitLabPushRequestSamples_7_10_5_489b413(),
-            new GitLabPushRequestSamples_8_1_2_8c8af7b()
+        new GitLabPushRequestSamples_7_5_1_36679b5(),
+        new GitLabPushRequestSamples_7_10_5_489b413(),
+        new GitLabPushRequestSamples_8_1_2_8c8af7b()
     };
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Theory
-    public void createRevisionParameterAction_pushBrandNewMasterBranchRequest(GitLabPushRequestSamples samples) throws Exception {
+    public void createRevisionParameterAction_pushBrandNewMasterBranchRequest(GitLabPushRequestSamples samples)
+            throws Exception {
         PushHook hook = samples.pushBrandNewMasterBranchRequest();
 
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));
@@ -52,10 +54,12 @@ public class PushHookTriggerHandlerGitlabServerTest {
     }
 
     @Theory
-    public void createRevisionParameterAction_mergeRequestMergePushRequest(GitLabPushRequestSamples samples) throws Exception {
+    public void createRevisionParameterAction_mergeRequestMergePushRequest(GitLabPushRequestSamples samples)
+            throws Exception {
         PushHook hook = samples.mergePushRequest();
 
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));
@@ -66,7 +70,8 @@ public class PushHookTriggerHandlerGitlabServerTest {
     public void createRevisionParameterAction_pushCommitRequest(GitLabPushRequestSamples samples) throws Exception {
         PushHook hook = samples.pushCommitRequest();
 
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));
@@ -77,7 +82,8 @@ public class PushHookTriggerHandlerGitlabServerTest {
     public void createRevisionParameterAction_pushNewBranchRequest(GitLabPushRequestSamples samples) throws Exception {
         PushHook hook = samples.pushNewBranchRequest();
 
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));
@@ -88,7 +94,8 @@ public class PushHookTriggerHandlerGitlabServerTest {
     public void createRevisionParameterAction_pushNewTagRequest(GitLabPushRequestSamples samples) throws Exception {
         PushHook hook = samples.pushNewTagRequest();
 
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));
@@ -96,7 +103,8 @@ public class PushHookTriggerHandlerGitlabServerTest {
     }
 
     @Theory
-    public void doNotCreateRevisionParameterAction_deleteBranchRequest(GitLabPushRequestSamples samples) throws Exception {
+    public void doNotCreateRevisionParameterAction_deleteBranchRequest(GitLabPushRequestSamples samples)
+            throws Exception {
         PushHook hook = samples.deleteBranchRequest();
 
         exception.expect(NoRevisionToBuildException.class);
@@ -108,18 +116,21 @@ public class PushHookTriggerHandlerGitlabServerTest {
         PushHook hook = samples.deleteBranchRequest();
 
         exception.expect(NoRevisionToBuildException.class);
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(true).createRevisionParameter(hook, null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(true).createRevisionParameter(hook, null);
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
-    public void createRevisionParameterAction_pushCommitRequestWithGitScm(GitLabPushRequestSamples samples) throws Exception {
+    public void createRevisionParameterAction_pushCommitRequestWithGitScm(GitLabPushRequestSamples samples)
+            throws Exception {
         PushHook hook = samples.pushCommitRequest();
 
         GitSCM gitSCM = new GitSCM("git@test.tld:test.git");
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, gitSCM);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, gitSCM);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getRef().replaceFirst("^refs/heads", "remotes/origin")));
@@ -127,15 +138,22 @@ public class PushHookTriggerHandlerGitlabServerTest {
     }
 
     @Theory
-    public void createRevisionParameterAction_pushCommitRequestWith2Remotes(GitLabPushRequestSamples samples) throws Exception {
+    public void createRevisionParameterAction_pushCommitRequestWith2Remotes(GitLabPushRequestSamples samples)
+            throws Exception {
         PushHook hook = samples.pushCommitRequest();
 
-        GitSCM gitSCM = new GitSCM(Arrays.asList(new UserRemoteConfig("git@test.tld:test.git", null, null, null),
-                                                 new UserRemoteConfig("git@test.tld:fork.git", "fork", null, null)),
-                                   Collections.singletonList(new BranchSpec("")),
-                                   false, Collections.<SubmoduleConfig>emptyList(),
-                                   null, null, null);
-        RevisionParameterAction revisionParameterAction = new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, gitSCM);
+        GitSCM gitSCM = new GitSCM(
+                Arrays.asList(
+                        new UserRemoteConfig("git@test.tld:test.git", null, null, null),
+                        new UserRemoteConfig("git@test.tld:fork.git", "fork", null, null)),
+                Collections.singletonList(new BranchSpec("")),
+                false,
+                Collections.<SubmoduleConfig>emptyList(),
+                null,
+                null,
+                null);
+        RevisionParameterAction revisionParameterAction =
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, gitSCM);
 
         assertThat(revisionParameterAction, is(notNullValue()));
         assertThat(revisionParameterAction.commit, is(hook.getAfter()));

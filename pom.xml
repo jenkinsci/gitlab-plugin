@@ -4,25 +4,15 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.54</version>
+    <version>4.62</version>
     <relativePath />
   </parent>
+
   <artifactId>gitlab-plugin</artifactId>
   <version>${revision}${changelist}</version>
+  <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
-  <packaging>hpi</packaging>
-
-  <properties>
-    <revision>1.7.3</revision>
-    <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.361.4</jenkins.version>
-    <spotbugs.effort>Max</spotbugs.effort>
-    <spotbugs.threshold>Low</spotbugs.threshold>
-    <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
-    <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
-    <mockserver.version>5.15.0</mockserver.version>
-  </properties>
 
   <licenses>
     <license>
@@ -39,6 +29,13 @@
     </developer>
   </developers>
 
+  <scm>
+    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <tag>${scmTag}</tag>
+    <url>https://github.com/${gitHubRepo}</url>
+  </scm>
+
   <distributionManagement>
     <repository>
       <id>maven.jenkins-ci.org</id>
@@ -52,29 +49,37 @@
     </snapshotRepository>
   </distributionManagement>
 
-  <scm>
-    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
-    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-    <url>https://github.com/${gitHubRepo}</url>
-    <tag>${scmTag}</tag>
-  </scm>
-  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
+  <properties>
+    <revision>1.7.13</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <jenkins.version>2.375.4</jenkins.version>
+    <spotbugs.effort>Max</spotbugs.effort>
+    <spotbugs.threshold>Low</spotbugs.threshold>
+    <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
+    <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
+    <mockserver.version>5.15.0</mockserver.version>
+    <spotless.check.skip>false</spotless.check.skip>
+  </properties>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-2.361.x</artifactId>
+        <version>2062.v154408a_24d20</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.12.5</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
-    <!-- Jenkins dependencies -->
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>caffeine-api</artifactId>
@@ -90,6 +95,47 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>3.15.6.Final</version>
+      <exclusions>
+        <!-- Provided by Jenkins core -->
+        <exclusion>
+          <groupId>com.github.stephenc.jcip</groupId>
+          <artifactId>jcip-annotations</artifactId>
+        </exclusion>
+        <!-- Provided by javax-activation-api plugin -->
+        <exclusion>
+          <groupId>com.sun.activation</groupId>
+          <artifactId>jakarta.activation</artifactId>
+        </exclusion>
+        <!-- Provided by Jenkins core -->
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+        <!-- Provided by javax-activation-api plugin -->
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <!-- Provided by jaxb plugin -->
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+        <!-- Provided by apache-httpcomponents-client-4-api plugin -->
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -141,51 +187,6 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
     </dependency>
-
-    <!-- REST client dependencies -->
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-client</artifactId>
-      <version>3.15.3.Final</version>
-      <exclusions>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
-          <groupId>com.github.stephenc.jcip</groupId>
-          <artifactId>jcip-annotations</artifactId>
-        </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
-        <exclusion>
-          <groupId>com.sun.activation</groupId>
-          <artifactId>jakarta.activation</artifactId>
-        </exclusion>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-        </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
-        <exclusion>
-          <groupId>jakarta.activation</groupId>
-          <artifactId>jakarta.activation-api</artifactId>
-        </exclusion>
-        <!-- Provided by jaxb plugin -->
-        <exclusion>
-          <groupId>jakarta.xml.bind</groupId>
-          <artifactId>jakarta.xml.bind-api</artifactId>
-        </exclusion>
-        <!-- Provided by apache-httpcomponents-client-4-api plugin -->
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <!-- util dependencies -->
     <dependency>
       <groupId>net.karneim</groupId>
       <artifactId>pojobuilder</artifactId>
@@ -193,8 +194,6 @@
       <!-- 'provided' scope because this is only needed during compilation -->
       <scope>provided</scope>
     </dependency>
-
-    <!-- test dependencies -->
     <dependency>
       <groupId>io.jenkins</groupId>
       <artifactId>configuration-as-code</artifactId>
@@ -284,17 +283,22 @@
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
+        <!-- Banned via the exclude/include list in parent pom 4.62 -->
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>javax.servlet-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.1</version>
+      <version>42.6.0</version>
       <scope>test</scope>
       <exclusions>
         <!-- Upper bounds with Guava -->
@@ -306,18 +310,20 @@
     </dependency>
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
-        <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.361.x</artifactId>
-        <version>1798.vc671fe94856f</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <plugins>
@@ -362,7 +368,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>2.22.2</version>
+            <version>3.1.0</version>
             <executions>
               <execution>
                 <goals>
@@ -390,10 +396,10 @@
             <version>1.2</version>
             <executions>
               <execution>
-                <phase>pre-integration-test</phase>
                 <goals>
                   <goal>allocate-ports</goal>
                 </goals>
+                <phase>pre-integration-test</phase>
                 <configuration>
                   <ports>
                     <port>
@@ -414,7 +420,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.40.3</version>
+            <version>0.42.1</version>
             <configuration>
               <verbose>true</verbose>
               <images>
@@ -478,19 +484,19 @@
             <executions>
               <execution>
                 <id>start</id>
-                <phase>pre-integration-test</phase>
                 <goals>
                   <goal>build</goal>
                   <goal>start</goal>
                 </goals>
+                <phase>pre-integration-test</phase>
               </execution>
               <execution>
                 <id>stop</id>
-                <phase>post-integration-test</phase>
                 <goals>
                   <goal>stop</goal>
                   <goal>remove</goal>
                 </goals>
+                <phase>post-integration-test</phase>
               </execution>
             </executions>
           </plugin>
@@ -502,10 +508,10 @@
             <executions>
               <execution>
                 <id>add-source</id>
-                <phase>generate-sources</phase>
                 <goals>
                   <goal>add-source</goal>
                 </goals>
+                <phase>generate-sources</phase>
                 <configuration>
                   <sources>
                     <source>${basedir}/target/generated-sources</source>
@@ -514,10 +520,10 @@
               </execution>
               <execution>
                 <id>add-test-source</id>
-                <phase>generate-test-sources</phase>
                 <goals>
                   <goal>add-test-source</goal>
                 </goals>
+                <phase>generate-test-sources</phase>
                 <configuration>
                   <sources>
                     <source>${basedir}/target/generated-test-sources</source>

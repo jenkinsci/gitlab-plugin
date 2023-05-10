@@ -56,7 +56,8 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException {
+    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+            throws IOException {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));

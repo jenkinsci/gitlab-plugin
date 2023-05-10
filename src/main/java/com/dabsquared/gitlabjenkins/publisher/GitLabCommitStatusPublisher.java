@@ -16,11 +16,10 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
-import java.io.IOException;
 
 /**
  * @author Robin Müller
@@ -47,7 +46,8 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+            throws InterruptedException, IOException {
         Result buildResult = build.getResult();
         if (buildResult == Result.SUCCESS || (buildResult == Result.UNSTABLE && markUnstableAsSuccess)) {
             CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, name);

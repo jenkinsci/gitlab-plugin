@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.cause;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.markup.EscapedMarkupFormatter;
+import java.util.*;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -10,8 +11,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
-
-import java.util.*;
 
 /**
  * @author Robin Müller
@@ -32,6 +31,7 @@ public final class CauseData {
     private final String sourceRepoUrl;
     private final String sourceRepoSshUrl;
     private final String sourceRepoHttpUrl;
+    private final String mergeCommitSha;
     private final String mergeRequestTitle;
     private final String mergeRequestDescription;
     private final Integer mergeRequestId;
@@ -63,13 +63,51 @@ public final class CauseData {
     private final String commentAuthor;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
-    CauseData(ActionType actionType, Integer sourceProjectId, Integer targetProjectId, String branch, String sourceBranch, String userName,
-              String userUsername, String userEmail, String sourceRepoHomepage, String sourceRepoName, String sourceNamespace, String sourceRepoUrl,
-              String sourceRepoSshUrl, String sourceRepoHttpUrl, String mergeRequestTitle, String mergeRequestDescription, Integer mergeRequestId,
-              Integer mergeRequestIid, Integer mergeRequestTargetProjectId, String targetBranch, String targetRepoName, String targetNamespace, String targetRepoSshUrl,
-              String targetRepoHttpUrl, String triggeredByUser, String before, String after, String lastCommit, String targetProjectUrl,
-              String triggerPhrase, String mergeRequestState, String mergedByUser, String mergeRequestAssignee, String ref, String isTag,
-	            String sha, String beforeSha, String status, String stages, String createdAt, String finishedAt, String buildDuration, String commentAuthor) {
+    CauseData(
+            ActionType actionType,
+            Integer sourceProjectId,
+            Integer targetProjectId,
+            String branch,
+            String sourceBranch,
+            String userName,
+            String userUsername,
+            String userEmail,
+            String sourceRepoHomepage,
+            String sourceRepoName,
+            String sourceNamespace,
+            String sourceRepoUrl,
+            String sourceRepoSshUrl,
+            String sourceRepoHttpUrl,
+            String mergeCommitSha,
+            String mergeRequestTitle,
+            String mergeRequestDescription,
+            Integer mergeRequestId,
+            Integer mergeRequestIid,
+            Integer mergeRequestTargetProjectId,
+            String targetBranch,
+            String targetRepoName,
+            String targetNamespace,
+            String targetRepoSshUrl,
+            String targetRepoHttpUrl,
+            String triggeredByUser,
+            String before,
+            String after,
+            String lastCommit,
+            String targetProjectUrl,
+            String triggerPhrase,
+            String mergeRequestState,
+            String mergedByUser,
+            String mergeRequestAssignee,
+            String ref,
+            String isTag,
+            String sha,
+            String beforeSha,
+            String status,
+            String stages,
+            String createdAt,
+            String finishedAt,
+            String buildDuration,
+            String commentAuthor) {
         this.actionType = Objects.requireNonNull(actionType, "actionType must not be null.");
         this.sourceProjectId = Objects.requireNonNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = Objects.requireNonNull(targetProjectId, "targetProjectId must not be null.");
@@ -84,6 +122,7 @@ public final class CauseData {
         this.sourceRepoUrl = sourceRepoUrl == null ? sourceRepoSshUrl : sourceRepoUrl;
         this.sourceRepoSshUrl = Objects.requireNonNull(sourceRepoSshUrl, "sourceRepoSshUrl must not be null.");
         this.sourceRepoHttpUrl = Objects.requireNonNull(sourceRepoHttpUrl, "sourceRepoHttpUrl must not be null.");
+        this.mergeCommitSha = mergeCommitSha == null ? "" : mergeCommitSha;
         this.mergeRequestTitle = Objects.requireNonNull(mergeRequestTitle, "mergeRequestTitle must not be null.");
         this.mergeRequestDescription = mergeRequestDescription == null ? "" : mergeRequestDescription;
         this.mergeRequestId = mergeRequestId;
@@ -130,11 +169,14 @@ public final class CauseData {
         variables.put("gitlabSourceRepoURL", sourceRepoUrl);
         variables.put("gitlabSourceRepoSshUrl", sourceRepoSshUrl);
         variables.put("gitlabSourceRepoHttpUrl", sourceRepoHttpUrl);
+        variables.putIfNotNull("gitlabMergeCommitSha", mergeCommitSha);
         variables.put("gitlabMergeRequestTitle", mergeRequestTitle);
         variables.put("gitlabMergeRequestDescription", mergeRequestDescription);
         variables.put("gitlabMergeRequestId", mergeRequestId == null ? "" : mergeRequestId.toString());
         variables.put("gitlabMergeRequestIid", mergeRequestIid == null ? "" : mergeRequestIid.toString());
-        variables.put("gitlabMergeRequestTargetProjectId", mergeRequestTargetProjectId == null ? "" : mergeRequestTargetProjectId.toString());
+        variables.put(
+                "gitlabMergeRequestTargetProjectId",
+                mergeRequestTargetProjectId == null ? "" : mergeRequestTargetProjectId.toString());
         variables.put("gitlabMergeRequestLastCommit", lastCommit);
         variables.putIfNotNull("gitlabMergeRequestState", mergeRequestState);
         variables.putIfNotNull("gitlabMergedByUser", mergedByUser);
@@ -236,6 +278,11 @@ public final class CauseData {
     }
 
     @Exported
+    public String getMergeCommitSha() {
+        return mergeCommitSha;
+    }
+
+    @Exported
     public String getMergeRequestDescription() {
         return mergeRequestDescription;
     }
@@ -306,35 +353,54 @@ public final class CauseData {
     }
 
     @Exported
-    public String getRef() { return ref; }
+    public String getRef() {
+        return ref;
+    }
 
     @Exported
-    public String getIsTag() { return isTag; }
+    public String getIsTag() {
+        return isTag;
+    }
 
     @Exported
-    public String getSha() { return sha; }
+    public String getSha() {
+        return sha;
+    }
 
     @Exported
-    public String getBeforeSha() {return beforeSha; }
+    public String getBeforeSha() {
+        return beforeSha;
+    }
 
     @Exported
-    public String getStatus() { return status; }
+    public String getStatus() {
+        return status;
+    }
 
     @Exported
-    public String getStages() { return stages; }
+    public String getStages() {
+        return stages;
+    }
 
     @Exported
-    public String getCreatedAt() { return createdAt; }
+    public String getCreatedAt() {
+        return createdAt;
+    }
 
     @Exported
-    public String getFinishedAt() { return finishedAt; }
+    public String getFinishedAt() {
+        return finishedAt;
+    }
 
     @Exported
-    public String getBuildDuration() { return buildDuration; }
+    public String getBuildDuration() {
+        return buildDuration;
+    }
 
     @Exported
-    public String getCommentAuthor() { return commentAuthor; }
-
+    public String getCommentAuthor() {
+        return commentAuthor;
+    }
 
     String getShortDescription() {
         return actionType.getShortDescription(this);
@@ -342,27 +408,36 @@ public final class CauseData {
 
     @Exported
     public String getMergeRequestState() {
-		return mergeRequestState;
-	}
+        return mergeRequestState;
+    }
 
     @Exported
-	public String getMergedByUser() {
-		return mergedByUser;
-	}
+    public String getMergedByUser() {
+        return mergedByUser;
+    }
 
     @Exported
-	public String getMergeRequestAssignee() {
-		return mergeRequestAssignee;
-	}
+    public String getMergeRequestAssignee() {
+        return mergeRequestAssignee;
+    }
 
     @Exported
-	public MergeRequest getMergeRequest() {
+    public MergeRequest getMergeRequest() {
         if (mergeRequestId == null) {
             return null;
         }
 
-        return new MergeRequest(mergeRequestId, mergeRequestIid, sourceBranch, targetBranch, mergeRequestTitle,
-            sourceProjectId, targetProjectId, mergeRequestDescription, mergeRequestState);
+        return new MergeRequest(
+                mergeRequestId,
+                mergeRequestIid,
+                mergeCommitSha,
+                sourceBranch,
+                targetBranch,
+                mergeRequestTitle,
+                sourceProjectId,
+                targetProjectId,
+                mergeRequestDescription,
+                mergeRequestState);
     }
 
     @Override
@@ -375,145 +450,148 @@ public final class CauseData {
         }
         CauseData causeData = (CauseData) o;
         return new EqualsBuilder()
-            .append(actionType, causeData.actionType)
-            .append(sourceProjectId, causeData.sourceProjectId)
-            .append(targetProjectId, causeData.targetProjectId)
-            .append(branch, causeData.branch)
-            .append(sourceBranch, causeData.sourceBranch)
-            .append(userName, causeData.userName)
-            .append(userUsername, causeData.userUsername)
-            .append(userEmail, causeData.userEmail)
-            .append(sourceRepoHomepage, causeData.sourceRepoHomepage)
-            .append(sourceRepoName, causeData.sourceRepoName)
-            .append(sourceNamespace, causeData.sourceNamespace)
-            .append(sourceRepoUrl, causeData.sourceRepoUrl)
-            .append(sourceRepoSshUrl, causeData.sourceRepoSshUrl)
-            .append(sourceRepoHttpUrl, causeData.sourceRepoHttpUrl)
-            .append(mergeRequestTitle, causeData.mergeRequestTitle)
-            .append(mergeRequestDescription, causeData.mergeRequestDescription)
-            .append(mergeRequestId, causeData.mergeRequestId)
-            .append(mergeRequestIid, causeData.mergeRequestIid)
-            .append(mergeRequestState, causeData.mergeRequestState)
-            .append(mergedByUser, causeData.mergedByUser)
-            .append(mergeRequestAssignee, causeData.mergeRequestAssignee)
-            .append(mergeRequestTargetProjectId, causeData.mergeRequestTargetProjectId)
-            .append(targetBranch, causeData.targetBranch)
-            .append(targetRepoName, causeData.targetRepoName)
-            .append(targetNamespace, causeData.targetNamespace)
-            .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
-            .append(targetRepoHttpUrl, causeData.targetRepoHttpUrl)
-            .append(triggeredByUser, causeData.triggeredByUser)
-            .append(before, causeData.before)
-            .append(after, causeData.after)
-            .append(lastCommit, causeData.lastCommit)
-            .append(targetProjectUrl, causeData.targetProjectUrl)
-            .append(ref, causeData.getRef())
-            .append(isTag, causeData.getIsTag())
-            .append(sha, causeData.getSha())
-            .append(beforeSha, causeData.getBeforeSha())
-            .append(status, causeData.getStatus())
-            .append(stages, causeData.getStages())
-            .append(createdAt, causeData.getCreatedAt())
-            .append(finishedAt, causeData.getFinishedAt())
-            .append(buildDuration, causeData.getBuildDuration())
-            .append(commentAuthor, causeData.getCommentAuthor())
-            .isEquals();
+                .append(actionType, causeData.actionType)
+                .append(sourceProjectId, causeData.sourceProjectId)
+                .append(targetProjectId, causeData.targetProjectId)
+                .append(branch, causeData.branch)
+                .append(sourceBranch, causeData.sourceBranch)
+                .append(userName, causeData.userName)
+                .append(userUsername, causeData.userUsername)
+                .append(userEmail, causeData.userEmail)
+                .append(sourceRepoHomepage, causeData.sourceRepoHomepage)
+                .append(sourceRepoName, causeData.sourceRepoName)
+                .append(sourceNamespace, causeData.sourceNamespace)
+                .append(sourceRepoUrl, causeData.sourceRepoUrl)
+                .append(sourceRepoSshUrl, causeData.sourceRepoSshUrl)
+                .append(sourceRepoHttpUrl, causeData.sourceRepoHttpUrl)
+                .append(mergeCommitSha, causeData.mergeCommitSha)
+                .append(mergeRequestTitle, causeData.mergeRequestTitle)
+                .append(mergeRequestDescription, causeData.mergeRequestDescription)
+                .append(mergeRequestId, causeData.mergeRequestId)
+                .append(mergeRequestIid, causeData.mergeRequestIid)
+                .append(mergeRequestState, causeData.mergeRequestState)
+                .append(mergedByUser, causeData.mergedByUser)
+                .append(mergeRequestAssignee, causeData.mergeRequestAssignee)
+                .append(mergeRequestTargetProjectId, causeData.mergeRequestTargetProjectId)
+                .append(targetBranch, causeData.targetBranch)
+                .append(targetRepoName, causeData.targetRepoName)
+                .append(targetNamespace, causeData.targetNamespace)
+                .append(targetRepoSshUrl, causeData.targetRepoSshUrl)
+                .append(targetRepoHttpUrl, causeData.targetRepoHttpUrl)
+                .append(triggeredByUser, causeData.triggeredByUser)
+                .append(before, causeData.before)
+                .append(after, causeData.after)
+                .append(lastCommit, causeData.lastCommit)
+                .append(targetProjectUrl, causeData.targetProjectUrl)
+                .append(ref, causeData.getRef())
+                .append(isTag, causeData.getIsTag())
+                .append(sha, causeData.getSha())
+                .append(beforeSha, causeData.getBeforeSha())
+                .append(status, causeData.getStatus())
+                .append(stages, causeData.getStages())
+                .append(createdAt, causeData.getCreatedAt())
+                .append(finishedAt, causeData.getFinishedAt())
+                .append(buildDuration, causeData.getBuildDuration())
+                .append(commentAuthor, causeData.getCommentAuthor())
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(actionType)
-            .append(sourceProjectId)
-            .append(targetProjectId)
-            .append(branch)
-            .append(sourceBranch)
-            .append(userName)
-            .append(userUsername)
-            .append(userEmail)
-            .append(sourceRepoHomepage)
-            .append(sourceRepoName)
-            .append(sourceNamespace)
-            .append(sourceRepoUrl)
-            .append(sourceRepoSshUrl)
-            .append(sourceRepoHttpUrl)
-            .append(mergeRequestTitle)
-            .append(mergeRequestDescription)
-            .append(mergeRequestId)
-            .append(mergeRequestIid)
-            .append(mergeRequestState)
-            .append(mergedByUser)
-            .append(mergeRequestAssignee)
-            .append(mergeRequestTargetProjectId)
-            .append(targetBranch)
-            .append(targetRepoName)
-            .append(targetNamespace)
-            .append(targetRepoSshUrl)
-            .append(targetRepoHttpUrl)
-            .append(triggeredByUser)
-            .append(before)
-            .append(after)
-            .append(lastCommit)
-            .append(targetProjectUrl)
-            .append(ref)
-            .append(isTag)
-            .append(sha)
-            .append(beforeSha)
-            .append(status)
-            .append(stages)
-            .append(createdAt)
-            .append(finishedAt)
-            .append(buildDuration)
-            .append(commentAuthor)
-            .toHashCode();
+                .append(actionType)
+                .append(sourceProjectId)
+                .append(targetProjectId)
+                .append(branch)
+                .append(sourceBranch)
+                .append(userName)
+                .append(userUsername)
+                .append(userEmail)
+                .append(sourceRepoHomepage)
+                .append(sourceRepoName)
+                .append(sourceNamespace)
+                .append(sourceRepoUrl)
+                .append(sourceRepoSshUrl)
+                .append(sourceRepoHttpUrl)
+                .append(mergeCommitSha)
+                .append(mergeRequestTitle)
+                .append(mergeRequestDescription)
+                .append(mergeRequestId)
+                .append(mergeRequestIid)
+                .append(mergeRequestState)
+                .append(mergedByUser)
+                .append(mergeRequestAssignee)
+                .append(mergeRequestTargetProjectId)
+                .append(targetBranch)
+                .append(targetRepoName)
+                .append(targetNamespace)
+                .append(targetRepoSshUrl)
+                .append(targetRepoHttpUrl)
+                .append(triggeredByUser)
+                .append(before)
+                .append(after)
+                .append(lastCommit)
+                .append(targetProjectUrl)
+                .append(ref)
+                .append(isTag)
+                .append(sha)
+                .append(beforeSha)
+                .append(status)
+                .append(stages)
+                .append(createdAt)
+                .append(finishedAt)
+                .append(buildDuration)
+                .append(commentAuthor)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("actionType", actionType)
-            .append("sourceProjectId", sourceProjectId)
-            .append("targetProjectId", targetProjectId)
-            .append("branch", branch)
-            .append("sourceBranch", sourceBranch)
-            .append("userName", userName)
-            .append("userUsername", userUsername)
-            .append("userEmail", userEmail)
-            .append("sourceRepoHomepage", sourceRepoHomepage)
-            .append("sourceRepoName", sourceRepoName)
-            .append("sourceNamespace", sourceNamespace)
-            .append("sourceRepoUrl", sourceRepoUrl)
-            .append("sourceRepoSshUrl", sourceRepoSshUrl)
-            .append("sourceRepoHttpUrl", sourceRepoHttpUrl)
-            .append("mergeRequestTitle", mergeRequestTitle)
-            .append("mergeRequestDescription", mergeRequestDescription)
-            .append("mergeRequestId", mergeRequestId)
-            .append("mergeRequestIid", mergeRequestIid)
-            .append("mergeRequestState", mergeRequestState)
-            .append("mergedByUser", mergedByUser)
-            .append("mergeRequestAssignee", mergeRequestAssignee)
-            .append("mergeRequestTargetProjectId", mergeRequestTargetProjectId)
-            .append("targetBranch", targetBranch)
-            .append("targetRepoName", targetRepoName)
-            .append("targetNamespace", targetNamespace)
-            .append("targetRepoSshUrl", targetRepoSshUrl)
-            .append("targetRepoHttpUrl", targetRepoHttpUrl)
-            .append("triggeredByUser", triggeredByUser)
-            .append("before", before)
-            .append("after", after)
-            .append("lastCommit", lastCommit)
-            .append("targetProjectUrl", targetProjectUrl)
-            .append("ref", ref)
-            .append("isTag", isTag)
-            .append("sha", sha)
-            .append("beforeSha", beforeSha)
-            .append("status", status)
-            .append("stages", stages)
-            .append("createdAt", createdAt)
-            .append("finishedAt", finishedAt)
-            .append("duration", buildDuration)
-            .append("commentAuthor", commentAuthor)
-            .toString();
+                .append("actionType", actionType)
+                .append("sourceProjectId", sourceProjectId)
+                .append("targetProjectId", targetProjectId)
+                .append("branch", branch)
+                .append("sourceBranch", sourceBranch)
+                .append("userName", userName)
+                .append("userUsername", userUsername)
+                .append("userEmail", userEmail)
+                .append("sourceRepoHomepage", sourceRepoHomepage)
+                .append("sourceRepoName", sourceRepoName)
+                .append("sourceNamespace", sourceNamespace)
+                .append("sourceRepoUrl", sourceRepoUrl)
+                .append("sourceRepoSshUrl", sourceRepoSshUrl)
+                .append("sourceRepoHttpUrl", sourceRepoHttpUrl)
+                .append("mergeCommitSha", mergeCommitSha)
+                .append("mergeRequestTitle", mergeRequestTitle)
+                .append("mergeRequestDescription", mergeRequestDescription)
+                .append("mergeRequestId", mergeRequestId)
+                .append("mergeRequestIid", mergeRequestIid)
+                .append("mergeRequestState", mergeRequestState)
+                .append("mergedByUser", mergedByUser)
+                .append("mergeRequestAssignee", mergeRequestAssignee)
+                .append("mergeRequestTargetProjectId", mergeRequestTargetProjectId)
+                .append("targetBranch", targetBranch)
+                .append("targetRepoName", targetRepoName)
+                .append("targetNamespace", targetNamespace)
+                .append("targetRepoSshUrl", targetRepoSshUrl)
+                .append("targetRepoHttpUrl", targetRepoHttpUrl)
+                .append("triggeredByUser", triggeredByUser)
+                .append("before", before)
+                .append("after", after)
+                .append("lastCommit", lastCommit)
+                .append("targetProjectUrl", targetProjectUrl)
+                .append("ref", ref)
+                .append("isTag", isTag)
+                .append("sha", sha)
+                .append("beforeSha", beforeSha)
+                .append("status", status)
+                .append("stages", stages)
+                .append("createdAt", createdAt)
+                .append("finishedAt", finishedAt)
+                .append("duration", buildDuration)
+                .append("commentAuthor", commentAuthor)
+                .toString();
     }
 
     public enum ActionType {
@@ -522,54 +600,68 @@ public final class CauseData {
             String getShortDescription(CauseData data) {
                 return getShortDescriptionPush(data);
             }
-        }, TAG_PUSH {
+        },
+        TAG_PUSH {
             @Override
             String getShortDescription(CauseData data) {
                 return getShortDescriptionPush(data);
             }
-        }, MERGE {
+        },
+        MERGE {
             @Override
             String getShortDescription(CauseData data) {
-                String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
-                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter || data.getTargetProjectUrl() == null) {
-                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_plain(String.valueOf(data.getMergeRequestIid()),
-                                                                                               forkNamespace + data.getSourceBranch(),
-                                                                                               data.getTargetBranch());
+                String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch())
+                        ? ""
+                        : data.getSourceNamespace() + "/";
+                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter
+                        || data.getTargetProjectUrl() == null) {
+                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_plain(
+                            String.valueOf(data.getMergeRequestIid()),
+                            forkNamespace + data.getSourceBranch(),
+                            data.getTargetBranch());
                 } else {
-                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_html(String.valueOf(data.getMergeRequestIid()),
-                                                                                              forkNamespace + data.getSourceBranch(),
-                                                                                              data.getTargetBranch(),
-                                                                                              data.getTargetProjectUrl());
+                    return Messages.GitLabWebHookCause_ShortDescription_MergeRequestHook_html(
+                            String.valueOf(data.getMergeRequestIid()),
+                            forkNamespace + data.getSourceBranch(),
+                            data.getTargetBranch(),
+                            data.getTargetProjectUrl());
                 }
             }
-        }, NOTE {
+        },
+        NOTE {
             @Override
             String getShortDescription(CauseData data) {
                 String triggeredBy = data.getTriggeredByUser();
-                String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch()) ? "" : data.getSourceNamespace() + "/";
-                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter || data.getTargetProjectUrl() == null) {
-                    return Messages.GitLabWebHookCause_ShortDescription_NoteHook_plain(triggeredBy,
-                        String.valueOf(data.getMergeRequestIid()),
-                        forkNamespace + data.getSourceBranch(),
-                        data.getTargetBranch());
+                String forkNamespace = StringUtils.equals(data.getSourceNamespace(), data.getTargetBranch())
+                        ? ""
+                        : data.getSourceNamespace() + "/";
+                if (Jenkins.getActiveInstance().getMarkupFormatter() instanceof EscapedMarkupFormatter
+                        || data.getTargetProjectUrl() == null) {
+                    return Messages.GitLabWebHookCause_ShortDescription_NoteHook_plain(
+                            triggeredBy,
+                            String.valueOf(data.getMergeRequestIid()),
+                            forkNamespace + data.getSourceBranch(),
+                            data.getTargetBranch());
                 } else {
-                    return Messages.GitLabWebHookCause_ShortDescription_NoteHook_html(triggeredBy,
-                        String.valueOf(data.getMergeRequestIid()),
-                        forkNamespace + data.getSourceBranch(),
-                        data.getTargetBranch(),
-                        data.getTargetProjectUrl());
+                    return Messages.GitLabWebHookCause_ShortDescription_NoteHook_html(
+                            triggeredBy,
+                            String.valueOf(data.getMergeRequestIid()),
+                            forkNamespace + data.getSourceBranch(),
+                            data.getTargetBranch(),
+                            data.getTargetProjectUrl());
                 }
             }
-        }, PIPELINE {
-                @Override
-                String getShortDescription(CauseData data) {
-                    String getStatus = data.getStatus();
-                    if (getStatus == null) {
-                       return Messages.GitLabWebHookCause_ShortDescription_PipelineHook_noStatus();
-                    } else {
-                      return Messages.GitLabWebHookCause_ShortDescription_PipelineHook(getStatus);
-                    }
+        },
+        PIPELINE {
+            @Override
+            String getShortDescription(CauseData data) {
+                String getStatus = data.getStatus();
+                if (getStatus == null) {
+                    return Messages.GitLabWebHookCause_ShortDescription_PipelineHook_noStatus();
+                } else {
+                    return Messages.GitLabWebHookCause_ShortDescription_PipelineHook(getStatus);
                 }
+            }
         };
 
         private static String getShortDescriptionPush(CauseData data) {

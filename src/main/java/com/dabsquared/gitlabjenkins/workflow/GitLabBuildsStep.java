@@ -1,13 +1,16 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
+import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.Extension;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
@@ -19,13 +22,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
-
-import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-
 /**
  * @author <a href="mailto:robin.mueller@1und1.de">Robin Müller</a>
  */
@@ -35,14 +31,12 @@ public class GitLabBuildsStep extends Step {
     private List<String> builds;
 
     @DataBoundConstructor
-    public GitLabBuildsStep() {
+    public GitLabBuildsStep() {}
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new GitLabBuildStepExecution(context, this);
     }
-    
-    
-	@Override
-	public StepExecution start(StepContext context) throws Exception {
-		return new GitLabBuildStepExecution(context, this);
-	}
 
     @DataBoundSetter
     public void setBuilds(List<String> builds) {
@@ -76,44 +70,50 @@ public class GitLabBuildsStep extends Step {
             this.step = step;
             run = context.get(Run.class);
         }
-        
+
         @Override
         public boolean start() throws Exception {
-            body = getContext().newBodyInvoker()
-                .withCallback(new BodyExecutionCallback() {
-                    @Override
-                    public void onStart(StepContext context) {
-                        for (String name : step.builds) {
-                            CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), BuildState.pending, name);
-                        }
-                        run.addAction(new PendingBuildsAction(new ArrayList<>(step.builds)));
-                    }
-
-                    @Override
-                    public void onSuccess(StepContext context, Object result) {
-                        PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
-                        if (action != null && !action.getBuilds().isEmpty()) {
-                            TaskListener taskListener = getTaskListener(context);
-                            if (taskListener != null) {
-                                taskListener.getLogger().println("There are still pending GitLab builds. Please check your configuration");
+            body = getContext()
+                    .newBodyInvoker()
+                    .withCallback(new BodyExecutionCallback() {
+                        @Override
+                        public void onStart(StepContext context) {
+                            for (String name : step.builds) {
+                                CommitStatusUpdater.updateCommitStatus(
+                                        run, getTaskListener(context), BuildState.pending, name);
                             }
+                            run.addAction(new PendingBuildsAction(new ArrayList<>(step.builds)));
                         }
-                        context.onSuccess(result);
-                    }
 
-                    @Override
-                    public void onFailure(StepContext context, Throwable t) {
-                        PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
-                        if (action != null) {
-                            BuildState state = t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
-                            for (String name : action.getBuilds()) {
-                                CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name);
+                        @Override
+                        public void onSuccess(StepContext context, Object result) {
+                            PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
+                            if (action != null && !action.getBuilds().isEmpty()) {
+                                TaskListener taskListener = getTaskListener(context);
+                                if (taskListener != null) {
+                                    taskListener
+                                            .getLogger()
+                                            .println(
+                                                    "There are still pending GitLab builds. Please check your configuration");
+                                }
                             }
+                            context.onSuccess(result);
                         }
-                        context.onFailure(t);
-                    }
-                })
-                .start();
+
+                        @Override
+                        public void onFailure(StepContext context, Throwable t) {
+                            PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
+                            if (action != null) {
+                                BuildState state =
+                                        t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
+                                for (String name : action.getBuilds()) {
+                                    CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name);
+                                }
+                            }
+                            context.onFailure(t);
+                        }
+                    })
+                    .start();
             return false;
         }
 
@@ -160,11 +160,11 @@ public class GitLabBuildsStep extends Step {
             return true;
         }
 
-		@Override
-		public Set<Class<?>> getRequiredContext() {
-			Set<Class<?>> context = new HashSet<>();
-			Collections.addAll(context, TaskListener.class, Run.class);
-			return Collections.unmodifiableSet(context);
-		}
+        @Override
+        public Set<Class<?>> getRequiredContext() {
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, TaskListener.class, Run.class);
+            return Collections.unmodifiableSet(context);
+        }
     }
 }

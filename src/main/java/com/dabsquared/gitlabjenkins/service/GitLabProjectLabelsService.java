@@ -1,20 +1,17 @@
 package com.dabsquared.gitlabjenkins.service;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 public class GitLabProjectLabelsService {
 
@@ -68,7 +65,10 @@ public class GitLabProjectLabelsService {
             for (Label label : client.getLabels(projectId)) {
                 result.add(label.getName());
             }
-            LOGGER.log(Level.FINEST, "found these labels for repo {0} : {1}", LoggerUtil.toArray(sourceRepository, result));
+            LOGGER.log(
+                    Level.FINEST,
+                    "found these labels for repo {0} : {1}",
+                    LoggerUtil.toArray(sourceRepository, result));
             return result;
         }
     }

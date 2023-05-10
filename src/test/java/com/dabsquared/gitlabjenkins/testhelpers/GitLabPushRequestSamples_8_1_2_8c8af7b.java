@@ -65,7 +65,8 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
                 .withRef("refs/heads/test-new-branch1")
                 .withBefore(COMMIT_25)
                 .withAfter(COMMIT_74)
-                .withCommits(Collections.singletonList(commit().withId(COMMIT_74).build()))
+                .withCommits(
+                        Collections.singletonList(commit().withId(COMMIT_74).build()))
                 .build();
     }
 
@@ -84,9 +85,9 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
                 .withAfter(COMMIT_E5)
                 .withCommits(Arrays.asList(
                         commit().withId(COMMIT_74).build(),
-                        commit().withId("ab569fa9c51fa80d6509b277a6b587faf8e7cb72").build(),
-                        commit().withId(COMMIT_E5).build())
-                )
+                        commit().withId("ab569fa9c51fa80d6509b277a6b587faf8e7cb72")
+                                .build(),
+                        commit().withId(COMMIT_E5).build()))
                 .build();
 
         // and afterwards the "delete branch" request comes in
@@ -105,7 +106,8 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
                 .withRef("refs/tags/test-tag-2")
                 .withBefore(ZERO_SHA)
                 .withAfter(COMMIT_64)
-                .withCommits(Collections.singletonList(commit().withId(COMMIT_64).build()))
+                .withCommits(
+                        Collections.singletonList(commit().withId(COMMIT_64).build()))
                 .build();
     }
 
@@ -124,5 +126,4 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
                 .withAfter(ZERO_SHA)
                 .build();
     }
-
 }

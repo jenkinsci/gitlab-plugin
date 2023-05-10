@@ -3,7 +3,6 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -23,9 +22,8 @@ class StateAndActionConfig implements Predicate<MergeRequestObjectAttributes> {
 
     @Override
     public boolean test(MergeRequestObjectAttributes mergeRequestObjectAttributes) {
-        return
-            states.test(mergeRequestObjectAttributes.getState()) &&
-            actions.test(mergeRequestObjectAttributes.getAction());
+        return states.test(mergeRequestObjectAttributes.getState())
+                && actions.test(mergeRequestObjectAttributes.getAction());
     }
 
     static <T> Predicate<T> nullOrContains(final Collection<T> collection) {

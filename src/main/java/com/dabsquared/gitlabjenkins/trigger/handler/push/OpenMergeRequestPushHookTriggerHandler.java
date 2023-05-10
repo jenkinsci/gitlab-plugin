@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
@@ -14,21 +16,13 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
-import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
+import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.Trigger;
-import jenkins.model.ParameterizedJobMixIn;
-import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.transport.URIish;
-import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,16 +30,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import jenkins.model.ParameterizedJobMixIn;
+import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
  * @author Robin Müller
  */
 class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
-    private final static Logger LOGGER = Logger.getLogger(OpenMergeRequestPushHookTriggerHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(OpenMergeRequestPushHookTriggerHandler.class.getName());
 
     private final boolean skipWorkInProgressMergeRequest;
 
@@ -54,32 +52,44 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     @Override
-    public void handle(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, MergeRequestLabelFilter mergeRequestLabelFilter) {
-    	try {
+    public void handle(
+            Job<?, ?> job,
+            PushHook hook,
+            boolean ciSkip,
+            BranchFilter branchFilter,
+            MergeRequestLabelFilter mergeRequestLabelFilter) {
+        try {
             if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                 ParameterizedJob<?, ?> project = (ParameterizedJobMixIn.ParameterizedJob) job;
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
                 Collection<Trigger<?>> triggerList = project.getTriggers().values();
                 for (Trigger<?> t : triggerList) {
-                	if (t instanceof GitLabPushTrigger) {
-                		final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
+                    if (t instanceof GitLabPushTrigger) {
+                        final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Integer projectId = hook.getProjectId();
                         if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                             GitLabClient client = property.getClient();
                             for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                                	handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                    handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
                                 }
                             }
                         }
-                	}
+                    }
                 }
 
             } else {
-            	LOGGER.log(Level.FINE, "Not a ParameterizedJob: {0}",LoggerUtil.toArray(job.getClass().getName()));
+                LOGGER.log(
+                        Level.FINE,
+                        "Not a ParameterizedJob: {0}",
+                        LoggerUtil.toArray(job.getClass().getName()));
             }
         } catch (WebApplicationException | ProcessingException e) {
-            LOGGER.log(Level.WARNING, "Failed to communicate with gitlab server to determine if this is an update for a merge request: " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to communicate with gitlab server to determine if this is an update for a merge request: "
+                            + e.getMessage(),
+                    e);
         }
     }
 
@@ -94,30 +104,48 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         return result;
     }
 
-    private void handleMergeRequest(Job<?, ?> job, PushHook hook, boolean ciSkip, BranchFilter branchFilter, GitLabClient client, MergeRequest mergeRequest) {
-        if (ciSkip && mergeRequest.getDescription() != null && mergeRequest.getDescription().contains("[ci-skip]")) {
+    private void handleMergeRequest(
+            Job<?, ?> job,
+            PushHook hook,
+            boolean ciSkip,
+            BranchFilter branchFilter,
+            GitLabClient client,
+            MergeRequest mergeRequest) {
+        if (ciSkip
+                && mergeRequest.getDescription() != null
+                && mergeRequest.getDescription().contains("[ci-skip]")) {
             LOGGER.log(Level.INFO, "Skipping MR " + mergeRequest.getTitle() + " due to ci-skip.");
             return;
         }
 
         Boolean workInProgress = mergeRequest.getWorkInProgress();
         if (skipWorkInProgressMergeRequest && workInProgress != null && workInProgress) {
-            LOGGER.log(Level.INFO, "Skip WIP Merge Request #{0} ({1})", toArray(mergeRequest.getIid(), mergeRequest.getTitle()));
+            LOGGER.log(
+                    Level.INFO,
+                    "Skip WIP Merge Request #{0} ({1})",
+                    toArray(mergeRequest.getIid(), mergeRequest.getTitle()));
             return;
         }
 
         String sourceBranch = mergeRequest.getSourceBranch();
         String targetBranch = mergeRequest.getTargetBranch();
-        if (targetBranch != null && branchFilter.isBranchAllowed(sourceBranch, targetBranch) && hook.getRef().equals("refs/heads/"+targetBranch) && sourceBranch != null) {
-            LOGGER.log(Level.INFO, "{0} triggered for push to target branch of open merge request #{1}.",
+        if (targetBranch != null
+                && branchFilter.isBranchAllowed(sourceBranch, targetBranch)
+                && hook.getRef().equals("refs/heads/" + targetBranch)
+                && sourceBranch != null) {
+            LOGGER.log(
+                    Level.INFO,
+                    "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
             Branch branch = client.getBranch(mergeRequest.getSourceProjectId().toString(), sourceBranch);
-            Project project = client.getProject(mergeRequest.getSourceProjectId().toString());
+            Project project =
+                    client.getProject(mergeRequest.getSourceProjectId().toString());
             String commit = branch.getCommit().getId();
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
-            List<Action> actions = Arrays.<Action>asList(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
-                                                         new RevisionParameterAction(commit, retrieveUrIish(hook)));
+            List<Action> actions = Arrays.<Action>asList(
+                    new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
+                    new RevisionParameterAction(commit, retrieveUrIish(hook)));
             scheduleBuild(job, actions.toArray(new Action[actions.size()]));
         }
     }
@@ -137,6 +165,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withSourceRepoUrl(project.getSshUrlToRepo())
                 .withSourceRepoSshUrl(project.getSshUrlToRepo())
                 .withSourceRepoHttpUrl(project.getHttpUrlToRepo())
+                .withMergeCommitSha(mergeRequest.getCommitSha())
                 .withMergeRequestTitle(mergeRequest.getTitle())
                 .withMergeRequestDescription(mergeRequest.getDescription())
                 .withMergeRequestId(mergeRequest.getId())
@@ -156,11 +185,19 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
         String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
-            GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
+            GitLabClient client =
+                    job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
                 String fixedTagRef = StringUtils.removeStart(ref, "refs/tags/");
                 String targetUrl = DisplayURLProvider.get().getJobURL(job);
-                client.changeBuildStatus(projectId, commit, BuildState.pending, fixedTagRef, buildName, targetUrl, BuildState.pending.name());
+                client.changeBuildStatus(
+                        projectId,
+                        commit,
+                        BuildState.pending,
+                        fixedTagRef,
+                        buildName,
+                        targetUrl,
+                        BuildState.pending.name());
             } catch (WebApplicationException | ProcessingException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }

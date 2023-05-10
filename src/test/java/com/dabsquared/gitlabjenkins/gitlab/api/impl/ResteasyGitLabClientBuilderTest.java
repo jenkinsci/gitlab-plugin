@@ -14,6 +14,7 @@ import org.mockserver.junit.MockServerRule;
 public class ResteasyGitLabClientBuilderTest {
     @Rule
     public MockServerRule mockServer = new MockServerRule(this);
+
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
@@ -29,5 +30,4 @@ public class ResteasyGitLabClientBuilderTest {
         GitLabClientBuilder clientBuilder = new ResteasyGitLabClientBuilder("test", 0, V3GitLabApiProxy.class, null);
         assertNotNull(buildClientWithDefaults(clientBuilder, "http://localhost"));
     }
-
 }

@@ -95,40 +95,41 @@ public class GitLabVotePublisherTest {
 
         // THEN
         mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, "v4", MERGE_REQUEST_IID, "thumbsdown"));
-        mockServerClient.verify(awardEmojiRequest("v4", MERGE_REQUEST_IID, "POST")
-            .withQueryStringParameter("name", "thumbsdown"));
+        mockServerClient.verify(
+                awardEmojiRequest("v4", MERGE_REQUEST_IID, "POST").withQueryStringParameter("name", "thumbsdown"));
     }
 
-    private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote) throws InterruptedException, IOException {
+    private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote)
+            throws InterruptedException, IOException {
         GitLabVotePublisher publisher = preparePublisher(new GitLabVotePublisher(), build);
         publisher.perform(build, null, listener);
 
         mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, apiLevel, mergeRequestId, defaultNote));
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(AbstractBuild build, String apiLevel, int mergeRequestId, String body) {
+    private HttpRequest prepareSendMessageWithSuccessResponse(
+            AbstractBuild build, String apiLevel, int mergeRequestId, String body) {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, formatNote(build, body));
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
     private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String name) {
-        return awardEmojiRequest(apiLevel, mergeRequestId, "POST")
-                .withQueryStringParameter("name", name);
+        return awardEmojiRequest(apiLevel, mergeRequestId, "POST").withQueryStringParameter("name", name);
     }
 
     private HttpRequest awardEmojiRequest(final String apiLevel, int mergeRequestId, String type) {
         return request()
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId + "/award_emoji")
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
+                        + "/award_emoji")
                 .withMethod(type)
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
     private void mockUser(final int id, final String username) {
-        String sb = ("{\"id\": " + id) +
-                     ",\"username\": \"" + username + "\"" +
-                     ",\"email\": \"jenkins@jenkins.io\"" +
-                     ",\"name\": \"Ms Jenkins\"}";
+        String sb = ("{\"id\": " + id) + ",\"username\": \""
+                + username + "\"" + ",\"email\": \"jenkins@jenkins.io\""
+                + ",\"name\": \"Ms Jenkins\"}";
         mockServerClient.when(prepareUserQuery()).respond(response(sb));
     }
 
@@ -147,6 +148,8 @@ public class GitLabVotePublisherTest {
         sb.append(",\"User\": ");
         sb.append("  { \"id\": 1 }");
         sb.append("}");
-        mockServerClient.when(awardEmojiRequest(apiLevel, mergeRequestId, "GET")).respond(response(sb.toString()));
+        mockServerClient
+                .when(awardEmojiRequest(apiLevel, mergeRequestId, "GET"))
+                .respond(response(sb.toString()));
     }
 }

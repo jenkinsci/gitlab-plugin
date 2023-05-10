@@ -19,13 +19,20 @@ public class ProjectIdUtilTest {
     @DataPoints
     public static TestData[] testData = {
         forRemoteUrl("git@gitlab.com", "git@gitlab.com:test/project.git").expectProjectId("test/project"),
-        forRemoteUrl("https://gitlab.com", "https://gitlab.com/test/project.git").expectProjectId("test/project"),
-        forRemoteUrl("https://myurl.com/gitlab", "https://myurl.com/gitlab/group/project.git").expectProjectId("group/project"),
-        forRemoteUrl("git@gitlab.com", "git@gitlab.com:group/subgroup/project.git").expectProjectId("group/subgroup/project"),
-        forRemoteUrl("https://myurl.com/gitlab", "https://myurl.com/gitlab/group/subgroup/project.git").expectProjectId("group/subgroup/project"),
-        forRemoteUrl("https://myurl.com", "https://myurl.com/group/subgroup/project.git").expectProjectId("group/subgroup/project"),
-        forRemoteUrl("https://myurl.com", "https://myurl.com/group/subgroup/subsubgroup/project.git").expectProjectId("group/subgroup/subsubgroup/project"),
-        forRemoteUrl("git@gitlab.com", "git@gitlab.com:group/subgroup/subsubgroup/project.git").expectProjectId("group/subgroup/subsubgroup/project"),
+        forRemoteUrl("https://gitlab.com", "https://gitlab.com/test/project.git")
+                .expectProjectId("test/project"),
+        forRemoteUrl("https://myurl.com/gitlab", "https://myurl.com/gitlab/group/project.git")
+                .expectProjectId("group/project"),
+        forRemoteUrl("git@gitlab.com", "git@gitlab.com:group/subgroup/project.git")
+                .expectProjectId("group/subgroup/project"),
+        forRemoteUrl("https://myurl.com/gitlab", "https://myurl.com/gitlab/group/subgroup/project.git")
+                .expectProjectId("group/subgroup/project"),
+        forRemoteUrl("https://myurl.com", "https://myurl.com/group/subgroup/project.git")
+                .expectProjectId("group/subgroup/project"),
+        forRemoteUrl("https://myurl.com", "https://myurl.com/group/subgroup/subsubgroup/project.git")
+                .expectProjectId("group/subgroup/subsubgroup/project"),
+        forRemoteUrl("git@gitlab.com", "git@gitlab.com:group/subgroup/subsubgroup/project.git")
+                .expectProjectId("group/subgroup/subsubgroup/project"),
         forRemoteUrl("http://myhost", "http://myhost.com/group/project.git").expectProjectId("group/project"),
         forRemoteUrl("", "http://myhost.com/group/project.git").expectProjectId("group/project"),
         forRemoteUrl("", "http://myhost.com:group/project.git").expectProjectId("group/project"),
@@ -39,7 +46,6 @@ public class ProjectIdUtilTest {
 
         assertThat(projectId, is(testData.expectedProjectId));
     }
-
 
     static final class TestData {
 

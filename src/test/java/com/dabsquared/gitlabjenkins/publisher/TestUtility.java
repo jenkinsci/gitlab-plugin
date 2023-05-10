@@ -44,6 +44,7 @@ final class TestUtility {
     static final String GITLAB_CONNECTION_V3 = "GitLabV3";
     static final String GITLAB_CONNECTION_V4 = "GitLabV4";
     static final String BUILD_URL = "/build/123";
+    static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
     static final int BUILD_NUMBER = 1;
     static final int PROJECT_ID = 3;
     static final int MERGE_REQUEST_ID = 1;
@@ -57,24 +58,45 @@ final class TestUtility {
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
-                credentialsStore.addCredentials(domains.get(0),
-                    new StringCredentialsImpl(CredentialsScope.SYSTEM, apiTokenId, "GitLab API Token", Secret.fromString(TestUtility.API_TOKEN)));
+                credentialsStore.addCredentials(
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                apiTokenId,
+                                "GitLab API Token",
+                                Secret.fromString(TestUtility.API_TOKEN)));
             }
         }
-        connectionConfig.addConnection(new GitLabConnection(TestUtility.GITLAB_CONNECTION_V3, "http://localhost:" + mockServer.getPort() + "/gitlab", apiTokenId, new V3GitLabClientBuilder(), false, 10, 10));
-        connectionConfig.addConnection(new GitLabConnection(TestUtility.GITLAB_CONNECTION_V4, "http://localhost:" + mockServer.getPort() + "/gitlab", apiTokenId, new V4GitLabClientBuilder(), false, 10, 10));
-
+        connectionConfig.addConnection(new GitLabConnection(
+                TestUtility.GITLAB_CONNECTION_V3,
+                "http://localhost:" + mockServer.getPort() + "/gitlab",
+                apiTokenId,
+                new V3GitLabClientBuilder(),
+                false,
+                10,
+                10));
+        connectionConfig.addConnection(new GitLabConnection(
+                TestUtility.GITLAB_CONNECTION_V4,
+                "http://localhost:" + mockServer.getPort() + "/gitlab",
+                apiTokenId,
+                new V4GitLabClientBuilder(),
+                false,
+                10,
+                10));
     }
 
-    static <T extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
+    static <T extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(
+            Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(MatrixConfiguration.class);
         Notifier publisher = mock(publisherClass);
         MatrixBuild parentBuild = mock(MatrixBuild.class);
 
         when(build.getParent()).thenReturn(project);
-        when(((MatrixAggregatable) publisher).createAggregator(any(MatrixBuild.class), any(), any(BuildListener.class))).thenCallRealMethod();
-        when(publisher.perform(any(AbstractBuild.class), any(Launcher.class), any(BuildListener.class))).thenReturn(true);
+        when(((MatrixAggregatable) publisher).createAggregator(any(MatrixBuild.class), any(), any(BuildListener.class)))
+                .thenCallRealMethod();
+        when(publisher.perform(any(AbstractBuild.class), any(Launcher.class), any(BuildListener.class)))
+                .thenReturn(true);
 
         MatrixAggregator aggregator = ((MatrixAggregatable) publisher).createAggregator(parentBuild, null, listener);
         aggregator.startBuild();
@@ -93,7 +115,8 @@ final class TestUtility {
         when(build.getNumber()).thenReturn(BUILD_NUMBER);
 
         AbstractProject<?, ?> project = mock(AbstractProject.class);
-        when(project.getProperty(GitLabConnectionProperty.class)).thenReturn(new GitLabConnectionProperty(gitLabConnection));
+        when(project.getProperty(GitLabConnectionProperty.class))
+                .thenReturn(new GitLabConnectionProperty(gitLabConnection));
         doReturn(project).when(build).getParent();
         doReturn(project).when(build).getProject();
         return build;
@@ -102,15 +125,19 @@ final class TestUtility {
     @SuppressWarnings("ConstantConditions")
     static String formatNote(AbstractBuild build, String note) {
         String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
-        return MessageFormat.format(note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
+        return MessageFormat.format(
+                note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
     }
 
     static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build) {
         P spyPublisher = spy(publisher);
-        MergeRequest mergeRequest = new MergeRequest(MERGE_REQUEST_ID, MERGE_REQUEST_IID, "", "", "", PROJECT_ID, PROJECT_ID, "", "");
+        MergeRequest mergeRequest = new MergeRequest(
+                MERGE_REQUEST_ID, MERGE_REQUEST_IID, MERGE_COMMIT_SHA, "", "", "", PROJECT_ID, PROJECT_ID, "", "");
         doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
         return spyPublisher;
     }
 
-    private TestUtility() { /* contains only static utility-methods */ }
+    private TestUtility() {
+        /* contains only static utility-methods */
+    }
 }
