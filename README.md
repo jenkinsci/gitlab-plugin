@@ -91,6 +91,7 @@ gitlabSourceNamespace
 gitlabSourceRepoURL
 gitlabSourceRepoSshUrl
 gitlabSourceRepoHttpUrl
+gitlabMergeCommitSha
 gitlabMergeRequestTitle
 gitlabMergeRequestDescription
 gitlabMergeRequestId

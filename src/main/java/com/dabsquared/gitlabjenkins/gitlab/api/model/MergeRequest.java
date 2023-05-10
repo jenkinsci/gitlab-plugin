@@ -17,6 +17,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 public class MergeRequest {
     private Integer id;
     private Integer iid;
+    private String commitSha;
     private String sourceBranch;
     private String targetBranch;
     private Integer projectId;
@@ -41,6 +42,7 @@ public class MergeRequest {
     public MergeRequest(
             int id,
             int iid,
+            String commitSha,
             String sourceBranch,
             String targetBranch,
             String title,
@@ -50,6 +52,7 @@ public class MergeRequest {
             String mergeStatus) {
         this.id = id;
         this.iid = iid;
+        this.commitSha = commitSha;
         this.sourceBranch = sourceBranch;
         this.targetBranch = targetBranch;
         this.title = title;
@@ -75,6 +78,15 @@ public class MergeRequest {
 
     public void setIid(Integer iid) {
         this.iid = iid;
+    }
+
+    @Exported
+    public String getCommitSha() {
+        return commitSha;
+    }
+
+    public void setCommitSha(String commitSha) {
+        this.commitSha = commitSha;
     }
 
     @Exported
@@ -233,6 +245,7 @@ public class MergeRequest {
         return new EqualsBuilder()
                 .append(id, that.id)
                 .append(iid, that.iid)
+                .append(commitSha, that.commitSha)
                 .append(sourceBranch, that.sourceBranch)
                 .append(targetBranch, that.targetBranch)
                 .append(projectId, that.projectId)
@@ -257,6 +270,7 @@ public class MergeRequest {
         return new HashCodeBuilder(17, 37)
                 .append(id)
                 .append(iid)
+                .append(commitSha)
                 .append(sourceBranch)
                 .append(targetBranch)
                 .append(projectId)
@@ -281,6 +295,7 @@ public class MergeRequest {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("iid", iid)
+                .append("commitSha", commitSha)
                 .append("sourceBranch", sourceBranch)
                 .append("targetBranch", targetBranch)
                 .append("projectId", projectId)

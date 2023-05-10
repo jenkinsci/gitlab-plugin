@@ -31,6 +31,7 @@ public final class CauseData {
     private final String sourceRepoUrl;
     private final String sourceRepoSshUrl;
     private final String sourceRepoHttpUrl;
+    private final String mergeCommitSha;
     private final String mergeRequestTitle;
     private final String mergeRequestDescription;
     private final Integer mergeRequestId;
@@ -77,6 +78,7 @@ public final class CauseData {
             String sourceRepoUrl,
             String sourceRepoSshUrl,
             String sourceRepoHttpUrl,
+            String mergeCommitSha,
             String mergeRequestTitle,
             String mergeRequestDescription,
             Integer mergeRequestId,
@@ -120,6 +122,7 @@ public final class CauseData {
         this.sourceRepoUrl = sourceRepoUrl == null ? sourceRepoSshUrl : sourceRepoUrl;
         this.sourceRepoSshUrl = Objects.requireNonNull(sourceRepoSshUrl, "sourceRepoSshUrl must not be null.");
         this.sourceRepoHttpUrl = Objects.requireNonNull(sourceRepoHttpUrl, "sourceRepoHttpUrl must not be null.");
+        this.mergeCommitSha = mergeCommitSha == null ? "" : mergeCommitSha;
         this.mergeRequestTitle = Objects.requireNonNull(mergeRequestTitle, "mergeRequestTitle must not be null.");
         this.mergeRequestDescription = mergeRequestDescription == null ? "" : mergeRequestDescription;
         this.mergeRequestId = mergeRequestId;
@@ -166,6 +169,7 @@ public final class CauseData {
         variables.put("gitlabSourceRepoURL", sourceRepoUrl);
         variables.put("gitlabSourceRepoSshUrl", sourceRepoSshUrl);
         variables.put("gitlabSourceRepoHttpUrl", sourceRepoHttpUrl);
+        variables.putIfNotNull("gitlabMergeCommitSha", mergeCommitSha);
         variables.put("gitlabMergeRequestTitle", mergeRequestTitle);
         variables.put("gitlabMergeRequestDescription", mergeRequestDescription);
         variables.put("gitlabMergeRequestId", mergeRequestId == null ? "" : mergeRequestId.toString());
@@ -271,6 +275,11 @@ public final class CauseData {
     @Exported
     public String getMergeRequestTitle() {
         return mergeRequestTitle;
+    }
+
+    @Exported
+    public String getMergeCommitSha() {
+        return mergeCommitSha;
     }
 
     @Exported
@@ -421,6 +430,7 @@ public final class CauseData {
         return new MergeRequest(
                 mergeRequestId,
                 mergeRequestIid,
+                mergeCommitSha,
                 sourceBranch,
                 targetBranch,
                 mergeRequestTitle,
@@ -454,6 +464,7 @@ public final class CauseData {
                 .append(sourceRepoUrl, causeData.sourceRepoUrl)
                 .append(sourceRepoSshUrl, causeData.sourceRepoSshUrl)
                 .append(sourceRepoHttpUrl, causeData.sourceRepoHttpUrl)
+                .append(mergeCommitSha, causeData.mergeCommitSha)
                 .append(mergeRequestTitle, causeData.mergeRequestTitle)
                 .append(mergeRequestDescription, causeData.mergeRequestDescription)
                 .append(mergeRequestId, causeData.mergeRequestId)
@@ -502,6 +513,7 @@ public final class CauseData {
                 .append(sourceRepoUrl)
                 .append(sourceRepoSshUrl)
                 .append(sourceRepoHttpUrl)
+                .append(mergeCommitSha)
                 .append(mergeRequestTitle)
                 .append(mergeRequestDescription)
                 .append(mergeRequestId)
@@ -550,6 +562,7 @@ public final class CauseData {
                 .append("sourceRepoUrl", sourceRepoUrl)
                 .append("sourceRepoSshUrl", sourceRepoSshUrl)
                 .append("sourceRepoHttpUrl", sourceRepoHttpUrl)
+                .append("mergeCommitSha", mergeCommitSha)
                 .append("mergeRequestTitle", mergeRequestTitle)
                 .append("mergeRequestDescription", mergeRequestDescription)
                 .append("mergeRequestId", mergeRequestId)

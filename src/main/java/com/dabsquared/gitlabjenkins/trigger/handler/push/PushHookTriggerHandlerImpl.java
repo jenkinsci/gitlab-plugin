@@ -73,6 +73,7 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
                     .withSourceRepoUrl(hook.getRepository().getUrl())
                     .withSourceRepoSshUrl(hook.getRepository().getGitSshUrl())
                     .withSourceRepoHttpUrl(hook.getRepository().getGitHttpUrl())
+                    .withMergeCommitSha(null)
                     .withMergeRequestTitle("")
                     .withMergeRequestDescription("")
                     .withMergeRequestId(null)
