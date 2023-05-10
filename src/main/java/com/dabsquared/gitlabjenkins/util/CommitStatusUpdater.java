@@ -62,7 +62,8 @@ public class CommitStatusUpdater {
         EnvVars environment = null;
         if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty() && environment != null) {
             try {
-                if (!build.getEnvironment(listener).isEmpty()) {
+                environment = build.getEnvironment(listener);
+                if (!environment.isEmpty()) {
                     gitLabBranchBuilds = retrieveGitlabProjectIds(build, environment);
                 }
             } catch (IOException | InterruptedException e) {
