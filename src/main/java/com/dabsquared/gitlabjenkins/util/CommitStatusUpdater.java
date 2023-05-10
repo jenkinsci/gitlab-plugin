@@ -60,7 +60,7 @@ public class CommitStatusUpdater {
         }
 
         EnvVars environment = null;
-        if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty() && environment != null) {
+        if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty()) {
             try {
                 environment = build.getEnvironment(listener);
                 if (!environment.isEmpty()) {
