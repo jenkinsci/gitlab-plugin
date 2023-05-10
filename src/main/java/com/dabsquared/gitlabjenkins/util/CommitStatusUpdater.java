@@ -59,10 +59,11 @@ public class CommitStatusUpdater {
             return;
         }
 
-        if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty() && build.getEnvironment(listener) != null) {
+        EnvVars environment = null;
+        if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty() && environment != null) {
             try {
                 if (!build.getEnvironment(listener).isEmpty()) {
-                    gitLabBranchBuilds = retrieveGitlabProjectIds(build, build.getEnvironment(listener));
+                    gitLabBranchBuilds = retrieveGitlabProjectIds(build, environment);
                 }
             } catch (IOException | InterruptedException e) {
                 printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
@@ -96,7 +97,7 @@ public class CommitStatusUpdater {
                                 gitLabBranchBuild.getProjectId(),
                                 gitLabBranchBuild.getRevisionHash(),
                                 state,
-                                getBuildBranchOrTag(build, build.getEnvironment(listener)),
+                                getBuildBranchOrTag(build, environment),
                                 current_build_name,
                                 buildUrl,
                                 state.name());
