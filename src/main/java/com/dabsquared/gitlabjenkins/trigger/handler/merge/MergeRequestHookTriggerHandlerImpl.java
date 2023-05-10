@@ -205,6 +205,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withSourceRepoUrl(hook.getObjectAttributes().getSource().getUrl())
                 .withSourceRepoSshUrl(hook.getObjectAttributes().getSource().getSshUrl())
                 .withSourceRepoHttpUrl(hook.getObjectAttributes().getSource().getHttpUrl())
+                .withMergeCommitSha(hook.getObjectAttributes().getMergeCommitSha())
                 .withMergeRequestTitle(hook.getObjectAttributes().getTitle())
                 .withMergeRequestDescription(hook.getObjectAttributes().getDescription())
                 .withMergeRequestId(hook.getObjectAttributes().getId())
@@ -242,7 +243,9 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     }
 
     private String retrieveRevisionToBuild(MergeRequestHook hook) throws NoRevisionToBuildException {
-        if (hook.getObjectAttributes() != null
+        if (hook.getObjectAttributes().getMergeCommitSha() != null) {
+            return hook.getObjectAttributes().getMergeCommitSha();
+        } else if (hook.getObjectAttributes() != null
                 && hook.getObjectAttributes().getLastCommit() != null
                 && hook.getObjectAttributes().getLastCommit().getId() != null) {
 

@@ -165,6 +165,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withSourceRepoUrl(project.getSshUrlToRepo())
                 .withSourceRepoSshUrl(project.getSshUrlToRepo())
                 .withSourceRepoHttpUrl(project.getHttpUrlToRepo())
+                .withMergeCommitSha(mergeRequest.getCommitSha())
                 .withMergeRequestTitle(mergeRequest.getTitle())
                 .withMergeRequestDescription(mergeRequest.getDescription())
                 .withMergeRequestId(mergeRequest.getId())
