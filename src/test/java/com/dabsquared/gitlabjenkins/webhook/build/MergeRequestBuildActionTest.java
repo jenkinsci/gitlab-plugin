@@ -104,13 +104,14 @@ public class MergeRequestBuildActionTest {
             testProject.addTrigger(mockTrigger);
             executeMergeRequestAction(testProject, getJson("MergeRequestEvent.json"));
         } finally {
-            ArgumentCaptor<MergeRequestHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(MergeRequestHook.class);
-            verify(mockTrigger).onPost(pushHookArgumentCaptor.capture());
-            assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
-            assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
-            assertThat(pushHookArgumentCaptor.getValue().getUser(), is(notNullValue()));
-            assertThat(pushHookArgumentCaptor.getValue().getUser().getName(), containsString("Administrator"));
-            assertThat(pushHookArgumentCaptor.getValue().getUser().getUsername(), containsString("root"));
+            ArgumentCaptor<MergeRequestHook> mergeRequestHookArgumentCaptor =
+                    ArgumentCaptor.forClass(MergeRequestHook.class);
+            verify(mockTrigger).onPost(mergeRequestHookArgumentCaptor.capture());
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getUser(), is(notNullValue()));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getUser().getName(), containsString("Administrator"));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getUser().getUsername(), containsString("root"));
         }
     }
 
