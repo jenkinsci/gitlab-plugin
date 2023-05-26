@@ -363,6 +363,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skip>true</skip>
+              <skipTests>true</skipTests>
             </configuration>
           </plugin>
           <plugin>
