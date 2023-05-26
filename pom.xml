@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.64</version>
+    <version>4.63</version>
     <relativePath />
   </parent>
 
@@ -420,7 +420,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.42.1</version>
+            <version>0.43.0</version>
             <configuration>
               <verbose>true</verbose>
               <images>
