@@ -1,0 +1,21 @@
+---
+name: Sync project branch
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+jobs:
+  sync-project-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: gsoc-2023-project
+      - run: |
+          git fetch origin
+          git merge origin/master
+      - uses: peter-evans/create-pull-request@v5
+        with:
+          title: Merge remote-tracking branch `origin/master` into `gsoc-2023-project`
+          branch: sync-project-branch
+          delete-branch: true
