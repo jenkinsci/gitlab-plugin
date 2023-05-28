@@ -12,7 +12,7 @@ jobs:
         with:
           ref: gsoc-2023-project
       - run: |
-          git fetch origin
+          git fetch --unshallow origin
           git merge origin/master
       - uses: peter-evans/create-pull-request@v5
         with:
