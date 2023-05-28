@@ -11,6 +11,10 @@ buildPlugin(
     [platform: 'linux',   jdk: '11'], // Linux first for coverage report on ci.jenkins.io
     [platform: 'windows', jdk: '17'],
   ],
+  // TODO We anticipate that the migration will cause tests to start failing due to problems in
+  // the test framework and not problems in production code. To avoid unnecessary noise during
+  // the development process, we skip running tests until such a time that src/main is
+  // reasonably stable with the new framework.
   tests: [
     skip: true // skip tests
   ]
