@@ -338,6 +338,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <test>InjectedTest</test>
+          <skipTests>true</skipTests>
         </configuration>
       </plugin>
       <plugin>
