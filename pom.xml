@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.62</version>
+    <version>4.63</version>
     <relativePath />
   </parent>
 
@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.7.13</revision>
+    <revision>1.7.15</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.375.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -67,7 +67,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>2062.v154408a_24d20</version>
+        <version>2102.v854b_fec19c92</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -420,7 +420,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.42.1</version>
+            <version>0.43.0</version>
             <configuration>
               <verbose>true</verbose>
               <images>
@@ -504,7 +504,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.4.0</version>
             <executions>
               <execution>
                 <id>add-source</id>

@@ -59,10 +59,12 @@ public class CommitStatusUpdater {
             return;
         }
 
+        EnvVars environment = null;
         if (gitLabBranchBuilds == null || gitLabBranchBuilds.isEmpty()) {
             try {
-                if (!build.getEnvironment(listener).isEmpty()) {
-                    gitLabBranchBuilds = retrieveGitlabProjectIds(build, build.getEnvironment(listener));
+                environment = build.getEnvironment(listener);
+                if (!environment.isEmpty()) {
+                    gitLabBranchBuilds = retrieveGitlabProjectIds(build, environment);
                 }
             } catch (IOException | InterruptedException e) {
                 printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
@@ -96,7 +98,7 @@ public class CommitStatusUpdater {
                                 gitLabBranchBuild.getProjectId(),
                                 gitLabBranchBuild.getRevisionHash(),
                                 state,
-                                getBuildBranchOrTag(build),
+                                getBuildBranchOrTag(build, environment),
                                 current_build_name,
                                 buildUrl,
                                 state.name());
@@ -155,10 +157,10 @@ public class CommitStatusUpdater {
         }
     }
 
-    private static String getBuildBranchOrTag(Run<?, ?> build) {
+    private static String getBuildBranchOrTag(Run<?, ?> build, EnvVars environment) {
         GitLabWebHookCause cause = build.getCause(GitLabWebHookCause.class);
         if (cause == null) {
-            return null;
+            return environment == null ? null : environment.get("BRANCH_NAME", null);
         }
         if (cause.getData().getActionType() == CauseData.ActionType.TAG_PUSH) {
             return StringUtils.removeStart(cause.getData().getSourceBranch(), "refs/tags/");
