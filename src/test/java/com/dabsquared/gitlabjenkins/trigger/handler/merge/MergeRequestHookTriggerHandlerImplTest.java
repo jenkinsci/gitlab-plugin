@@ -26,6 +26,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -585,7 +586,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
         });
         project.setQuietPeriod(0);
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = new MergeRequestHookTriggerHandlerImpl(
-                Arrays.asList(State.opened, State.reopened), Arrays.asList(Action.approved), false, false, false);
+                Arrays.asList(State.opened, State.reopened), List.of(Action.approved), false, false, false);
         mergeRequestHookTriggerHandler.handle(
                 project,
                 mergeRequestHook()

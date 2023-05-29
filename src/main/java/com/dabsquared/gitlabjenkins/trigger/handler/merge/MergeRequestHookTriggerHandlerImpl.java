@@ -196,9 +196,12 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withTargetProjectId(hook.getObjectAttributes().getTargetProjectId())
                 .withBranch(hook.getObjectAttributes().getSourceBranch())
                 .withSourceBranch(hook.getObjectAttributes().getSourceBranch())
-                .withUserName(hook.getUser().getName())
-                .withUserUsername(hook.getUser().getUsername())
-                .withUserEmail(hook.getUser().getEmail())
+                .withUserName(
+                        hook.getObjectAttributes().getLastCommit().getAuthor().getName())
+                .withUserUsername(
+                        hook.getObjectAttributes().getLastCommit().getAuthor().getUsername())
+                .withUserEmail(
+                        hook.getObjectAttributes().getLastCommit().getAuthor().getEmail())
                 .withSourceRepoHomepage(hook.getObjectAttributes().getSource().getHomepage())
                 .withSourceRepoName(hook.getObjectAttributes().getSource().getName())
                 .withSourceNamespace(hook.getObjectAttributes().getSource().getNamespace())
@@ -359,10 +362,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 changedLabels.getPrevious() != null ? changedLabels.getPrevious() : emptyList();
 
         return current.stream()
-                .filter(currentLabel -> !previous.stream()
-                        .anyMatch(previousLabel -> Objects.equals(currentLabel.getId(), previousLabel.getId())))
-                .map(label -> label.getTitle())
-                .anyMatch(label -> labelsThatForcesBuildIfAdded.contains(label));
+                .filter(currentLabel -> previous.stream()
+                        .noneMatch(previousLabel -> Objects.equals(currentLabel.getId(), previousLabel.getId())))
+                .map(MergeRequestLabel::getTitle)
+                .anyMatch(labelsThatForcesBuildIfAdded::contains);
     }
 
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {

@@ -18,6 +18,8 @@ import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
@@ -95,7 +97,9 @@ public class NoteBuildActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(
                 0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
-        future.get();
+        if (future != null) {
+            future.get();
+        }
 
         exception.expect(HttpResponses.HttpResponseException.class);
         new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null).execute(response);
@@ -145,6 +149,7 @@ public class NoteBuildActionTest {
     }
 
     private String getJson(String name) throws IOException {
-        return IOUtils.toString(getClass().getResourceAsStream(name)).replace("${commitSha1}", commitSha1);
+        return IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(name)), StandardCharsets.UTF_8)
+                .replace("${commitSha1}", commitSha1);
     }
 }
