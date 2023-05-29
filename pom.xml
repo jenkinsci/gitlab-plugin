@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.7.14</revision>
+    <revision>1.7.15</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.375.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
