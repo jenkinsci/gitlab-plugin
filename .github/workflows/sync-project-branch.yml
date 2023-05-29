@@ -12,8 +12,10 @@ jobs:
         with:
           ref: gsoc-2023-project
       - run: |
-          git fetch --unshallow origin
-          git merge origin/master
+          git fetch --unshallow origin || git fetch origin
+          git config user.email "sync-project-branch@jenkins.io"
+          git config user.name "Sync project branch action"
+          git merge --no-edit origin/master
       - uses: peter-evans/create-pull-request@v5
         with:
           title: Merge remote-tracking branch `origin/master` into `gsoc-2023-project`
