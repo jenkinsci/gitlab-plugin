@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
@@ -11,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.gitlab4j.api.Constants.CommitBuildState;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
@@ -80,7 +80,7 @@ public class GitLabBuildsStep extends Step {
                         public void onStart(StepContext context) {
                             for (String name : step.builds) {
                                 CommitStatusUpdater.updateCommitStatus(
-                                        run, getTaskListener(context), BuildState.pending, name);
+                                        run, getTaskListener(context), CommitBuildState.PENDING, name);
                             }
                             run.addAction(new PendingBuildsAction(new ArrayList<>(step.builds)));
                         }
@@ -104,8 +104,9 @@ public class GitLabBuildsStep extends Step {
                         public void onFailure(StepContext context, Throwable t) {
                             PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
                             if (action != null) {
-                                BuildState state =
-                                        t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
+                                CommitBuildState state = t instanceof FlowInterruptedException
+                                        ? CommitBuildState.CANCELED
+                                        : CommitBuildState.FAILED;
                                 for (String name : action.getBuilds()) {
                                     CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name);
                                 }
@@ -124,7 +125,7 @@ public class GitLabBuildsStep extends Step {
                 PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
                 if (action != null) {
                     for (String name : action.getBuilds()) {
-                        CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name);
+                        CommitStatusUpdater.updateCommitStatus(run, null, CommitBuildState.CANCELED, name);
                     }
                 }
                 body.cancel(cause);

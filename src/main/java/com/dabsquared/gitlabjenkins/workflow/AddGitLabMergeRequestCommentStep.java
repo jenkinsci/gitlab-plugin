@@ -1,10 +1,8 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getGitLabApi;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.model.Cause;
 import hudson.model.Cause.UpstreamCause;
@@ -20,6 +18,9 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -82,15 +83,19 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                 }
             }
             if (cause != null) {
-                MergeRequest mergeRequest = cause.getData().getMergeRequest();
+                MergeRequest mergeRequest = getMergeRequest(run, getGitLabApi(run));
+                // will use mergerequestcausedata
                 if (mergeRequest != null) {
-                    GitLabClient client = getClient(run);
-                    if (client == null) {
+                    GitLabApi gitLabApi = getGitLabApi(run);
+                    if (gitLabApi == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            client.createMergeRequestNote(mergeRequest, step.getComment());
-                        } catch (WebApplicationException | ProcessingException e) {
+                            gitLabApi
+                                    .getNotesApi()
+                                    .createMergeRequestNote(
+                                            mergeRequest.getProjectId(), mergeRequest.getIid(), step.getComment());
+                        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
                             printf(
                                     "Failed to add comment on Merge Request for project '%s': %s%n",
                                     mergeRequest.getProjectId(), e.getMessage());
@@ -110,6 +115,32 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                                 + "Cannot retrieve GitLab MR context: Cannot find GitLabWebHookCause");
             }
             return null;
+        }
+
+        private MergeRequest getMergeRequest(Run<?, ?> run, GitLabApi gitlabApi) throws GitLabApiException {
+            GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            String mergeRequestTitle = cause.getData().getMergeRequestTitle();
+            String mergeRequestDescription = cause.getData().getMergeRequestDescription();
+            String sourceBranch = cause.getData().getSourceBranch();
+            String targetBranch = cause.getData().getTargetBranch();
+            Long sourceProjectId = cause.getData().getSourceProjectId();
+            Long targetProjectId = cause.getData().getTargetProjectId();
+
+            MergeRequest mergeRequest = getGitLabApi(run)
+                    .getMergeRequestApi()
+                    .createMergeRequest(
+                            sourceProjectId,
+                            sourceBranch,
+                            targetBranch,
+                            mergeRequestTitle,
+                            mergeRequestDescription,
+                            null,
+                            targetProjectId,
+                            null,
+                            null,
+                            false,
+                            null);
+            return mergeRequest;
         }
 
         private void println(String message) {
