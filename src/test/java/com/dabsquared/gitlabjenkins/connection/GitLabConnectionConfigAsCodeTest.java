@@ -53,7 +53,6 @@ public class GitLabConnectionConfigAsCodeTest {
                 gitLabConnections.getConnections().get(0);
         assertEquals("gitlab_token", gitLabConnection.getApiTokenId());
         assertEquals("my_gitlab_server", gitLabConnection.getName());
-        assertEquals("autodetect", gitLabConnection.getClientBuilderId());
         assertEquals("https://gitlab.com/", gitLabConnection.getUrl());
         assertEquals(20, gitLabConnection.getConnectionTimeout());
         assertEquals(10, gitLabConnection.getReadTimeout());

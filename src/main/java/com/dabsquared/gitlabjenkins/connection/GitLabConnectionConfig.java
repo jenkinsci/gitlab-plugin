@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.Item;
@@ -9,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jenkins.model.GlobalConfiguration;
+import org.gitlab4j.api.GitLabApi;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -57,11 +57,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         save();
     }
 
-    public GitLabClient getClient(String connectionName, Item item, String jobCredentialId) {
+    public GitLabApi getGitLabApi(String connectionName, Item item, String jobCredentialId) {
         if (!connectionMap.containsKey(connectionName)) {
             return null;
         }
-        return connectionMap.get(connectionName).getClient(item, jobCredentialId);
+        return connectionMap.get(connectionName).getGitLabApi(item, jobCredentialId);
     }
 
     private void refreshConnectionMap() {
