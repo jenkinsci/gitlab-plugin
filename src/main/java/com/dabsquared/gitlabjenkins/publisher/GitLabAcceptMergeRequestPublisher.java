@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -14,6 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -56,13 +57,19 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest) {
         try {
             if (build.getResult() == Result.SUCCESS) {
-                client.acceptMergeRequest(
-                        mergeRequest, "Merge Request accepted by jenkins build success", this.deleteSourceBranch);
+                gitLabApi
+                        .getMergeRequestApi()
+                        .acceptMergeRequest(
+                                mergeRequest,
+                                mergeRequest.getIid(),
+                                "Merge Request accepted by jenkins build success",
+                                isDeleteSourceBranch(),
+                                true);
             }
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
             listener.getLogger()
                     .printf(
                             "Failed to accept merge request for project '%s': %s%n",

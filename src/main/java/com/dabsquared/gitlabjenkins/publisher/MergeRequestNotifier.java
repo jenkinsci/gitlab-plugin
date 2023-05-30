@@ -1,10 +1,11 @@
+/* Note for Reviewers :
+ * getmergeRequest() is defined here instead of using causedata temporarily.
+ */
 package com.dabsquared.gitlabjenkins.publisher;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getGitLabApi;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -16,6 +17,9 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import java.io.IOException;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
 
 /**
  * @author Robin Müller
@@ -28,17 +32,21 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        GitLabClient client = getClient(build);
-        if (client == null) {
+        GitLabApi gitlabApi = getGitLabApi(build);
+        if (gitlabApi == null) {
             listener.getLogger().println("No GitLab connection configured");
             return true;
         }
-
-        MergeRequest mergeRequest = getMergeRequest(build);
-        if (mergeRequest != null) {
-            perform(build, listener, client, mergeRequest);
+        try {
+            MergeRequest mergeRequest = getMergeRequest(build);
+            if (mergeRequest != null) {
+                perform(build, listener, gitlabApi, mergeRequest);
+            }
+            return true;
+        } catch (GitLabApiException e) {
+            listener.getLogger().println("Failed to create merge request: " + e.getMessage());
+            return false;
         }
-        return true;
     }
 
     public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
@@ -52,10 +60,31 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     }
 
     protected abstract void perform(
-            Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest);
+            Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest);
 
-    MergeRequest getMergeRequest(Run<?, ?> run) {
+    MergeRequest getMergeRequest(Run<?, ?> run) throws GitLabApiException {
         GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
-        return cause == null ? null : cause.getData().getMergeRequest();
+        String mergeRequestTitle = cause.getData().getMergeRequestTitle();
+        String mergeRequestDescription = cause.getData().getMergeRequestDescription();
+        String sourceBranch = cause.getData().getSourceBranch();
+        String targetBranch = cause.getData().getTargetBranch();
+        Long sourceProjectId = cause.getData().getSourceProjectId();
+        Long targetProjectId = cause.getData().getTargetProjectId();
+
+        MergeRequest mergeRequest = getGitLabApi(run)
+                .getMergeRequestApi()
+                .createMergeRequest(
+                        sourceProjectId,
+                        sourceBranch,
+                        targetBranch,
+                        mergeRequestTitle,
+                        mergeRequestDescription,
+                        null,
+                        targetProjectId,
+                        null,
+                        null,
+                        false,
+                        null);
+        return mergeRequest;
     }
 }

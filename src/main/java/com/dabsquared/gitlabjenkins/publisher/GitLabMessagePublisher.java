@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractProject;
@@ -18,6 +16,9 @@ import java.util.logging.Logger;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -174,12 +175,15 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabClient client, MergeRequest mergeRequest) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest) {
         try {
             if (!onlyForFailure || build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
-                client.createMergeRequestNote(mergeRequest, getNote(build, listener));
+                gitLabApi
+                        .getNotesApi()
+                        .createMergeRequestNote(
+                                mergeRequest.getProjectId(), mergeRequest.getIid(), getNote(build, listener));
             }
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
             listener.getLogger()
                     .printf(
                             "Failed to add comment on Merge Request for project '%s': %s%n",
