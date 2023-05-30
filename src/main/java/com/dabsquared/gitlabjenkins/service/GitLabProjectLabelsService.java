@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Label;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -12,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.Label;
 
 public class GitLabProjectLabelsService {
 
@@ -34,9 +35,9 @@ public class GitLabProjectLabelsService {
         return instance;
     }
 
-    public List<String> getLabels(GitLabClient client, String sourceRepositoryString) {
+    public List<String> getLabels(GitLabApi gitLabApi, String sourceRepositoryString) {
         synchronized (projectLabelsCache) {
-            return projectLabelsCache.get(sourceRepositoryString, new LabelNamesLoader(client));
+            return projectLabelsCache.get(sourceRepositoryString, new LabelNamesLoader(gitLabApi));
         }
     }
 
@@ -47,10 +48,10 @@ public class GitLabProjectLabelsService {
     }
 
     private static class LabelNamesLoader implements Function<String, List<String>> {
-        private final GitLabClient client;
+        private final GitLabApi gitLabApi;
 
-        private LabelNamesLoader(GitLabClient client) {
-            this.client = client;
+        private LabelNamesLoader(GitLabApi gitLabApi) {
+            this.gitLabApi = gitLabApi;
         }
 
         @Override
@@ -58,12 +59,16 @@ public class GitLabProjectLabelsService {
             List<String> result = new ArrayList<>();
             String projectId;
             try {
-                projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
+                projectId = ProjectIdUtil.retrieveProjectId(gitLabApi, sourceRepository);
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 throw new LabelLoadingException(e);
             }
-            for (Label label : client.getLabels(projectId)) {
-                result.add(label.getName());
+            try {
+                for (Label label : gitLabApi.getLabelsApi().getLabels(projectId)) {
+                    result.add(label.getName());
+                }
+            } catch (GitLabApiException e) {
+                LOGGER.log(Level.SEVERE, "failed to load labels for repo " + e.getMessage());
             }
             LOGGER.log(
                     Level.FINEST,

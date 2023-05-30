@@ -1,7 +1,5 @@
 package com.dabsquared.gitlabjenkins.service;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import com.dabsquared.gitlabjenkins.util.ProjectIdUtil;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -12,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.Branch;
 
 public class GitLabProjectBranchesService {
 
@@ -34,9 +35,9 @@ public class GitLabProjectBranchesService {
         return gitLabProjectBranchesService;
     }
 
-    public List<String> getBranches(GitLabClient client, String sourceRepositoryString) {
+    public List<String> getBranches(GitLabApi gitLabApi, String sourceRepositoryString) {
         synchronized (projectBranchCache) {
-            return projectBranchCache.get(sourceRepositoryString, new BranchNamesLoader(client));
+            return projectBranchCache.get(sourceRepositoryString, new BranchNamesLoader(gitLabApi));
         }
     }
 
@@ -47,10 +48,10 @@ public class GitLabProjectBranchesService {
     }
 
     private static class BranchNamesLoader implements Function<String, List<String>> {
-        private final GitLabClient client;
+        private final GitLabApi gitLabApi;
 
-        private BranchNamesLoader(GitLabClient client) {
-            this.client = client;
+        private BranchNamesLoader(GitLabApi gitLabApi) {
+            this.gitLabApi = gitLabApi;
         }
 
         @Override
@@ -58,12 +59,16 @@ public class GitLabProjectBranchesService {
             List<String> result = new ArrayList<>();
             String projectId;
             try {
-                projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
+                projectId = ProjectIdUtil.retrieveProjectId(gitLabApi, sourceRepository);
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 throw new BranchLoadingException(e);
             }
-            for (Branch branch : client.getBranches(projectId)) {
-                result.add(branch.getName());
+            try {
+                for (Branch branch : gitLabApi.getRepositoryApi().getBranches(projectId)) {
+                    result.add(branch.getName());
+                }
+            } catch (GitLabApiException e) {
+                LOGGER.log(Level.SEVERE, "failed to load branches from repository " + e.getMessage());
             }
             LOGGER.log(
                     Level.FINEST,
