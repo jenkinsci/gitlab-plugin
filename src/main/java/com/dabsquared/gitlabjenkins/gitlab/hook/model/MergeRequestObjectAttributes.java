@@ -1,3 +1,6 @@
+/* Note for reviewers :
+ * This class will be replaced by mergerequestevent. This is temporary.
+ */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import java.util.Date;
@@ -12,12 +15,12 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class MergeRequestObjectAttributes {
 
-    private Integer id;
-    private Integer iid;
+    private Long id;
+    private Long iid;
     private String sourceBranch;
     private String targetBranch;
-    private Integer sourceProjectId;
-    private Integer targetProjectId;
+    private Long sourceProjectId;
+    private Long targetProjectId;
     private Integer authorId;
     private Integer assigneeId;
     private String title;
@@ -35,19 +38,19 @@ public class MergeRequestObjectAttributes {
     private Action action;
     private Boolean workInProgress;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Integer getIid() {
+    public Long getIid() {
         return iid;
     }
 
-    public void setIid(Integer iid) {
+    public void setIid(Long iid) {
         this.iid = iid;
     }
 
@@ -67,19 +70,19 @@ public class MergeRequestObjectAttributes {
         this.targetBranch = targetBranch;
     }
 
-    public Integer getSourceProjectId() {
+    public Long getSourceProjectId() {
         return sourceProjectId;
     }
 
-    public void setSourceProjectId(Integer sourceProjectId) {
+    public void setSourceProjectId(Long sourceProjectId) {
         this.sourceProjectId = sourceProjectId;
     }
 
-    public Integer getTargetProjectId() {
+    public Long getTargetProjectId() {
         return targetProjectId;
     }
 
-    public void setTargetProjectId(Integer targetProjectId) {
+    public void setTargetProjectId(Long targetProjectId) {
         this.targetProjectId = targetProjectId;
     }
 

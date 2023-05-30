@@ -1,3 +1,6 @@
+/* Note for Reviewers :
+ * Temporary class. Will be removed.
+ */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import java.util.List;
@@ -20,7 +23,7 @@ public class PushHook extends WebHook {
     private String userUsername;
     private String userEmail;
     private String userAvatar;
-    private Integer projectId;
+    private Long projectId;
     private Project project;
     private List<Commit> commits;
     private Integer totalCommitsCount;
@@ -89,11 +92,11 @@ public class PushHook extends WebHook {
         this.userAvatar = userAvatar;
     }
 
-    public Integer getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Integer projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
