@@ -47,7 +47,7 @@ This plugin allows GitLab to trigger builds in Jenkins when code is committed or
 This plugin is Open Source Software, developed on a volunteer basis by users of Jenkins and GitLab. It is not formally supported by either GitLab Inc. or CloudBees Inc.
 
 #### Supported GitLab versions
-GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the current major release. At the time of this writing, the current stable release of GitLab is 11.1, so the oldest release supported by this plugin is 9.0.
+GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the current major release. At the time of this writing, the current stable release of GitLab is 16.0, so the oldest release supported by this plugin is 14.0.
 
 #### Getting help
 If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project.
@@ -63,13 +63,7 @@ To enable debug logging in the plugin:
 
 ## Known bugs/issues
 
-This is not an exhaustive list of issues, but rather a place for us to note significant bugs that may impact your use of the plugin in certain circumstances. For most things, please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section and open a new one if you don't find anything.
-* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition < 8.8.3. Subsequent versions work fine.
-* Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
-* [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
-* [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
-* [#730](https://github.com/jenkinsci/gitlab-plugin/issues/730) - GitLab 10.5.6 introduced an issue which can cause HTTP 500 errors when webhooks are triggered if the webhook is pointing to http://localhost or http://127.0.0.1. See the linked issue for a workaround.
-
+Please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section for relevant issues and open a new one if you don't find anything.
 ## Report an Issue
 
 Please report issues and enhancements through the [GitHub issue tracker](https://github.com/jenkinsci/gitlab-plugin/issues/new/choose).
@@ -589,6 +583,8 @@ To cancel pending builds of the same merge request when new commits are pushed, 
 This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
 
 ## Compatibility
+
+During the migration of the GitLab Plugin from RESTEasy library to GitLab4J-API as GitLab has dropped support for API V3, the support for GitLab API V3 has also been removed from the plugin and only the latest V4 is supported.
 
 Version 1.2.1 of the plugin introduces a backwards-incompatible change
 for Pipeline jobs. They will need to be manually reconfigured when you
