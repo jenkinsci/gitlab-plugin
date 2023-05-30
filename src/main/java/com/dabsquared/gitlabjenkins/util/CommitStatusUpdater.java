@@ -1,12 +1,10 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getGitLabApi;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.EnvVars;
 import hudson.model.*;
@@ -31,6 +29,10 @@ import jenkins.scm.api.SCMRevisionAction;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab4j.api.Constants.CommitBuildState;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.CommitStatus;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
@@ -43,18 +45,18 @@ public class CommitStatusUpdater {
     public static void updateCommitStatus(
             Run<?, ?> build,
             TaskListener listener,
-            BuildState state,
+            CommitBuildState state,
             String name,
             List<GitLabBranchBuild> gitLabBranchBuilds,
             GitLabConnectionProperty connection) {
-        GitLabClient client;
+        GitLabApi gitLabApi;
         if (connection != null) {
-            client = connection.getClient();
+            gitLabApi = connection.getGitLabApi();
         } else {
-            client = getClient(build);
+            gitLabApi = getGitLabApi(build);
         }
 
-        if (client == null) {
+        if (gitLabApi == null) {
             println(listener, "No GitLab connection configured");
             return;
         }
@@ -75,12 +77,12 @@ public class CommitStatusUpdater {
         if (gitLabBranchBuilds != null) {
             for (final GitLabBranchBuild gitLabBranchBuild : gitLabBranchBuilds) {
                 try {
-                    GitLabClient current_client = client;
+                    GitLabApi current_gitLabApi = gitLabApi;
                     if (gitLabBranchBuild.getConnection() != null) {
-                        GitLabClient build_specific_client =
-                                gitLabBranchBuild.getConnection().getClient();
-                        if (build_specific_client != null) {
-                            current_client = build_specific_client;
+                        GitLabApi build_specific_gitLabApi =
+                                gitLabBranchBuild.getConnection().getGitLabApi();
+                        if (build_specific_gitLabApi != null) {
+                            current_gitLabApi = build_specific_gitLabApi;
                         }
                     }
 
@@ -90,20 +92,25 @@ public class CommitStatusUpdater {
                     }
 
                     if (existsCommit(
-                            current_client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
+                            current_gitLabApi, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
+                        CommitStatus status = new CommitStatus();
+                        status.withTargetUrl(buildUrl)
+                                .withName(current_build_name)
+                                .withDescription(build.getDisplayName())
+                                .withRef(getBuildBranchOrTag(build, environment))
+                                .withCoverage(null);
                         LOGGER.log(
                                 Level.INFO,
                                 String.format("Updating build '%s' to '%s'", gitLabBranchBuild.getProjectId(), state));
-                        current_client.changeBuildStatus(
-                                gitLabBranchBuild.getProjectId(),
-                                gitLabBranchBuild.getRevisionHash(),
-                                state,
-                                getBuildBranchOrTag(build, environment),
-                                current_build_name,
-                                buildUrl,
-                                state.name());
+                        current_gitLabApi
+                                .getCommitsApi()
+                                .addCommitStatus(
+                                        gitLabBranchBuild.getProjectId(),
+                                        gitLabBranchBuild.getRevisionHash(),
+                                        state,
+                                        status);
                     }
-                } catch (WebApplicationException | ProcessingException e) {
+                } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
                     printf(
                             listener,
                             "Failed to update Gitlab commit status for project '%s': %s%n",
@@ -120,7 +127,7 @@ public class CommitStatusUpdater {
         }
     }
 
-    public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state, String name) {
+    public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, CommitBuildState state, String name) {
         try {
             updateCommitStatus(build, listener, state, name, null, null);
         } catch (IllegalStateException e) {
@@ -145,11 +152,11 @@ public class CommitStatusUpdater {
         }
     }
 
-    private static boolean existsCommit(GitLabClient client, String gitlabProjectId, String commitHash) {
+    private static boolean existsCommit(GitLabApi gitLabApi, String gitlabProjectId, String commitHash) {
         try {
-            client.getCommit(gitlabProjectId, commitHash);
+            gitLabApi.getCommitsApi().getCommit(gitlabProjectId, commitHash);
             return true;
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | GitLabApiException e) {
             LOGGER.log(
                     Level.FINE,
                     String.format("Project (%s) and commit (%s) combination not found", gitlabProjectId, commitHash));
@@ -189,8 +196,8 @@ public class CommitStatusUpdater {
             return builds;
         }
 
-        final GitLabClient gitLabClient = getClient(build);
-        if (gitLabClient == null) {
+        final GitLabApi gitLabApi = getGitLabApi(build);
+        if (gitLabApi == null) {
             LOGGER.log(Level.WARNING, "No gitlab client found.");
             return result;
         }
@@ -203,7 +210,7 @@ public class CommitStatusUpdater {
 
         if (buildDatas.size() == 1) {
             addGitLabBranchBuild(
-                    result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
+                    result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabApi);
         } else {
             final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
 
@@ -232,7 +239,7 @@ public class CommitStatusUpdater {
                         if (buildByBranchName.getValue().getSHA1() != null) {
                             if (buildByBranchName.getValue().getSHA1().equals(ObjectId.fromString(scmRevisionHash))) {
                                 addGitLabBranchBuild(
-                                        result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabClient);
+                                        result, scmRevisionHash, buildData.getRemoteUrls(), environment, gitLabApi);
                             }
                         }
                     }
@@ -267,21 +274,22 @@ public class CommitStatusUpdater {
             String scmRevisionHash,
             Set<String> remoteUrls,
             EnvVars environment,
-            GitLabClient gitLabClient) {
+            GitLabApi gitLabApi) {
         for (String remoteUrl : remoteUrls) {
             try {
                 LOGGER.log(Level.INFO, "Retrieving the gitlab project id from remote url {0}", remoteUrl);
                 final String projectNameWithNameSpace =
-                        ProjectIdUtil.retrieveProjectId(gitLabClient, environment.expand(remoteUrl));
+                        ProjectIdUtil.retrieveProjectId(gitLabApi, environment.expand(remoteUrl));
                 if (StringUtils.isNotBlank(projectNameWithNameSpace)) {
                     String projectId = projectNameWithNameSpace;
                     if (projectNameWithNameSpace.contains(".")) {
                         try {
-                            projectId = gitLabClient
+                            projectId = gitLabApi
+                                    .getProjectApi()
                                     .getProject(projectNameWithNameSpace)
                                     .getId()
                                     .toString();
-                        } catch (WebApplicationException | ProcessingException e) {
+                        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
                             LOGGER.log(
                                     Level.SEVERE,
                                     String.format(
