@@ -1,10 +1,11 @@
+/* Note for Reviewers :
+ * changebuildstatus() is replaced by addcommitstatus() for updating the commit status.
+ */
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -27,6 +28,10 @@ import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.gitlab4j.api.Constants.CommitBuildState;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.CommitStatus;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
@@ -71,25 +76,27 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         try {
             String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
             if (StringUtils.isNotBlank(buildName)) {
-                GitLabClient client =
-                        job.getProperty(GitLabConnectionProperty.class).getClient();
+                GitLabApi gitLabApi =
+                        job.getProperty(GitLabConnectionProperty.class).getGitLabApi();
                 BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
                 try {
-                    if (client == null) {
+                    if (gitLabApi == null) {
                         LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                     } else {
                         String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
                         String targetUrl = DisplayURLProvider.get().getJobURL(job);
-                        client.changeBuildStatus(
-                                buildStatusUpdate.getProjectId(),
-                                buildStatusUpdate.getSha(),
-                                BuildState.pending,
-                                ref,
-                                buildName,
-                                targetUrl,
-                                BuildState.pending.name());
+                        Long projectId = buildStatusUpdate.getProjectId();
+                        String sha = buildStatusUpdate.getSha();
+                        CommitStatus status = new CommitStatus();
+                        status.withRef(ref)
+                                .withName(buildName)
+                                .withTargetUrl(targetUrl)
+                                .withDescription(CommitBuildState.PENDING.name())
+                                .withCoverage(null)
+                                .withTargetUrl(targetUrl);
+                        gitLabApi.getCommitsApi().addCommitStatus(projectId, sha, CommitBuildState.PENDING, status);
                     }
-                } catch (WebApplicationException | ProcessingException e) {
+                } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
                     LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
                 }
             }
@@ -171,18 +178,18 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     }
 
     public static class BuildStatusUpdate {
-        private final Integer projectId;
+        private final Long projectId;
         private final String sha;
         private final String ref;
 
         @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-        public BuildStatusUpdate(Integer projectId, String sha, String ref) {
+        public BuildStatusUpdate(Long projectId, String sha, String ref) {
             this.projectId = projectId;
             this.sha = sha;
             this.ref = ref;
         }
 
-        public Integer getProjectId() {
+        public Long getProjectId() {
             return projectId;
         }
 

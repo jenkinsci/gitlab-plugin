@@ -42,9 +42,9 @@ public final class ProjectBranchesProvider {
     private List<String> getProjectBranches(Job<?, ?> project) {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null && connectionProperty.getClient() != null) {
+        if (connectionProperty != null && connectionProperty.getGitLabApi() != null) {
             return GitLabProjectBranchesService.instance()
-                    .getBranches(connectionProperty.getClient(), sourceRepository.toString());
+                    .getBranches(connectionProperty.getGitLabApi(), sourceRepository.toString());
         } else {
             LOGGER.log(
                     Level.WARNING,

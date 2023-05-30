@@ -43,9 +43,9 @@ public final class ProjectLabelsProvider {
     private List<String> getProjectLabels(Job<?, ?> project) {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
-        if (connectionProperty != null && connectionProperty.getClient() != null) {
+        if (connectionProperty != null && connectionProperty.getGitLabApi() != null) {
             return GitLabProjectLabelsService.instance()
-                    .getLabels(connectionProperty.getClient(), sourceRepository.toString());
+                    .getLabels(connectionProperty.getGitLabApi(), sourceRepository.toString());
         } else {
             LOGGER.log(
                     Level.WARNING,

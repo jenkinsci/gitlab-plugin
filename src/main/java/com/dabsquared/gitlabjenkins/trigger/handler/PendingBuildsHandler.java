@@ -1,11 +1,12 @@
+/* Note for Reviewers :
+ * changebuildstatus() is replaced by addcommitstatus() for updating the commit status.
+ */
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.AbstractProject;
@@ -16,6 +17,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.Constants.CommitBuildState;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.CommitStatus;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
@@ -23,7 +28,7 @@ public class PendingBuildsHandler {
 
     private static final Logger LOGGER = Logger.getLogger(PendingBuildsHandler.class.getName());
 
-    public void cancelPendingBuilds(Job<?, ?> job, Integer projectId, String branch) {
+    public void cancelPendingBuilds(Job<?, ?> job, Long projectId, String branch) {
         Queue queue = Jenkins.getInstance().getQueue();
         for (Queue.Item item : queue.getItems()) {
             if (!job.getName().equals(item.task.getName())) {
@@ -69,18 +74,23 @@ public class PendingBuildsHandler {
             return;
         }
         String targetUrl = DisplayURLProvider.get().getJobURL(job);
-        GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
+        GitLabApi gitLabApi = job.getProperty(GitLabConnectionProperty.class).getGitLabApi();
         String ref = StringUtils.removeStart(causeData.getSourceBranch(), "refs/tags/");
         try {
-            client.changeBuildStatus(
-                    causeData.getSourceProjectId(),
-                    causeData.getLastCommit(),
-                    BuildState.canceled,
-                    ref,
-                    buildName,
-                    targetUrl,
-                    BuildState.canceled.name());
-        } catch (Exception e) {
+            CommitStatus status = new CommitStatus();
+            status.withRef(ref)
+                    .withName(buildName)
+                    .withDescription(CommitBuildState.CANCELED.name())
+                    .withCoverage(null) // dont know whether it should be null or not
+                    .withTargetUrl(targetUrl);
+            gitLabApi
+                    .getCommitsApi()
+                    .addCommitStatus(
+                            causeData.getSourceProjectId(),
+                            causeData.getLastCommit(),
+                            CommitBuildState.CANCELED,
+                            status);
+        } catch (GitLabApiException e) {
             LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
         }
     }
