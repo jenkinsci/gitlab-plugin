@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import hudson.Extension;
 import hudson.Launcher;
@@ -18,6 +17,7 @@ import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.Constants.CommitBuildState;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -41,7 +41,7 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.running, name);
+        CommitStatusUpdater.updateCommitStatus(build, listener, CommitBuildState.RUNNING, name);
         return true;
     }
 
@@ -50,11 +50,11 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
             throws InterruptedException, IOException {
         Result buildResult = build.getResult();
         if (buildResult == Result.SUCCESS || (buildResult == Result.UNSTABLE && markUnstableAsSuccess)) {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, name);
+            CommitStatusUpdater.updateCommitStatus(build, listener, CommitBuildState.SUCCESS, name);
         } else if (buildResult == Result.ABORTED) {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.canceled, name);
+            CommitStatusUpdater.updateCommitStatus(build, listener, CommitBuildState.CANCELED, name);
         } else {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.failed, name);
+            CommitStatusUpdater.updateCommitStatus(build, listener, CommitBuildState.FAILED, name);
         }
         return true;
     }
