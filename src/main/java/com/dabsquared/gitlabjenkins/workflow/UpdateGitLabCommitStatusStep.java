@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import hudson.Extension;
 import hudson.model.Run;
@@ -11,6 +10,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.Constants.CommitBuildState;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -27,10 +27,10 @@ import org.kohsuke.stapler.export.ExportedBean;
 public class UpdateGitLabCommitStatusStep extends Step {
 
     private String name;
-    private BuildState state;
+    private CommitBuildState state;
 
     @DataBoundConstructor
-    public UpdateGitLabCommitStatusStep(String name, BuildState state) {
+    public UpdateGitLabCommitStatusStep(String name, CommitBuildState state) {
         this.name = StringUtils.isEmpty(name) ? null : name;
         this.state = state;
     }
@@ -49,12 +49,12 @@ public class UpdateGitLabCommitStatusStep extends Step {
         this.name = StringUtils.isEmpty(name) ? null : name;
     }
 
-    public BuildState getState() {
+    public CommitBuildState getState() {
         return state;
     }
 
     @DataBoundSetter
-    public void setState(BuildState state) {
+    public void setState(CommitBuildState state) {
         this.state = state;
     }
 
@@ -109,7 +109,7 @@ public class UpdateGitLabCommitStatusStep extends Step {
 
         public ListBoxModel doFillStateItems() {
             ListBoxModel options = new ListBoxModel();
-            for (BuildState buildState : EnumSet.allOf(BuildState.class)) {
+            for (CommitBuildState buildState : EnumSet.allOf(CommitBuildState.class)) {
                 options.add(buildState.name());
             }
             return options;

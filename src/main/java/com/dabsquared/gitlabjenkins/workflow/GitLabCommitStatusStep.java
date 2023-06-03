@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.util.CommitStatusUpdater;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
@@ -13,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.Constants.CommitBuildState;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
@@ -92,7 +92,7 @@ public class GitLabCommitStatusStep extends Step {
                             CommitStatusUpdater.updateCommitStatus(
                                     run,
                                     getTaskListener(context),
-                                    BuildState.running,
+                                    CommitBuildState.RUNNING,
                                     name,
                                     step.builds,
                                     step.connection);
@@ -108,7 +108,7 @@ public class GitLabCommitStatusStep extends Step {
                                 CommitStatusUpdater.updateCommitStatus(
                                         run,
                                         getTaskListener(context),
-                                        BuildState.success,
+                                        CommitBuildState.SUCCESS,
                                         name,
                                         step.builds,
                                         step.connection);
@@ -120,12 +120,12 @@ public class GitLabCommitStatusStep extends Step {
 
                         @Override
                         public void onFailure(StepContext context, Throwable t) {
-                            BuildState state = BuildState.failed;
+                            CommitBuildState state = CommitBuildState.FAILED;
                             if (t != null) {
                                 if (t instanceof FlowInterruptedException) {
                                     FlowInterruptedException ex = (FlowInterruptedException) t;
                                     if (ex.isActualInterruption()) {
-                                        state = BuildState.canceled;
+                                        state = CommitBuildState.CANCELED;
                                     }
                                 }
                             }
@@ -145,7 +145,7 @@ public class GitLabCommitStatusStep extends Step {
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
                 CommitStatusUpdater.updateCommitStatus(
-                        run, null, BuildState.canceled, name, step.builds, step.connection);
+                        run, null, CommitBuildState.CANCELED, name, step.builds, step.connection);
                 body.cancel(cause);
             }
         }
