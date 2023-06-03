@@ -1,6 +1,11 @@
+/* Note for Reviewers :
+ * This Causedata will be broken according to the events received from Gitlab.
+ * gitlab4j uses Long data type instead of Integer
+ * as i cant create gitlabapi instance in causedata, getmergereqest has been moved to the classes which required in specifically.
+ */
+
 package com.dabsquared.gitlabjenkins.cause;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.markup.EscapedMarkupFormatter;
 import java.util.*;
 import jenkins.model.Jenkins;
@@ -18,8 +23,8 @@ import org.kohsuke.stapler.export.ExportedBean;
 @ExportedBean
 public final class CauseData {
     private final ActionType actionType;
-    private final Integer sourceProjectId;
-    private final Integer targetProjectId;
+    private final Long sourceProjectId;
+    private final Long targetProjectId;
     private final String branch;
     private final String sourceBranch;
     private final String userName;
@@ -34,12 +39,12 @@ public final class CauseData {
     private final String mergeCommitSha;
     private final String mergeRequestTitle;
     private final String mergeRequestDescription;
-    private final Integer mergeRequestId;
-    private final Integer mergeRequestIid;
+    private final Long mergeRequestId;
+    private final Long mergeRequestIid;
     private final String mergeRequestState;
     private final String mergedByUser;
     private final String mergeRequestAssignee;
-    private final Integer mergeRequestTargetProjectId;
+    private final Long mergeRequestTargetProjectId;
     private final String targetBranch;
     private final String targetRepoName;
     private final String targetNamespace;
@@ -65,8 +70,8 @@ public final class CauseData {
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(
             ActionType actionType,
-            Integer sourceProjectId,
-            Integer targetProjectId,
+            Long sourceProjectId,
+            Long targetProjectId,
             String branch,
             String sourceBranch,
             String userName,
@@ -81,9 +86,9 @@ public final class CauseData {
             String mergeCommitSha,
             String mergeRequestTitle,
             String mergeRequestDescription,
-            Integer mergeRequestId,
-            Integer mergeRequestIid,
-            Integer mergeRequestTargetProjectId,
+            Long mergeRequestId,
+            Long mergeRequestIid,
+            Long mergeRequestTargetProjectId,
             String targetBranch,
             String targetRepoName,
             String targetNamespace,
@@ -203,12 +208,12 @@ public final class CauseData {
     }
 
     @Exported
-    public Integer getSourceProjectId() {
+    public Long getSourceProjectId() {
         return sourceProjectId;
     }
 
     @Exported
-    public Integer getTargetProjectId() {
+    public Long getTargetProjectId() {
         return targetProjectId;
     }
 
@@ -288,17 +293,17 @@ public final class CauseData {
     }
 
     @Exported
-    public Integer getMergeRequestId() {
+    public Long getMergeRequestId() {
         return mergeRequestId;
     }
 
     @Exported
-    public Integer getMergeRequestIid() {
+    public Long getMergeRequestIid() {
         return mergeRequestIid;
     }
 
     @Exported
-    public Integer getMergeRequestTargetProjectId() {
+    public Long getMergeRequestTargetProjectId() {
         return mergeRequestTargetProjectId;
     }
 
@@ -419,25 +424,6 @@ public final class CauseData {
     @Exported
     public String getMergeRequestAssignee() {
         return mergeRequestAssignee;
-    }
-
-    @Exported
-    public MergeRequest getMergeRequest() {
-        if (mergeRequestId == null) {
-            return null;
-        }
-
-        return new MergeRequest(
-                mergeRequestId,
-                mergeRequestIid,
-                mergeCommitSha,
-                sourceBranch,
-                targetBranch,
-                mergeRequestTitle,
-                sourceProjectId,
-                targetProjectId,
-                mergeRequestDescription,
-                mergeRequestState);
     }
 
     @Override
