@@ -1,3 +1,6 @@
+/* Note to Reviewers :
+ * Will be removed.
+ */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import java.util.List;
@@ -13,16 +16,16 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class PipelineHook extends WebHook {
 
     private User user;
-    public Integer projectId;
+    public Long projectId;
     private List<Commit> commits;
     private Project project;
     private PipelineEventObjectAttributes objectAttributes;
 
-    public Integer getProjectId() {
+    public Long getProjectId() {
         return projectId;
     }
 
-    public void setProjectId(Integer projectId) {
+    public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
