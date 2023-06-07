@@ -24,10 +24,9 @@ public final class V4GitLabClientBuilder extends GitLabClientBuilder {
         GitLabApi client = null;
         try {
             client = new GitLabApi(ApiVersion.V4, url, token);
+            client.getUserApi().getCurrentUser();
             client.setIgnoreCertificateErrors(ignoreCertificateErrors);
-            /* whenever using this line of commented code, client is giving gitlabapiexception */
-            // client.withRequestTimeout(connectionTimeout, readTimeout);
-            client.getUserApi().getCurrentUser(); // for checking if the client is working or not
+            client.setRequestTimeout(connectionTimeout, readTimeout);
             return client;
         } catch (GitLabApiException e) {
             return null;
