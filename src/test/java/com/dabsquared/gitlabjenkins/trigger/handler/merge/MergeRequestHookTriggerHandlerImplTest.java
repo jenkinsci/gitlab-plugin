@@ -586,12 +586,12 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     private MergeRequestObjectAttributesBuilder defaultMergeRequestObjectAttributes() {
         return mergeRequestObjectAttributes()
-                .withIid(1)
+                .withIid(1L)
                 .withAction(Action.open)
                 .withState(State.opened)
                 .withTitle("test")
-                .withTargetProjectId(1)
-                .withSourceProjectId(1)
+                .withTargetProjectId(1L)
+                .withSourceProjectId(1L)
                 .withSourceBranch("feature")
                 .withTargetBranch("master")
                 .withSource(project()
