@@ -38,7 +38,7 @@ public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
             throw new IllegalArgumentException("Could not autodetect GitLab API version");
         } else {
             client.setIgnoreCertificateErrors(ignoreCertificateErrors);
-            // client.withRequestTimeout(connectionTimeout, readTimeout);
+            client.setRequestTimeout(connectionTimeout, readTimeout);
             return client;
         }
     }
