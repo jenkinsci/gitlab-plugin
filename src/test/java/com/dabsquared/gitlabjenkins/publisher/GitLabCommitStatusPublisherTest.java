@@ -436,7 +436,7 @@ public class GitLabCommitStatusPublisherTest {
         return build;
     }
 
-    private String getSingleProjectJson(String name, String projectNameWithNamespace, int projectId)
+    private String getSingleProjectJson(String name, String projectNameWithNamespace, Long projectId)
             throws IOException {
         String nameSpace = projectNameWithNamespace.split("/")[0];
         String projectName = projectNameWithNamespace.split("/")[1];
