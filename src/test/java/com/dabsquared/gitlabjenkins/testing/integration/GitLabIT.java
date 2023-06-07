@@ -11,8 +11,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
+
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
+import org.gitlab4j.api.models.Pipeline;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.testing.gitlab.rule.GitLabRule;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
@@ -50,7 +52,7 @@ import org.jvnet.hudson.test.TestNotifier;
  * @author Robin Müller
  */
 public class GitLabIT {
-    private static final String GITLAB_URL = "http://localhost:" + System.getProperty("gitlab.http.port", "10080");
+    private static final String GITLAB_URL = "http://localhost:" + System.getProperty("gitlab.http.port", "55580");
 
     @Rule
     public GitLabRule gitlab =
@@ -63,7 +65,7 @@ public class GitLabIT {
     public TemporaryFolder tmp = new TemporaryFolder();
 
     @Test
-    public void buildOnPush() throws IOException, InterruptedException, GitAPIException {
+    public void buildOnPush() throws IOException, InterruptedException, GitAPIException, GitLabApiException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
         GitLabPushTrigger trigger = gitLabPushTrigger()
@@ -89,7 +91,7 @@ public class GitLabIT {
     }
 
     @Test
-    public void buildOnMergeRequest() throws IOException, InterruptedException, GitAPIException {
+    public void buildOnMergeRequest() throws IOException, InterruptedException, GitLabApiException, GitAPIException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
         GitLabPushTrigger trigger = gitLabPushTrigger()
@@ -108,7 +110,7 @@ public class GitLabIT {
         });
         project.setQuietPeriod(0);
 
-        Pair<Integer, String> gitlabData = createGitLabProject(true, false, false, true);
+        Pair<Long, String> gitlabData = createGitLabProject(true, false, false, true);
 
         gitlab.createMergeRequest(gitlabData.getLeft(), "feature", "master", "Merge feature branch to master.");
 
@@ -117,7 +119,7 @@ public class GitLabIT {
     }
 
     @Test
-    public void buildOnNote() throws IOException, InterruptedException, GitAPIException {
+    public void buildOnNote() throws IOException, InterruptedException, GitAPIException, GitLabApiException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject("test");
         GitLabPushTrigger trigger = gitLabPushTrigger()
@@ -135,24 +137,24 @@ public class GitLabIT {
         });
         project.setQuietPeriod(0);
 
-        Pair<Integer, String> gitlabData = createGitLabProject(true, false, true, false);
+        Pair<Long, String> gitlabData = createGitLabProject(true, false, true, false);
 
         // create merge-request
         MergeRequest mr =
                 gitlab.createMergeRequest(gitlabData.getLeft(), "feature", "master", "Merge feature branch to master.");
-
+        Long mergeRequestIid = mr.getIid();
         // add trigger after push/merge-request so it may only receive the note-hook
         project.addTrigger(trigger);
         trigger.start(project, true);
 
-        gitlab.createMergeRequestNote(mr, "this is a test note");
+        gitlab.createMergeRequestNote(mr, mergeRequestIid, "this is a test note");
 
         buildTriggered.block(20000);
         assertThat(buildTriggered.isSignaled(), is(true));
     }
 
     @Test
-    public void reportBuildStatus() throws IOException, InterruptedException, GitAPIException {
+    public void reportBuildStatus() throws IOException, InterruptedException, GitAPIException, GitLabApiException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         final OneShotEvent buildReported = new OneShotEvent();
 
@@ -188,7 +190,7 @@ public class GitLabIT {
         trigger.start(project, true);
         project.setQuietPeriod(0);
 
-        Pair<Integer, String> gitlabData = createGitLabProject(false, true, true, false);
+        Pair<Long, String> gitlabData = createGitLabProject(false, true, true, false);
         assertThat(gitlab.getPipelines(gitlabData.getLeft()), empty());
 
         buildTriggered.block(20000);
@@ -202,7 +204,7 @@ public class GitLabIT {
         assertPipelineStatus(gitlabData, "success");
     }
 
-    private void assertPipelineStatus(Pair<Integer, String> gitlabData, String status) {
+    private void assertPipelineStatus(Pair<Long, String> gitlabData, String status) throws GitLabApiException {
         List<Pipeline> pipelines = gitlab.getPipelines(gitlabData.getLeft());
         assertThat(pipelines, hasSize(1));
 
@@ -211,9 +213,9 @@ public class GitLabIT {
         assertEquals(status, pipeline.getStatus());
     }
 
-    private Pair<Integer, String> createGitLabProject(
+    private Pair<Long, String> createGitLabProject(
             boolean addFeatureBranch, boolean withPushHook, boolean withNoteHook, boolean withMergeRequestHook)
-            throws IOException, GitAPIException {
+            throws IOException, GitAPIException, GitLabApiException {
         // check for clean slate
         assertTrue(gitlab.getProjectIds().isEmpty());
 
@@ -236,10 +238,10 @@ public class GitLabIT {
         // Once the issue is resolved, replace this implementation.
         List<String> projectIds = gitlab.getProjectIds();
         assertSame(projectIds.size(), 1);
-        return new ImmutablePair<>(Integer.parseInt(projectIds.get(0)), sha);
+        return new ImmutablePair<>(Long.parseLong(projectIds.get(0)), sha);
     }
 
-    private String initGitLabProject(String url, boolean addFeatureBranch) throws GitAPIException, IOException {
+    private String initGitLabProject(String url, boolean addFeatureBranch) throws GitAPIException, IOException, GitLabApiException {
         // Setup git repository
         Git.init().setDirectory(tmp.getRoot()).call();
         Git git = Git.open(tmp.getRoot());
@@ -255,7 +257,7 @@ public class GitLabIT {
                 .setRemote("origin")
                 .add("master")
                 .setCredentialsProvider(
-                        new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
+                        new UsernamePasswordCredentialsProvider(gitlab.getUsername(), (String) gitlab.getPassword()))
                 .call();
 
         if (addFeatureBranch) {
@@ -267,7 +269,7 @@ public class GitLabIT {
                     .setRemote("origin")
                     .add("feature")
                     .setCredentialsProvider(
-                            new UsernamePasswordCredentialsProvider(gitlab.getUsername(), gitlab.getPassword()))
+                            new UsernamePasswordCredentialsProvider(gitlab.getUsername(), (String) gitlab.getPassword()))
                     .call();
         }
 
