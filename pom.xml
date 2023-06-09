@@ -332,7 +332,7 @@
   <build>
     <plugins>
       <!--
-        TODO We anticipate that the migration will cause tests to start failing due to problems in
+        TODO: We anticipate that the migration will cause tests to start failing due to problems in
         the test framework and not problems in production code. To avoid unnecessary noise during
         the development process, we skip running most tests until such a time that src/main is
         reasonably stable with the new framework.
@@ -378,9 +378,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
