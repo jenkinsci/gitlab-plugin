@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import jenkins.model.Jenkins;
+import org.gitlab4j.api.GitLabApi;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -45,7 +46,7 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
     }
 
     @NonNull
-    public abstract GitLabClient buildClient(
+    public abstract GitLabApi buildClient(
             String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout);
 
     @Override
