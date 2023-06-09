@@ -1,12 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
-
 import hudson.Extension;
-
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.GitLabApi.ApiVersion;
+import org.gitlab4j.api.GitLabApiException;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 

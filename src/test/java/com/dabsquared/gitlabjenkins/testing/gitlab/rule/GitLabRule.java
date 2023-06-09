@@ -9,10 +9,6 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
-import org.gitlab4j.api.models.MergeRequest;
-import org.gitlab4j.api.models.Pipeline;
-import org.gitlab4j.api.models.Project;
-import org.gitlab4j.api.models.User;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.sql.Connection;
@@ -21,11 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import jenkins.model.Jenkins;
-
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
+import org.gitlab4j.api.models.Pipeline;
+import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.User;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -67,12 +65,13 @@ public class GitLabRule implements TestRule {
         return projectIds;
     }
 
-    public String createProject(ProjectRequest request) throws GitLabApiException{
+    public String createProject(ProjectRequest request) throws GitLabApiException {
         Project project = client().getProjectApi().createProject(request.getName());
         projectIds.add(project.getId().toString());
         if (request.getWebHookUrl() != null
                 && (request.isPushHook() || request.isMergeRequestHook() || request.isNoteHook())) {
-            client().getProjectApi().addHook(
+            client().getProjectApi()
+                    .addHook(
                             project.getId().toString(),
                             request.getWebHookUrl(),
                             request.isPushHook(),
@@ -104,8 +103,9 @@ public class GitLabRule implements TestRule {
         return new GitLabConnectionProperty(connection.getName());
     }
 
-    public MergeRequest createMergeRequest (
-            final Long projectId, final String sourceBranch, final String targetBranch, final String title) throws GitLabApiException {
+    public MergeRequest createMergeRequest(
+            final Long projectId, final String sourceBranch, final String targetBranch, final String title)
+            throws GitLabApiException {
         return client().getMergeRequestApi().createMergeRequest(projectId, sourceBranch, targetBranch, title, "", null);
     }
 

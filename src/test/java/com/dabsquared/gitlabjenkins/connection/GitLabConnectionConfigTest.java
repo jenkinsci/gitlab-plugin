@@ -2,7 +2,6 @@ package com.dabsquared.gitlabjenkins.connection;
 
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_error;
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_success;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -20,9 +19,6 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
-import com.dabsquared.gitlabjenkins.testing.gitlab.rule.GitLabRule;
-
-import hudson.ProxyConfiguration;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.security.GlobalMatrixAuthorizationStrategy;

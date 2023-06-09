@@ -16,8 +16,6 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-
-import org.gitlab4j.api.Constants.CommitBuildState;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -45,6 +43,7 @@ import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMRevisionAction;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab4j.api.Constants.CommitBuildState;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.After;
@@ -127,7 +126,8 @@ public class GitLabCommitStatusPublisherTest {
         HttpRequest[] requests = new HttpRequest[] {
             prepareGetProjectResponse("test/project.test"),
             prepareExistsCommitWithSuccessResponse("v4", String.valueOf(PROJECT_ID)),
-            prepareUpdateCommitStatusWithSuccessResponse("v4", String.valueOf(PROJECT_ID), build, CommitBuildState.RUNNING)
+            prepareUpdateCommitStatusWithSuccessResponse(
+                    "v4", String.valueOf(PROJECT_ID), build, CommitBuildState.RUNNING)
         };
 
         prebuildAndVerify(build, listener, requests);
@@ -261,7 +261,8 @@ public class GitLabCommitStatusPublisherTest {
         when(buildListener.getLogger()).thenReturn(new PrintStream(outputStream));
 
         prepareExistsCommitWithSuccessResponse("v4", "test/project");
-        HttpRequest updateCommitStatus = prepareUpdateCommitStatus("v4", "test/project", build, CommitBuildState.RUNNING);
+        HttpRequest updateCommitStatus =
+                prepareUpdateCommitStatus("v4", "test/project", build, CommitBuildState.RUNNING);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(403));
 
         prebuildAndVerify(build, buildListener, updateCommitStatus);

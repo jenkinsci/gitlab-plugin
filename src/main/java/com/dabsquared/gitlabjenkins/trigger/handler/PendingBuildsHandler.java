@@ -80,7 +80,11 @@ public class PendingBuildsHandler {
                     .withCoverage(null)
                     .withTargetUrl(targetUrl);
             client.getCommitsApi()
-                    .addCommitStatus(causeData.getSourceProjectId(), causeData.getLastCommit(), CommitBuildState.CANCELED, status);
+                    .addCommitStatus(
+                            causeData.getSourceProjectId(),
+                            causeData.getLastCommit(),
+                            CommitBuildState.CANCELED,
+                            status);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to set build state to cancelled", e);
         }
