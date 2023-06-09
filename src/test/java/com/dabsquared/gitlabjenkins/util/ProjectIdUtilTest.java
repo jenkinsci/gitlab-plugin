@@ -3,18 +3,30 @@ package com.dabsquared.gitlabjenkins.util;
 import static com.dabsquared.gitlabjenkins.util.ProjectIdUtilTest.TestData.forRemoteUrl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import org.gitlab4j.api.GitLabApi;
+import org.junit.Before;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author Robin Müller
  */
 @RunWith(Theories.class)
 public class ProjectIdUtilTest {
+
+    @Mock
+    GitLabApi gitLabApi;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @DataPoints
     public static TestData[] testData = {
@@ -40,9 +52,10 @@ public class ProjectIdUtilTest {
 
     @Theory
     public void retrieveProjectId(TestData testData) throws ProjectIdUtil.ProjectIdResolutionException {
-        GitLabClient client = new GitLabClientStub(testData.hostUrl);
 
-        String projectId = ProjectIdUtil.retrieveProjectId(client, testData.remoteUrl);
+        when(gitLabApi.getGitLabServerUrl()).thenReturn(testData.hostUrl);
+
+        String projectId = ProjectIdUtil.retrieveProjectId(gitLabApi, testData.remoteUrl);
 
         assertThat(projectId, is(testData.expectedProjectId));
     }
