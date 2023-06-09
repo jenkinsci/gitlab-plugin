@@ -27,8 +27,8 @@ public class GitLabClientBuilderTest {
     @Test
     public void getGitLabClientBuilderById_success() {
         assertThat(
-                GitLabClientBuilder.getGitLabClientBuilderById(new V3GitLabClientBuilder().id()),
-                instanceOf(V3GitLabClientBuilder.class));
+                GitLabClientBuilder.getGitLabClientBuilderById(new V4GitLabClientBuilder().id()),
+                instanceOf(V4GitLabClientBuilder.class));
     }
 
     @Test(expected = NoSuchElementException.class)
