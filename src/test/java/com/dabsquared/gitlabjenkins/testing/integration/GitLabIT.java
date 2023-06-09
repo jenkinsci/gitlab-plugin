@@ -11,10 +11,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-
-import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.models.MergeRequest;
-import org.gitlab4j.api.models.Pipeline;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.testing.gitlab.rule.GitLabRule;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
@@ -40,6 +36,9 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
+import org.gitlab4j.api.models.Pipeline;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -241,7 +240,8 @@ public class GitLabIT {
         return new ImmutablePair<>(Long.parseLong(projectIds.get(0)), sha);
     }
 
-    private String initGitLabProject(String url, boolean addFeatureBranch) throws GitAPIException, IOException, GitLabApiException {
+    private String initGitLabProject(String url, boolean addFeatureBranch)
+            throws GitAPIException, IOException, GitLabApiException {
         // Setup git repository
         Git.init().setDirectory(tmp.getRoot()).call();
         Git git = Git.open(tmp.getRoot());
@@ -268,8 +268,8 @@ public class GitLabIT {
             git.push()
                     .setRemote("origin")
                     .add("feature")
-                    .setCredentialsProvider(
-                            new UsernamePasswordCredentialsProvider(gitlab.getUsername(), (String) gitlab.getPassword()))
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(
+                            gitlab.getUsername(), (String) gitlab.getPassword()))
                     .call();
         }
 

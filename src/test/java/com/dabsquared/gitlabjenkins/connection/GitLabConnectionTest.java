@@ -10,7 +10,6 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.testing.gitlab.rule.GitLabRule;
-
 import hudson.util.Secret;
 import java.io.IOException;
 import java.util.List;
@@ -61,8 +60,7 @@ public class GitLabConnectionTest {
             }
         }
 
-        connection = new GitLabConnection(
-                "test", GITLAB_URL, API_TOKEN_ID, new V4GitLabClientBuilder(), false, 10, 10);
+        connection = new GitLabConnection("test", GITLAB_URL, API_TOKEN_ID, new V4GitLabClientBuilder(), false, 10, 10);
     }
 
     @Test

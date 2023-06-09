@@ -1,18 +1,20 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
-
+import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandler;
 import hudson.Extension;
-
+import java.util.logging.Logger;
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.GitLabApi.ApiVersion;
+import org.gitlab4j.api.GitLabApiException;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 @Extension
 @Restricted(NoExternalUse.class)
 public final class V3GitLabClientBuilder extends GitLabClientBuilder {
+
+    private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
 
     public V3GitLabClientBuilder() {
         super("V3", 2);

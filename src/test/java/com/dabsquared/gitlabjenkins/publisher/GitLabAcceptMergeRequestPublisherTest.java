@@ -88,7 +88,8 @@ public class GitLabAcceptMergeRequestPublisherTest {
     }
 
     private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(
-            String apiLevel, Long mergeRequestId, Boolean shouldRemoveSourceBranch) throws UnsupportedEncodingException {
+            String apiLevel, Long mergeRequestId, Boolean shouldRemoveSourceBranch)
+            throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId, shouldRemoveSourceBranch);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;

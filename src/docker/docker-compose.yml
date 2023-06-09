@@ -3,16 +3,16 @@ version: '3'
 services:
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
-    restart: "no"
+    restart: "on-failure"
     hostname: 'localhost'
     platform: 'linux/amd64'
     ports:
       - '55580:80'
       - '55522:22'
     volumes:
-      - '/srv/docker/gitlab/config:/etc/gitlab'
-      - '/srv/docker/gitlab/logs:/var/log/gitlab'
-      - '/srv/docker/gitlab/data:/var/opt/gitlab'
+      - '/Users/krisstern/srv/docker/gitlab/config:/etc/gitlab'
+      - '/Users/krisstern/srv/docker/gitlab/logs:/var/log/gitlab'
+      - '/Users/krisstern/srv/docker/gitlab/data:/var/opt/gitlab'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'http://localhost'
@@ -21,11 +21,11 @@ services:
     shm_size: '5gb'
 
   jenkins:
-    restart: "no"
+    restart: "on-failure"
     image: jenkins/jenkins:lts
     ports:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      - '/srv/docker/jenkins:/var/jenkins_home'
+      - '/Users/krisstern/srv/docker/jenkins:/var/jenkins_home'
     shm_size: '5gb'
