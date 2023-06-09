@@ -117,6 +117,9 @@ public class AddGitLabMergeRequestCommentStep extends Step {
 
         private MergeRequest getMergeRequest(Run<?, ?> run, GitLabApi gitlabApi) throws GitLabApiException {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            if (cause == null) {
+                throw new GitLabApiException("Cannot find GitLabWebHookCause");
+            }
             String mergeRequestTitle = cause.getData().getMergeRequestTitle();
             String mergeRequestDescription = cause.getData().getMergeRequestDescription();
             String sourceBranch = cause.getData().getSourceBranch();

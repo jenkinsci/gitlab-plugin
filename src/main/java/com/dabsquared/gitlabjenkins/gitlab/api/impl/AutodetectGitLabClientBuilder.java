@@ -3,8 +3,6 @@ package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
-import java.util.ArrayList;
-import java.util.Collection;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApi.ApiVersion;
 import org.gitlab4j.api.GitLabApiException;
@@ -22,12 +20,11 @@ public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
     @NonNull
     public GitLabApi buildClient(
             String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
-        Collection<GitLabClientBuilder> candidates = new ArrayList<>(getAllGitLabClientBuilders());
-        candidates.remove(this);
         GitLabApi client = null;
         for (ApiVersion version : ApiVersion.values()) {
             try {
                 client = new GitLabApi(version, url, token);
+                // this is added as a check to ensure that the token and url obtained from gitlab server is valid
                 client.getUserApi().getCurrentUser();
                 break;
             } catch (GitLabApiException e) {

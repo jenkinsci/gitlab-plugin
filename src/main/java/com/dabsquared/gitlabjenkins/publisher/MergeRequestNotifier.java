@@ -61,6 +61,9 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
 
     MergeRequest getMergeRequest(Run<?, ?> run) throws GitLabApiException {
         GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+        if (cause == null) {
+            throw new GitLabApiException("No GitLabWebHookCause found");
+        }
         String mergeRequestTitle = cause.getData().getMergeRequestTitle();
         String mergeRequestDescription = cause.getData().getMergeRequestDescription();
         String sourceBranch = cause.getData().getSourceBranch();

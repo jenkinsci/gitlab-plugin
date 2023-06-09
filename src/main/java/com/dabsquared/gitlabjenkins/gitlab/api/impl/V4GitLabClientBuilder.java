@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApi.ApiVersion;
@@ -18,7 +17,6 @@ public final class V4GitLabClientBuilder extends GitLabClientBuilder {
     }
 
     @Override
-    @NonNull
     public GitLabApi buildClient(
             String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         GitLabApi client = null;
