@@ -13,7 +13,6 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.AutodetectGitLabClientBuilder;
 import hudson.Extension;
@@ -32,10 +31,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.util.StringUtils;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
@@ -57,7 +57,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     private final boolean ignoreCertificateErrors;
     private final Integer connectionTimeout;
     private final Integer readTimeout;
-    private transient Map<String, GitLabClient> clientCache;
+    private transient Map<String, GitLabApi> clientCache;
 
     public GitLabConnection(
             String name,
@@ -142,7 +142,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         return readTimeout;
     }
 
-    public GitLabClient getClient(Item item, String jobCredentialId) {
+    public GitLabApi getClient(Item item, String jobCredentialId) {
         final String clientId;
         final String token;
         if ((jobCredentialId == null) || jobCredentialId.equals(apiTokenId)) {
@@ -292,13 +292,13 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
                                 connectionTimeout,
                                 readTimeout)
                         .getClient(null, null)
+                        .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
             } catch (WebApplicationException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
-            } catch (ProcessingException e) {
-                return FormValidation.error(
-                        Messages.connection_error(e.getCause().getMessage()));
+            } catch (GitLabApiException e) {
+                return FormValidation.error(Messages.connection_error(e.getMessage()));
             }
         }
 
