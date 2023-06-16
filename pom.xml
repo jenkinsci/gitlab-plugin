@@ -52,7 +52,7 @@
   <properties>
     <revision>1.7.15</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.375.4</jenkins.version>
+    <jenkins.version>2.387.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
@@ -385,7 +385,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.2</version>
             <executions>
               <execution>
                 <goals>
