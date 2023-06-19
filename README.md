@@ -115,7 +115,7 @@ gitlabTriggerPhrase
 
 ## Global plugin configuration
 ### GitLab-to-Jenkins authentication
-By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs.
+The plugin requires authentication to connect from GitLab to Jenkins. This prevents unauthorized persons from triggering jobs.
 
 #### Authentication Security
 
