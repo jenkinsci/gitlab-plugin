@@ -126,7 +126,7 @@ APITOKENS and other secrets MUST not be send over unsecure connections. So, all 
 #### Configuring global authentication
 1. Create a user in Jenkins which has, at a minimum, Job/Build permissions
 2. Log in as that user (this is required even if you are a Jenkins admin user), then click on the user's name in the top right corner of the page
-3. Click 'Configure,' then 'Show API Token...', and note/copy the User ID and API Token
+3. Click 'Configure,' then 'Add new Token', and note/copy the User ID and API Token
 4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL and do not enter anything for 'Secret Token': `https://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
 5. After you add the webhook, click the 'Test' button, and it should succeed
 
