@@ -63,12 +63,7 @@ To enable debug logging in the plugin:
 
 ## Known bugs/issues
 
-This is not an exhaustive list of issues, but rather a place for us to note significant bugs that may impact your use of the plugin in certain circumstances. For most things, please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section and open a new one if you don't find anything.
-* [#272](https://github.com/jenkinsci/gitlab-plugin/issues/272) - Plugin version 1.2.0+ does not work with GitLab Enterprise Edition < 8.8.3. Subsequent versions work fine.
-* Jenkins versions 1.651.2 and 2.3 removed the ability of plugins to set arbitrary job parameters that are not specifically defined in each job's configuration. This was an important security update, but it has broken compatibility with some plugins, including ours. See [here](https://jenkins.io/blog/2016/05/11/security-update/) for more information and workarounds if you are finding parameters unset or empty that you expect to have values.
-* [#473](https://github.com/jenkinsci/gitlab-plugin/issues/473) - When upgrading from plugin versions older than 1.2.0, you must upgrade to that version first, and then to the latest version. Otherwise, you will get a NullPointerException in com.cloudbees.plugins.credentials.matchers.IdMatcher after you upgrade. See the linked issue for specific instructions.
-* [#608](https://github.com/jenkinsci/gitlab-plugin/issues/608) - GitLab 9.5.0 - 9.5.4 has a bug that causes the "Test Webhook" function to fail when it sends a test to Jenkins. This was fixed in 9.5.5.
-* [#730](https://github.com/jenkinsci/gitlab-plugin/issues/730) - GitLab 10.5.6 introduced an issue which can cause HTTP 500 errors when webhooks are triggered if the webhook is pointing to http://localhost or http://127.0.0.1. See the linked issue for a workaround.
+The plugin tracks current issues with the [GitHub issue tracker](https://github.com/jenkinsci/gitlab-plugin/issues).  Some issues are reported in the [Jenkins Jira issue tracker](https://issues.jenkins.io/issues/?jql=component%3D19326). When searching for existng issues, please check both locations.
 
 ## Report an Issue
 
@@ -115,7 +110,7 @@ gitlabTriggerPhrase
 
 ## Global plugin configuration
 ### GitLab-to-Jenkins authentication
-By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs.
+The plugin requires authentication to connect from GitLab to Jenkins. This prevents unauthorized persons from triggering jobs.
 
 #### Authentication Security
 
@@ -126,7 +121,7 @@ APITOKENS and other secrets MUST not be send over unsecure connections. So, all 
 #### Configuring global authentication
 1. Create a user in Jenkins which has, at a minimum, Job/Build permissions
 2. Log in as that user (this is required even if you are a Jenkins admin user), then click on the user's name in the top right corner of the page
-3. Click 'Configure,' then 'Show API Token...', and note/copy the User ID and API Token
+3. Click 'Configure,' then 'Add new Token', and note/copy the User ID and API Token
 4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL and do not enter anything for 'Secret Token': `https://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
 5. After you add the webhook, click the 'Test' button, and it should succeed
 
