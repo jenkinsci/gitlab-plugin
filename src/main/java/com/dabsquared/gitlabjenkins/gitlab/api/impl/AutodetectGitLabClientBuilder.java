@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
