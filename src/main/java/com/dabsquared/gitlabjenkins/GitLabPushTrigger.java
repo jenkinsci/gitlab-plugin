@@ -187,55 +187,53 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @Initializer(after = InitMilestone.JOB_LOADED)
     public static void migrateJobs() throws IOException {
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
-        if (oldConfig != null) {
-            if (!oldConfig.jobsMigrated) {
-                GitLabConnectionConfig gitLabConfig =
-                        (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-                gitLabConfig
-                        .getConnections()
-                        .add(new GitLabConnection(
-                                oldConfig.gitlabHostUrl,
-                                oldConfig.gitlabHostUrl,
-                                oldConfig.gitlabApiToken,
-                                oldConfig.ignoreCertificateErrors,
-                                10,
-                                10));
+        if (!oldConfig.jobsMigrated) {
+            GitLabConnectionConfig gitLabConfig =
+                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+            gitLabConfig
+                    .getConnections()
+                    .add(new GitLabConnection(
+                            oldConfig.gitlabHostUrl,
+                            oldConfig.gitlabHostUrl,
+                            oldConfig.gitlabApiToken,
+                            "autodetect",
+                            oldConfig.ignoreCertificateErrors,
+                            10,
+                            10));
 
-                String defaultConnectionName =
-                        gitLabConfig.getConnections().get(0).getName();
-                for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                    GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                    if (trigger != null) {
-                        if (trigger.addCiMessage) {
-                            project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins", false));
-                        }
-                        project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
-                        project.save();
+            String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
+            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                if (trigger != null) {
+                    if (trigger.addCiMessage) {
+                        project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins", false));
                     }
+                    project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
+                    project.save();
                 }
-                gitLabConfig.save();
-                oldConfig.jobsMigrated = true;
-                oldConfig.save();
             }
-            if (!oldConfig.jobsMigrated2) {
-                for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                    GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                    if (trigger != null) {
-                        if (trigger.addNoteOnMergeRequest) {
-                            project.getPublishersList().add(new GitLabMessagePublisher());
-                        }
-                        if (trigger.addVoteOnMergeRequest) {
-                            project.getPublishersList().add(new GitLabVotePublisher());
-                        }
-                        if (trigger.acceptMergeRequestOnSuccess) {
-                            project.getPublishersList().add(new GitLabAcceptMergeRequestPublisher());
-                        }
-                        project.save();
+            gitLabConfig.save();
+            oldConfig.jobsMigrated = true;
+            oldConfig.save();
+        }
+        if (!oldConfig.jobsMigrated2) {
+            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                if (trigger != null) {
+                    if (trigger.addNoteOnMergeRequest) {
+                        project.getPublishersList().add(new GitLabMessagePublisher());
                     }
+                    if (trigger.addVoteOnMergeRequest) {
+                        project.getPublishersList().add(new GitLabVotePublisher());
+                    }
+                    if (trigger.acceptMergeRequestOnSuccess) {
+                        project.getPublishersList().add(new GitLabAcceptMergeRequestPublisher());
+                    }
+                    project.save();
                 }
-                oldConfig.jobsMigrated2 = true;
-                oldConfig.save();
             }
+            oldConfig.jobsMigrated2 = true;
+            oldConfig.save();
         }
     }
 

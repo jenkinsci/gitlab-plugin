@@ -1,6 +1,3 @@
-/* Note for Reviewers :
- * changebuildstatus() is replaced by addcommitstatus() for updating the commit status.
- */
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
@@ -21,7 +18,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
@@ -76,11 +72,11 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         try {
             String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
             if (StringUtils.isNotBlank(buildName)) {
-                GitLabApi gitLabApi =
-                        job.getProperty(GitLabConnectionProperty.class).getGitLabApi();
+                GitLabApi client =
+                        job.getProperty(GitLabConnectionProperty.class).getClient();
                 BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
                 try {
-                    if (gitLabApi == null) {
+                    if (client == null) {
                         LOGGER.log(Level.SEVERE, "No GitLab connection configured");
                     } else {
                         String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
@@ -92,11 +88,10 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                                 .withName(buildName)
                                 .withTargetUrl(targetUrl)
                                 .withDescription(CommitBuildState.PENDING.name())
-                                .withCoverage(null)
-                                .withTargetUrl(targetUrl);
-                        gitLabApi.getCommitsApi().addCommitStatus(projectId, sha, CommitBuildState.PENDING, status);
+                                .withCoverage(null);
+                        client.getCommitsApi().addCommitStatus(projectId, sha, CommitBuildState.PENDING, status);
                     }
-                } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+                } catch (WebApplicationException | GitLabApiException e) {
                     LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
                 }
             }

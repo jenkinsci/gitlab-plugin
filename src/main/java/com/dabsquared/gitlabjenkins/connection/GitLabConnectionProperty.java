@@ -14,7 +14,6 @@ import hudson.model.Run;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -67,15 +66,15 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         this.useAlternativeCredential = useAlternativeCredential;
     }
 
-    public GitLabApi getGitLabApi() {
+    public GitLabApi getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig =
                     (GitLabConnectionConfig) Jenkins.getActiveInstance().getDescriptor(GitLabConnectionConfig.class);
             if (connectionConfig != null) {
                 if (useAlternativeCredential) {
-                    return connectionConfig.getGitLabApi(gitLabConnection, this.owner, jobCredentialId);
+                    return connectionConfig.getClient(gitLabConnection, this.owner, jobCredentialId);
                 } else {
-                    return connectionConfig.getGitLabApi(gitLabConnection, null, null);
+                    return connectionConfig.getClient(gitLabConnection, null, null);
                 }
             }
             return null;
@@ -83,12 +82,12 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         return null;
     }
 
-    public static GitLabApi getGitLabApi(@NonNull Run<?, ?> build) {
+    public static GitLabApi getClient(@NonNull Run<?, ?> build) {
         Job<?, ?> job = build.getParent();
         if (job != null) {
             final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
             if (connectionProperty != null) {
-                return connectionProperty.getGitLabApi();
+                return connectionProperty.getClient();
             }
         }
         return null;
@@ -168,18 +167,16 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
                                 "",
                                 gitLabConnectionTested.getUrl(),
                                 jobCredentialId,
+                                gitLabConnectionTested.getClientBuilderId(),
                                 true,
                                 gitLabConnectionTested.getConnectionTimeout(),
                                 gitLabConnectionTested.getReadTimeout())
-                        .getGitLabApi(item, jobCredentialId)
+                        .getClient(item, jobCredentialId)
                         .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
             } catch (WebApplicationException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
-            } catch (ProcessingException e) {
-                return FormValidation.error(
-                        Messages.connection_error(e.getCause().getMessage()));
             } catch (GitLabApiException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
             }

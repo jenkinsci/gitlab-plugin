@@ -19,6 +19,7 @@ import hudson.model.Result;
 import hudson.model.StreamBuildListener;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import org.gitlab4j.api.GitLabApiException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -65,27 +66,27 @@ public class GitLabVotePublisherTest {
     }
 
     @Test
-    public void success_v3() throws IOException, InterruptedException {
+    public void success_v3() throws IOException, InterruptedException, GitLabApiException {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", MERGE_REQUEST_ID, "thumbsup");
     }
 
     @Test
-    public void success_v4() throws IOException, InterruptedException {
+    public void success_v4() throws IOException, InterruptedException, GitLabApiException {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", MERGE_REQUEST_IID, "thumbsup");
     }
 
     @Test
-    public void failed_v3() throws IOException, InterruptedException {
+    public void failed_v3() throws IOException, InterruptedException, GitLabApiException {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", MERGE_REQUEST_ID, "thumbsdown");
     }
 
     @Test
-    public void failed_v4() throws IOException, InterruptedException {
+    public void failed_v4() throws IOException, InterruptedException, GitLabApiException {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, "thumbsdown");
     }
 
     @Test
-    public void removePreviousVote() throws IOException, InterruptedException {
+    public void removePreviousVote() throws IOException, InterruptedException, GitLabApiException {
         // GIVEN
         AbstractBuild build = mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         mockAward("v4", MERGE_REQUEST_IID, 1, "thumbsdown");
@@ -99,8 +100,8 @@ public class GitLabVotePublisherTest {
                 awardEmojiRequest("v4", MERGE_REQUEST_IID, "POST").withQueryStringParameter("name", "thumbsdown"));
     }
 
-    private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote)
-            throws InterruptedException, IOException {
+    private void performAndVerify(AbstractBuild build, String apiLevel, Long mergeRequestId, String defaultNote)
+            throws InterruptedException, IOException, GitLabApiException {
         GitLabVotePublisher publisher = preparePublisher(new GitLabVotePublisher(), build);
         publisher.perform(build, null, listener);
 
@@ -108,17 +109,17 @@ public class GitLabVotePublisherTest {
     }
 
     private HttpRequest prepareSendMessageWithSuccessResponse(
-            AbstractBuild build, String apiLevel, int mergeRequestId, String body) {
+            AbstractBuild build, String apiLevel, Long mergeRequestId, String body) {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, formatNote(build, body));
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String name) {
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, Long mergeRequestId, String name) {
         return awardEmojiRequest(apiLevel, mergeRequestId, "POST").withQueryStringParameter("name", name);
     }
 
-    private HttpRequest awardEmojiRequest(final String apiLevel, int mergeRequestId, String type) {
+    private HttpRequest awardEmojiRequest(final String apiLevel, Long mergeRequestId, String type) {
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
                         + "/award_emoji")
@@ -141,7 +142,7 @@ public class GitLabVotePublisherTest {
                 .withHeader("PRIVATE-TOKEN", "secret");
     }
 
-    private void mockAward(final String apiLevel, int mergeRequestId, int awardId, String name) {
+    private void mockAward(final String apiLevel, Long mergeRequestId, int awardId, String name) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"id\": " + awardId);
         sb.append(",\"name\": " + name);

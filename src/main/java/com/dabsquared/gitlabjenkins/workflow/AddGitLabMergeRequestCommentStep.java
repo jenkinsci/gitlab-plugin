@@ -1,6 +1,6 @@
 package com.dabsquared.gitlabjenkins.workflow;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getGitLabApi;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.Extension;
@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab4j.api.GitLabApi;
@@ -83,19 +81,17 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                 }
             }
             if (cause != null) {
-                MergeRequest mergeRequest = getMergeRequest(run, getGitLabApi(run));
-                // will use mergerequestcausedata
+                MergeRequest mergeRequest = getMergeRequest(run, getClient(run));
                 if (mergeRequest != null) {
-                    GitLabApi gitLabApi = getGitLabApi(run);
-                    if (gitLabApi == null) {
+                    GitLabApi client = getClient(run);
+                    if (client == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            gitLabApi
-                                    .getNotesApi()
+                            client.getNotesApi()
                                     .createMergeRequestNote(
                                             mergeRequest.getProjectId(), mergeRequest.getIid(), step.getComment());
-                        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+                        } catch (GitLabApiException e) {
                             printf(
                                     "Failed to add comment on Merge Request for project '%s': %s%n",
                                     mergeRequest.getProjectId(), e.getMessage());
@@ -119,6 +115,9 @@ public class AddGitLabMergeRequestCommentStep extends Step {
 
         private MergeRequest getMergeRequest(Run<?, ?> run, GitLabApi gitlabApi) throws GitLabApiException {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            if (cause == null) {
+                throw new GitLabApiException("Cannot find GitLabWebHookCause");
+            }
             String mergeRequestTitle = cause.getData().getMergeRequestTitle();
             String mergeRequestDescription = cause.getData().getMergeRequestDescription();
             String sourceBranch = cause.getData().getSourceBranch();
@@ -126,7 +125,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
             Long sourceProjectId = cause.getData().getSourceProjectId();
             Long targetProjectId = cause.getData().getTargetProjectId();
 
-            MergeRequest mergeRequest = getGitLabApi(run)
+            MergeRequest mergeRequest = getClient(run)
                     .getMergeRequestApi()
                     .createMergeRequest(
                             sourceProjectId,

@@ -5,8 +5,6 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -14,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
@@ -37,6 +33,10 @@ import hudson.model.Queue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import org.gitlab4j.api.CommitsApi;
+import org.gitlab4j.api.Constants.CommitBuildState;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.models.CommitStatus;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +56,10 @@ public class PendingBuildsHandlerTest {
     public static JenkinsRule jenkins = new JenkinsRule();
 
     @Mock
-    private GitLabClient gitLabClient;
+    private GitLabApi gitLabClient;
+
+    @Mock
+    private CommitsApi commitsApi;
 
     @Mock
     private GitLabConnectionProperty gitLabConnectionProperty;
@@ -64,6 +67,7 @@ public class PendingBuildsHandlerTest {
     @Before
     public void init() {
         when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
+        when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
     }
 
     @After
@@ -75,49 +79,47 @@ public class PendingBuildsHandlerTest {
     }
 
     @Test
-    public void projectCanBeConfiguredToSendPendingBuildStatusWhenTriggered() throws IOException {
+    public void projectCanBeConfiguredToSendPendingBuildStatusWhenTriggered() throws Exception {
         Project project =
                 freestyleProject("freestyleProject1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
 
-        gitLabPushTrigger.onPost(pushHook(1, "branch1", "commit1"));
-
-        verify(gitLabClient)
-                .changeBuildStatus(
-                        eq(1),
-                        eq("commit1"),
-                        eq(BuildState.pending),
-                        eq("branch1"),
-                        eq(GITLAB_BUILD_NAME),
-                        contains("/freestyleProject1/"),
-                        eq(BuildState.pending.name()));
+        gitLabPushTrigger.onPost(pushHook(1L, "branch1", "commit1"));
+        CommitStatus status = new CommitStatus();
+        status.withRef("branch1")
+                .withName(GITLAB_BUILD_NAME)
+                .withDescription(CommitBuildState.PENDING.name())
+                .withCoverage(null)
+                .withTargetUrl("/freestyleProject1/");
+        when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
+        verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
         verifyNoMoreInteractions(gitLabClient);
     }
 
     @Test
-    public void workflowJobCanConfiguredToSendToPendingBuildStatusWhenTriggered() throws IOException {
+    public void workflowJobCanConfiguredToSendToPendingBuildStatusWhenTriggered() throws Exception {
         WorkflowJob workflowJob = workflowJob();
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(workflowJob);
         gitLabPushTrigger.setPendingBuildName(GITLAB_BUILD_NAME);
 
-        gitLabPushTrigger.onPost(mergeRequestHook(1, "branch1", "commit1"));
+        gitLabPushTrigger.onPost(mergeRequestHook(1L, "branch1", "commit1"));
 
-        verify(gitLabClient)
-                .changeBuildStatus(
-                        eq(1),
-                        eq("commit1"),
-                        eq(BuildState.pending),
-                        eq("branch1"),
-                        eq(GITLAB_BUILD_NAME),
-                        contains("/workflowJob/"),
-                        eq(BuildState.pending.name()));
+        CommitStatus status = new CommitStatus();
+        status.withRef("branch1")
+                .withName(GITLAB_BUILD_NAME)
+                .withDescription(CommitBuildState.PENDING.name())
+                .withCoverage(null)
+                .withTargetUrl("/WorkflowJob/");
+
+        when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
+        verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
         verifyNoMoreInteractions(gitLabClient);
     }
 
     @Test
-    public void queuedMergeRequestBuildsCanBeCancelledOnMergeRequestUpdate() throws IOException {
+    public void queuedMergeRequestBuildsCanBeCancelledOnMergeRequestUpdate() throws Exception {
         Project project = freestyleProject("project1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
@@ -125,30 +127,22 @@ public class PendingBuildsHandlerTest {
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(0));
 
-        gitLabPushTrigger.onPost(mergeRequestHook(1, "sourceBranch", "commit1")); // Will be cancelled
-        gitLabPushTrigger.onPost(mergeRequestHook(1, "sourceBranch", "commit2")); // Will be cancelled
-        gitLabPushTrigger.onPost(mergeRequestHook(1, "sourceBranch", "commit3"));
-        gitLabPushTrigger.onPost(mergeRequestHook(1, "anotherBranch", "commit4"));
-        gitLabPushTrigger.onPost(mergeRequestHook(2, "sourceBranch", "commit5"));
+        gitLabPushTrigger.onPost(mergeRequestHook(1L, "sourceBranch", "commit1")); // Will be cancelled
+        gitLabPushTrigger.onPost(mergeRequestHook(1L, "sourceBranch", "commit2")); // Will be cancelled
+        gitLabPushTrigger.onPost(mergeRequestHook(1L, "sourceBranch", "commit3"));
+        gitLabPushTrigger.onPost(mergeRequestHook(1L, "anotherBranch", "commit4"));
+        gitLabPushTrigger.onPost(mergeRequestHook(2L, "sourceBranch", "commit5"));
 
-        verify(gitLabClient)
-                .changeBuildStatus(
-                        eq(1),
-                        eq("commit1"),
-                        eq(BuildState.canceled),
-                        eq("sourceBranch"),
-                        eq("Jenkins"),
-                        contains("project1"),
-                        eq(BuildState.canceled.name()));
-        verify(gitLabClient)
-                .changeBuildStatus(
-                        eq(1),
-                        eq("commit2"),
-                        eq(BuildState.canceled),
-                        eq("sourceBranch"),
-                        eq("Jenkins"),
-                        contains("project1"),
-                        eq(BuildState.canceled.name()));
+        CommitStatus status = new CommitStatus();
+        status.withRef("sourceBranch")
+                .withName("Jenkins")
+                .withDescription(CommitBuildState.CANCELED.name())
+                .withCoverage(null)
+                .withTargetUrl("project1");
+
+        when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
+        verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.CANCELED, status);
+        verify(commitsApi).addCommitStatus(1L, "commit2", CommitBuildState.CANCELED, status);
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
     }
@@ -177,14 +171,14 @@ public class PendingBuildsHandlerTest {
         return gitLabPushTrigger;
     }
 
-    private MergeRequestHook mergeRequestHook(int projectId, String branch, String commitId) {
+    private MergeRequestHook mergeRequestHook(Long projectId, String branch, String commitId) {
         return MergeRequestHookBuilder.mergeRequestHook()
                 .withObjectAttributes(mergeRequestObjectAttributes()
                         .withAction(Action.update)
                         .withState(State.updated)
-                        .withIid(1)
+                        .withIid(1L)
                         .withTitle("test")
-                        .withTargetProjectId(1)
+                        .withTargetProjectId(1L)
                         .withTargetBranch("targetBranch")
                         .withSourceBranch(branch)
                         .withSourceProjectId(projectId)
@@ -215,7 +209,7 @@ public class PendingBuildsHandlerTest {
                 .build();
     }
 
-    private PushHook pushHook(int projectId, String branch, String commitId) {
+    private PushHook pushHook(Long projectId, String branch, String commitId) {
         User user = new UserBuilder().withName("username").build();
 
         Repository repository = new RepositoryBuilder()

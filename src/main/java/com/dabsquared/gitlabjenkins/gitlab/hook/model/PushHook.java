@@ -1,6 +1,3 @@
-/* Note for Reviewers :
- * Temporary class. Will be removed.
- */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import java.util.List;

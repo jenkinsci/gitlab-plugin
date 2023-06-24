@@ -1,11 +1,8 @@
-/* Note for Reviewers :
- * Proxy settings will be configured here, not implimented currently
- * feature of filling clientbuilderid by user and the respective constructors has been removed
- */
-
 package com.dabsquared.gitlabjenkins.connection;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -16,6 +13,8 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.impl.AutodetectGitLabClientBuilder;
 import hudson.Extension;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -32,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.util.StringUtils;
 import org.gitlab4j.api.GitLabApi;
@@ -55,13 +52,12 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     private transient String apiToken;
     // TODO make final when migration code gets removed
     private String apiTokenId;
-    private GitLabApi gitLabApi;
+    private GitLabClientBuilder clientBuilder;
     private final boolean ignoreCertificateErrors;
     private final Integer connectionTimeout;
     private final Integer readTimeout;
-    private transient Map<String, GitLabApi> gitLabApiCache;
+    private transient Map<String, GitLabApi> clientCache;
 
-    @DataBoundConstructor
     public GitLabConnection(
             String name,
             String url,
@@ -69,18 +65,52 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
             boolean ignoreCertificateErrors,
             Integer connectionTimeout,
             Integer readTimeout) {
+        this(
+                name,
+                url,
+                apiTokenId,
+                new AutodetectGitLabClientBuilder(),
+                ignoreCertificateErrors,
+                connectionTimeout,
+                readTimeout);
+    }
+
+    @DataBoundConstructor
+    public GitLabConnection(
+            String name,
+            String url,
+            String apiTokenId,
+            String clientBuilderId,
+            boolean ignoreCertificateErrors,
+            Integer connectionTimeout,
+            Integer readTimeout) {
+        this(
+                name,
+                url,
+                apiTokenId,
+                getGitLabClientBuilderById(clientBuilderId),
+                ignoreCertificateErrors,
+                connectionTimeout,
+                readTimeout);
+    }
+
+    @Restricted(NoExternalUse.class)
+    public GitLabConnection(
+            String name,
+            String url,
+            String apiTokenId,
+            GitLabClientBuilder clientBuilder,
+            boolean ignoreCertificateErrors,
+            Integer connectionTimeout,
+            Integer readTimeout) {
         this.name = name;
         this.url = url == null ? "" : url;
         this.apiTokenId = apiTokenId;
+        this.clientBuilder = clientBuilder;
         this.ignoreCertificateErrors = ignoreCertificateErrors;
         this.connectionTimeout = connectionTimeout;
         this.readTimeout = readTimeout;
-        createGitLabApi(url, apiToken);
-        gitLabApiCache = new HashMap<>();
-    }
-
-    private GitLabApi createGitLabApi(String url, String apiToken) {
-        return gitLabApi = new GitLabApi(url, apiToken);
+        clientCache = new HashMap<>();
     }
 
     public String getName() {
@@ -95,6 +125,10 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         return apiTokenId;
     }
 
+    public String getClientBuilderId() {
+        return clientBuilder.id();
+    }
+
     public boolean isIgnoreCertificateErrors() {
         return ignoreCertificateErrors;
     }
@@ -107,24 +141,24 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         return readTimeout;
     }
 
-    public GitLabApi getGitLabApi(Item item, String jobCredentialId) {
-        final String gitLabApiId;
+    public GitLabApi getClient(Item item, String jobCredentialId) {
+        final String clientId;
         final String token;
         if ((jobCredentialId == null) || jobCredentialId.equals(apiTokenId)) {
-            gitLabApiId = "global";
+            clientId = "global";
             token = getApiToken(apiTokenId, null);
         } else {
             // Add prefix to credential ID to avoid collision with "global"
-            gitLabApiId = "alternative-" + jobCredentialId;
+            clientId = "alternative-" + jobCredentialId;
             token = getApiToken(jobCredentialId, item);
         }
 
-        if (!gitLabApiCache.containsKey(gitLabApiId)) {
-            gitLabApiCache.put(gitLabApiId, createGitLabApi(url, token));
+        if (!clientCache.containsKey(clientId)) {
+            clientCache.put(
+                    clientId,
+                    clientBuilder.buildClient(url, token, ignoreCertificateErrors, connectionTimeout, readTimeout));
         }
-        return gitLabApiCache.get(gitLabApiId);
-
-        // proxy configuration setup has to be done here
+        return clientCache.get(clientId);
     }
 
     @Restricted(NoExternalUse.class)
@@ -150,13 +184,21 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
 
     protected GitLabConnection readResolve() {
         if (connectionTimeout == null || readTimeout == null) {
-            return new GitLabConnection(name, url, apiTokenId, ignoreCertificateErrors, 10, 10);
+            return new GitLabConnection(
+                    name, url, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, 10, 10);
         }
-        if (gitLabApi == null) {
-            return new GitLabConnection(name, url, apiTokenId, ignoreCertificateErrors, connectionTimeout, readTimeout);
+        if (clientBuilder == null) {
+            return new GitLabConnection(
+                    name,
+                    url,
+                    apiTokenId,
+                    new AutodetectGitLabClientBuilder(),
+                    ignoreCertificateErrors,
+                    connectionTimeout,
+                    readTimeout);
         }
-        if (gitLabApiCache == null) {
-            gitLabApiCache = new HashMap<>();
+        if (clientCache == null) {
+            clientCache = new HashMap<>();
         }
 
         return this;
@@ -234,21 +276,24 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         public FormValidation doTestConnection(
                 @QueryParameter String url,
                 @QueryParameter String apiTokenId,
+                @QueryParameter String clientBuilderId,
                 @QueryParameter boolean ignoreCertificateErrors,
                 @QueryParameter int connectionTimeout,
                 @QueryParameter int readTimeout) {
             Jenkins.get().checkPermission(Jenkins.ADMINISTER);
             try {
-                new GitLabConnection("", url, apiTokenId, ignoreCertificateErrors, connectionTimeout, readTimeout)
-                        .getGitLabApi(null, null)
+                new GitLabConnection(
+                                "",
+                                url,
+                                apiTokenId,
+                                clientBuilderId,
+                                ignoreCertificateErrors,
+                                connectionTimeout,
+                                readTimeout)
+                        .getClient(null, null)
                         .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
-            } catch (WebApplicationException e) {
-                return FormValidation.error(Messages.connection_error(e.getMessage()));
-            } catch (ProcessingException e) {
-                return FormValidation.error(
-                        Messages.connection_error(e.getCause().getMessage()));
             } catch (GitLabApiException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
             }
@@ -267,6 +312,15 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
                         .includeCurrentValue(apiTokenId);
             }
             return new StandardListBoxModel();
+        }
+
+        public ListBoxModel doFillClientBuilderIdItems() {
+            ListBoxModel model = new ListBoxModel();
+            for (GitLabClientBuilder builder : getAllGitLabClientBuilders()) {
+                model.add(builder.id());
+            }
+
+            return model;
         }
     }
 }

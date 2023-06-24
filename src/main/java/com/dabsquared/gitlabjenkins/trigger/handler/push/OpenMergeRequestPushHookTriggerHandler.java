@@ -1,6 +1,3 @@
-/* Note to Reviewers :
- * dont require method for getting open merge requests. gitlab4j direclty provides.
- */
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
@@ -26,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
@@ -71,28 +67,25 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                     if (t instanceof GitLabPushTrigger) {
                         final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Long projectId = hook.getProjectId();
-                        if (property != null
-                                && property.getGitLabApi() != null
-                                && projectId != null
-                                && trigger != null) {
-                            GitLabApi gitLabApi = property.getGitLabApi();
-                            for (MergeRequest mergeRequest : gitLabApi
-                                    .getMergeRequestApi()
-                                    .getMergeRequests(projectId, MergeRequestState.OPENED)) {
+                        if (property != null && property.getClient() != null && projectId != null && trigger != null) {
+                            GitLabApi client = property.getClient();
+                            for (MergeRequest mergeRequest :
+                                    client.getMergeRequestApi().getMergeRequests(projectId, MergeRequestState.OPENED)) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                                    handleMergeRequest(job, hook, ciSkip, branchFilter, gitLabApi, mergeRequest);
+                                    handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
                                 }
                             }
                         }
                     }
                 }
+
             } else {
                 LOGGER.log(
                         Level.FINE,
                         "Not a ParameterizedJob: {0}",
                         LoggerUtil.toArray(job.getClass().getName()));
             }
-        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+        } catch (WebApplicationException | GitLabApiException e) {
             LOGGER.log(
                     Level.WARNING,
                     "Failed to communicate with gitlab server to determine if this is an update for a merge request: "
@@ -106,7 +99,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             PushHook hook,
             boolean ciSkip,
             BranchFilter branchFilter,
-            GitLabApi gitLabApi,
+            GitLabApi client,
             MergeRequest mergeRequest) {
         if (ciSkip
                 && mergeRequest.getDescription() != null
@@ -134,12 +127,12 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                     Level.INFO,
                     "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
+
             try {
-                Branch branch = gitLabApi
-                        .getRepositoryApi()
+                Branch branch = client.getRepositoryApi()
                         .getBranch(mergeRequest.getSourceProjectId().toString(), sourceBranch);
                 String commit = branch.getCommit().getId();
-                Project project = gitLabApi.getProjectApi().getProject(mergeRequest.getSourceProjectId());
+                Project project = client.getProjectApi().getProject(mergeRequest.getSourceProjectId());
                 setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
                 List<Action> actions = Arrays.<Action>asList(
                         new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
@@ -190,8 +183,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Long projectId, String commit, String ref) {
         String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
-            GitLabApi gitLabApi =
-                    job.getProperty(GitLabConnectionProperty.class).getGitLabApi();
+            GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
                 String fixedTagRef = StringUtils.removeStart(ref, "refs/tags/");
                 String targetUrl = DisplayURLProvider.get().getJobURL(job);
@@ -202,8 +194,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                         .withDescription(CommitBuildState.PENDING.name())
                         .withCoverage(null)
                         .withTargetUrl(targetUrl);
-                gitLabApi.getCommitsApi().addCommitStatus(projectId, commit, CommitBuildState.PENDING, status);
-            } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+                client.getCommitsApi().addCommitStatus(projectId, commit, CommitBuildState.PENDING, status);
+            } catch (WebApplicationException | GitLabApiException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
         }

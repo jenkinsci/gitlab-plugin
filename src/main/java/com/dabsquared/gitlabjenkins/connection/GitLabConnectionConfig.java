@@ -57,11 +57,11 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         save();
     }
 
-    public GitLabApi getGitLabApi(String connectionName, Item item, String jobCredentialId) {
+    public GitLabApi getClient(String connectionName, Item item, String jobCredentialId) {
         if (!connectionMap.containsKey(connectionName)) {
             return null;
         }
-        return connectionMap.get(connectionName).getGitLabApi(item, jobCredentialId);
+        return connectionMap.get(connectionName).getClient(item, jobCredentialId);
     }
 
     private void refreshConnectionMap() {

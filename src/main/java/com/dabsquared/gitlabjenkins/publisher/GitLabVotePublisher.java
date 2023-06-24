@@ -10,9 +10,6 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.AwardEmoji;
@@ -47,17 +44,15 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, MergeRequest mergeRequest) {
         boolean alreadyAwarded = false;
         try {
-            Long userId = gitLabApi.getUserApi().getCurrentUser().getId();
-            for (AwardEmoji awardEmoji : gitLabApi
-                    .getAwardEmojiApi()
+            Long userId = client.getUserApi().getCurrentUser().getId();
+            for (AwardEmoji awardEmoji : client.getAwardEmojiApi()
                     .getMergeRequestAwardEmojis(mergeRequest.getProjectId(), mergeRequest.getIid())) {
                 if (awardEmoji.getName().equals(getResultIcon(!isSuccessful(build.getResult())))) {
                     if (awardEmoji.getUser().getId().equals(userId)) {
-                        gitLabApi
-                                .getAwardEmojiApi()
+                        client.getAwardEmojiApi()
                                 .deleteMergeRequestAwardEmoji(
                                         mergeRequest.getProjectId(), mergeRequest.getIid(), awardEmoji.getId());
                     }
@@ -67,7 +62,7 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
                     }
                 }
             }
-        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             listener.getLogger()
                     .printf(
                             "Failed to remove vote on Merge Request for project '%s': %s%n",
@@ -81,27 +76,17 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
 
         try {
             if (!alreadyAwarded) {
-                gitLabApi
-                        .getAwardEmojiApi()
+                client.getAwardEmojiApi()
                         .addMergeRequestAwardEmoji(
                                 mergeRequest.getProjectId(), mergeRequest.getIid(), getResultIcon(build.getResult()));
             }
-        } catch (NotFoundException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             String message = String.format(
                     "Failed to add vote on Merge Request for project '%s'%n"
                             + "Got unexpected 404, are you using the wrong API version or trying to vote on your own merge request?",
                     mergeRequest.getProjectId());
             listener.getLogger().println(message);
             LOGGER.log(Level.WARNING, message, e);
-        } catch (WebApplicationException | ProcessingException e) {
-            listener.getLogger()
-                    .printf(
-                            "Failed to add vote on Merge Request for project '%s': %s%n",
-                            mergeRequest.getProjectId(), e.getMessage());
-            LOGGER.log(
-                    Level.SEVERE,
-                    String.format("Failed to add vote on Merge Request for project '%s'", mergeRequest.getProjectId()),
-                    e);
         }
     }
 

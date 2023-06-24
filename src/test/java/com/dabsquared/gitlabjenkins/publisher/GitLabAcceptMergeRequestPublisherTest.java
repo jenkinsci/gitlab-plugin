@@ -19,6 +19,7 @@ import hudson.model.StreamBuildListener;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import org.gitlab4j.api.GitLabApiException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -64,7 +65,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
     }
 
     @Test
-    public void success() throws IOException, InterruptedException {
+    public void success() throws IOException, InterruptedException, GitLabApiException {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS));
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
@@ -74,26 +75,27 @@ public class GitLabAcceptMergeRequestPublisherTest {
     }
 
     @Test
-    public void failed() throws IOException, InterruptedException {
+    public void failed() throws IOException, InterruptedException, GitLabApiException {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE));
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE));
 
         mockServerClient.verifyZeroInteractions();
     }
 
-    private void publish(AbstractBuild build) throws InterruptedException, IOException {
+    private void publish(AbstractBuild build) throws InterruptedException, IOException, GitLabApiException {
         GitLabAcceptMergeRequestPublisher publisher = preparePublisher(new GitLabAcceptMergeRequestPublisher(), build);
         publisher.perform(build, null, listener);
     }
 
     private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(
-            String apiLevel, int mergeRequestId, Boolean shouldRemoveSourceBranch) throws UnsupportedEncodingException {
+            String apiLevel, Long mergeRequestId, Boolean shouldRemoveSourceBranch)
+            throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId, shouldRemoveSourceBranch);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareAcceptMergeRequest(String apiLevel, int mergeRequestId, Boolean removeSourceBranch)
+    private HttpRequest prepareAcceptMergeRequest(String apiLevel, Long mergeRequestId, Boolean removeSourceBranch)
             throws UnsupportedEncodingException {
         String body = "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success";
         if (removeSourceBranch != null) {

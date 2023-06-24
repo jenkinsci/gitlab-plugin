@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import org.gitlab4j.api.GitLabApi;
@@ -175,15 +174,14 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, MergeRequest mergeRequest) {
         try {
             if (!onlyForFailure || build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
-                gitLabApi
-                        .getNotesApi()
+                client.getNotesApi()
                         .createMergeRequestNote(
                                 mergeRequest.getProjectId(), mergeRequest.getIid(), getNote(build, listener));
             }
-        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+        } catch (WebApplicationException | GitLabApiException e) {
             listener.getLogger()
                     .printf(
                             "Failed to add comment on Merge Request for project '%s': %s%n",

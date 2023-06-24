@@ -1,6 +1,3 @@
-/* Note for Reviewers :
- * changebuildstatus() is replaced by addcommitstatus() for updating the commit status.
- */
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
@@ -19,7 +16,6 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab4j.api.Constants.CommitBuildState;
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.CommitStatus;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -74,24 +70,23 @@ public class PendingBuildsHandler {
             return;
         }
         String targetUrl = DisplayURLProvider.get().getJobURL(job);
-        GitLabApi gitLabApi = job.getProperty(GitLabConnectionProperty.class).getGitLabApi();
+        GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
         String ref = StringUtils.removeStart(causeData.getSourceBranch(), "refs/tags/");
         try {
             CommitStatus status = new CommitStatus();
             status.withRef(ref)
                     .withName(buildName)
                     .withDescription(CommitBuildState.CANCELED.name())
-                    .withCoverage(null) // dont know whether it should be null or not
+                    .withCoverage(null)
                     .withTargetUrl(targetUrl);
-            gitLabApi
-                    .getCommitsApi()
+            client.getCommitsApi()
                     .addCommitStatus(
                             causeData.getSourceProjectId(),
                             causeData.getLastCommit(),
                             CommitBuildState.CANCELED,
                             status);
-        } catch (GitLabApiException e) {
-            LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to set build state to cancelled", e);
         }
     }
 

@@ -1,9 +1,3 @@
-/* Note for Reviewers :
- * This Causedata will be broken according to the events received from Gitlab.
- * gitlab4j uses Long data type instead of Integer
- * as i cant create gitlabapi instance in causedata, getmergereqest has been moved to the classes which required in specifically.
- */
-
 package com.dabsquared.gitlabjenkins.cause;
 
 import hudson.markup.EscapedMarkupFormatter;

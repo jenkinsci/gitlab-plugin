@@ -10,6 +10,9 @@
       <c:select/>
     </f:entry>
     <f:advanced>
+      <f:entry title="${%API-Level}" field="clientBuilderId" description="${%API Level for accessing Gitlab}">
+        <f:select default="autodetect"/>
+      </f:entry>
       <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
         <f:checkbox />
       </f:entry>
@@ -22,5 +25,5 @@
       <st:include page="configure-advanced.jelly" optional="true" />
     </f:advanced>
     <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
-                      with="apiTokenId,url,ignoreCertificateErrors"/>
+                      with="apiTokenId,clientBuilderId,url,ignoreCertificateErrors"/>
 </j:jelly>

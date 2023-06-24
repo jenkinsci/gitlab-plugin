@@ -15,9 +15,9 @@ public final class ProjectIdUtil {
 
     private ProjectIdUtil() {}
 
-    public static String retrieveProjectId(GitLabApi gitLabApi, String remoteUrl) throws ProjectIdResolutionException {
+    public static String retrieveProjectId(GitLabApi client, String remoteUrl) throws ProjectIdResolutionException {
         try {
-            String baseUri = gitLabApi.getGitLabServerUrl();
+            String baseUri = client.getGitLabServerUrl();
             String projectId;
             if (baseUri != null && remoteUrl.startsWith(baseUri)) {
                 projectId = new URIish(remoteUrl.substring(baseUri.length())).getPath();

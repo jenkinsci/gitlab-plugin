@@ -1,6 +1,3 @@
-/* Note to Reviewers :
- * will be removed.
- */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import net.karneim.pojobuilder.GeneratePojoBuilder;

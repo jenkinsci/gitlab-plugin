@@ -1,9 +1,6 @@
-/* Note for Reviewers :
- * getmergeRequest() is defined here instead of using causedata temporarily.
- */
 package com.dabsquared.gitlabjenkins.publisher;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getGitLabApi;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.Launcher;
@@ -32,19 +29,19 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        GitLabApi gitlabApi = getGitLabApi(build);
-        if (gitlabApi == null) {
+        GitLabApi client = getClient(build);
+        if (client == null) {
             listener.getLogger().println("No GitLab connection configured");
             return true;
         }
         try {
             MergeRequest mergeRequest = getMergeRequest(build);
             if (mergeRequest != null) {
-                perform(build, listener, gitlabApi, mergeRequest);
+                perform(build, listener, client, mergeRequest);
             }
             return true;
         } catch (GitLabApiException e) {
-            listener.getLogger().println("Failed to create merge request: " + e.getMessage());
+            listener.getLogger().println("Failed to create merge request");
             return false;
         }
     }
@@ -60,10 +57,13 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
     }
 
     protected abstract void perform(
-            Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest);
+            Run<?, ?> build, TaskListener listener, GitLabApi client, MergeRequest mergeRequest);
 
     MergeRequest getMergeRequest(Run<?, ?> run) throws GitLabApiException {
         GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+        if (cause == null) {
+            throw new GitLabApiException("No GitLabWebHookCause found");
+        }
         String mergeRequestTitle = cause.getData().getMergeRequestTitle();
         String mergeRequestDescription = cause.getData().getMergeRequestDescription();
         String sourceBranch = cause.getData().getSourceBranch();
@@ -71,7 +71,7 @@ public abstract class MergeRequestNotifier extends Notifier implements MatrixAgg
         Long sourceProjectId = cause.getData().getSourceProjectId();
         Long targetProjectId = cause.getData().getTargetProjectId();
 
-        MergeRequest mergeRequest = getGitLabApi(run)
+        MergeRequest mergeRequest = getClient(run)
                 .getMergeRequestApi()
                 .createMergeRequest(
                         sourceProjectId,

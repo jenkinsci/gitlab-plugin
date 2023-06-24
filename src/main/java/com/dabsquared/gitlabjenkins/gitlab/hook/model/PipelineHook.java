@@ -1,5 +1,8 @@
 /* Note to Reviewers :
- * Will be removed. Temporary.
+ * Will be removed.
+ */
+/*
+ * TODO remove this class because in milestone 2 PipelineEvent object will be used instead of PipelineHook
  */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 

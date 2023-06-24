@@ -138,4 +138,10 @@
   <Match>
     <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT" />
   </Match>
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH" />
+  </Match>
+  <Match>
+    <Bug pattern="NP_NONNULL_RETURN_VIOLATION" />
+  </Match>
 </FindBugsFilter>

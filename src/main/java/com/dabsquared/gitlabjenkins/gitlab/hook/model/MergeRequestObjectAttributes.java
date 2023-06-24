@@ -1,6 +1,3 @@
-/* Note for reviewers :
- * This class will be replaced by mergerequestevent. This is temporary.
- */
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import java.util.Date;

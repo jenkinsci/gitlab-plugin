@@ -35,9 +35,9 @@ public class GitLabProjectBranchesService {
         return gitLabProjectBranchesService;
     }
 
-    public List<String> getBranches(GitLabApi gitLabApi, String sourceRepositoryString) {
+    public List<String> getBranches(GitLabApi client, String sourceRepositoryString) {
         synchronized (projectBranchCache) {
-            return projectBranchCache.get(sourceRepositoryString, new BranchNamesLoader(gitLabApi));
+            return projectBranchCache.get(sourceRepositoryString, new BranchNamesLoader(client));
         }
     }
 
@@ -48,10 +48,10 @@ public class GitLabProjectBranchesService {
     }
 
     private static class BranchNamesLoader implements Function<String, List<String>> {
-        private final GitLabApi gitLabApi;
+        private final GitLabApi client;
 
-        private BranchNamesLoader(GitLabApi gitLabApi) {
-            this.gitLabApi = gitLabApi;
+        private BranchNamesLoader(GitLabApi client) {
+            this.client = client;
         }
 
         @Override
@@ -59,17 +59,18 @@ public class GitLabProjectBranchesService {
             List<String> result = new ArrayList<>();
             String projectId;
             try {
-                projectId = ProjectIdUtil.retrieveProjectId(gitLabApi, sourceRepository);
+                projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 throw new BranchLoadingException(e);
             }
             try {
-                for (Branch branch : gitLabApi.getRepositoryApi().getBranches(projectId)) {
+                for (Branch branch : client.getRepositoryApi().getBranches(projectId)) {
                     result.add(branch.getName());
                 }
             } catch (GitLabApiException e) {
                 LOGGER.log(Level.SEVERE, "failed to load branches from repository " + e.getMessage());
             }
+
             LOGGER.log(
                     Level.FINEST,
                     "found these branches for repo {0} : {1}",

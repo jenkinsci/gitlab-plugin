@@ -10,8 +10,6 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.MergeRequest;
@@ -57,11 +55,10 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     }
 
     @Override
-    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi gitLabApi, MergeRequest mergeRequest) {
+    protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, MergeRequest mergeRequest) {
         try {
             if (build.getResult() == Result.SUCCESS) {
-                gitLabApi
-                        .getMergeRequestApi()
+                client.getMergeRequestApi()
                         .acceptMergeRequest(
                                 mergeRequest,
                                 mergeRequest.getIid(),
@@ -69,7 +66,7 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
                                 isDeleteSourceBranch(),
                                 true);
             }
-        } catch (WebApplicationException | ProcessingException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             listener.getLogger()
                     .printf(
                             "Failed to accept merge request for project '%s': %s%n",

@@ -15,6 +15,8 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
+import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -41,18 +43,17 @@ import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.junit.MockServerRule;
 
-class TestUtility {
+final class TestUtility {
+    static final String GITLAB_CONNECTION_V3 = "GitLabV3";
     static final String GITLAB_CONNECTION_V4 = "GitLabV4";
     static final String BUILD_URL = "/build/123";
     static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
     static final int BUILD_NUMBER = 1;
-    static final Long PROJECT_ID = 3L;
-    static final int MERGE_REQUEST_ID = 1;
-    static final int MERGE_REQUEST_IID = 2;
+    static final long PROJECT_ID = 3;
+    static final long MERGE_REQUEST_ID = 1;
+    static final long MERGE_REQUEST_IID = 2;
 
     private static final String API_TOKEN = "secret";
-    private static GitLabApi gitLabApi;
-    private static MergeRequestApi mergeRequestApi;
 
     static void setupGitLabConnections(JenkinsRule jenkins, MockServerRule mockServer) throws IOException {
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
@@ -70,9 +71,18 @@ class TestUtility {
             }
         }
         connectionConfig.addConnection(new GitLabConnection(
+                TestUtility.GITLAB_CONNECTION_V3,
+                "http://localhost:" + mockServer.getPort() + "/gitlab",
+                apiTokenId,
+                new V3GitLabClientBuilder(),
+                false,
+                10,
+                10));
+        connectionConfig.addConnection(new GitLabConnection(
                 TestUtility.GITLAB_CONNECTION_V4,
                 "http://localhost:" + mockServer.getPort() + "/gitlab",
                 apiTokenId,
+                new V4GitLabClientBuilder(),
                 false,
                 10,
                 10));
@@ -124,13 +134,11 @@ class TestUtility {
 
     static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build)
             throws GitLabApiException {
-        gitLabApi = mock(GitLabApi.class);
-        mergeRequestApi = mock(MergeRequestApi.class);
+        GitLabApi client = mock(GitLabApi.class);
+        MergeRequestApi mergeRequestApi = mock(MergeRequestApi.class);
         P spyPublisher = spy(publisher);
-        // MERGEREQUESTCAUSEDATA has to be used
-        doReturn(mergeRequestApi).when(gitLabApi).getMergeRequestApi();
-        MergeRequest mergeRequest = gitLabApi
-                .getMergeRequestApi()
+        doReturn(mergeRequestApi).when(client).getMergeRequestApi();
+        MergeRequest mergeRequest = client.getMergeRequestApi()
                 .createMergeRequest(
                         PROJECT_ID,
                         "sourceBranch",

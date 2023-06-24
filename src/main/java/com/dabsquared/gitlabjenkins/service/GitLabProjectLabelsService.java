@@ -35,9 +35,9 @@ public class GitLabProjectLabelsService {
         return instance;
     }
 
-    public List<String> getLabels(GitLabApi gitLabApi, String sourceRepositoryString) {
+    public List<String> getLabels(GitLabApi client, String sourceRepositoryString) {
         synchronized (projectLabelsCache) {
-            return projectLabelsCache.get(sourceRepositoryString, new LabelNamesLoader(gitLabApi));
+            return projectLabelsCache.get(sourceRepositoryString, new LabelNamesLoader(client));
         }
     }
 
@@ -48,10 +48,10 @@ public class GitLabProjectLabelsService {
     }
 
     private static class LabelNamesLoader implements Function<String, List<String>> {
-        private final GitLabApi gitLabApi;
+        private final GitLabApi client;
 
-        private LabelNamesLoader(GitLabApi gitLabApi) {
-            this.gitLabApi = gitLabApi;
+        private LabelNamesLoader(GitLabApi client) {
+            this.client = client;
         }
 
         @Override
@@ -59,12 +59,12 @@ public class GitLabProjectLabelsService {
             List<String> result = new ArrayList<>();
             String projectId;
             try {
-                projectId = ProjectIdUtil.retrieveProjectId(gitLabApi, sourceRepository);
+                projectId = ProjectIdUtil.retrieveProjectId(client, sourceRepository);
             } catch (ProjectIdUtil.ProjectIdResolutionException e) {
                 throw new LabelLoadingException(e);
             }
             try {
-                for (Label label : gitLabApi.getLabelsApi().getLabels(projectId)) {
+                for (Label label : client.getLabelsApi().getLabels(projectId)) {
                     result.add(label.getName());
                 }
             } catch (GitLabApiException e) {

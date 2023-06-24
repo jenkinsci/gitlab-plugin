@@ -1,9 +1,6 @@
-/* Note to Reviewers :
- * using getmergeRequest() instead of causedata temporarily.
- */
 package com.dabsquared.gitlabjenkins.workflow;
 
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getGitLabApi;
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.Extension;
@@ -14,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab4j.api.GitLabApi;
@@ -99,23 +95,21 @@ public class AcceptGitLabMergeRequestStep extends Step {
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause != null) {
-                MergeRequest mergeRequest = getMergeRequest(run, getGitLabApi(run));
-                // mergerequestcause will be used
+                MergeRequest mergeRequest = getMergeRequest(run, getClient(run));
                 if (mergeRequest != null) {
-                    GitLabApi gitLabApi = getGitLabApi(run);
-                    if (gitLabApi == null) {
+                    GitLabApi client = getClient(run);
+                    if (client == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            gitLabApi
-                                    .getMergeRequestApi()
+                            client.getMergeRequestApi()
                                     .acceptMergeRequest(
                                             mergeRequest.getProjectId(),
                                             mergeRequest.getIid(),
                                             getCommitMessage(mergeRequest),
                                             true,
                                             true);
-                        } catch (WebApplicationException | ProcessingException e) {
+                        } catch (WebApplicationException e) {
                             printf(
                                     "Failed to accept merge request for project '%s': %s%n",
                                     mergeRequest.getProjectId(), e.getMessage());
@@ -134,6 +128,9 @@ public class AcceptGitLabMergeRequestStep extends Step {
 
         private MergeRequest getMergeRequest(Run<?, ?> run, GitLabApi gitlabApi) throws GitLabApiException {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            if (cause == null) {
+                throw new GitLabApiException("No GitLabWebHookCause found");
+            }
             String mergeRequestTitle = cause.getData().getMergeRequestTitle();
             String mergeRequestDescription = cause.getData().getMergeRequestDescription();
             String sourceBranch = cause.getData().getSourceBranch();
@@ -141,7 +138,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
             Long sourceProjectId = cause.getData().getSourceProjectId();
             Long targetProjectId = cause.getData().getTargetProjectId();
 
-            MergeRequest mergeRequest = getGitLabApi(run)
+            MergeRequest mergeRequest = getClient(run)
                     .getMergeRequestApi()
                     .createMergeRequest(
                             sourceProjectId,

@@ -170,7 +170,7 @@ public class GitLabConnectionConfigSSLTest {
                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
         FormValidation formValidation =
-                descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
+                descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v4", false, 10, 10);
         assertThat(formValidation.getMessage(), containsString(Messages.connection_error("PKIX path building failed")));
     }
 }
