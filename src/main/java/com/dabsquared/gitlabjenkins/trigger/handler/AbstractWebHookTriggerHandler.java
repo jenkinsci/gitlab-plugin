@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -91,7 +90,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                                 .withCoverage(null);
                         client.getCommitsApi().addCommitStatus(projectId, sha, CommitBuildState.PENDING, status);
                     }
-                } catch (WebApplicationException | GitLabApiException e) {
+                } catch (GitLabApiException e) {
                     LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
                 }
             }

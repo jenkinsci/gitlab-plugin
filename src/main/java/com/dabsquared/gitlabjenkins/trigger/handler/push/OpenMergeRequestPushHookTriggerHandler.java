@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import org.apache.commons.lang.StringUtils;
@@ -85,7 +84,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                         "Not a ParameterizedJob: {0}",
                         LoggerUtil.toArray(job.getClass().getName()));
             }
-        } catch (WebApplicationException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             LOGGER.log(
                     Level.WARNING,
                     "Failed to communicate with gitlab server to determine if this is an update for a merge request: "
@@ -195,7 +194,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                         .withCoverage(null)
                         .withTargetUrl(targetUrl);
                 client.getCommitsApi().addCommitStatus(projectId, commit, CommitBuildState.PENDING, status);
-            } catch (WebApplicationException | GitLabApiException e) {
+            } catch (GitLabApiException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
         }

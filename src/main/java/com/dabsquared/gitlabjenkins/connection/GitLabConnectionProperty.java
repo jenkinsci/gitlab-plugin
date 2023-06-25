@@ -14,7 +14,6 @@ import hudson.model.Run;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -175,8 +174,6 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
                         .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
-            } catch (WebApplicationException e) {
-                return FormValidation.error(Messages.connection_error(e.getMessage()));
             } catch (GitLabApiException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
             }
