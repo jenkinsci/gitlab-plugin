@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.util.StringUtils;
 import org.gitlab4j.api.GitLabApi;
@@ -295,8 +294,6 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
                         .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
-            } catch (WebApplicationException e) {
-                return FormValidation.error(Messages.connection_error(e.getMessage()));
             } catch (GitLabApiException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
             }

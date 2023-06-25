@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab4j.api.GitLabApi;
@@ -93,7 +91,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                             client.getNotesApi()
                                     .createMergeRequestNote(
                                             mergeRequest.getProjectId(), mergeRequest.getIid(), step.getComment());
-                        } catch (WebApplicationException | ProcessingException e) {
+                        } catch (GitLabApiException e) {
                             printf(
                                     "Failed to add comment on Merge Request for project '%s': %s%n",
                                     mergeRequest.getProjectId(), e.getMessage());

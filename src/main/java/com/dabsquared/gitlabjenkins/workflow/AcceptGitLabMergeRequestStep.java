@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.gitlab4j.api.GitLabApi;
@@ -110,7 +109,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
                                             getCommitMessage(mergeRequest),
                                             true,
                                             true);
-                        } catch (WebApplicationException | ProcessingException e) {
+                        } catch (WebApplicationException e) {
                             printf(
                                     "Failed to accept merge request for project '%s': %s%n",
                                     mergeRequest.getProjectId(), e.getMessage());

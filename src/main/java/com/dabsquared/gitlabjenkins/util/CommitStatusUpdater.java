@@ -20,8 +20,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
 import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMRevisionAction;
@@ -109,7 +107,7 @@ public class CommitStatusUpdater {
                                         state,
                                         status);
                     }
-                } catch (WebApplicationException | GitLabApiException e) {
+                } catch (GitLabApiException e) {
                     printf(
                             listener,
                             "Failed to update Gitlab commit status for project '%s': %s%n",
@@ -155,7 +153,7 @@ public class CommitStatusUpdater {
         try {
             client.getCommitsApi().getCommit(gitlabProjectId, commitHash);
             return true;
-        } catch (NotFoundException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             LOGGER.log(
                     Level.FINE,
                     String.format("Project (%s) and commit (%s) combination not found", gitlabProjectId, commitHash));
@@ -288,7 +286,7 @@ public class CommitStatusUpdater {
                                     .getProject(projectNameWithNameSpace)
                                     .getId()
                                     .toString();
-                        } catch (WebApplicationException | GitLabApiException e) {
+                        } catch (GitLabApiException e) {
                             LOGGER.log(
                                     Level.SEVERE,
                                     String.format(

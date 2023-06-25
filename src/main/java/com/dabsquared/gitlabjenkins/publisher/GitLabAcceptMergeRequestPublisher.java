@@ -10,7 +10,6 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.WebApplicationException;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.MergeRequest;
@@ -67,7 +66,7 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
                                 isDeleteSourceBranch(),
                                 true);
             }
-        } catch (WebApplicationException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             listener.getLogger()
                     .printf(
                             "Failed to accept merge request for project '%s': %s%n",

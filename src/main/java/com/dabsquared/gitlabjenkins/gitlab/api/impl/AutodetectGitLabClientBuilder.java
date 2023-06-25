@@ -1,42 +1,64 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.NoSuchElementException;
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApi.ApiVersion;
-import org.gitlab4j.api.GitLabApiException;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 @Extension
 @Restricted(NoExternalUse.class)
 public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
+    private static final int ORDINAL = 0;
+
     public AutodetectGitLabClientBuilder() {
-        super("autodetect", 0);
+        super("autodetect", ORDINAL);
     }
 
     @Override
     @NonNull
     public GitLabApi buildClient(
             String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
-        GitLabApi client = null;
-        for (ApiVersion version : ApiVersion.values()) {
-            try {
-                client = new GitLabApi(version, url, token);
-                // this is added as a check to ensure that the token and url obtained from gitlab server is valid
-                client.getUserApi().getCurrentUser();
-                break;
-            } catch (GitLabApiException e) {
-                client = null;
-            }
-        }
-        if (client == null) {
-            throw new IllegalArgumentException("Could not autodetect GitLab API version");
-        } else {
-            client.setIgnoreCertificateErrors(ignoreCertificateErrors);
-            client.setRequestTimeout(connectionTimeout, readTimeout);
+        Collection<GitLabClientBuilder> candidates = new ArrayList<>(getAllGitLabClientBuilders());
+        candidates.remove(this);
+        return autodetectOrDie(candidates, url, token, ignoreCertificateErrors, connectionTimeout, readTimeout);
+    }
+
+    @NonNull
+    private GitLabApi autodetectOrDie(
+            Collection<GitLabClientBuilder> candidates,
+            String url,
+            String token,
+            boolean ignoreCertificateErrors,
+            int connectionTimeout,
+            int readTimeout) {
+        GitLabApi client = autodetect(candidates, url, token, ignoreCertificateErrors, connectionTimeout, readTimeout);
+        if (client != null) {
             return client;
         }
+
+        throw new NoSuchElementException("no client-builder found that supports server at " + url);
+    }
+
+    @CheckForNull
+    private GitLabApi autodetect(
+            Collection<GitLabClientBuilder> candidates,
+            String url,
+            String token,
+            boolean ignoreCertificateErrors,
+            int connectionTimeout,
+            int readTimeout) {
+        for (GitLabClientBuilder candidate : candidates) {
+            GitLabApi client =
+                    candidate.buildClient(url, token, ignoreCertificateErrors, connectionTimeout, readTimeout);
+            return client;
+        }
+
+        return null;
     }
 }

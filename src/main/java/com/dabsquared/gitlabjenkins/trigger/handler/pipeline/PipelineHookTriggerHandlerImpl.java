@@ -21,7 +21,6 @@ import hudson.plugins.git.RevisionParameterAction;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.WebApplicationException;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Project;
@@ -59,7 +58,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                     hook.setProjectId(projectForName.getId());
                 }
             }
-        } catch (WebApplicationException | GitLabApiException e) {
+        } catch (GitLabApiException e) {
             LOGGER.log(
                     Level.WARNING,
                     "Failed to communicate with gitlab server to determine project id: " + e.getMessage(),
