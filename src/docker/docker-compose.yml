@@ -28,4 +28,6 @@ services:
       - "50000:50000"
     volumes:
       - '/srv/docker/jenkins:/var/jenkins_home'
+    environment:
+      - "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50000"
     shm_size: '5gb'
