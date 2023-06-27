@@ -131,10 +131,10 @@ public class NoteHookTriggerHandlerImplTest {
                                 .withTargetBranch("refs/heads/"
                                         + git.nameRev().add(head).call().get(head))
                                 .withState(State.opened)
-                                .withIid(1)
+                                .withIid(1L)
                                 .withTitle("test")
-                                .withTargetProjectId(1)
-                                .withSourceProjectId(1)
+                                .withTargetProjectId(1L)
+                                .withSourceProjectId(1L)
                                 .withSourceBranch("feature")
                                 .withTargetBranch("master")
                                 .withLastCommit(commit().withAuthor(

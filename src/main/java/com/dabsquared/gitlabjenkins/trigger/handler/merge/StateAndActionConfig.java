@@ -1,29 +1,29 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
+import org.gitlab4j.api.Constants.ActionType;
+import org.gitlab4j.api.Constants.MergeRequestState;
+import org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes;
 
-class StateAndActionConfig implements Predicate<MergeRequestObjectAttributes> {
-    private final Predicate<State> states;
-    private final Predicate<Action> actions;
+class StateAndActionConfig implements Predicate<ObjectAttributes> {
+    private final Predicate<MergeRequestState> states;
+    private final Predicate<ActionType> actions;
 
-    public StateAndActionConfig(Collection<State> allowedStates, Collection<Action> allowedActions) {
+    public StateAndActionConfig(Collection<MergeRequestState> allowedStates, Collection<ActionType> allowedActions) {
         this(nullOrContains(allowedStates), nullOrContains(allowedActions));
     }
 
-    public StateAndActionConfig(Predicate<State> states, Predicate<Action> actions) {
+    public StateAndActionConfig(Predicate<MergeRequestState> states, Predicate<ActionType> actions) {
         this.states = states == null ? unused -> true : states;
         this.actions = actions == null ? unused -> true : actions;
     }
 
     @Override
-    public boolean test(MergeRequestObjectAttributes mergeRequestObjectAttributes) {
-        return states.test(mergeRequestObjectAttributes.getState())
-                && actions.test(mergeRequestObjectAttributes.getAction());
+    public boolean test(ObjectAttributes mergeRequestObjectAttributes) {
+        return states.test(MergeRequestState.valueOf(mergeRequestObjectAttributes.getState()))
+                && actions.test(ActionType.valueOf(mergeRequestObjectAttributes.getAction()));
     }
 
     static <T> Predicate<T> nullOrContains(final Collection<T> collection) {

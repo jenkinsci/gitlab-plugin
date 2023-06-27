@@ -7,13 +7,6 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
@@ -24,18 +17,24 @@ import hudson.model.Job;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.Trigger;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.gitlab4j.api.Constants.CommitBuildState;
+import org.gitlab4j.api.Constants.MergeRequestState;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.Branch;
+import org.gitlab4j.api.models.CommitStatus;
+import org.gitlab4j.api.models.MergeRequest;
+import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.webhook.PushEvent;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
@@ -54,7 +53,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     @Override
     public void handle(
             Job<?, ?> job,
-            PushHook hook,
+            PushEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
@@ -66,12 +65,13 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 for (Trigger<?> t : triggerList) {
                     if (t instanceof GitLabPushTrigger) {
                         final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
-                        Integer projectId = hook.getProjectId();
+                        Long projectId = event.getProjectId();
                         if (property != null && property.getClient() != null && projectId != null && trigger != null) {
-                            GitLabClient client = property.getClient();
-                            for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
+                            GitLabApi client = property.getClient();
+                            for (MergeRequest mergeRequest :
+                                    client.getMergeRequestApi().getMergeRequests(projectId, MergeRequestState.OPENED)) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                                    handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                    handleMergeRequest(job, event, ciSkip, branchFilter, client, mergeRequest);
                                 }
                             }
                         }
@@ -84,7 +84,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                         "Not a ParameterizedJob: {0}",
                         LoggerUtil.toArray(job.getClass().getName()));
             }
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (GitLabApiException e) {
             LOGGER.log(
                     Level.WARNING,
                     "Failed to communicate with gitlab server to determine if this is an update for a merge request: "
@@ -93,23 +93,12 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         }
     }
 
-    private List<MergeRequest> getOpenMergeRequests(GitLabClient client, String projectId) {
-        List<MergeRequest> result = new ArrayList<>();
-        Integer page = 1;
-        do {
-            List<MergeRequest> mergeRequests = client.getMergeRequests(projectId, State.opened, page, 100);
-            result.addAll(mergeRequests);
-            page = mergeRequests.isEmpty() ? null : page + 1;
-        } while (page != null);
-        return result;
-    }
-
     private void handleMergeRequest(
             Job<?, ?> job,
-            PushHook hook,
+            PushEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
-            GitLabClient client,
+            GitLabApi client,
             MergeRequest mergeRequest) {
         if (ciSkip
                 && mergeRequest.getDescription() != null
@@ -131,30 +120,39 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         String targetBranch = mergeRequest.getTargetBranch();
         if (targetBranch != null
                 && branchFilter.isBranchAllowed(sourceBranch, targetBranch)
-                && hook.getRef().equals("refs/heads/" + targetBranch)
+                && event.getRef().equals("refs/heads/" + targetBranch)
                 && sourceBranch != null) {
             LOGGER.log(
                     Level.INFO,
                     "{0} triggered for push to target branch of open merge request #{1}.",
                     LoggerUtil.toArray(job.getFullName(), mergeRequest.getId()));
 
-            Branch branch = client.getBranch(mergeRequest.getSourceProjectId().toString(), sourceBranch);
-            Project project =
-                    client.getProject(mergeRequest.getSourceProjectId().toString());
-            String commit = branch.getCommit().getId();
-            setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
-            List<Action> actions = Arrays.<Action>asList(
-                    new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
-                    new RevisionParameterAction(commit, retrieveUrIish(hook)));
-            scheduleBuild(job, actions.toArray(new Action[actions.size()]));
+            try {
+                Branch branch = client.getRepositoryApi()
+                        .getBranch(mergeRequest.getSourceProjectId().toString(), sourceBranch);
+                String commit = branch.getCommit().getId();
+                Project project = client.getProjectApi().getProject(mergeRequest.getSourceProjectId());
+                setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
+                List<Action> actions = Arrays.<Action>asList(
+                        new CauseAction(
+                                new GitLabWebHookCause(retrieveCauseData(event, project, mergeRequest, branch))),
+                        new RevisionParameterAction(commit, retrieveUrIish(event)));
+                scheduleBuild(job, actions.toArray(new Action[actions.size()]));
+            } catch (GitLabApiException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to obtain branch/project information for merge request:" + e.getMessage(),
+                        e);
+                return;
+            }
         }
     }
 
-    private CauseData retrieveCauseData(PushHook hook, Project project, MergeRequest mergeRequest, Branch branch) {
+    private CauseData retrieveCauseData(PushEvent event, Project project, MergeRequest mergeRequest, Branch branch) {
         return causeData()
                 .withActionType(CauseData.ActionType.MERGE)
                 .withSourceProjectId(mergeRequest.getSourceProjectId())
-                .withTargetProjectId(hook.getProjectId())
+                .withTargetProjectId(event.getProjectId())
                 .withBranch(branch.getName())
                 .withSourceBranch(branch.getName())
                 .withUserName(branch.getCommit().getAuthorName())
@@ -165,40 +163,39 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withSourceRepoUrl(project.getSshUrlToRepo())
                 .withSourceRepoSshUrl(project.getSshUrlToRepo())
                 .withSourceRepoHttpUrl(project.getHttpUrlToRepo())
-                .withMergeCommitSha(mergeRequest.getCommitSha())
+                .withMergeCommitSha(mergeRequest.getSha())
                 .withMergeRequestTitle(mergeRequest.getTitle())
                 .withMergeRequestDescription(mergeRequest.getDescription())
                 .withMergeRequestId(mergeRequest.getId())
                 .withMergeRequestIid(mergeRequest.getIid())
                 .withMergeRequestTargetProjectId(mergeRequest.getTargetProjectId())
                 .withTargetBranch(mergeRequest.getTargetBranch())
-                .withTargetRepoName(hook.getRepository().getName())
-                .withTargetNamespace(hook.getProject().getNamespace())
-                .withTargetRepoSshUrl(hook.getRepository().getGitSshUrl())
-                .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
-                .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
+                .withTargetRepoName(event.getRepository().getName())
+                .withTargetNamespace(event.getProject().getNamespace())
+                .withTargetRepoSshUrl(event.getRepository().getGit_ssh_url())
+                .withTargetRepoHttpUrl(event.getRepository().getGit_http_url())
+                .withTriggeredByUser(event.getCommits().get(0).getAuthor().getName())
                 .withLastCommit(branch.getCommit().getId())
                 .withTargetProjectUrl(project.getWebUrl())
                 .build();
     }
 
-    private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
+    private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Long projectId, String commit, String ref) {
         String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
-            GitLabClient client =
-                    job.getProperty(GitLabConnectionProperty.class).getClient();
+            GitLabApi client = job.getProperty(GitLabConnectionProperty.class).getClient();
             try {
                 String fixedTagRef = StringUtils.removeStart(ref, "refs/tags/");
                 String targetUrl = DisplayURLProvider.get().getJobURL(job);
-                client.changeBuildStatus(
-                        projectId,
-                        commit,
-                        BuildState.pending,
-                        fixedTagRef,
-                        buildName,
-                        targetUrl,
-                        BuildState.pending.name());
-            } catch (WebApplicationException | ProcessingException e) {
+                CommitStatus status = new CommitStatus();
+                status.withRef(fixedTagRef)
+                        .withName(buildName)
+                        .withTargetUrl(targetUrl)
+                        .withDescription(CommitBuildState.PENDING.name())
+                        .withCoverage(null)
+                        .withTargetUrl(targetUrl);
+                client.getCommitsApi().addCommitStatus(projectId, commit, CommitBuildState.PENDING, status);
+            } catch (GitLabApiException e) {
                 LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
             }
         }
@@ -225,10 +222,10 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         };
     }
 
-    private URIish retrieveUrIish(PushHook hook) {
+    private URIish retrieveUrIish(PushEvent event) {
         try {
-            if (hook.getRepository() != null) {
-                return new URIish(hook.getRepository().getUrl());
+            if (event.getRepository() != null) {
+                return new URIish(event.getRepository().getUrl());
             }
         } catch (URISyntaxException e) {
             LOGGER.log(Level.WARNING, "could not parse URL");

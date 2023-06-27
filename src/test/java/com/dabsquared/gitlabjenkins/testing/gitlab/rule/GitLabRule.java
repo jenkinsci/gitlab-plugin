@@ -8,12 +8,7 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
+import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.sql.Connection;
@@ -22,8 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import jenkins.model.Jenkins;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
+import org.gitlab4j.api.models.Pipeline;
+import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.User;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -34,12 +34,12 @@ import org.junit.runners.model.Statement;
  */
 public class GitLabRule implements TestRule {
     private static final String API_TOKEN_ID = "apiTokenId";
-    private static final String PASSWORD = "integration-test";
+    private static final CharSequence PASSWORD = "integration-test";
 
     private final String url;
     private final int postgresPort;
 
-    private GitLabClient clientCache;
+    private GitLabApi clientCache;
 
     private List<String> projectIds = new ArrayList<>();
 
@@ -53,24 +53,25 @@ public class GitLabRule implements TestRule {
         return new GitlabStatement(base);
     }
 
-    public Project getProject(final String projectName) {
-        return client().getProject(projectName);
+    public Project getProject(final String projectName) throws GitLabApiException {
+        return client().getProjectApi().getProject(projectName);
     }
 
-    public List<Pipeline> getPipelines(int projectId) {
-        return client().getPipelines(String.valueOf(projectId));
+    public List<Pipeline> getPipelines(Long projectId) throws GitLabApiException {
+        return client().getPipelineApi().getPipelines(String.valueOf(projectId));
     }
 
     public List<String> getProjectIds() {
         return projectIds;
     }
 
-    public String createProject(ProjectRequest request) {
-        Project project = client().createProject(request.getName());
+    public String createProject(ProjectRequest request) throws GitLabApiException {
+        Project project = client().getProjectApi().createProject(request.getName());
         projectIds.add(project.getId().toString());
         if (request.getWebHookUrl() != null
                 && (request.isPushHook() || request.isMergeRequestHook() || request.isNoteHook())) {
-            client().addProjectHook(
+            client().getProjectApi()
+                    .addHook(
                             project.getId().toString(),
                             request.getWebHookUrl(),
                             request.isPushHook(),
@@ -96,35 +97,37 @@ public class GitLabRule implements TestRule {
 
         GitLabConnectionConfig config = Jenkins.getInstance().getDescriptorByType(GitLabConnectionConfig.class);
         GitLabConnection connection =
-                new GitLabConnection("test", url, API_TOKEN_ID, new V3GitLabClientBuilder(), true, 10, 10);
+                new GitLabConnection("test", url, API_TOKEN_ID, new V4GitLabClientBuilder(), true, 10, 10);
         config.addConnection(connection);
         config.save();
         return new GitLabConnectionProperty(connection.getName());
     }
 
     public MergeRequest createMergeRequest(
-            final Integer projectId, final String sourceBranch, final String targetBranch, final String title) {
-        return client().createMergeRequest(projectId, sourceBranch, targetBranch, title);
+            final Long projectId, final String sourceBranch, final String targetBranch, final String title)
+            throws GitLabApiException {
+        return client().getMergeRequestApi().createMergeRequest(projectId, sourceBranch, targetBranch, title, "", null);
     }
 
-    public void createMergeRequestNote(MergeRequest mr, String body) {
-        client().createMergeRequestNote(mr, body);
+    public void createMergeRequestNote(MergeRequest mr, Long mergeRequestIid, String body) throws GitLabApiException {
+        client().getNotesApi().createMergeRequestNote(mr, mergeRequestIid, body);
     }
 
-    public String getUsername() {
-        return client().getCurrentUser().getUsername();
+    public String getUsername() throws GitLabApiException {
+        return client().getUserApi().getCurrentUser().getUsername();
     }
 
-    public String getPassword() {
+    public CharSequence getPassword() {
         return PASSWORD;
     }
 
-    private void cleanup() {
+    private void cleanup() throws GitLabApiException {
         for (String projectId : projectIds) {
-            String randomProjectName = UUID.randomUUID().toString();
             // rename the project before deleting as the deletion will take a while
-            client().updateProject(projectId, randomProjectName, randomProjectName);
-            client().deleteProject(projectId);
+            Project project = new Project();
+            project.setId(Long.parseLong(projectId));
+            client().getProjectApi().updateProject(project);
+            client().getProjectApi().deleteProject(projectId);
         }
     }
 
@@ -144,11 +147,11 @@ public class GitLabRule implements TestRule {
         }
     }
 
-    private GitLabClient client() {
+    private GitLabApi client() throws GitLabApiException {
         if (clientCache == null) {
-            clientCache = new V3GitLabClientBuilder().buildClient(url, getApiToken(), false, -1, -1);
-            User user = clientCache.getCurrentUser();
-            client().updateUser(user.getId().toString(), user.getEmail(), user.getUsername(), user.getName(), PASSWORD);
+            clientCache = new V4GitLabClientBuilder().buildClient(url, getApiToken(), false, -1, -1);
+            User user = clientCache.getUserApi().getCurrentUser();
+            client().getUserApi().updateUser(user, PASSWORD);
         }
         return clientCache;
     }

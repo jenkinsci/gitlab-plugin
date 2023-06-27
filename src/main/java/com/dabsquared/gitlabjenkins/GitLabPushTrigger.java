@@ -9,10 +9,6 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerH
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.publisher.GitLabAcceptMergeRequestPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.publisher.GitLabMessagePublisher;
@@ -29,6 +25,9 @@ import com.dabsquared.gitlabjenkins.trigger.handler.merge.MergeRequestHookTrigge
 import com.dabsquared.gitlabjenkins.trigger.handler.note.NoteHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.push.PushSystemHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.push.TagPushHookTriggerHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.push.TagPushSystemHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
 import hudson.Extension;
@@ -56,6 +55,14 @@ import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.systemhooks.MergeRequestSystemHookEvent;
+import org.gitlab4j.api.systemhooks.PushSystemHookEvent;
+import org.gitlab4j.api.systemhooks.TagPushSystemHookEvent;
+import org.gitlab4j.api.webhook.MergeRequestEvent;
+import org.gitlab4j.api.webhook.NoteEvent;
+import org.gitlab4j.api.webhook.PipelineEvent;
+import org.gitlab4j.api.webhook.PushEvent;
+import org.gitlab4j.api.webhook.TagPushEvent;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.AncestorInPath;
@@ -107,6 +114,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     private transient BranchFilter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
+    private transient TagPushHookTriggerHandler tagPushHookTriggerHandler;
+    private transient PushSystemHookTriggerHandler pushSystemHookTriggerHandler;
+    private transient TagPushSystemHookTriggerHandler tagPushSystemHookTriggerHandler;
     private transient MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler;
     private transient NoteHookTriggerHandler noteHookTriggerHandler;
     private transient PipelineHookTriggerHandler pipelineTriggerHandler;
@@ -511,8 +521,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
     }
 
-    // executes when the Trigger receives a push request
-    public void onPost(final PushHook hook) {
+    // executes when the Trigger receives a push webhook request
+    public void onPost(final PushEvent event) {
         if (branchFilter == null) {
             initializeBranchFilter();
         }
@@ -522,11 +532,53 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         if (pushHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        pushHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        pushHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
-    // executes when the Trigger receives a merge request
-    public void onPost(final MergeRequestHook hook) {
+    // executes when the Trigger receives a tag push webhook request
+    public void onPost(final TagPushEvent event) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (pushHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
+        tagPushHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+    }
+
+    // executes when the Trigger receives a push systemhook request
+    public void onPost(final PushSystemHookEvent event) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (pushHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
+        pushSystemHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+    }
+
+    // executes when the Trigger receives a tag push systemhook request
+    public void onPost(final TagPushSystemHookEvent event) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (pushHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
+        tagPushSystemHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+    }
+
+    // executes when the Trigger receives a merge webhook request
+    public void onPost(final MergeRequestEvent event) {
         if (branchFilter == null) {
             initializeBranchFilter();
         }
@@ -536,11 +588,25 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         if (mergeRequestHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        mergeRequestHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+    }
+
+    // executes when the Trigger receives a merge systemhook request
+    public void onPost(final MergeRequestSystemHookEvent event) {
+        if (branchFilter == null) {
+            initializeBranchFilter();
+        }
+        if (mergeRequestLabelFilter == null) {
+            initializeMergeRequestLabelFilter();
+        }
+        if (mergeRequestHookTriggerHandler == null) {
+            initializeTriggerHandler();
+        }
+        mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a note request
-    public void onPost(final NoteHook hook) {
+    public void onPost(final NoteEvent event) {
         if (branchFilter == null) {
             initializeBranchFilter();
         }
@@ -550,18 +616,18 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         if (noteHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        noteHookTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        noteHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a pipeline event
-    public void onPost(final PipelineHook hook) {
+    public void onPost(final PipelineEvent event) {
         if (branchFilter == null) {
             initializeBranchFilter();
         }
         if (pipelineTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        pipelineTriggerHandler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        pipelineTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     private void initializeTriggerHandler() {

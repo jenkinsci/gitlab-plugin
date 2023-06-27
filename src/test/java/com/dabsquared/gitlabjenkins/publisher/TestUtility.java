@@ -17,7 +17,6 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -36,6 +35,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import jenkins.model.Jenkins;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.MergeRequestApi;
+import org.gitlab4j.api.models.MergeRequest;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.junit.MockServerRule;
@@ -46,9 +49,9 @@ final class TestUtility {
     static final String BUILD_URL = "/build/123";
     static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
     static final int BUILD_NUMBER = 1;
-    static final int PROJECT_ID = 3;
-    static final int MERGE_REQUEST_ID = 1;
-    static final int MERGE_REQUEST_IID = 2;
+    static final long PROJECT_ID = 3;
+    static final long MERGE_REQUEST_ID = 1;
+    static final long MERGE_REQUEST_IID = 2;
 
     private static final String API_TOKEN = "secret";
 
@@ -129,10 +132,25 @@ final class TestUtility {
                 note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
     }
 
-    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build) {
+    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build)
+            throws GitLabApiException {
+        GitLabApi client = mock(GitLabApi.class);
+        MergeRequestApi mergeRequestApi = mock(MergeRequestApi.class);
         P spyPublisher = spy(publisher);
-        MergeRequest mergeRequest = new MergeRequest(
-                MERGE_REQUEST_ID, MERGE_REQUEST_IID, MERGE_COMMIT_SHA, "", "", "", PROJECT_ID, PROJECT_ID, "", "");
+        doReturn(mergeRequestApi).when(client).getMergeRequestApi();
+        MergeRequest mergeRequest = client.getMergeRequestApi()
+                .createMergeRequest(
+                        PROJECT_ID,
+                        "sourceBranch",
+                        "targetBranch",
+                        "title",
+                        "",
+                        null,
+                        PROJECT_ID,
+                        null,
+                        null,
+                        false,
+                        null);
         doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
         return spyPublisher;
     }

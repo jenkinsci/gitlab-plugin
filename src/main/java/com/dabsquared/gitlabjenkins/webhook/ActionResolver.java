@@ -1,10 +1,8 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
-import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.PipelineBuildAction;
@@ -14,14 +12,11 @@ import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
-import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.StringJoiner;
@@ -31,18 +26,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import jenkins.scm.api.SCMSourceOwner;
-import org.apache.commons.io.IOUtils;
+import org.gitlab4j.api.systemhooks.MergeRequestSystemHookEvent;
+import org.gitlab4j.api.systemhooks.PushSystemHookEvent;
+import org.gitlab4j.api.systemhooks.SystemHookListener;
+import org.gitlab4j.api.systemhooks.TagPushSystemHookEvent;
+import org.gitlab4j.api.webhook.MergeRequestEvent;
+import org.gitlab4j.api.webhook.NoteEvent;
+import org.gitlab4j.api.webhook.PipelineEvent;
+import org.gitlab4j.api.webhook.PushEvent;
+import org.gitlab4j.api.webhook.TagPushEvent;
+import org.gitlab4j.api.webhook.WebHookListener;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author Robin Müller
  */
-public class ActionResolver {
+public class ActionResolver implements WebHookListener, SystemHookListener {
 
     private static final Logger LOGGER = Logger.getLogger(ActionResolver.class.getName());
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
+    private StaplerRequest request;
+    private Item project;
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
@@ -59,11 +65,27 @@ public class ActionResolver {
         return resolveAction(project, restOfPath.toString(), request);
     }
 
+    private void setRequest(StaplerRequest request) {
+        this.request = request;
+    }
+
+    private void setProject(Item project) {
+        this.project = project;
+    }
+
+    public StaplerRequest getRequest() {
+        return request;
+    }
+
+    public Item getProject() {
+        return project;
+    }
+
     private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
+        setRequest(request);
+        setProject(project);
         String method = request.getMethod();
-        if (method.equals("POST")) {
-            return onPost(project, request);
-        } else if (method.equals("GET")) {
+        if (method.equals("GET")) {
             if (project instanceof Job<?, ?>) {
                 return onGet((Job<?, ?>) project, restOfPath, request);
             } else {
@@ -104,68 +126,90 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onPost(Item project, StaplerRequest request) {
-        String eventHeader = request.getHeader("X-Gitlab-Event");
-        if (eventHeader == null) {
-            LOGGER.log(Level.FINE, "Missing X-Gitlab-Event header");
-            return new NoopAction();
-        }
-        String tokenHeader = request.getHeader("X-Gitlab-Token");
-        switch (eventHeader) {
-            case "Merge Request Hook":
-                return new MergeRequestBuildAction(project, getRequestBody(request), tokenHeader);
-            case "Push Hook":
-            case "Tag Push Hook":
-                return new PushBuildAction(project, getRequestBody(request), tokenHeader);
-            case "Note Hook":
-                return new NoteBuildAction(project, getRequestBody(request), tokenHeader);
-            case "Pipeline Hook":
-                return new PipelineBuildAction(project, getRequestBody(request), tokenHeader);
-            case "System Hook":
-                return onSystemHook(project, getRequestBody(request), tokenHeader);
-            default:
-                LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
-                return new NoopAction();
-        }
+    @Override
+    public void onPushEvent(PushEvent pushEvent) {
+        LOGGER.log(Level.FINE, "Push:{0}", pushEvent.toString());
+        fireWebHookBuildAction(getProject(), pushEvent, getRequest());
     }
 
-    private WebHookAction onSystemHook(Item project, String requestBody, String tokenHeader) {
-        /*
-         * Each Gitlab System Hook request uses the same common Header, so the deterministic transform based on the
-         * header value, as seen in onPost, is not possible. Instead we need to peek at the payload to make the
-         * determination.
-         */
-        JsonNode jsonTree = null;
-        String objectKind = "";
-        try {
-            jsonTree = JsonUtil.readTree(requestBody);
-            objectKind = jsonTree.path("object_kind").asText("");
-        } catch (RuntimeException exception) {
-            LOGGER.log(Level.FINE, "Could not extract object_kind from request body.");
-        }
-
-        switch (objectKind) {
-            case "merge_request":
-                return new MergeRequestBuildAction(project, jsonTree, tokenHeader);
-            case "tag_push":
-            case "push":
-                return new PushBuildAction(project, jsonTree, tokenHeader);
-            default:
-                LOGGER.log(Level.FINE, "Unsupported System Hook event type: {0}", objectKind);
-                return new NoopAction();
-        }
+    @Override
+    public void onPushEvent(PushSystemHookEvent pushSystemHookEvent) {
+        LOGGER.log(Level.FINE, "PushSystemHook:{0}", pushSystemHookEvent.toString());
+        fireSystemHookBuildAction(getProject(), pushSystemHookEvent, getRequest());
     }
 
-    private String getRequestBody(StaplerRequest request) {
-        String requestBody;
-        try {
-            Charset charset =
-                    request.getCharacterEncoding() == null ? UTF_8 : Charset.forName(request.getCharacterEncoding());
-            requestBody = IOUtils.toString(request.getInputStream(), charset);
-        } catch (IOException e) {
-            throw HttpResponses.error(500, "Failed to read request body");
-        }
-        return requestBody;
+    @Override
+    public void onMergeRequestEvent(MergeRequestEvent mergeRequestEvent) {
+        LOGGER.log(Level.FINE, "MergeRequest:{0}", mergeRequestEvent.toString());
+        fireWebHookBuildAction(getProject(), mergeRequestEvent, getRequest());
+    }
+
+    @Override
+    public void onMergeRequestEvent(MergeRequestSystemHookEvent mergeRequestSystemHookEvent) {
+        LOGGER.log(Level.FINE, "MergeRequest:{0}", mergeRequestSystemHookEvent.toString());
+        fireSystemHookBuildAction(getProject(), mergeRequestSystemHookEvent, getRequest());
+    }
+
+    @Override
+    public void onNoteEvent(NoteEvent noteEvent) {
+        LOGGER.log(Level.FINE, "Note:{0}", noteEvent.toString());
+        fireWebHookBuildAction(getProject(), noteEvent, getRequest());
+    }
+
+    @Override
+    public void onTagPushEvent(TagPushSystemHookEvent tagPushSystemHookEvent) {
+        LOGGER.log(Level.FINE, "TagPush:{0}", tagPushSystemHookEvent.toString());
+        fireSystemHookBuildAction(getProject(), tagPushSystemHookEvent, getRequest());
+    }
+
+    @Override
+    public void onTagPushEvent(TagPushEvent tagPushEvent) {
+        LOGGER.log(Level.FINE, "TagPush:{0}", tagPushEvent.toString());
+        fireWebHookBuildAction(getProject(), tagPushEvent, getRequest());
+    }
+
+    @Override
+    public void onPipelineEvent(PipelineEvent pipelineEvent) {
+        LOGGER.log(Level.FINE, "Pipeline:{0}", pipelineEvent.toString());
+        fireWebHookBuildAction(getProject(), pipelineEvent, getRequest());
+    }
+
+    String tokenHeader = getRequest().getHeader("X-Gitlab-Token");
+
+    private WebHookAction fireWebHookBuildAction(Item project, PushEvent pushEvent, StaplerRequest request) {
+        return new PushBuildAction(project, pushEvent, tokenHeader);
+    }
+
+    private WebHookAction fireSystemHookBuildAction(
+            Item project, PushSystemHookEvent pushSystemHookEvent, StaplerRequest request) {
+        return new PushBuildAction(project, pushSystemHookEvent, tokenHeader);
+    }
+
+    private WebHookAction fireWebHookBuildAction(
+            Item project, MergeRequestEvent mergeRequestEvent, StaplerRequest request) {
+        return new MergeRequestBuildAction(project, mergeRequestEvent, tokenHeader);
+    }
+
+    private WebHookAction fireSystemHookBuildAction(
+            Item project, MergeRequestSystemHookEvent mergeRequestSystemHookEvent, StaplerRequest request) {
+        return new MergeRequestBuildAction(project, mergeRequestSystemHookEvent, tokenHeader);
+    }
+
+    private WebHookAction fireWebHookBuildAction(Item project, TagPushEvent tagPushEvent, StaplerRequest request) {
+        return new PushBuildAction(project, tagPushEvent, tokenHeader);
+    }
+
+    private WebHookAction fireSystemHookBuildAction(
+            Item project, TagPushSystemHookEvent tagPushSystemHookEvent, StaplerRequest request) {
+        return new PushBuildAction(project, tagPushSystemHookEvent, tokenHeader);
+    }
+
+    private WebHookAction fireWebHookBuildAction(Item project, NoteEvent noteEvent, StaplerRequest request) {
+        return new NoteBuildAction(project, noteEvent, tokenHeader);
+    }
+
+    private WebHookAction fireWebHookBuildAction(Item project, PipelineEvent pipelineEvent, StaplerRequest request) {
+        return new PipelineBuildAction(project, pipelineEvent, tokenHeader);
     }
 
     private Item resolveProject(final String projectName, final Iterator<String> restOfPathParts) {

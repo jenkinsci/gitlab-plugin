@@ -4,7 +4,6 @@ import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -12,14 +11,18 @@ import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandle
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.transport.URIish;
+import org.gitlab4j.api.webhook.NoteEvent;
 
 /**
  * @author Nikolay Ustinov
  */
-class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook> implements NoteHookTriggerHandler {
+class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteEvent> implements NoteHookTriggerHandler {
 
     private static final Logger LOGGER = Logger.getLogger(NoteHookTriggerHandlerImpl.class.getName());
 
@@ -32,29 +35,29 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     @Override
     public void handle(
             Job<?, ?> job,
-            NoteHook hook,
+            NoteEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
-        if (isValidTriggerPhrase(hook.getObjectAttributes().getNote())) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        if (isValidTriggerPhrase(event.getObjectAttributes().getNote())) {
+            super.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
 
     @Override
-    protected boolean isCiSkip(NoteHook hook) {
-        return hook.getMergeRequest() != null
-                && hook.getMergeRequest().getDescription() != null
-                && hook.getMergeRequest().getDescription().contains("[ci-skip]");
+    protected boolean isCiSkip(NoteEvent event) {
+        return event.getMergeRequest() != null
+                && event.getMergeRequest().getDescription() != null
+                && event.getMergeRequest().getDescription().contains("[ci-skip]");
     }
 
     @Override
-    protected String getSourceBranch(NoteHook hook) {
-        return hook.getMergeRequest() == null ? null : hook.getMergeRequest().getSourceBranch();
+    protected String getSourceBranch(NoteEvent event) {
+        return event.getMergeRequest() == null ? null : event.getMergeRequest().getSourceBranch();
     }
 
     @Override
-    protected String getTargetBranch(NoteHook hook) {
+    protected String getTargetBranch(NoteEvent hook) {
         return hook.getMergeRequest() == null ? null : hook.getMergeRequest().getTargetBranch();
     }
 
@@ -64,63 +67,76 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
     }
 
     @Override
-    protected CauseData retrieveCauseData(NoteHook hook) {
+    protected CauseData retrieveCauseData(NoteEvent event) {
         return causeData()
                 .withActionType(CauseData.ActionType.NOTE)
-                .withSourceProjectId(hook.getMergeRequest().getSourceProjectId())
-                .withTargetProjectId(hook.getMergeRequest().getTargetProjectId())
-                .withBranch(hook.getMergeRequest().getSourceBranch())
-                .withSourceBranch(hook.getMergeRequest().getSourceBranch())
-                .withUserName(hook.getMergeRequest().getLastCommit().getAuthor().getName())
+                .withSourceProjectId(event.getMergeRequest().getSourceProjectId())
+                .withTargetProjectId(event.getMergeRequest().getTargetProjectId())
+                .withBranch(event.getMergeRequest().getSourceBranch())
+                .withSourceBranch(event.getMergeRequest().getSourceBranch())
+                .withUserName(
+                        event.getMergeRequest().getLastCommit().getAuthor().getName())
                 .withUserEmail(
-                        hook.getMergeRequest().getLastCommit().getAuthor().getEmail())
-                .withSourceRepoHomepage(hook.getMergeRequest().getSource().getHomepage())
-                .withSourceRepoName(hook.getMergeRequest().getSource().getName())
-                .withSourceNamespace(hook.getMergeRequest().getSource().getNamespace())
-                .withSourceRepoUrl(hook.getMergeRequest().getSource().getUrl())
-                .withSourceRepoSshUrl(hook.getMergeRequest().getSource().getSshUrl())
-                .withSourceRepoHttpUrl(hook.getMergeRequest().getSource().getHttpUrl())
-                .withMergeRequestTitle(hook.getMergeRequest().getTitle())
-                .withMergeRequestDescription(hook.getMergeRequest().getDescription())
-                .withMergeRequestId(hook.getMergeRequest().getId())
-                .withMergeRequestIid(hook.getMergeRequest().getIid())
-                .withMergeRequestTargetProjectId(hook.getMergeRequest().getTargetProjectId())
-                .withTargetBranch(hook.getMergeRequest().getTargetBranch())
-                .withTargetRepoName(hook.getMergeRequest().getTarget().getName())
-                .withTargetNamespace(hook.getMergeRequest().getTarget().getNamespace())
-                .withTargetRepoSshUrl(hook.getMergeRequest().getTarget().getSshUrl())
-                .withTargetRepoHttpUrl(hook.getMergeRequest().getTarget().getHttpUrl())
+                        event.getMergeRequest().getLastCommit().getAuthor().getEmail())
+                .withSourceRepoHomepage(event.getMergeRequest().getSource().getHomepage())
+                .withSourceRepoName(event.getMergeRequest().getSource().getName())
+                .withSourceNamespace(event.getMergeRequest().getSource().getNamespace())
+                .withSourceRepoUrl(event.getMergeRequest().getSource().getUrl())
+                .withSourceRepoSshUrl(event.getMergeRequest().getSource().getSshUrl())
+                .withSourceRepoHttpUrl(event.getMergeRequest().getSource().getHttpUrl())
+                .withMergeRequestTitle(event.getMergeRequest().getTitle())
+                .withMergeRequestDescription(event.getMergeRequest().getDescription())
+                .withMergeRequestId(event.getMergeRequest().getId())
+                .withMergeRequestIid(event.getMergeRequest().getIid())
+                .withMergeRequestTargetProjectId(event.getMergeRequest().getTargetProjectId())
+                .withTargetBranch(event.getMergeRequest().getTargetBranch())
+                .withTargetRepoName(event.getMergeRequest().getTarget().getName())
+                .withTargetNamespace(event.getMergeRequest().getTarget().getNamespace())
+                .withTargetRepoSshUrl(event.getMergeRequest().getTarget().getSshUrl())
+                .withTargetRepoHttpUrl(event.getMergeRequest().getTarget().getHttpUrl())
                 .withTriggeredByUser(
-                        hook.getMergeRequest().getLastCommit().getAuthor().getName())
-                .withLastCommit(hook.getMergeRequest().getLastCommit().getId())
-                .withTargetProjectUrl(hook.getMergeRequest().getTarget().getWebUrl())
-                .withTriggerPhrase(hook.getObjectAttributes().getNote())
+                        event.getMergeRequest().getLastCommit().getAuthor().getName())
+                .withLastCommit(event.getMergeRequest().getLastCommit().getId())
+                .withTargetProjectUrl(event.getMergeRequest().getTarget().getWebUrl())
+                .withTriggerPhrase(event.getObjectAttributes().getNote())
                 .withCommentAuthor(
-                        hook.getUser() == null ? null : hook.getUser().getUsername())
+                        event.getUser() == null ? null : event.getUser().getUsername())
                 .build();
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(NoteHook hook, GitSCM gitSCM)
+    protected RevisionParameterAction createRevisionParameter(NoteEvent event, GitSCM gitSCM)
             throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+        return new RevisionParameterAction(retrieveRevisionToBuild(event), retrieveUrIish(event));
     }
 
     @Override
-    protected BuildStatusUpdate retrieveBuildStatusUpdate(NoteHook hook) {
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(NoteEvent event) {
         return buildStatusUpdate()
-                .withProjectId(hook.getMergeRequest().getSourceProjectId())
-                .withSha(hook.getMergeRequest().getLastCommit().getId())
-                .withRef(hook.getMergeRequest().getSourceBranch())
+                .withProjectId(event.getMergeRequest().getSourceProjectId())
+                .withSha(event.getMergeRequest().getLastCommit().getId())
+                .withRef(event.getMergeRequest().getSourceBranch())
                 .build();
     }
 
-    private String retrieveRevisionToBuild(NoteHook hook) throws NoRevisionToBuildException {
-        if (hook.getMergeRequest() != null
-                && hook.getMergeRequest().getLastCommit() != null
-                && hook.getMergeRequest().getLastCommit().getId() != null) {
+    @Override
+    protected URIish retrieveUrIish(NoteEvent event) {
+        try {
+            if (event.getProject().getUrl() != null) {
+                return new URIish(event.getProject().getUrl());
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+        }
+        return null;
+    }
 
-            return hook.getMergeRequest().getLastCommit().getId();
+    private String retrieveRevisionToBuild(NoteEvent event) throws NoRevisionToBuildException {
+        if (event.getMergeRequest() != null
+                && event.getMergeRequest().getLastCommit() != null
+                && event.getMergeRequest().getLastCommit().getId() != null) {
+
+            return event.getMergeRequest().getLastCommit().getId();
         } else {
             throw new NoRevisionToBuildException();
         }
