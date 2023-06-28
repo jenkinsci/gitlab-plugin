@@ -91,7 +91,7 @@ public class PendingBuildsHandlerTest {
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
                 .withCoverage(null)
-                .withTargetUrl("/freestyleProject1/");
+                .withTargetUrl(jenkins.getURL() + "job/freestyleProject1/display/redirect");
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
         verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
         verifyNoMoreInteractions(gitLabClient);
@@ -111,7 +111,7 @@ public class PendingBuildsHandlerTest {
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
                 .withCoverage(null)
-                .withTargetUrl("/WorkflowJob/");
+                .withTargetUrl(jenkins.getURL() + "nullprefix/workflowJob/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
         verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
@@ -138,7 +138,7 @@ public class PendingBuildsHandlerTest {
                 .withName("Jenkins")
                 .withDescription(CommitBuildState.CANCELED.name())
                 .withCoverage(null)
-                .withTargetUrl("project1");
+                .withTargetUrl(jenkins.getURL() + "/job/project1/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
         verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.CANCELED, status);

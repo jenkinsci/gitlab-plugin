@@ -189,7 +189,6 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withDescription(CommitBuildState.SUCCESS.name())
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
@@ -203,7 +202,6 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withDescription(CommitBuildState.SUCCESS.name())
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
@@ -219,7 +217,6 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withDescription(CommitBuildState.SUCCESS.name())
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
@@ -237,7 +234,6 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withDescription(CommitBuildState.SUCCESS.name())
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
@@ -280,7 +276,6 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef("3.0.0")
                 .withName(STAGE)
-                .withDescription(CommitBuildState.SUCCESS.name())
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
