@@ -33,6 +33,8 @@ import hudson.model.Queue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+
 import org.gitlab4j.api.CommitsApi;
 import org.gitlab4j.api.Constants.CommitBuildState;
 import org.gitlab4j.api.GitLabApi;
@@ -80,7 +82,7 @@ public class PendingBuildsHandlerTest {
 
     @Test
     public void projectCanBeConfiguredToSendPendingBuildStatusWhenTriggered() throws Exception {
-        Project project =
+        Project<?, ?> project =
                 freestyleProject("freestyleProject1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
@@ -90,7 +92,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("branch1")
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
-                .withCoverage(null)
+                .withCoverage(Float.valueOf((Long)null))
                 .withTargetUrl(jenkins.getURL() + "job/freestyleProject1/display/redirect");
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
         verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
@@ -110,7 +112,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("branch1")
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
-                .withCoverage(null)
+                .withCoverage(Float.valueOf((Long)null))
                 .withTargetUrl(jenkins.getURL() + "nullprefix/workflowJob/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
@@ -120,7 +122,7 @@ public class PendingBuildsHandlerTest {
 
     @Test
     public void queuedMergeRequestBuildsCanBeCancelledOnMergeRequestUpdate() throws Exception {
-        Project project = freestyleProject("project1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
+        Project<?, ?> project = freestyleProject("project1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
         gitLabPushTrigger.setCancelPendingBuildsOnUpdate(true);
@@ -137,7 +139,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("sourceBranch")
                 .withName("Jenkins")
                 .withDescription(CommitBuildState.CANCELED.name())
-                .withCoverage(null)
+                .withCoverage(Float.valueOf((Long)null))
                 .withTargetUrl(jenkins.getURL() + "/job/project1/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
@@ -147,7 +149,7 @@ public class PendingBuildsHandlerTest {
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
     }
 
-    private GitLabPushTrigger gitLabPushTrigger(Project project) throws IOException {
+    private GitLabPushTrigger gitLabPushTrigger(Project<?, ?> project) throws IOException {
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger();
         project.addTrigger(gitLabPushTrigger);
         gitLabPushTrigger.start(project, true);
@@ -224,15 +226,15 @@ public class PendingBuildsHandlerTest {
                 .withAfter(commitId)
                 .withRepository(new Repository())
                 .withProject(ProjectBuilder.project().withNamespace("namespace").build())
-                .withCommits(Arrays.asList(
-                        CommitBuilder.commit().withId(commitId).withAuthor(user).build()))
+                .withCommits(Collections.singletonList(
+                    commit().withId(commitId).withAuthor(user).build()))
                 .withRepository(repository)
                 .withObjectKind("push")
                 .withUserName("username")
                 .build();
     }
 
-    private Project freestyleProject(String name, GitLabCommitStatusPublisher gitLabCommitStatusPublisher)
+    private Project<?, ?> freestyleProject(String name, GitLabCommitStatusPublisher gitLabCommitStatusPublisher)
             throws IOException {
         FreeStyleProject project = jenkins.createFreeStyleProject(name);
         project.setQuietPeriod(5000);
