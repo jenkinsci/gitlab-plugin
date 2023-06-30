@@ -67,37 +67,37 @@ public class GitLabVotePublisherTest {
 
     @Test
     public void success_v3() throws IOException, InterruptedException, GitLabApiException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", MERGE_REQUEST_ID, "thumbsup");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "V3", MERGE_REQUEST_ID, "thumbsup");
     }
 
     @Test
     public void success_v4() throws IOException, InterruptedException, GitLabApiException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", MERGE_REQUEST_IID, "thumbsup");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "V4", MERGE_REQUEST_IID, "thumbsup");
     }
 
     @Test
     public void failed_v3() throws IOException, InterruptedException, GitLabApiException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", MERGE_REQUEST_ID, "thumbsdown");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "V3", MERGE_REQUEST_ID, "thumbsdown");
     }
 
     @Test
     public void failed_v4() throws IOException, InterruptedException, GitLabApiException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, "thumbsdown");
+        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "V4", MERGE_REQUEST_IID, "thumbsdown");
     }
 
     @Test
     public void removePreviousVote() throws IOException, InterruptedException, GitLabApiException {
         // GIVEN
         AbstractBuild build = mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
-        mockAward("v4", MERGE_REQUEST_IID, 1, "thumbsdown");
+        mockAward("V4", MERGE_REQUEST_IID, 1, "thumbsdown");
 
         // WHEN
-        performAndVerify(build, "v4", MERGE_REQUEST_IID, "thumbsdown");
+        performAndVerify(build, "V4", MERGE_REQUEST_IID, "thumbsdown");
 
         // THEN
-        mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, "v4", MERGE_REQUEST_IID, "thumbsdown"));
+        mockServerClient.verify(prepareSendMessageWithSuccessResponse(build, "V4", MERGE_REQUEST_IID, "thumbsdown"));
         mockServerClient.verify(
-                awardEmojiRequest("v4", MERGE_REQUEST_IID, "POST").withQueryStringParameter("name", "thumbsdown"));
+                awardEmojiRequest("V4", MERGE_REQUEST_IID, "POST").withQueryStringParameter("name", "thumbsdown"));
     }
 
     private void performAndVerify(AbstractBuild build, String apiLevel, Long mergeRequestId, String defaultNote)

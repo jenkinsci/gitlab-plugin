@@ -189,7 +189,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage(null)
+                .withCoverage((Float.valueOf(null)))
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
@@ -202,7 +202,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage(null)
+                .withCoverage((Float.valueOf(null)))
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
@@ -217,7 +217,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage(null)
+                .withCoverage((Float.valueOf(null)))
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         when(gitLabApi.getCommitsApi()).thenReturn(commitsApi);
@@ -234,7 +234,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage(null)
+                .withCoverage(Float.valueOf(null))
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
@@ -276,7 +276,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef("3.0.0")
                 .withName(STAGE)
-                .withCoverage(null)
+                .withCoverage((Float.valueOf(null)))
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
