@@ -18,7 +18,6 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Repository;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestHookBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
@@ -32,9 +31,7 @@ import hudson.model.Project;
 import hudson.model.Queue;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-
 import org.gitlab4j.api.CommitsApi;
 import org.gitlab4j.api.Constants.CommitBuildState;
 import org.gitlab4j.api.GitLabApi;
@@ -92,7 +89,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("branch1")
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
-                .withCoverage(Float.valueOf((Long)null))
+                .withCoverage(Float.valueOf((Long) null))
                 .withTargetUrl(jenkins.getURL() + "job/freestyleProject1/display/redirect");
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
         verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
@@ -112,7 +109,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("branch1")
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
-                .withCoverage(Float.valueOf((Long)null))
+                .withCoverage(Float.valueOf((Long) null))
                 .withTargetUrl(jenkins.getURL() + "nullprefix/workflowJob/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
@@ -139,7 +136,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("sourceBranch")
                 .withName("Jenkins")
                 .withDescription(CommitBuildState.CANCELED.name())
-                .withCoverage(Float.valueOf((Long)null))
+                .withCoverage(Float.valueOf((Long) null))
                 .withTargetUrl(jenkins.getURL() + "/job/project1/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
@@ -227,7 +224,7 @@ public class PendingBuildsHandlerTest {
                 .withRepository(new Repository())
                 .withProject(ProjectBuilder.project().withNamespace("namespace").build())
                 .withCommits(Collections.singletonList(
-                    commit().withId(commitId).withAuthor(user).build()))
+                        commit().withId(commitId).withAuthor(user).build()))
                 .withRepository(repository)
                 .withObjectKind("push")
                 .withUserName("username")
