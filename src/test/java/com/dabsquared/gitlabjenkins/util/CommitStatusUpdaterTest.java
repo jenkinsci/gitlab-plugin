@@ -171,7 +171,6 @@ public class CommitStatusUpdaterTest {
                 .build();
 
         when(gitlabCause.getData()).thenReturn(causeData);
-        spy(gitLabApi);
     }
 
     @After

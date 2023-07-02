@@ -140,8 +140,8 @@ public class PendingBuildsHandlerTest {
                 .withTargetUrl(jenkins.getURL() + "/job/project1/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
-        verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.CANCELED, status);
-        verify(commitsApi).addCommitStatus(1L, "commit2", CommitBuildState.CANCELED, status);
+        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.CANCELED), refEq(status));
+        verify(commitsApi).addCommitStatus(eq(1L), eq("commit2"), eq(CommitBuildState.CANCELED), refEq(status));
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
     }
