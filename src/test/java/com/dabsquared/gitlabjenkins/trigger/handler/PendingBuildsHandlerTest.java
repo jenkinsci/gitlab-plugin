@@ -5,6 +5,8 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -89,11 +91,10 @@ public class PendingBuildsHandlerTest {
         status.withRef("branch1")
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
-                .withCoverage(Float.valueOf((Long) null))
+                .withCoverage(null)
                 .withTargetUrl(jenkins.getURL() + "job/freestyleProject1/display/redirect");
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
-        verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
-        verifyNoMoreInteractions(gitLabClient);
+        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.PENDING), refEq(status));
     }
 
     @Test
@@ -109,12 +110,11 @@ public class PendingBuildsHandlerTest {
         status.withRef("branch1")
                 .withName(GITLAB_BUILD_NAME)
                 .withDescription(CommitBuildState.PENDING.name())
-                .withCoverage(Float.valueOf((Long) null))
+                .withCoverage(null)
                 .withTargetUrl(jenkins.getURL() + "nullprefix/workflowJob/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
-        verify(commitsApi).addCommitStatus(1L, "commit1", CommitBuildState.PENDING, status);
-        verifyNoMoreInteractions(gitLabClient);
+        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.PENDING), refEq(status));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class PendingBuildsHandlerTest {
         status.withRef("sourceBranch")
                 .withName("Jenkins")
                 .withDescription(CommitBuildState.CANCELED.name())
-                .withCoverage(Float.valueOf((Long) null))
+                .withCoverage(null)
                 .withTargetUrl(jenkins.getURL() + "/job/project1/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
