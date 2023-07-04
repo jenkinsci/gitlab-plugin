@@ -6,7 +6,7 @@ credentials:
               scope: SYSTEM
               id: gitlab_token
               apiToken: "${BIND_TOKEN}"
-              description: "Gitlab Token"
+              description: "GitLab Token"
 unclassified:
   gitlabconnectionconfig:
     useAuthenticatedEndpoint: true
