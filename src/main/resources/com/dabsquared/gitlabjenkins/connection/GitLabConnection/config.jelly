@@ -3,14 +3,14 @@
     <f:entry title="${%Connection name}" field="name" description="${%A name for the connection}">
       <f:textbox/>
     </f:entry>
-    <f:entry title="${%Gitlab host URL}" field="url" description="${%The complete URL to the Gitlab server} (${%e.g. http://gitlab.mydomain.com})">
+    <f:entry title="${%GitLab host URL}" field="url" description="${%The complete URL to the GitLab server} (${%e.g. http://gitlab.mydomain.com})">
       <f:textbox />
     </f:entry>
-    <f:entry title="${%Credentials}" field="apiTokenId" description="${%API Token for accessing Gitlab}">
+    <f:entry title="${%Credentials}" field="apiTokenId" description="${%API Token for accessing GitLab}">
       <c:select/>
     </f:entry>
     <f:advanced>
-      <f:entry title="${%API-Level}" field="clientBuilderId" description="${%API Level for accessing Gitlab}">
+      <f:entry title="${%API-Level}" field="clientBuilderId" description="${%API Level for accessing GitLab}">
         <f:select default="autodetect"/>
       </f:entry>
       <f:entry title="${%Ignore SSL Certificate Errors}" field="ignoreCertificateErrors">
