@@ -15,6 +15,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import hudson.model.FreeStyleProject;
+import hudson.security.ACL;
 import java.io.IOException;
 import java.util.Collections;
 import jenkins.plugins.git.GitSCMSource;
@@ -102,10 +103,13 @@ public class PushBuildActionTest {
     public void scmSourceOnUpdateExecuted() {
         GitSCMSource source = new GitSCMSource("http://test");
         SCMSourceOwner item = mock(SCMSourceOwner.class);
+        ACL acl = mock(ACL.class);
         when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
+        when(item.getACL()).thenReturn(acl);
         Assert.assertThrows(
                 HttpResponses.HttpResponseException.class,
                 () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
+        item.onSCMSourceUpdated(source);
         verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
     }
 
