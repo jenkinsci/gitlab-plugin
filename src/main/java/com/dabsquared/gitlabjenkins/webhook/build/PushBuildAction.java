@@ -4,6 +4,7 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
+import hudson.security.Permission;
 import hudson.util.HttpResponses;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -23,6 +25,7 @@ import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
 import jenkins.scm.api.trait.SCMTrait;
+import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
 
@@ -90,13 +93,19 @@ public class PushBuildAction extends BuildWebHookAction {
             throw HttpResponses.ok();
         }
         if (project instanceof SCMSourceOwner) {
-            ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
+            ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier(Jenkins.getAuthentication()));
             throw HttpResponses.ok();
         }
         throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");
     }
 
     private class SCMSourceOwnerNotifier implements Runnable {
+        private final Authentication authentication;
+
+        public SCMSourceOwnerNotifier(Authentication authentication) {
+            this.authentication = authentication;
+        }
+
         public void run() {
             for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
                 if (scmSource instanceof GitSCMSource) {
@@ -108,6 +117,7 @@ public class PushBuildAction extends BuildWebHookAction {
                                         Level.FINE,
                                         "Notify scmSourceOwner {0} about changes for {1}",
                                         toArray(project.getName(), gitSCMSource.getRemote()));
+                                checkPermission(Item.BUILD);
                                 ((SCMSourceOwner) project).onSCMSourceUpdated(scmSource);
                             } else {
                                 LOGGER.log(
@@ -120,6 +130,26 @@ public class PushBuildAction extends BuildWebHookAction {
                         // nothing to do
                     }
                 }
+            }
+        }
+
+        private void checkPermission(Permission permission) {
+            GitLabConnectionConfig gitlabConfig =
+                    (GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class);
+            if (gitlabConfig != null) {
+                if (gitlabConfig.isUseAuthenticatedEndpoint()) {
+                    if (!project.getACL().hasPermission(authentication, permission)) {
+                        String message = String.format(
+                                "%s is missing the %s/%s permission",
+                                authentication.getName(), permission.group.title, permission.name);
+                        LOGGER.finest("Unauthorized, cannot start indexing on SCMSourceOwner object");
+                        throw HttpResponses.errorWithoutStack(403, message);
+                    }
+                }
+            } else {
+                String message = "GitLab plugin configuration is not supposed to be null";
+                LOGGER.log(Level.WARNING, message);
+                throw HttpResponses.errorWithoutStack(500, message);
             }
         }
     }
