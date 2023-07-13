@@ -303,13 +303,23 @@ public class GitLabCommitStatusPublisherTest {
             final String apiLevel, String projectName, Run<?, ?> build, CommitBuildState state)
             throws UnsupportedEncodingException {
         return request()
+                .withSecure(false)
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, "UTF-8")
                         + "/statuses/" + SHA1)
                 .withMethod("POST")
+                .withKeepAlive(true)
                 .withHeader("PRIVATE-TOKEN", "secret")
+                .withHeader("Accept", "application/json")
+                .withHeader("User-Agent", "Jersey/2.39.1 (HttpUrlConnection 17.0.5)")
+                .withHeader("Connection", "keep-alive")
+                .withHeader("Host", "localhost:" + mockServer.getPort())
+                .withHeader("Content-Length", "113")
+                .withHeader("Content-Type", "application/x-www-form-urlencoded")
+                .withBody("type " + ":" + " STRING")
+                .withBody("c3RhdGU9c3VjY2VzcyZuYW1lPWplbmtpbnMmdGFyZ2V0X3VybD1odHRwJTNBJTJGJTJGbG9jYWxob3N0JTNBNTc3NjElMkZqZW5raW5zJTJGJTJGYnVpbGQlMkYxMjNkaXNwbGF5JTJGcmVkaXJlY3Q=")//type string
                 .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url="
-                        + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8") + "&description="
-                        + URLEncoder.encode(state.name(), "UTF-8"));
+                        + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8"))
+                .withBody("Content-type " + ":" + " application/x-www-form-urlencoded");
     }
 
     private HttpRequest prepareExistsCommitWithSuccessResponse(String apiLevel, String projectName)
@@ -321,17 +331,30 @@ public class GitLabCommitStatusPublisherTest {
 
     private HttpRequest prepareExistsCommit(String apiLevel, String projectName) throws UnsupportedEncodingException {
         return request()
+                .withSecure(false)
+                .withQueryStringParameter("per_page", "96")
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, "UTF-8")
                         + "/repository/commits/" + SHA1)
                 .withMethod("GET")
-                .withHeader("PRIVATE-TOKEN", "secret");
+                .withKeepAlive(true)
+                .withHeader("content-length", "0")
+                .withHeader("PRIVATE-TOKEN", "secret")
+                .withHeader("Accept", "application/json")
+                .withHeader("User-Agent", "Jersey/2.39.1 (HttpUrlConnection 17.0.5)")
+                .withHeader("Connection", "keep-alive")
+                .withHeader("Host", "localhost:" + mockServer.getPort());
     }
 
     private HttpRequest prepareGetProjectResponse(String projectName) throws IOException {
         HttpRequest request = request()
                 .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode(projectName, "UTF-8"))
                 .withMethod("GET")
-                .withHeader("PRIVATE-TOKEN", "secret");
+                .withHeader("content-length", "0")
+                .withHeader("PRIVATE-TOKEN", "secret")
+                .withHeader("Accept", "application/json")
+                .withHeader("User-Agent", "Jersey/2.39.1 (HttpUrlConnection 17.0.5)")
+                .withHeader("Connection", "keep-alive")
+                .withHeader("Host", "localhost:" + mockServer.getPort());
 
         HttpResponse response =
                 response().withBody(getSingleProjectJson("GetSingleProject.json", projectName, PROJECT_ID));

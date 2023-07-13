@@ -23,13 +23,8 @@ public final class V4GitLabClientBuilder extends GitLabClientBuilder {
     public GitLabApi buildClient(
             String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
         GitLabApi client = new GitLabApi(ApiVersion.V4, url, token);
-        try {
-            client.getUserApi().getCurrentUser();
             client.setIgnoreCertificateErrors(ignoreCertificateErrors);
             client.setRequestTimeout(connectionTimeout, readTimeout);
-        } catch (GitLabApiException e) {
-            throw new NoSuchElementException("no client-builder found that supports server at " + url);
-        }
         return client;
     }
 }
