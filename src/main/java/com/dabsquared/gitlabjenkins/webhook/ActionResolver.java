@@ -3,10 +3,6 @@ package com.dabsquared.gitlabjenkins.webhook;
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
-import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
-import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
-import com.dabsquared.gitlabjenkins.webhook.build.PipelineBuildAction;
-import com.dabsquared.gitlabjenkins.webhook.build.PushBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
@@ -26,29 +22,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import jenkins.scm.api.SCMSourceOwner;
-import org.gitlab4j.api.systemhooks.MergeRequestSystemHookEvent;
-import org.gitlab4j.api.systemhooks.PushSystemHookEvent;
-import org.gitlab4j.api.systemhooks.SystemHookListener;
-import org.gitlab4j.api.systemhooks.TagPushSystemHookEvent;
-import org.gitlab4j.api.webhook.MergeRequestEvent;
-import org.gitlab4j.api.webhook.NoteEvent;
-import org.gitlab4j.api.webhook.PipelineEvent;
-import org.gitlab4j.api.webhook.PushEvent;
-import org.gitlab4j.api.webhook.TagPushEvent;
-import org.gitlab4j.api.webhook.WebHookListener;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.systemhooks.SystemHookManager;
+import org.gitlab4j.api.webhook.WebHookManager;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author Robin Müller
  */
-public class ActionResolver implements WebHookListener, SystemHookListener {
+public class ActionResolver {
 
     private static final Logger LOGGER = Logger.getLogger(ActionResolver.class.getName());
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
-    private StaplerRequest request;
     private Item project;
+    private StaplerRequest request;
 
     public WebHookAction resolve(final String projectName, StaplerRequest request) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
@@ -65,25 +54,25 @@ public class ActionResolver implements WebHookListener, SystemHookListener {
         return resolveAction(project, restOfPath.toString(), request);
     }
 
-    private void setRequest(StaplerRequest request) {
-        this.request = request;
-    }
-
     private void setProject(Item project) {
         this.project = project;
     }
 
-    public StaplerRequest getRequest() {
-        return request;
+    private void setRequest(StaplerRequest request) {
+        this.request = request;
     }
 
     public Item getProject() {
         return project;
     }
 
+    public StaplerRequest getRequest() {
+        return request;
+    }
+
     private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
-        setRequest(request);
         setProject(project);
+        setRequest(request);
         String method = request.getMethod();
         if (method.equals("GET")) {
             if (project instanceof Job<?, ?>) {
@@ -92,6 +81,22 @@ public class ActionResolver implements WebHookListener, SystemHookListener {
                 LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
                 return new NoopAction();
             }
+        }
+        try {
+            WebHookManager webHookManager = new WebHookManager();
+            webHookManager.addListener(new GitLabHookResolver(project, request));
+            webHookManager.handleEvent(request);
+            return new NoopAction();
+        } catch (GitLabApiException e) {
+            LOGGER.log(Level.FINE, "WebHook was not supported for this project {0}", project.getName());
+        }
+        try {
+            SystemHookManager systemHookManager = new SystemHookManager();
+            systemHookManager.addListener(new GitLabHookResolver(project, request));
+            systemHookManager.handleEvent(request);
+            return new NoopAction();
+        } catch (GitLabApiException e) {
+            LOGGER.log(Level.FINE, "SystemHook was not supported for this project {0}", project.getName());
         }
         LOGGER.log(Level.FINE, "Unsupported HTTP method: {0}", method);
         return new NoopAction();
@@ -124,92 +129,6 @@ public class ActionResolver implements WebHookListener, SystemHookListener {
         } else {
             return new CommitStatusPngAction(project, request.getParameter("sha1"));
         }
-    }
-
-    @Override
-    public void onPushEvent(PushEvent pushEvent) {
-        LOGGER.log(Level.FINE, "Push:{0}", pushEvent.toString());
-        fireWebHookBuildAction(getProject(), pushEvent, getRequest());
-    }
-
-    @Override
-    public void onPushEvent(PushSystemHookEvent pushSystemHookEvent) {
-        LOGGER.log(Level.FINE, "PushSystemHook:{0}", pushSystemHookEvent.toString());
-        fireSystemHookBuildAction(getProject(), pushSystemHookEvent, getRequest());
-    }
-
-    @Override
-    public void onMergeRequestEvent(MergeRequestEvent mergeRequestEvent) {
-        LOGGER.log(Level.FINE, "MergeRequest:{0}", mergeRequestEvent.toString());
-        fireWebHookBuildAction(getProject(), mergeRequestEvent, getRequest());
-    }
-
-    @Override
-    public void onMergeRequestEvent(MergeRequestSystemHookEvent mergeRequestSystemHookEvent) {
-        LOGGER.log(Level.FINE, "MergeRequest:{0}", mergeRequestSystemHookEvent.toString());
-        fireSystemHookBuildAction(getProject(), mergeRequestSystemHookEvent, getRequest());
-    }
-
-    @Override
-    public void onNoteEvent(NoteEvent noteEvent) {
-        LOGGER.log(Level.FINE, "Note:{0}", noteEvent.toString());
-        fireWebHookBuildAction(getProject(), noteEvent, getRequest());
-    }
-
-    @Override
-    public void onTagPushEvent(TagPushSystemHookEvent tagPushSystemHookEvent) {
-        LOGGER.log(Level.FINE, "TagPush:{0}", tagPushSystemHookEvent.toString());
-        fireSystemHookBuildAction(getProject(), tagPushSystemHookEvent, getRequest());
-    }
-
-    @Override
-    public void onTagPushEvent(TagPushEvent tagPushEvent) {
-        LOGGER.log(Level.FINE, "TagPush:{0}", tagPushEvent.toString());
-        fireWebHookBuildAction(getProject(), tagPushEvent, getRequest());
-    }
-
-    @Override
-    public void onPipelineEvent(PipelineEvent pipelineEvent) {
-        LOGGER.log(Level.FINE, "Pipeline:{0}", pipelineEvent.toString());
-        fireWebHookBuildAction(getProject(), pipelineEvent, getRequest());
-    }
-
-    String tokenHeader = getRequest().getHeader("X-Gitlab-Token");
-
-    private WebHookAction fireWebHookBuildAction(Item project, PushEvent pushEvent, StaplerRequest request) {
-        return new PushBuildAction(project, pushEvent, tokenHeader);
-    }
-
-    private WebHookAction fireSystemHookBuildAction(
-            Item project, PushSystemHookEvent pushSystemHookEvent, StaplerRequest request) {
-        return new PushBuildAction(project, pushSystemHookEvent, tokenHeader);
-    }
-
-    private WebHookAction fireWebHookBuildAction(
-            Item project, MergeRequestEvent mergeRequestEvent, StaplerRequest request) {
-        return new MergeRequestBuildAction(project, mergeRequestEvent, tokenHeader);
-    }
-
-    private WebHookAction fireSystemHookBuildAction(
-            Item project, MergeRequestSystemHookEvent mergeRequestSystemHookEvent, StaplerRequest request) {
-        return new MergeRequestBuildAction(project, mergeRequestSystemHookEvent, tokenHeader);
-    }
-
-    private WebHookAction fireWebHookBuildAction(Item project, TagPushEvent tagPushEvent, StaplerRequest request) {
-        return new PushBuildAction(project, tagPushEvent, tokenHeader);
-    }
-
-    private WebHookAction fireSystemHookBuildAction(
-            Item project, TagPushSystemHookEvent tagPushSystemHookEvent, StaplerRequest request) {
-        return new PushBuildAction(project, tagPushSystemHookEvent, tokenHeader);
-    }
-
-    private WebHookAction fireWebHookBuildAction(Item project, NoteEvent noteEvent, StaplerRequest request) {
-        return new NoteBuildAction(project, noteEvent, tokenHeader);
-    }
-
-    private WebHookAction fireWebHookBuildAction(Item project, PipelineEvent pipelineEvent, StaplerRequest request) {
-        return new PipelineBuildAction(project, pipelineEvent, tokenHeader);
     }
 
     private Item resolveProject(final String projectName, final Iterator<String> restOfPathParts) {

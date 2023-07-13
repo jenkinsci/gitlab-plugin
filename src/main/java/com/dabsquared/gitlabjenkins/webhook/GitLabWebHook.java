@@ -10,9 +10,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.systemhooks.SystemHookManager;
-import org.gitlab4j.api.webhook.WebHookManager;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -40,15 +37,8 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    public void getDynamic(final String projectName, final StaplerRequest request, StaplerResponse response)
-            throws GitLabApiException {
+    public void getDynamic(final String projectName, final StaplerRequest request, StaplerResponse response) {
         LOGGER.log(Level.INFO, "WebHook called with url: {0}", request.getRequestURIWithQueryString());
-        WebHookManager webHookManager = new WebHookManager();
-        SystemHookManager systemHookManager = new SystemHookManager();
-        webHookManager.addListener(actionResolver);
-        systemHookManager.addListener(actionResolver);
-        webHookManager.handleEvent(request);
-        systemHookManager.handleEvent(request);
         actionResolver.resolve(projectName, request).execute(response);
     }
 

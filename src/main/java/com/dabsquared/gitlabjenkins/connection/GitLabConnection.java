@@ -34,7 +34,6 @@ import java.util.UUID;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.util.StringUtils;
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
@@ -294,7 +293,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
                         .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
-            } catch (GitLabApiException e) {
+            } catch (Exception e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
             }
         }
