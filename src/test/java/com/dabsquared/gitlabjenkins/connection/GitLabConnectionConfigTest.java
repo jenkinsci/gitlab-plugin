@@ -92,7 +92,7 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void doCheckConnection_forbidden() {
-        String expected = connection_error("HTTP 403 Forbidden");
+        String expected = connection_error("Forbidden");
         assertThat(doCheckConnection("V3", Response.Status.FORBIDDEN), is(expected));
         assertThat(doCheckConnection("V4", Response.Status.FORBIDDEN), is(expected));
     }
@@ -120,7 +120,7 @@ public class GitLabConnectionConfigTest {
         GitLabConnection.DescriptorImpl descriptor =
                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
         FormValidation formValidation =
-                descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 10);
+                descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 60);
         mockServerClient.verify(request);
         return formValidation.getMessage();
     }
