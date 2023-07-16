@@ -73,11 +73,11 @@ public class ActionResolver {
                 onGet((Job<?, ?>) project, restOfPath, request, response);
             } else {
                 LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
+                LOGGER.log(Level.FINE, "Unsupported HTTP method: {0}", method);
+                NoopAction noopAction = new NoopAction();
+                noopAction.execute(response);
             }
         }
-        LOGGER.log(Level.FINE, "Unsupported HTTP method: {0}", method);
-        NoopAction noopAction = new NoopAction();
-        noopAction.execute(response);
     }
 
     private void onGet(Job<?, ?> project, String restOfPath, StaplerRequest request, StaplerResponse response) {
