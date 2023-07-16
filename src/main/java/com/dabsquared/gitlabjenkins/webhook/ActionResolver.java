@@ -36,10 +36,8 @@ public class ActionResolver {
     private static final Logger LOGGER = Logger.getLogger(ActionResolver.class.getName());
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
-    private Item project;
-    private StaplerRequest request;
 
-    public WebHookAction resolve(final String projectName, StaplerRequest request) {
+    public void resolve(final String projectName, StaplerRequest request, StaplerResponse response) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
                 .filter(s -> !s.isEmpty())
                 .iterator();
@@ -51,68 +49,50 @@ public class ActionResolver {
         while (restOfPathParts.hasNext()) {
             restOfPath.add(restOfPathParts.next());
         }
-        return resolveAction(project, restOfPath.toString(), request);
+        resolveAction(project, restOfPath.toString(), request, response);
     }
 
-    private void setProject(Item project) {
-        this.project = project;
-    }
-
-    private void setRequest(StaplerRequest request) {
-        this.request = request;
-    }
-
-    public Item getProject() {
-        return project;
-    }
-
-    public StaplerRequest getRequest() {
-        return request;
-    }
-
-    private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
-        setProject(project);
-        setRequest(request);
+    private void resolveAction(Item project, String restOfPath, StaplerRequest request, StaplerResponse response) {
         String method = request.getMethod();
-        if (method.equals("GET")) {
-            if (project instanceof Job<?, ?>) {
-                return onGet((Job<?, ?>) project, restOfPath, request);
-            } else {
-                LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
-                return new NoopAction();
-            }
-        }
         try {
             WebHookManager webHookManager = new WebHookManager();
-            webHookManager.addListener(new GitLabHookResolver(project, request));
+            webHookManager.addListener(new GitLabHookResolver(project, request, response));
             webHookManager.handleEvent(request);
-            return new NoopAction();
         } catch (GitLabApiException e) {
             LOGGER.log(Level.FINE, "WebHook was not supported for this project {0}", project.getName());
         }
         try {
             SystemHookManager systemHookManager = new SystemHookManager();
-            systemHookManager.addListener(new GitLabHookResolver(project, request));
+            systemHookManager.addListener(new GitLabHookResolver(project, request, response));
             systemHookManager.handleEvent(request);
-            return new NoopAction();
         } catch (GitLabApiException e) {
             LOGGER.log(Level.FINE, "SystemHook was not supported for this project {0}", project.getName());
         }
+        if (method.equals("GET")) {
+            if (project instanceof Job<?, ?>) {
+                onGet((Job<?, ?>) project, restOfPath, request, response);
+            } else {
+                LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
+            }
+        }
         LOGGER.log(Level.FINE, "Unsupported HTTP method: {0}", method);
-        return new NoopAction();
+        NoopAction noopAction = new NoopAction();
+        noopAction.execute(response);
     }
 
-    private WebHookAction onGet(Job<?, ?> project, String restOfPath, StaplerRequest request) {
+    private void onGet(Job<?, ?> project, String restOfPath, StaplerRequest request, StaplerResponse response) {
         Matcher commitMatcher = COMMIT_STATUS_PATTERN.matcher(restOfPath);
         if (restOfPath.isEmpty() && request.hasParameter("ref")) {
-            return new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
+            BranchBuildPageRedirectAction branchBuildPageRedirectAction = new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
+            branchBuildPageRedirectAction.execute(response);
         } else if (restOfPath.endsWith("status.png")) {
-            return onGetStatusPng(project, request);
+            onGetStatusPng(project, request, response);
         } else if (commitMatcher.matches()) {
-            return onGetCommitStatus(project, commitMatcher.group("sha1"), commitMatcher.group("statusJson"));
+            onGetCommitStatus(project, commitMatcher.group("sha1"), commitMatcher.group("statusJson"));
         }
         LOGGER.log(Level.FINE, "Unknown GET request: {0}", restOfPath);
-        return new NoopAction();
+        NoopAction noopAction = new NoopAction();
+        noopAction.execute(response);
     }
 
     private WebHookAction onGetCommitStatus(Job<?, ?> project, String sha1, String statusJson) {
@@ -123,11 +103,13 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onGetStatusPng(Job<?, ?> project, StaplerRequest request) {
+    private void onGetStatusPng(Job<?, ?> project, StaplerRequest request, StaplerResponse response) {
         if (request.hasParameter("ref")) {
-            return new BranchStatusPngAction(project, request.getParameter("ref"));
+            BranchStatusPngAction branchStatusPngAction = new BranchStatusPngAction(project, request.getParameter("ref"));
+            branchStatusPngAction.execute(response);
         } else {
-            return new CommitStatusPngAction(project, request.getParameter("sha1"));
+            CommitStatusPngAction commitStatusPngAction = new CommitStatusPngAction(project, request.getParameter("sha1"));
+            commitStatusPngAction.execute(response);
         }
     }
 
