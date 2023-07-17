@@ -214,14 +214,16 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
             }
 
             String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
-            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
-                if (trigger != null) {
-                    if (trigger.addCiMessage) {
-                        project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins", false));
+            if (defaultConnectionName != null) {
+                for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                    GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
+                    if (trigger != null) {
+                        if (trigger.addCiMessage) {
+                            project.getPublishersList().add(new GitLabCommitStatusPublisher("jenkins", false));
+                        }
+                        project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
+                        project.save();
                     }
-                    project.addProperty(new GitLabConnectionProperty(defaultConnectionName));
-                    project.save();
                 }
             }
             gitLabConfig.save();
