@@ -58,6 +58,7 @@ public class ActionResolver {
             WebHookManager webHookManager = new WebHookManager();
             webHookManager.addListener(new GitLabHookResolver(project, request, response));
             webHookManager.handleEvent(request);
+            throw HttpResponses.ok();
         } catch (GitLabApiException e) {
             LOGGER.log(Level.FINE, "WebHook was not supported for this project {0}", project.getName());
         }
@@ -65,6 +66,7 @@ public class ActionResolver {
             SystemHookManager systemHookManager = new SystemHookManager();
             systemHookManager.addListener(new GitLabHookResolver(project, request, response));
             systemHookManager.handleEvent(request);
+            throw HttpResponses.ok();
         } catch (GitLabApiException e) {
             LOGGER.log(Level.FINE, "SystemHook was not supported for this project {0}", project.getName());
         }

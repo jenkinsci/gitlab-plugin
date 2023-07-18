@@ -41,6 +41,6 @@ public class NoteBuildAction implements WebHookAction {
                         trigger.onPost(noteEvent);
                     }
                 });
-        throw HttpResponses.ok();
+        return;
     }
 }

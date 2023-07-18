@@ -54,6 +54,6 @@ public class PipelineBuildAction extends BuildWebHookAction {
                 trigger.onPost(pipelineEvent);
             }
         });
-        throw HttpResponses.ok();
+        return;
     }
 }

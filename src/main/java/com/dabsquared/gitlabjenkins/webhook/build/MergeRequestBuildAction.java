@@ -101,6 +101,6 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
                 }
             });
         }
-        throw HttpResponses.ok();
+        return;
     }
 }

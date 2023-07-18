@@ -149,7 +149,7 @@ public class PushBuildAction extends BuildWebHookAction {
                         trigger.onPost(pushEvent);
                     }
                 });
-                throw HttpResponses.ok();
+                return;
             }
         }
         if (tagPushEvent != null) {
@@ -166,7 +166,7 @@ public class PushBuildAction extends BuildWebHookAction {
                         trigger.onPost(tagPushEvent);
                     }
                 });
-                throw HttpResponses.ok();
+                return;
             }
         }
         if (pushSystemHookEvent != null) {
@@ -183,7 +183,7 @@ public class PushBuildAction extends BuildWebHookAction {
                         trigger.onPost(pushSystemHookEvent);
                     }
                 });
-                throw HttpResponses.ok();
+                return;
             }
         }
         if (tagPushSystemHookEvent != null) {
@@ -200,12 +200,13 @@ public class PushBuildAction extends BuildWebHookAction {
                         trigger.onPost(tagPushSystemHookEvent);
                     }
                 });
-                throw HttpResponses.ok();
+                return;
             }
         }
         if (project instanceof SCMSourceOwner) {
             ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
-            throw HttpResponses.ok();
+            // throw HttpResponses.ok();
+            return;
         }
         throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");
     }
