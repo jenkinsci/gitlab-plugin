@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.gitlab4j.api.webhook.NoteEvent;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -89,7 +90,7 @@ public class NoteBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null).execute(response);
 
-        verify(trigger).onPost(any(NoteHook.class));
+        verify(trigger).onPost(any(NoteEvent.class));
     }
 
     @Test
@@ -130,7 +131,7 @@ public class NoteBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null).execute(response);
 
-        verify(trigger).onPost(any(NoteHook.class));
+        verify(trigger).onPost(any(NoteEvent.class));
     }
 
     private String getJson(String name) throws IOException {

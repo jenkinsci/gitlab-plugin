@@ -21,6 +21,7 @@ import jenkins.plugins.git.GitSCMSource;
 import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
 import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
+import org.gitlab4j.api.webhook.PushEvent;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -59,7 +60,7 @@ public class PushBuildActionTest {
 
         new PushBuildAction(testProject, getJson("PushEvent_missingRepositoryUrl.json"), null).execute(response);
 
-        verify(trigger, never()).onPost(any(PushHook.class));
+        verify(trigger, never()).onPost(any(PushEvent.class));
     }
 
     @Test
@@ -72,7 +73,7 @@ public class PushBuildActionTest {
             exception.expect(HttpResponses.HttpResponseException.class);
             new PushBuildAction(testProject, getJson("PushEvent.json"), null).execute(response);
         } finally {
-            ArgumentCaptor<PushHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(PushHook.class);
+            ArgumentCaptor<PushEvent> pushHookArgumentCaptor = ArgumentCaptor.forClass(PushEvent.class);
             verify(trigger).onPost(pushHookArgumentCaptor.capture());
             assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
             assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
@@ -91,7 +92,7 @@ public class PushBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new PushBuildAction(testProject, getJson("PushEvent.json"), "wrong-secret").execute(response);
 
-        verify(trigger, never()).onPost(any(PushHook.class));
+        verify(trigger, never()).onPost(any(PushEvent.class));
     }
 
     private String getJson(String name) throws IOException {

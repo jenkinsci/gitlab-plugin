@@ -9,6 +9,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import hudson.model.FreeStyleProject;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
+import org.gitlab4j.api.webhook.PipelineEvent;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -52,7 +53,7 @@ public class PipelineBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response);
 
-        verify(trigger).onPost(any(PipelineHook.class));
+        verify(trigger).onPost(any(PipelineEvent.class));
     }
 
     @Test
@@ -60,7 +61,7 @@ public class PipelineBuildActionTest {
         exception.expect(HttpResponses.HttpResponseException.class);
         new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null).execute(response);
 
-        verify(trigger, never()).onPost(any(PipelineHook.class));
+        verify(trigger, never()).onPost(any(PipelineEvent.class));
     }
 
     private String getJson(String name) throws IOException {

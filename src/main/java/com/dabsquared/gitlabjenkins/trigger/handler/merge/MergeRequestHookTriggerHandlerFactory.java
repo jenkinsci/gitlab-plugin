@@ -34,10 +34,10 @@ public final class MergeRequestHookTriggerHandlerFactory {
         TriggerConfigChain chain = new TriggerConfigChain();
         chain.acceptOnlyIf(
                         triggerOpenMergeRequest != TriggerOpenMergeRequest.never,
-                        of(MergeRequestState.OPENED),
+                        of(MergeRequestState.OPENED), // updated missing
                         of(ActionType.UPDATED))
                 .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(ActionType.APPROVED))
-                .acceptIf(triggerOnMergeRequest, of(MergeRequestState.OPENED), null)
+                .acceptIf(triggerOnMergeRequest, of(MergeRequestState.OPENED), null) // reopened missing
                 .acceptIf(triggerOnAcceptedMergeRequest, null, of(ActionType.MERGED))
                 .acceptIf(triggerOnClosedMergeRequest, null, of(ActionType.CLOSED))
                 .acceptIf(triggerOnClosedMergeRequest, of(MergeRequestState.CLOSED), null);

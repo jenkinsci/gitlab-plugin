@@ -112,7 +112,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -170,7 +170,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -220,7 +220,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 true,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -236,7 +236,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -252,7 +252,7 @@ public class GitLabMessagePublisherTest {
                 true,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -268,7 +268,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 true,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     private void performAndVerify(

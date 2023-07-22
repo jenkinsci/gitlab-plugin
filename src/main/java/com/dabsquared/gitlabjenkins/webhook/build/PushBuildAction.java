@@ -205,7 +205,6 @@ public class PushBuildAction extends BuildWebHookAction {
         }
         if (project instanceof SCMSourceOwner) {
             ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
-            // throw HttpResponses.ok();
             return;
         }
         throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");

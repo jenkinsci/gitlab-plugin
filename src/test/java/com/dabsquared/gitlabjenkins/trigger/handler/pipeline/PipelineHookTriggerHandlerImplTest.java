@@ -10,8 +10,6 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilte
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Functions;
 import hudson.Launcher;
@@ -27,6 +25,12 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab4j.api.models.Repository;
+import org.gitlab4j.api.models.User;
+import org.gitlab4j.api.webhook.EventProject;
+import org.gitlab4j.api.webhook.EventRepository;
+import org.gitlab4j.api.webhook.PipelineEvent;
+import org.gitlab4j.api.webhook.PipelineEvent.ObjectAttributes;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -48,17 +52,17 @@ public class PipelineHookTriggerHandlerImplTest {
     public TemporaryFolder tmp = new TemporaryFolder();
 
     private PipelineHookTriggerHandler pipelineHookTriggerHandler;
-    private PipelineHook pipelineHook;
+    private PipelineEvent pipelineEvent;
 
     @Before
     public void setup() throws IOException, GitAPIException {
 
         List<String> allowedStates = new ArrayList<>();
-        allowedStates.add("success");
+        allowedStates.add("SUCCESS");
 
         User user = new User();
         user.setName("test");
-        user.setId(1);
+        user.setId(1L);
 
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
@@ -68,28 +72,27 @@ public class PipelineHookTriggerHandlerImplTest {
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
 
         pipelineHookTriggerHandler = new PipelineHookTriggerHandlerImpl(allowedStates);
-        pipelineHook = pipelineHook()
-                .withUser(user)
-                .withRepository(repository()
-                        .withName("test")
-                        .withHomepage("https://gitlab.org/test")
-                        .withUrl("git@gitlab.org:test.git")
-                        .withGitSshUrl("git@gitlab.org:test.git")
-                        .withGitHttpUrl("https://gitlab.org/test.git")
-                        .build())
-                .withProject(project()
-                        .withNamespace("test-namespace")
-                        .withWebUrl("https://gitlab.org/test")
-                        .withId(1L)
-                        .build())
-                .withObjectAttributes(pipelineEventObjectAttributes()
-                        .withId(1)
-                        .withStatus("success")
-                        .withSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
-                        .withStages(new ArrayList<String>())
-                        .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
-                        .build())
-                .build();
+        ObjectAttributes objectAttributes = new ObjectAttributes();
+        objectAttributes.setId(1L);
+        objectAttributes.setStatus("SUCCESS");
+        objectAttributes.setSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2");
+        objectAttributes.setStages(new ArrayList<String>());
+        objectAttributes.setRef("refs/heads/" + git.nameRev().add(head).call().get(head));
+        EventProject project = new EventProject();
+        project.setNamespace("test-namespace");
+        project.setWebUrl("https://gitlab.org/test");
+        project.setId(1L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test");
+        repository.setHomepage("https://gitlab.org/test");
+        repository.setUrl("git@gitlab.org:test.git");
+        repository.setGit_http_url("https://gitlab.org/test.git");
+        repository.setGit_ssh_url("git@gitlab.org:test.git");
+        PipelineEvent pipelineEvent = new PipelineEvent();
+        pipelineEvent.setUser(user);
+        pipelineEvent.setObjectAttributes(objectAttributes);
+        pipelineEvent.setProject(project);
+        pipelineEvent.setRepository(repository);
         git.close();
     }
 
@@ -111,7 +114,7 @@ public class PipelineHookTriggerHandlerImplTest {
         project.setQuietPeriod(0);
         pipelineHookTriggerHandler.handle(
                 project,
-                pipelineHook,
+                pipelineEvent,
                 true,
                 newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));
@@ -137,7 +140,7 @@ public class PipelineHookTriggerHandlerImplTest {
 
         pipelineHookTriggerHandler.handle(
                 project,
-                pipelineHook,
+                pipelineEvent,
                 false,
                 newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));
