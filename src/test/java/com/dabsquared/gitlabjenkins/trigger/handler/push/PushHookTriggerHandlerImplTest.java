@@ -89,7 +89,7 @@ public class PushHookTriggerHandlerImplTest {
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
         git.add().addFilepattern("test");
-        RevCommit commit = git.commit().setMessage("test").call();
+        RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
         String repositoryUrl = tmp.getRoot().toURI().toString();
 
@@ -141,7 +141,7 @@ public class PushHookTriggerHandlerImplTest {
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
         git.add().addFilepattern("test");
-        RevCommit commit = git.commit().setMessage("test").call();
+        RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
         String repositoryUrl = tmp.getRoot().toURI().toString();
 

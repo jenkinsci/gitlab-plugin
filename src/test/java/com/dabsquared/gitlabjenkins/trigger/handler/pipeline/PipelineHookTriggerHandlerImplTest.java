@@ -64,7 +64,7 @@ public class PipelineHookTriggerHandlerImplTest {
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
         git.add().addFilepattern("test");
-        git.commit().setMessage("test").call();
+        git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
 
         pipelineHookTriggerHandler = new PipelineHookTriggerHandlerImpl(allowedStates);
