@@ -267,7 +267,7 @@ public class GitLabCommitStatusPublisherTest {
         assertThat(
                 outputStream.toString(),
                 CoreMatchers.containsString(
-                        "Failed to update Gitlab commit status for project 'test/project': HTTP 403 Forbidden"));
+                        "Failed to update GitLab commit status for project 'test/project': HTTP 403 Forbidden"));
     }
 
     private void prebuildAndVerify(AbstractBuild build, BuildListener listener, HttpRequest... requests) {

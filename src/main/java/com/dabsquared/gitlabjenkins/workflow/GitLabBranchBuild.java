@@ -74,7 +74,7 @@ public class GitLabBranchBuild extends AbstractDescribableImpl<GitLabBranchBuild
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Gitlab Branch Build";
+            return "GitLab Branch Build";
         }
     }
 }
