@@ -7,13 +7,13 @@
   },
   "project_id": 5,
   "project":{
-    "name":"Gitlab Test",
+    "name":"GitLab Test",
     "description":"Aut reprehenderit ut est.",
     "web_url":"http://example.com/gitlab-org/gitlab-test",
     "avatar_url":null,
     "git_ssh_url":"git@example.com:gitlab-org/gitlab-test.git",
     "git_http_url":"http://example.com/gitlab-org/gitlab-test.git",
-    "namespace":"Gitlab Org",
+    "namespace":"GitLab Org",
     "visibility_level":10,
     "path_with_namespace":"gitlab-org/gitlab-test",
     "default_branch":"master",
@@ -23,7 +23,7 @@
     "http_url":"http://example.com/gitlab-org/gitlab-test.git"
   },
   "repository":{
-    "name": "Gitlab Test",
+    "name": "GitLab Test",
     "url": "http://localhost/gitlab-org/gitlab-test.git",
     "description": "Aut reprehenderit ut est.",
     "homepage": "http://example.com/gitlab-org/gitlab-test"
@@ -63,13 +63,13 @@
     "position": 0,
     "locked_at": null,
     "source":{
-      "name":"Gitlab Test",
+      "name":"GitLab Test",
       "description":"Aut reprehenderit ut est.",
       "web_url":"http://example.com/gitlab-org/gitlab-test",
       "avatar_url":null,
       "git_ssh_url":"git@example.com:gitlab-org/gitlab-test.git",
       "git_http_url":"http://example.com/gitlab-org/gitlab-test.git",
-      "namespace":"Gitlab Org",
+      "namespace":"GitLab Org",
       "visibility_level":10,
       "path_with_namespace":"gitlab-org/gitlab-test",
       "default_branch":"master",
@@ -79,13 +79,13 @@
       "http_url":"http://example.com/gitlab-org/gitlab-test.git"
     },
     "target": {
-      "name":"Gitlab Test",
+      "name":"GitLab Test",
       "description":"Aut reprehenderit ut est.",
       "web_url":"http://example.com/gitlab-org/gitlab-test",
       "avatar_url":null,
       "git_ssh_url":"git@example.com:gitlab-org/gitlab-test.git",
       "git_http_url":"http://example.com/gitlab-org/gitlab-test.git",
-      "namespace":"Gitlab Org",
+      "namespace":"GitLab Org",
       "visibility_level":10,
       "path_with_namespace":"gitlab-org/gitlab-test",
       "default_branch":"master",
