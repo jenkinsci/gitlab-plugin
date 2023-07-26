@@ -23,11 +23,24 @@ import hudson.model.queue.QueueListener;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import javax.servlet.ServletException;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeCommand.FastForwardMode.Merge;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.gitlab4j.api.models.Assignee;
+import org.gitlab4j.api.models.Author;
+import org.gitlab4j.api.models.User;
+import org.gitlab4j.api.models.Visibility;
+import org.gitlab4j.api.webhook.ChangeContainer;
+import org.gitlab4j.api.webhook.EventCommit;
+import org.gitlab4j.api.webhook.EventProject;
+import org.gitlab4j.api.webhook.MergeRequestChanges;
+import org.gitlab4j.api.webhook.MergeRequestEvent;
+import org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -63,6 +76,7 @@ public class MergeRequestBuildActionTest {
 
     private String gitRepoUrl;
     private String commitSha1;
+    private MergeRequestEvent mergeRequestEvent = new MergeRequestEvent();
 
     @BeforeClass
     public static void addQueueListener() {
@@ -93,6 +107,68 @@ public class MergeRequestBuildActionTest {
 
         // some defaults of the trigger
         trigger.setBranchFilterType(BranchFilterType.All);
+
+        mergeRequestEvent.setObjectKind("merge_request");
+        User user = new User();
+        user.setName("Administrator");
+        user.setUsername("root");
+        user.setAvatarUrl("http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon");
+        mergeRequestEvent.setUser(user);
+        ObjectAttributes objectAttributes = new ObjectAttributes();
+        objectAttributes.setId(99L);
+        objectAttributes.setTargetBranch("master");
+        objectAttributes.setSourceBranch("ms-viewport");
+        objectAttributes.setSourceProjectId(14L);
+        objectAttributes.setAuthorId(51L);
+        objectAttributes.setAssigneeId(6L);
+        objectAttributes.setTitle("MS-Viewport");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        objectAttributes.setCreatedAt(dateFormat.parse("2013-12-03T17:23:34.123Z"));
+        objectAttributes.setUpdatedAt(dateFormat.parse("2013-12-03T17:23:34.123Z"));
+        objectAttributes.setStCommits(null);
+        objectAttributes.setStDiffs(null);
+        objectAttributes.setMilestoneId(null);
+        objectAttributes.setState("opened");
+        objectAttributes.setMergeStatus("unchecked");
+        objectAttributes.setTargetProjectId(14L);
+        objectAttributes.setIid(1L);
+        objectAttributes.setDescription("");
+        objectAttributes.setUrl("http://example.com/gitlab-org/gitlab-test/merge_requests/1#note_1244");
+        EventProject sourceortargetproject = new EventProject();
+        sourceortargetproject.setName("Awesome Project");
+        sourceortargetproject.setDescription("Aut reprehenderit ut est.");
+        sourceortargetproject.setWebUrl("http://example.com/awesome_space/awesome_project");
+        sourceortargetproject.setAvatarUrl(null);
+        sourceortargetproject.setGitSshUrl("git@example.com:awesome_space/awesome_project.git");
+        sourceortargetproject.setGitHttpUrl("http://example.com/awesome_space/awesome_project.git");
+        sourceortargetproject.setNamespace("Awesome Space");
+        // sourceortargetproject.setVisibilityLevel(Visibility.PUBLIC);
+        sourceortargetproject.setPathWithNamespace("awesome_space/awesome_project");
+        sourceortargetproject.setDefaultBranch("master");
+        sourceortargetproject.setHomepage("http://example.com/awesome_space/awesome_project");
+        sourceortargetproject.setUrl("http://example.com/awesome_space/awesome_project.git");
+        sourceortargetproject.setSshUrl("git@example.com:awesome_space/awesome_project.git");
+        sourceortargetproject.setHttpUrl("http://example.com/awesome_space/awesome_project.git");
+        objectAttributes.setSource(sourceortargetproject);
+        objectAttributes.setTarget(sourceortargetproject);
+        EventCommit lastCommit = new EventCommit();
+        lastCommit.setId("da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
+        lastCommit.setMessage("fixed readme");
+        lastCommit.setTimestamp(dateFormat.parse("2012-01-03T23:36:29+02:00"));
+        lastCommit.setUrl("http://example.com/awesome_space/awesome_project/commits/da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
+        Author commitAuthor = new Author();
+        commitAuthor.setName("GitLab dev user");
+        commitAuthor.setEmail("gitlabdev@dv6700.(none)");
+        lastCommit.setAuthor(commitAuthor);
+        objectAttributes.setLastCommit(lastCommit);
+        objectAttributes.setWorkInProgress(false);
+        objectAttributes.setAction("open");
+        Assignee assignee2 = new Assignee();
+        assignee2.setName("User1");
+        assignee2.setUsername("user1");
+        assignee2.setAvatarUrl("http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon");
+        objectAttributes.setAssignee(assignee2);
+        mergeRequestEvent.setObjectAttributes(objectAttributes);
     }
 
     @Test
@@ -101,22 +177,22 @@ public class MergeRequestBuildActionTest {
         try {
             FreeStyleProject testProject = jenkins.createFreeStyleProject();
             testProject.addTrigger(mockTrigger);
-            executeMergeRequestAction(testProject, getJson("MergeRequestEvent.json"));
+            executeMergeRequestAction(testProject, mergeRequestEvent);
         } finally {
-            ArgumentCaptor<MergeRequestHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(MergeRequestHook.class);
+            ArgumentCaptor<MergeRequestEvent> pushHookArgumentCaptor = ArgumentCaptor.forClass(MergeRequestEvent.class);
             verify(mockTrigger).onPost(pushHookArgumentCaptor.capture());
             assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
             assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
         }
     }
 
-    private void executeMergeRequestAction(FreeStyleProject testProject, String json) throws IOException {
+    private void executeMergeRequestAction(FreeStyleProject testProject, MergeRequestEvent event) throws IOException {
         try {
             wouldFire = false;
 
             trigger.start(testProject, false);
 
-            new MergeRequestBuildAction(testProject, json, null).execute(response);
+            new MergeRequestBuildAction(testProject, event, null).execute(response);
         } catch (HttpResponses.HttpResponseException hre) {
             // Test for OK status of a response.
             try {
@@ -134,7 +210,9 @@ public class MergeRequestBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
 
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_closedMR.json"));
+        MergeRequestEvent mergeRequestEvent_closedMR = mergeRequestEvent;
+        mergeRequestEvent_closedMR.getObjectAttributes().setState("closed");
+        executeMergeRequestAction(testProject, mergeRequestEvent_closedMR);
         assertFalse(wouldFire);
     }
 
@@ -144,7 +222,9 @@ public class MergeRequestBuildActionTest {
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
 
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_approvedMR.json"));
+        MergeRequestEvent mergeRequestEvent_approvedMR = mergeRequestEvent;
+        mergeRequestEvent_approvedMR.getObjectAttributes().setAction("approved");
+        executeMergeRequestAction(testProject, mergeRequestEvent_approvedMR);
 
         assertFalse(wouldFire);
     }
@@ -154,14 +234,18 @@ public class MergeRequestBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR_initialBuild.json"));
+        MergeRequestEvent mergeRequestEvent_alreadyBuiltMR = mergeRequestEvent;
+        mergeRequestEvent_alreadyBuiltMR.getObjectAttributes().setAction("reopen");
+        MergeRequestEvent mergeRequestEvent_alreadyBuiltMR_initialBuild = mergeRequestEvent;
+        mergeRequestEvent_alreadyBuiltMR_initialBuild.getObjectAttributes().getLastCommit().setId("${commitSha1}");
+        executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR_initialBuild);
         jenkins.waitUntilNoActivity();
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR.json"));
+        executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR);
         assertFalse(wouldFire);
     }
 
     @Test
-    public void build_acceptedMr() throws IOException, ExecutionException, InterruptedException {
+    public void build_acceptedMr() throws IOException, ExecutionException, InterruptedException, ParseException {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         trigger.setTriggerOnAcceptedMergeRequest(true);
         trigger.setTriggerOnMergeRequest(false);
@@ -171,10 +255,27 @@ public class MergeRequestBuildActionTest {
                 0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
         future.get();
 
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_merged.json"));
+        MergeRequestEvent mergeRequestEvent_merged = mergeRequestEvent;
+        mergeRequestEvent_merged.getObjectAttributes().setAction("merged");
+        mergeRequestEvent_merged.getObjectAttributes().getLastCommit().setId("${commitSha1}");
+        MergeRequestChanges mergeRequestChanges = new MergeRequestChanges();
+        ChangeContainer<String> state = new ChangeContainer<>();
+        state.setPrevious("locked");
+        state.setCurrent("merged");
+        mergeRequestChanges.setState(state);
+        ChangeContainer<Date> updatedAt = new ChangeContainer<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        updatedAt.setPrevious(dateFormat.parse("2018-03-28 15:36:42 UTC"));
+        updatedAt.setCurrent(dateFormat.parse("2018-03-28 15:36:42 UTC"));
+        mergeRequestChanges.setUpdatedAt(updatedAt);
+        ChangeContainer<Integer> total_time_spent = new ChangeContainer<>();
+        total_time_spent.setPrevious(null);
+        total_time_spent.setCurrent(0);
+        mergeRequestChanges.setTotalTimeSpent(total_time_spent);
+        mergeRequestEvent_merged.setChanges(mergeRequestChanges);
+        executeMergeRequestAction(testProject, mergeRequestEvent_merged);
         assertTrue(wouldFire);
     }
-
     @Test
     public void build_alreadyBuiltMR_differentTargetBranch()
             throws IOException, ExecutionException, InterruptedException {
@@ -210,12 +311,12 @@ public class MergeRequestBuildActionTest {
                         .build()));
         future.get();
 
-        executeMergeRequestAction(testProject, getJson("MergeRequestEvent_alreadyBuiltMR_differentTargetBranch.json"));
+        MergeRequestEvent mergeRequestEvent_alreadyBuiltMR_differentTargetBranch = mergeRequestEvent;
+        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch.getObjectAttributes().setTargetBranch("develop");
+        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch.getObjectAttributes().getLastCommit().setId("${commitSha1}");
+        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch.getObjectAttributes().setAction("update");
+        executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR_differentTargetBranch);
 
         assertTrue(wouldFire);
-    }
-
-    private String getJson(String name) throws IOException {
-        return IOUtils.toString(getClass().getResourceAsStream(name)).replace("${commitSha1}", commitSha1);
     }
 }

@@ -12,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -28,9 +29,10 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.gitlab4j.api.webhook.EventCommit;
+import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.PushEvent;
-import org.gitlab4j.api.webhook.TagPushEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -51,11 +53,11 @@ public class PushHookTriggerHandlerImplTest {
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
 
-    private TagPushHookTriggerHandler tagPushHookTriggerHandler;
+    private PushHookTriggerHandler pushHookTriggerHandler;
 
     @Before
     public void setup() {
-        tagPushHookTriggerHandler = new TagPushHookTriggerHandlerImpl(false);
+        pushHookTriggerHandler = new PushHookTriggerHandlerImpl(false);
     }
 
     @Test
@@ -72,10 +74,12 @@ public class PushHookTriggerHandlerImplTest {
         });
         project.setQuietPeriod(0);
         PushEvent pushEvent = new PushEvent();
-        // pushEvent.setCommits(Arrays.asList(
-        //                         commit().withMessage("some message").build(),
-        //                         commit().withMessage("[ci-skip]").build()));
-        tagPushHookTriggerHandler.handle(
+        EventCommit commit1 = new EventCommit();
+        EventCommit commit2 = new EventCommit();
+        commit1.setMessage("some message");
+        commit2.setMessage("[ci-skip]");
+        pushEvent.setCommits(Arrays.asList(commit1, commit2));
+        pushHookTriggerHandler.handle(
                 project,
                 pushEvent,
                 true,
@@ -108,10 +112,10 @@ public class PushHookTriggerHandlerImplTest {
             }
         });
         project.setQuietPeriod(0);
-        TagPushEvent tagPushEvent = new TagPushEvent();
-        tagPushEvent.setUserId(123L);
-        tagPushEvent.setUserName("admin@example");
-        tagPushEvent.setProjectId(345L);
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
         EventRepository repository = new EventRepository();
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
@@ -119,16 +123,16 @@ public class PushHookTriggerHandlerImplTest {
         repository.setUrl("git@gitlab.org:test.git");
         repository.setGit_ssh_url("git@gitlab.org:test.git");
         repository.setGit_http_url("https://gitlab.org/test.git");
-        tagPushEvent.setRepository(repository);
-        tagPushEvent.setRef("refs/heads/" + git.nameRev().add(head).call().get(head));
-        tagPushEvent.setBefore("0000000000000000000000000000000000000000");
-        tagPushEvent.setAfter(commit.name());
-        tagPushEvent.setProjectId(1L);
-        tagPushEvent.setUserName("test");
-        tagPushEvent.setObjectKind("tag_push");
-        tagPushHookTriggerHandler.handle(
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/heads/" + git.nameRev().add(head).call().get(head));
+        pushEvent.setBefore("0000000000000000000000000000000000000000");
+        pushEvent.setAfter(commit.name());
+        pushEvent.setProjectId(1L);
+        pushEvent.setUserName("test");
+        pushEvent.setObjectKind("tag_push");
+        pushHookTriggerHandler.handle(
                 project,
-                tagPushEvent,
+                pushEvent,
                 true,
                 newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));
@@ -165,36 +169,35 @@ public class PushHookTriggerHandlerImplTest {
             }
         });
         project.setQuietPeriod(0);
-        PushHookBuilder pushHookBuilder = pushHook()
-                .withBefore("0000000000000000000000000000000000000000")
-                .withProjectId(1L)
-                .withUserName("test")
-                .withObjectKind("push")
-                .withRepository(repository()
-                        .withName("test")
-                        .withHomepage("https://gitlab.org/test")
-                        .withUrl("git@gitlab.org:test.git")
-                        .withGitSshUrl("git@gitlab.org:test.git")
-                        .withGitHttpUrl("https://gitlab.org/test.git")
-                        .build())
-                .withProject(project()
-                        .withNamespace("test-namespace")
-                        .withWebUrl("https://gitlab.org/test")
-                        .build())
-                .withAfter(commit.name())
-                .withRef("refs/heads/" + git.nameRev().add(head).call().get(head));
-        tagPushHookTriggerHandler.handle(
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setBefore("0000000000000000000000000000000000000000");
+        pushEvent.setProjectId(1L);
+        pushEvent.setUserName("test");
+        pushEvent.setObjectKind("push");
+        EventRepository repository = new EventRepository();
+        repository.setName("test");
+        repository.setHomepage("https://gitlab.org/test");
+        repository.setUrl("git@gitlab.org:test.git");
+        repository.setGit_ssh_url("git@gitlab.org:test.git");
+        repository.setGit_http_url("https://gitlab.org/test.git");
+        pushEvent.setRepository(repository);
+        EventProject project1 = new EventProject();
+        project1.setNamespace("test-namespace");
+        project1.setWebUrl("https://gitlab.org/test");
+        pushEvent.setProject(project1);
+        pushEvent.setAfter(commit.name());
+        pushEvent.setRef("refs/heads/" + git.nameRev().add(head).call().get(head));
+        pushHookTriggerHandler.handle(
                 project,
-                pushHookBuilder.build(),
+                pushEvent,
                 true,
                 newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));
-        tagPushHookTriggerHandler.handle(
+        PushEvent pushEvent2 = new PushEvent();
+        pushEvent2.setRef("refs/heads/" + git.nameRev().add(head).call().get(head) + "-2");
+        pushHookTriggerHandler.handle(
                 project,
-                pushHookBuilder
-                        .but()
-                        .withRef("refs/heads/" + git.nameRev().add(head).call().get(head) + "-2")
-                        .build(),
+                pushEvent2,
                 true,
                 newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));
