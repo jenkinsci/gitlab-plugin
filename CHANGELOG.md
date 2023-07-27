@@ -30,8 +30,8 @@ ChangeLog
 * #951: Fix inability to trigger builds on accepted Merge Request
 * #1002: Fix that the plugin checks only global permissions instead of both global and project-level permissions
 * #1008: Fix NPE during commit status retrieval by gitlabCommitStatus step
-* #1012: Fix NPE if SCM revision is null (probably occurs only while using with Gitlab Branch Source Plugin)
-* #1014: Fix another NPE while using this plugin with Gitlab Branch Source Plugin
+* #1012: Fix NPE if SCM revision is null (probably occurs only while using with GitLab Branch Source Plugin)
+* #1014: Fix another NPE while using this plugin with GitLab Branch Source Plugin
 
 1.5.15
 =====================
@@ -149,7 +149,7 @@ ChangeLog
 * #532: Allow publishing a comment to the GitLab MR if the build result is 'unstable'
 * #543: Matrix/multi-configuration project support
 * #544: Add a button to clear the security token in build configuration
-* #559: Add a function to (re)set the Gitlab connections for bootstrapping new Jenkins installs
+* #559: Add a function to (re)set the GitLab connections for bootstrapping new Jenkins installs
 * #562: Fix issue #523 - Build result sent to Pipeline library repo instead of project repo
 
 1.4.5
@@ -186,7 +186,7 @@ ChangeLog
 * Breaking changes for some Pipeline jobs (see [migration guide](https://github.com/jenkinsci/gitlab-plugin/wiki/Migration-Guides) for more information)
 * Cleanup UI for GitLabPushTrigger
 * #201: customize notes for merge requsts
-* #168: MR Voting Broken after Gitlab 8.2
+* #168: MR Voting Broken after GitLab 8.2
 * #190: Add option to mark unstable builds as success in GitLab
 * #345: Configurable "Add note with build status on merge requests"
 * Add Notifier and workflow step for accepting a MR on success
@@ -224,12 +224,12 @@ ChangeLog
 =====================
 * #332: Find better fitting labels for the supported kind of GitLab credentials in global configuration
 * #261: Support [WIP] tag to prevent builds from triggering
-* #317: Retried builds are not marked immediately with Gitlab 8.1
+* #317: Retried builds are not marked immediately with GitLab 8.1
 * #306: GitLab [ci-skip] is ignored
 * #362: Allow to change build name submitted to GitLab
 * Catch client exceptions while retrieving the projectId from GitLab
 * #358: Null pointer exception when using 'rebuild open MRs' and GitLab 7.14
-* #364: gitlabCommitStatus: Gitlab in non-root location
+* #364: gitlabCommitStatus: GitLab in non-root location
 * #213: Trigger build by phrase in merge request note
 * #282: Authentication not required for /project end-point
 * #359: Git repositories in dockerized GitLab cannot be reached from Jenkins when using plugin-provided url parameters
@@ -251,7 +251,7 @@ ChangeLog
 * #311 Fix finding related commit of the build
 * #312 Fix setting MR IID
 * #319: Wrong username in Jenkins build description on push event
-* #322 Git push hook namespace compatibility for Gitlab pre ~v8.5
+* #322 Git push hook namespace compatibility for GitLab pre ~v8.5
 * #327 Fix to support NameSpace or ProjectName with dot in it
 * Update tests for new commit status publisher behavior
 * Use HTTP Get instead of HEAD to check for the existence of a commit as workaround for RESTEASY-1347

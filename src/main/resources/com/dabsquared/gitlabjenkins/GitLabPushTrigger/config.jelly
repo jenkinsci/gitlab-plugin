@@ -44,7 +44,7 @@
     <f:entry title="${%Ignore WIP Merge Requests}" field="skipWorkInProgressMergeRequest">
       <f:checkbox default="true"/>
     </f:entry>
-    <f:entry title="Labels that forces builds if they are added (comma-separated)">
+    <f:entry title="Labels that launch a build if they are added (comma-separated)" help="/plugin/gitlab-plugin/help/help-labelsThatForcesBuildIfAdded.html">
       <f:textbox field="labelsThatForcesBuildIfAdded"/>
     </f:entry>
     <f:entry title="Set build description to build cause (eg. Merge request or Git Push)" field="setBuildDescription">
