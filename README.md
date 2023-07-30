@@ -345,7 +345,7 @@ Also make sure you have chosen the appropriate GitLab instance from the 'GitLab 
         }
     }
     ```
-* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented here: https://docs.gitlab.com/ee/api/commits.html#post-the-build-status-to-a-commit
+* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented [here](https://docs.gitlab.com/ee/api/commits.html#set-the-pipeline-status-of-a-commit).
     ```groovy
     node() {
         stage('Checkout') { checkout <your-scm-config> }

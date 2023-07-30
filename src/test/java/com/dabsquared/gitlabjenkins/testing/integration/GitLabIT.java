@@ -250,7 +250,7 @@ public class GitLabIT {
         // Setup remote master branch
         tmp.newFile("test");
         git.add().addFilepattern("test");
-        RevCommit commit = git.commit().setMessage("test").call();
+        RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         git.push()
                 .setRemote("origin")
                 .add("master")
@@ -262,7 +262,7 @@ public class GitLabIT {
             // Setup remote feature branch
             git.checkout().setName("feature").setCreateBranch(true).call();
             tmp.newFile("feature");
-            commit = git.commit().setMessage("feature").call();
+            commit = git.commit().setSign(false).setMessage("feature").call();
             git.push()
                     .setRemote("origin")
                     .add("feature")
