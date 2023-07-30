@@ -236,7 +236,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test

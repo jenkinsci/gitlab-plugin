@@ -99,7 +99,7 @@ public class GitLabCommitStatusPublisherTest {
     @Test
     public void running_v3() throws UnsupportedEncodingException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, null, "test/project.git");
-        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, CommitBuildState.RUNNING);
+        HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("V3", build, CommitBuildState.RUNNING);
 
         prebuildAndVerify(build, listener, requests);
     }
@@ -127,7 +127,7 @@ public class GitLabCommitStatusPublisherTest {
             prepareGetProjectResponse("test/project.test"),
             prepareExistsCommitWithSuccessResponse("V4", String.valueOf(PROJECT_ID)),
             prepareUpdateCommitStatusWithSuccessResponse(
-                    "v4", String.valueOf(PROJECT_ID), build, CommitBuildState.RUNNING)
+                    "V4", String.valueOf(PROJECT_ID), build, CommitBuildState.RUNNING)
         };
 
         prebuildAndVerify(build, listener, requests);
