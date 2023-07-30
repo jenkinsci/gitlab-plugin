@@ -1,13 +1,8 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import com.dabsquared.gitlabjenkins.util.JsonUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -25,6 +20,11 @@ import jenkins.scm.api.SCMSourceOwner;
 import jenkins.scm.api.trait.SCMTrait;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.gitlab4j.api.systemhooks.PushSystemHookEvent;
+import org.gitlab4j.api.systemhooks.TagPushSystemHookEvent;
+import org.gitlab4j.api.webhook.EventProject;
+import org.gitlab4j.api.webhook.PushEvent;
+import org.gitlab4j.api.webhook.TagPushEvent;
 
 /**
  * @author Robin Müller
@@ -33,65 +33,179 @@ public class PushBuildAction extends BuildWebHookAction {
 
     private static final Logger LOGGER = Logger.getLogger(PushBuildAction.class.getName());
     private final Item project;
-    private PushHook pushHook;
+    private PushEvent pushEvent;
+    private TagPushEvent tagPushEvent;
+    private PushSystemHookEvent pushSystemHookEvent;
+    private TagPushSystemHookEvent tagPushSystemHookEvent;
     private final String secretToken;
 
-    public PushBuildAction(Item project, String json, String secretToken) {
-        LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
+    public PushBuildAction(Item project, PushEvent pushEvent, String secretToken) {
         this.project = project;
-        this.pushHook = JsonUtil.read(json, PushHook.class);
+        this.pushEvent = pushEvent;
         this.secretToken = secretToken;
     }
 
-    /**
-     * Alternative Constructor which takes in an already deserialized Json Tree.
-     * @param project Jenkins Project Item
-     * @param json Payload Json Tree
-     * @param secretToken Secret Token
-     */
-    public PushBuildAction(Item project, JsonNode json, String secretToken) {
-        LOGGER.log(Level.FINE, "Push: {0}", toPrettyPrint(json));
+    public PushBuildAction(Item project, TagPushEvent tagPushEvent, String secretToken) {
         this.project = project;
-        this.pushHook = JsonUtil.read(json, PushHook.class);
+        this.tagPushEvent = tagPushEvent;
+        this.secretToken = secretToken;
+    }
+
+    public PushBuildAction(Item project, PushSystemHookEvent pushSystemHookEvent, String secretToken) {
+        this.project = project;
+        this.pushSystemHookEvent = pushSystemHookEvent;
+        this.secretToken = secretToken;
+    }
+
+    public PushBuildAction(Item project, TagPushSystemHookEvent tagPushSystemHookEvent, String secretToken) {
+        LOGGER.log(Level.FINE, tagPushSystemHookEvent.toString());
+        this.project = project;
+        this.tagPushSystemHookEvent = tagPushSystemHookEvent;
         this.secretToken = secretToken;
     }
 
     void processForCompatibility() {
         // Fill in project if it's not defined.
-        if (this.pushHook.getProject() == null && this.pushHook.getRepository() != null) {
-            try {
-                String path = new URL(this.pushHook.getRepository().getGitHttpUrl()).getPath();
-                if (StringUtils.isNotBlank(path)) {
-                    Project project = new Project();
-                    project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
-                    this.pushHook.setProject(project);
-                } else {
-                    LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+        if (this.pushEvent != null) {
+            if (this.pushEvent.getProject() == null && this.pushEvent.getRepository() != null) {
+                try {
+                    String path = new URL(this.pushEvent.getRepository().getGit_http_url()).getPath();
+                    if (StringUtils.isNotBlank(path)) {
+                        EventProject project = new EventProject();
+                        project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
+                        this.pushEvent.setProject(project);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                    }
+                } catch (MalformedURLException ignored) {
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
                 }
-            } catch (MalformedURLException ignored) {
-                LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+            }
+        }
+        if (this.tagPushEvent != null) {
+            if (this.tagPushEvent.getProject() == null && this.tagPushEvent.getRepository() != null) {
+                try {
+                    String path = new URL(this.tagPushEvent.getRepository().getGit_http_url()).getPath();
+                    if (StringUtils.isNotBlank(path)) {
+                        EventProject project = new EventProject();
+                        project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
+                        this.tagPushEvent.setProject(project);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                    }
+                } catch (MalformedURLException ignored) {
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                }
+            }
+        }
+        if (this.pushSystemHookEvent != null) {
+            if (this.pushSystemHookEvent.getProject() == null && this.pushSystemHookEvent.getRepository() != null) {
+                try {
+                    String path =
+                            new URL(this.pushSystemHookEvent.getRepository().getGit_http_url()).getPath();
+                    if (StringUtils.isNotBlank(path)) {
+                        EventProject project = new EventProject();
+                        project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
+                        this.pushSystemHookEvent.setProject(project);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                    }
+                } catch (MalformedURLException ignored) {
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                }
+            }
+        }
+        if (this.tagPushSystemHookEvent != null) {
+            if (this.tagPushSystemHookEvent.getProject() == null
+                    && this.tagPushSystemHookEvent.getRepository() != null) {
+                try {
+                    String path =
+                            new URL(this.tagPushSystemHookEvent.getRepository().getGit_http_url()).getPath();
+                    if (StringUtils.isNotBlank(path)) {
+                        EventProject project = new EventProject();
+                        project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
+                        this.tagPushSystemHookEvent.setProject(project);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                    }
+                } catch (MalformedURLException ignored) {
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                }
             }
         }
     }
 
     public void execute() {
-        if (pushHook.getRepository() != null && pushHook.getRepository().getUrl() == null) {
-            LOGGER.log(Level.WARNING, "No repository url found.");
-            return;
-        }
+        if (pushEvent != null) {
+            if (pushEvent.getRepository() != null && pushEvent.getRepository().getUrl() == null) {
+                LOGGER.log(Level.WARNING, "No repository url found.");
+                return;
+            }
 
-        if (project instanceof Job<?, ?>) {
-            ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
-                @Override
-                protected void performOnPost(GitLabPushTrigger trigger) {
-                    trigger.onPost(pushHook);
-                }
-            });
-            throw HttpResponses.ok();
+            if (project instanceof Job<?, ?>) {
+                ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
+                    @Override
+                    protected void performOnPost(GitLabPushTrigger trigger) {
+                        trigger.onPost(pushEvent);
+                    }
+                });
+                return;
+            }
+        }
+        if (tagPushEvent != null) {
+            if (tagPushEvent.getRepository() != null
+                    && tagPushEvent.getRepository().getUrl() == null) {
+                LOGGER.log(Level.WARNING, "No repository url found.");
+                return;
+            }
+
+            if (project instanceof Job<?, ?>) {
+                ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
+                    @Override
+                    protected void performOnPost(GitLabPushTrigger trigger) {
+                        trigger.onPost(tagPushEvent);
+                    }
+                });
+                return;
+            }
+        }
+        if (pushSystemHookEvent != null) {
+            if (pushSystemHookEvent.getRepository() != null
+                    && pushSystemHookEvent.getRepository().getUrl() == null) {
+                LOGGER.log(Level.WARNING, "No repository url found.");
+                return;
+            }
+
+            if (project instanceof Job<?, ?>) {
+                ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
+                    @Override
+                    protected void performOnPost(GitLabPushTrigger trigger) {
+                        trigger.onPost(pushSystemHookEvent);
+                    }
+                });
+                return;
+            }
+        }
+        if (tagPushSystemHookEvent != null) {
+            if (tagPushSystemHookEvent.getRepository() != null
+                    && tagPushSystemHookEvent.getRepository().getUrl() == null) {
+                LOGGER.log(Level.WARNING, "No repository url found.");
+                return;
+            }
+
+            if (project instanceof Job<?, ?>) {
+                ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
+                    @Override
+                    protected void performOnPost(GitLabPushTrigger trigger) {
+                        trigger.onPost(tagPushSystemHookEvent);
+                    }
+                });
+                return;
+            }
         }
         if (project instanceof SCMSourceOwner) {
             ACL.impersonate(ACL.SYSTEM, new SCMSourceOwnerNotifier());
-            throw HttpResponses.ok();
+            return;
         }
         throw HttpResponses.errorWithoutStack(409, "Push Hook is not supported for this project");
     }
