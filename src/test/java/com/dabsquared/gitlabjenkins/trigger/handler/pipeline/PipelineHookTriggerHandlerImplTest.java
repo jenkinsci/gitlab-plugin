@@ -92,7 +92,6 @@ public class PipelineHookTriggerHandlerImplTest {
         pipelineEvent.setUser(user);
         pipelineEvent.setObjectAttributes(objectAttributes);
         pipelineEvent.setProject(project);
-        pipelineEvent.setRepository(repository);
         git.close();
     }
 
