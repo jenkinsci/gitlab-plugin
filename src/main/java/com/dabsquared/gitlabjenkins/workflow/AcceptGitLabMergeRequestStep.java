@@ -94,7 +94,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause != null) {
-                MergeRequest mergeRequest = getMergeRequest(run, getClient(run));
+                MergeRequest mergeRequest = getMergeRequest(run);
                 if (mergeRequest != null) {
                     GitLabApi client = getClient(run);
                     if (client == null) {
@@ -125,33 +125,9 @@ public class AcceptGitLabMergeRequestStep extends Step {
             return null;
         }
 
-        private MergeRequest getMergeRequest(Run<?, ?> run, GitLabApi gitlabApi) throws GitLabApiException {
+        private MergeRequest getMergeRequest(Run<?, ?> run) throws GitLabApiException {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
-            if (cause == null) {
-                throw new GitLabApiException("No GitLabWebHookCause found");
-            }
-            String mergeRequestTitle = cause.getData().getMergeRequestTitle();
-            String mergeRequestDescription = cause.getData().getMergeRequestDescription();
-            String sourceBranch = cause.getData().getSourceBranch();
-            String targetBranch = cause.getData().getTargetBranch();
-            Long sourceProjectId = cause.getData().getSourceProjectId();
-            Long targetProjectId = cause.getData().getTargetProjectId();
-
-            MergeRequest mergeRequest = getClient(run)
-                    .getMergeRequestApi()
-                    .createMergeRequest(
-                            sourceProjectId,
-                            sourceBranch,
-                            targetBranch,
-                            mergeRequestTitle,
-                            mergeRequestDescription,
-                            null,
-                            targetProjectId,
-                            null,
-                            null,
-                            false,
-                            null);
-            return mergeRequest;
+            return cause == null ? null : cause.getData().getMergeRequest(run);
         }
 
         private String getCommitMessage(MergeRequest mergeRequest) {
