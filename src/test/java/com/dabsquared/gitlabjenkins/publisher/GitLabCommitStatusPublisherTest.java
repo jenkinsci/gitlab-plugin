@@ -316,7 +316,8 @@ public class GitLabCommitStatusPublisherTest {
                 .withHeader("Content-Length", "113")
                 .withHeader("Content-Type", "application/x-www-form-urlencoded")
                 .withBody("type " + ":" + " STRING")
-                .withBody("c3RhdGU9c3VjY2VzcyZuYW1lPWplbmtpbnMmdGFyZ2V0X3VybD1odHRwJTNBJTJGJTJGbG9jYWxob3N0JTNBNTc3NjElMkZqZW5raW5zJTJGJTJGYnVpbGQlMkYxMjNkaXNwbGF5JTJGcmVkaXJlY3Q=")//type string
+                .withBody(
+                        "c3RhdGU9c3VjY2VzcyZuYW1lPWplbmtpbnMmdGFyZ2V0X3VybD1odHRwJTNBJTJGJTJGbG9jYWxob3N0JTNBNTc3NjElMkZqZW5raW5zJTJGJTJGYnVpbGQlMkYxMjNkaXNwbGF5JTJGcmVkaXJlY3Q=") // type string
                 .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url="
                         + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8"))
                 .withBody("Content-type " + ":" + " application/x-www-form-urlencoded");

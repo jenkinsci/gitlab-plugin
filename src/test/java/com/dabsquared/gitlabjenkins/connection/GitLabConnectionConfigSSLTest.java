@@ -171,6 +171,10 @@ public class GitLabConnectionConfigSSLTest {
 
         FormValidation formValidation =
                 descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "V4", false, 10, 60);
-        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")));
+        assertThat(
+                formValidation.getMessage(),
+                containsString(
+                        Messages.connection_error(
+                                "javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")));
     }
 }
