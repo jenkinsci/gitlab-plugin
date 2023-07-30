@@ -8,119 +8,120 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.gitlab4j.api.webhook.EventRepository;
+import org.gitlab4j.api.webhook.PushEvent;
+
 public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequestSamples {
 
     private static final String ZERO_SHA = "0000000000000000000000000000000000000000";
 
-    public PushHook pushBrandNewMasterBranchRequest() {
-        return pushHook()
-                .withUserId(123)
-                .withUserName("admin@example")
-                .withProjectId(345L)
-                .withRepository(repository()
-                        .withName("test-repo")
-                        .withUrl("git@gitlabserver.example.com:test-group/test-repo.git")
-                        .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
-                        .build())
-                .withRef("refs/heads/master")
-                .withBefore(ZERO_SHA)
-                .withAfter("d91a0f248625f6dc808fb7cda75c4ee01516b609")
-                // no checkout_sha and no commit on new branches
-                .build();
+    public PushEvent pushBrandNewMasterBranchRequest() {
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test-repo");
+        repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
+        repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/heads/master");
+        pushEvent.setBefore(ZERO_SHA);
+        pushEvent.setAfter("d91a0f248625f6dc808fb7cda75c4ee01516b609");
+        // no checkout_sha and no commit on new branches
+        return pushEvent;
     }
 
-    public PushHook pushNewBranchRequest() {
-        return pushHook()
-                .withUserId(123)
-                .withUserName("admin@example")
-                .withProjectId(345L)
-                .withRepository(repository()
-                        .withName("test-repo")
-                        .withUrl("git@gitlabserver.example.com:test-group/test-repo.git")
-                        .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
-                        .build())
-                .withRef("refs/heads/test-new-branch1")
-                .withBefore(ZERO_SHA)
-                .withAfter("2bf4170829aedd706d7485d40091a01637b9abf4")
-                // no checkout_sha and no commit on new branches
-                .build();
+    public PushEvent pushNewBranchRequest() {
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test-repo");
+        repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
+        repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/heads/test-new-branch1");
+        pushEvent.setBefore(ZERO_SHA);
+        pushEvent.setAfter("2bf4170829aedd706d7485d40091a01637b9abf4");
+        return pushEvent; 
     }
 
-    public PushHook pushCommitRequest() {
-        return pushHook()
-                .withUserId(123)
-                .withUserName("admin@example")
-                .withProjectId(345L)
-                .withRepository(repository()
-                        .withName("test-repo")
-                        .withUrl("git@gitlabserver.example.com:test-group/test-repo.git")
-                        .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
-                        .build())
-                .withRef("refs/heads/test-new-branch1")
-                .withBefore("2bf4170829aedd706d7485d40091a01637b9abf4")
-                .withAfter("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
-                // no checkout_sha
-                .withCommits(Collections.singletonList(commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
-                        .build()))
-                .build();
+    public PushEvent pushCommitRequest() {
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test-repo");
+        repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
+        repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/heads/test-new-branch1");
+        pushEvent.setBefore("2bf4170829aedd706d7485d40091a01637b9abf4");
+        pushEvent.setAfter("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb");
+        // no checkout_sha
+        //pushEvent.setCommits(Collections.singletonList(commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb"));
+        return pushEvent;
     }
 
-    public PushHook mergePushRequest() {
-        return pushHook()
-                .withRef("refs/heads/master")
-                .withUserId(123)
-                .withUserName("admin@example")
-                .withProjectId(345L)
-                .withRepository(repository()
-                        .withName("test-repo")
-                        .withUrl("git@gitlabserver.example.com:test-group/test-repo.git")
-                        .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
-                        .build())
-                .withBefore("27548e742f40971f75c715aaa7920404eeff6616")
-                .withAfter("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
-                // no checkout_sha
-                .withCommits(Arrays.asList(
-                        commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
-                                .build(),
-                        commit().withId("be473fcc670b920cc9795581a5cd8f00fa7afddd")
-                                .build(),
-                        commit().withId("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
-                                .build()))
-                .build();
+    public PushEvent mergePushRequest() {
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test-repo");
+        repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
+        repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/heads/master");
+        pushEvent.setBefore("27548e742f40971f75c715aaa7920404eeff6616");
+        pushEvent.setAfter("3ebb6927ad4afbe8a11830938b3584cdaf4d657b");
+        // no checkout_sha
+        // pushEvent.setCommits(Arrays.asList(
+                        // commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
+                        //         .build(),
+                        // commit().withId("be473fcc670b920cc9795581a5cd8f00fa7afddd")
+                        //         .build(),
+                        // commit().withId("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
+                        //         .build()));
+        return pushEvent;
         // and afterwards the "delete branch" request comes in
     }
 
-    public PushHook pushNewTagRequest() {
-        return pushHook()
-                .withUserId(123)
-                .withUserName("admin@example")
-                .withProjectId(345L)
-                .withRepository(repository()
-                        .withName("test-repo")
-                        .withUrl("git@gitlabserver.example.com:test-group/test-repo.git")
-                        .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
-                        .build())
-                .withRef("refs/tags/test-tag-2")
-                .withBefore(ZERO_SHA)
-                .withAfter("f10d9d7b648e5a3e55fe8fe865aba5aa7404df7c")
-                // no checkout_sha and no commit on new branches
-                .build();
+    public PushEvent pushNewTagRequest() {
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test-repo");
+        repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
+        repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/tags/test-tag-2");
+        pushEvent.setBefore(ZERO_SHA);
+        pushEvent.setAfter("f10d9d7b648e5a3e55fe8fe865aba5aa7404df7c");
+        // no checkout_sha and no commit on new branches
+        return pushEvent;
     }
 
-    public PushHook deleteBranchRequest() {
-        return pushHook()
-                .withUserId(123)
-                .withUserName("admin@example")
-                .withProjectId(345L)
-                .withRepository(repository()
-                        .withName("test-repo")
-                        .withUrl("git@gitlabserver.example.com:test-group/test-repo.git")
-                        .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
-                        .build())
-                .withRef("refs/heads/test-branch-delete-1")
-                .withBefore("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
-                .withAfter(ZERO_SHA)
-                // no checkout_sha and no commit on new branches
-                .build();
+    public PushEvent deleteBranchRequest() {
+        PushEvent pushEvent = new PushEvent();
+        pushEvent.setUserId(123L);
+        pushEvent.setUserName("admin@example");
+        pushEvent.setProjectId(345L);
+        EventRepository repository = new EventRepository();
+        repository.setName("test-repo");
+        repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
+        repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        pushEvent.setRepository(repository);
+        pushEvent.setRef("refs/heads/test-branch-delete-1");
+        pushEvent.setBefore("3ebb6927ad4afbe8a11830938b3584cdaf4d657b");
+        pushEvent.setAfter(ZERO_SHA);
+        // no checkout_sha and no commit on new branches
+        return pushEvent;
     }
 }

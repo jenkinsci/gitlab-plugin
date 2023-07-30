@@ -138,19 +138,16 @@ final class TestUtility {
         MergeRequestApi mergeRequestApi = mock(MergeRequestApi.class);
         P spyPublisher = spy(publisher);
         doReturn(mergeRequestApi).when(client).getMergeRequestApi();
-        MergeRequest mergeRequest = client.getMergeRequestApi()
-                .createMergeRequest(
-                        PROJECT_ID,
-                        "sourceBranch",
-                        "targetBranch",
-                        "title",
-                        "",
-                        null,
-                        PROJECT_ID,
-                        null,
-                        null,
-                        false,
-                        null);
+        MergeRequest mergeRequest = new MergeRequest();
+        mergeRequest.setId(MERGE_REQUEST_ID);
+        mergeRequest.setIid(MERGE_REQUEST_IID);
+        mergeRequest.setMergeCommitSha(MERGE_COMMIT_SHA);
+        mergeRequest.setTitle("");
+        mergeRequest.setSourceBranch("");
+        mergeRequest.setTargetBranch("");
+        mergeRequest.setSourceProjectId(PROJECT_ID);
+        mergeRequest.setTargetProjectId(PROJECT_ID);
+        mergeRequest.setDescription("");
         doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
         return spyPublisher;
     }
