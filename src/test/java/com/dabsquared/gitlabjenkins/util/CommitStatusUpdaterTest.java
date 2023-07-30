@@ -10,8 +10,6 @@ import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.EnvVars;
 import hudson.Functions;
@@ -29,6 +27,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.lib.ObjectId;
+import org.gitlab4j.api.CommitsApi;
+import org.gitlab4j.api.Constants.CommitBuildState;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.CommitStatus;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +46,7 @@ import org.mockito.MockitoAnnotations;
  */
 public class CommitStatusUpdaterTest {
 
-    private static final int PROJECT_ID = 1;
+    private static final Long PROJECT_ID = 1L;
     private static final String BUILD_URL = "job/Test-Job";
     private static final String STAGE = "test";
     private static final String REVISION = "1111111";
@@ -59,7 +62,10 @@ public class CommitStatusUpdaterTest {
     GitLabConnectionConfig gitLabConnectionConfig;
 
     @Mock
-    GitLabClient client;
+    GitLabApi gitLabApi;
+
+    @Mock
+    CommitsApi commitsApi;
 
     @Mock
     GitLabWebHookCause gitlabCause;
@@ -109,10 +115,10 @@ public class CommitStatusUpdaterTest {
         mockedGitLabConnectionProperty = Mockito.mockStatic(GitLabConnectionProperty.class);
         mockedGitLabConnectionProperty
                 .when(() -> GitLabConnectionProperty.getClient(any(Run.class)))
-                .thenReturn(client);
+                .thenReturn(gitLabApi);
         when(gitLabConnectionConfig.getClient(any(String.class), any(Item.class), any(String.class)))
-                .thenReturn(client);
-        when(connection.getClient()).thenReturn(client);
+                .thenReturn(gitLabApi);
+        when(connection.getClient()).thenReturn(gitLabApi);
         when(build.getAction(BuildData.class)).thenReturn(action);
         when(action.getLastBuiltRevision()).thenReturn(lastBuiltRevision);
         when(action.getLastBuild(any(ObjectId.class))).thenReturn(lastBuild);
@@ -135,6 +141,7 @@ public class CommitStatusUpdaterTest {
         mockedDisplayURLProvider.when(DisplayURLProvider::get).thenReturn(urlProvider);
         String url = JENKINS_URL + Util.encode(build.getUrl());
         when(urlProvider.getRunURL(any())).thenReturn(url);
+        when(gitLabApi.getCommitsApi()).thenReturn(commitsApi);
 
         causeData = CauseDataBuilder.causeData()
                 .withActionType(CauseData.ActionType.NOTE)
@@ -150,8 +157,8 @@ public class CommitStatusUpdaterTest {
                 .withSourceRepoSshUrl("git@gitlab.org:test.git")
                 .withSourceRepoHttpUrl("https://gitlab.org/test.git")
                 .withMergeRequestTitle("Test")
-                .withMergeRequestId(1)
-                .withMergeRequestIid(1)
+                .withMergeRequestId(1L)
+                .withMergeRequestIid(1L)
                 .withTargetBranch("master")
                 .withTargetRepoName("test")
                 .withTargetNamespace("test-namespace")
@@ -174,71 +181,65 @@ public class CommitStatusUpdaterTest {
     }
 
     @Test
-    public void buildStateUpdateTest() {
-        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
+    public void buildStateUpdateTest() throws GitLabApiException {
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, CommitBuildState.SUCCESS, STAGE);
 
-        verify(client)
-                .changeBuildStatus(
-                        Integer.toString(PROJECT_ID),
-                        REVISION,
-                        BuildState.success,
-                        null,
-                        STAGE,
-                        DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+        CommitStatus status = new CommitStatus();
+        status.withRef(null)
+                .withName(STAGE)
+                .withCoverage((Float.valueOf(null)))
+                .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
+
+        verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
     }
 
     @Test
-    public void buildStateUpdateTestSpecificConnection() {
-        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, null, connection);
+    public void buildStateUpdateTestSpecificConnection() throws GitLabApiException {
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, CommitBuildState.SUCCESS, STAGE, null, connection);
 
-        verify(client)
-                .changeBuildStatus(
-                        Integer.toString(PROJECT_ID),
-                        REVISION,
-                        BuildState.success,
-                        null,
-                        STAGE,
-                        DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+        CommitStatus status = new CommitStatus();
+        status.withRef(null)
+                .withName(STAGE)
+                .withCoverage((Float.valueOf(null)))
+                .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
+
+        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
     }
 
     @Test
-    public void buildStateUpdateTestSpecificBuild() {
+    public void buildStateUpdateTestSpecificBuild() throws GitLabApiException {
         ArrayList builds = new ArrayList();
-        builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
-        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, null);
+        builds.add(new GitLabBranchBuild(Long.toString(PROJECT_ID), REVISION));
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, CommitBuildState.SUCCESS, STAGE, builds, null);
 
-        verify(client)
-                .changeBuildStatus(
-                        Integer.toString(PROJECT_ID),
-                        REVISION,
-                        BuildState.success,
-                        null,
-                        STAGE,
-                        DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+        CommitStatus status = new CommitStatus();
+        status.withRef(null)
+                .withName(STAGE)
+                .withCoverage((Float.valueOf(null)))
+                .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
+
+        when(gitLabApi.getCommitsApi()).thenReturn(commitsApi);
+        verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
     }
 
     @Test
-    public void buildStateUpdateTestSpecificConnectionSpecificBuild() {
+    public void buildStateUpdateTestSpecificConnectionSpecificBuild() throws GitLabApiException {
         ArrayList builds = new ArrayList();
-        builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
-        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, connection);
+        builds.add(new GitLabBranchBuild(Long.toString(PROJECT_ID), REVISION));
+        CommitStatusUpdater.updateCommitStatus(
+                build, taskListener, CommitBuildState.SUCCESS, STAGE, builds, connection);
 
-        verify(client)
-                .changeBuildStatus(
-                        Integer.toString(PROJECT_ID),
-                        REVISION,
-                        BuildState.success,
-                        null,
-                        STAGE,
-                        DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+        CommitStatus status = new CommitStatus();
+        status.withRef(null)
+                .withName(STAGE)
+                .withCoverage(Float.valueOf(null))
+                .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
+
+        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
     }
 
     @Test
-    public void testTagEvent() {
+    public void testTagEvent() throws GitLabApiException {
         causeData = CauseDataBuilder.causeData()
                 .withActionType(CauseData.ActionType.TAG_PUSH)
                 .withSourceProjectId(PROJECT_ID)
@@ -253,8 +254,8 @@ public class CommitStatusUpdaterTest {
                 .withSourceRepoSshUrl("git@gitlab.org:test.git")
                 .withSourceRepoHttpUrl("https://gitlab.org/test.git")
                 .withMergeRequestTitle("Test")
-                .withMergeRequestId(1)
-                .withMergeRequestIid(1)
+                .withMergeRequestId(1L)
+                .withMergeRequestIid(1L)
                 .withTargetBranch("master")
                 .withTargetRepoName("test")
                 .withTargetNamespace("test-namespace")
@@ -268,16 +269,14 @@ public class CommitStatusUpdaterTest {
         when(build.getCause(GitLabWebHookCause.class)).thenReturn(gitlabCause);
         when(gitlabCause.getData()).thenReturn(causeData);
 
-        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, CommitBuildState.SUCCESS, STAGE);
 
-        verify(client)
-                .changeBuildStatus(
-                        Integer.toString(PROJECT_ID),
-                        REVISION,
-                        BuildState.success,
-                        "3.0.0",
-                        STAGE,
-                        DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+        CommitStatus status = new CommitStatus();
+        status.withRef("3.0.0")
+                .withName(STAGE)
+                .withCoverage((Float.valueOf(null)))
+                .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
+
+        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
     }
 }

@@ -3,8 +3,6 @@ package com.dabsquared.gitlabjenkins.workflow;
 import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
-import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -13,9 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -95,16 +94,21 @@ public class AcceptGitLabMergeRequestStep extends Step {
         protected Void run() throws Exception {
             GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
             if (cause != null) {
-                MergeRequest mergeRequest = cause.getData().getMergeRequest();
+                MergeRequest mergeRequest = getMergeRequest(run, getClient(run));
                 if (mergeRequest != null) {
-                    GitLabClient client = getClient(run);
+                    GitLabApi client = getClient(run);
                     if (client == null) {
                         println("No GitLab connection configured");
                     } else {
                         try {
-                            client.acceptMergeRequest(
-                                    mergeRequest, getCommitMessage(mergeRequest), step.removeSourceBranch);
-                        } catch (WebApplicationException | ProcessingException e) {
+                            client.getMergeRequestApi()
+                                    .acceptMergeRequest(
+                                            mergeRequest.getProjectId(),
+                                            mergeRequest.getIid(),
+                                            getCommitMessage(mergeRequest),
+                                            true,
+                                            true);
+                        } catch (GitLabApiException e) {
                             printf(
                                     "Failed to accept merge request for project '%s': %s%n",
                                     mergeRequest.getProjectId(), e.getMessage());
@@ -119,6 +123,35 @@ public class AcceptGitLabMergeRequestStep extends Step {
                 }
             }
             return null;
+        }
+
+        private MergeRequest getMergeRequest(Run<?, ?> run, GitLabApi gitlabApi) throws GitLabApiException {
+            GitLabWebHookCause cause = run.getCause(GitLabWebHookCause.class);
+            if (cause == null) {
+                throw new GitLabApiException("No GitLabWebHookCause found");
+            }
+            String mergeRequestTitle = cause.getData().getMergeRequestTitle();
+            String mergeRequestDescription = cause.getData().getMergeRequestDescription();
+            String sourceBranch = cause.getData().getSourceBranch();
+            String targetBranch = cause.getData().getTargetBranch();
+            Long sourceProjectId = cause.getData().getSourceProjectId();
+            Long targetProjectId = cause.getData().getTargetProjectId();
+
+            MergeRequest mergeRequest = getClient(run)
+                    .getMergeRequestApi()
+                    .createMergeRequest(
+                            sourceProjectId,
+                            sourceBranch,
+                            targetBranch,
+                            mergeRequestTitle,
+                            mergeRequestDescription,
+                            null,
+                            targetProjectId,
+                            null,
+                            null,
+                            false,
+                            null);
+            return mergeRequest;
         }
 
         private String getCommitMessage(MergeRequest mergeRequest) {

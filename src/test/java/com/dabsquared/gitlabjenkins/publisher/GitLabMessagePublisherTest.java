@@ -34,6 +34,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
+import org.gitlab4j.api.GitLabApiException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -111,7 +112,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -128,7 +129,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -145,7 +146,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -169,7 +170,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -186,7 +187,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -203,7 +204,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -219,7 +220,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 true,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -235,7 +236,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -251,7 +252,7 @@ public class GitLabMessagePublisherTest {
                 true,
                 false,
                 false,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     @Test
@@ -267,7 +268,7 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 true,
-                prepareSendMessageWithSuccessResponse("v4", MERGE_REQUEST_IID, defaultNote));
+                prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
     }
 
     private void performAndVerify(
@@ -284,19 +285,24 @@ public class GitLabMessagePublisherTest {
         String failureNoteText = replaceFailureNote ? note : null;
         String abortNoteText = replaceAbortNote ? note : null;
         String unstableNoteText = replaceUnstableNote ? note : null;
-        GitLabMessagePublisher publisher = preparePublisher(
-                new GitLabMessagePublisher(
-                        onlyForFailure,
-                        replaceSuccessNote,
-                        replaceFailureNote,
-                        replaceAbortNote,
-                        replaceUnstableNote,
-                        successNoteText,
-                        failureNoteText,
-                        abortNoteText,
-                        unstableNoteText),
-                build);
-        publisher.perform(build, null, listener);
+        GitLabMessagePublisher publisher;
+        try {
+            publisher = preparePublisher(
+                    new GitLabMessagePublisher(
+                            onlyForFailure,
+                            replaceSuccessNote,
+                            replaceFailureNote,
+                            replaceAbortNote,
+                            replaceUnstableNote,
+                            successNoteText,
+                            failureNoteText,
+                            abortNoteText,
+                            unstableNoteText),
+                    build);
+            publisher.perform(build, null, listener);
+        } catch (GitLabApiException e) {
+            e.printStackTrace();
+        }
 
         if (requests.length > 0) {
             mockServerClient.verify(requests);
@@ -305,14 +311,14 @@ public class GitLabMessagePublisherTest {
         }
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(String apiLevel, int mergeRequestId, String body)
+    private HttpRequest prepareSendMessageWithSuccessResponse(String apiLevel, Long mergeRequestId, String body)
             throws UnsupportedEncodingException {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, body);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String body)
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, Long mergeRequestId, String body)
             throws UnsupportedEncodingException {
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId

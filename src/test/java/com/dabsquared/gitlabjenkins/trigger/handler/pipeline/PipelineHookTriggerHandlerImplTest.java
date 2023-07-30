@@ -80,7 +80,7 @@ public class PipelineHookTriggerHandlerImplTest {
                 .withProject(project()
                         .withNamespace("test-namespace")
                         .withWebUrl("https://gitlab.org/test")
-                        .withId(1)
+                        .withId(1L)
                         .build())
                 .withObjectAttributes(pipelineEventObjectAttributes()
                         .withId(1)

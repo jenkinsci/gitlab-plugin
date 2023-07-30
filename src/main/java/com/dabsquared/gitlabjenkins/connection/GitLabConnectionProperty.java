@@ -4,7 +4,6 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Item;
@@ -15,11 +14,11 @@ import hudson.model.Run;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
@@ -66,7 +65,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         this.useAlternativeCredential = useAlternativeCredential;
     }
 
-    public GitLabClient getClient() {
+    public GitLabApi getClient() {
         if (StringUtils.isNotEmpty(gitLabConnection)) {
             GitLabConnectionConfig connectionConfig =
                     (GitLabConnectionConfig) Jenkins.getActiveInstance().getDescriptor(GitLabConnectionConfig.class);
@@ -82,7 +81,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         return null;
     }
 
-    public static GitLabClient getClient(@NonNull Run<?, ?> build) {
+    public static GitLabApi getClient(@NonNull Run<?, ?> build) {
         Job<?, ?> job = build.getParent();
         if (job != null) {
             final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
@@ -172,13 +171,11 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
                                 gitLabConnectionTested.getConnectionTimeout(),
                                 gitLabConnectionTested.getReadTimeout())
                         .getClient(item, jobCredentialId)
+                        .getUserApi()
                         .getCurrentUser();
                 return FormValidation.ok(Messages.connection_success());
-            } catch (WebApplicationException e) {
+            } catch (GitLabApiException e) {
                 return FormValidation.error(Messages.connection_error(e.getMessage()));
-            } catch (ProcessingException e) {
-                return FormValidation.error(
-                        Messages.connection_error(e.getCause().getMessage()));
             }
         }
     }

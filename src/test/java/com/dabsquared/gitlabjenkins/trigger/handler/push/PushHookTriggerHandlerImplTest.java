@@ -109,7 +109,7 @@ public class PushHookTriggerHandlerImplTest {
                 project,
                 pushHook()
                         .withBefore("0000000000000000000000000000000000000000")
-                        .withProjectId(1)
+                        .withProjectId(1L)
                         .withUserName("test")
                         .withObjectKind("tag_push")
                         .withRepository(repository()
@@ -164,7 +164,7 @@ public class PushHookTriggerHandlerImplTest {
         project.setQuietPeriod(0);
         PushHookBuilder pushHookBuilder = pushHook()
                 .withBefore("0000000000000000000000000000000000000000")
-                .withProjectId(1)
+                .withProjectId(1L)
                 .withUserName("test")
                 .withObjectKind("push")
                 .withRepository(repository()
