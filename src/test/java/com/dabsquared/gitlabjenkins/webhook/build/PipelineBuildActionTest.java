@@ -5,7 +5,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.ibm.icu.text.SimpleDateFormat;
 
 import hudson.model.FreeStyleProject;

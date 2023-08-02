@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_7_10_5_489b413;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_7_5_1_36679b5;
@@ -21,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.gitlab4j.api.webhook.PushEvent;
-import org.jinterop.winreg.IJIWinReg.enumValue;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
