@@ -1,13 +1,5 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
-
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.PushEvent;
 
