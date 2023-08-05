@@ -213,7 +213,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                                 10));
             }
 
-            String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
+            String defaultConnectionName = null;
+            if (gitLabConfig != null) {
+                defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
+            }
             if (defaultConnectionName != null) {
                 for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
                     GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
@@ -226,7 +229,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                     }
                 }
             }
-            gitLabConfig.save();
+            if (gitLabConfig != null) {
+                gitLabConfig.save();
+            }
             oldConfig.jobsMigrated = true;
             oldConfig.save();
         }

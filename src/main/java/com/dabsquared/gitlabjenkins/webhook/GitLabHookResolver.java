@@ -42,21 +42,24 @@ public class GitLabHookResolver implements WebHookListener, SystemHookListener {
     @Override
     public void onPushEvent(PushSystemHookEvent pushSystemHookEvent) {
         LOGGER.log(Level.FINE, "PushSystemHook:{0}", pushSystemHookEvent.toString());
-        PushBuildAction pushBuildAction = new PushBuildAction(project, pushSystemHookEvent, request.getHeader("X-GitLab-Token"));
+        PushBuildAction pushBuildAction =
+                new PushBuildAction(project, pushSystemHookEvent, request.getHeader("X-GitLab-Token"));
         pushBuildAction.execute(response);
     }
 
     @Override
     public void onMergeRequestEvent(MergeRequestEvent mergeRequestEvent) {
         LOGGER.log(Level.FINE, "MergeRequest:{0}", mergeRequestEvent.toString());
-        MergeRequestBuildAction mergeRequestBuildAction = new MergeRequestBuildAction(project, mergeRequestEvent, request.getHeader("X-GitLab-Token"));
+        MergeRequestBuildAction mergeRequestBuildAction =
+                new MergeRequestBuildAction(project, mergeRequestEvent, request.getHeader("X-GitLab-Token"));
         mergeRequestBuildAction.execute(response);
     }
 
     @Override
     public void onMergeRequestEvent(MergeRequestSystemHookEvent mergeRequestSystemHookEvent) {
         LOGGER.log(Level.FINE, "MergeRequest:{0}", mergeRequestSystemHookEvent.toString());
-        MergeRequestBuildAction mergeRequestBuildAction = new MergeRequestBuildAction(project, mergeRequestSystemHookEvent, request.getHeader("X-GitLab-Token"));
+        MergeRequestBuildAction mergeRequestBuildAction =
+                new MergeRequestBuildAction(project, mergeRequestSystemHookEvent, request.getHeader("X-GitLab-Token"));
         mergeRequestBuildAction.execute(response);
     }
 
@@ -70,21 +73,24 @@ public class GitLabHookResolver implements WebHookListener, SystemHookListener {
     @Override
     public void onTagPushEvent(TagPushSystemHookEvent tagPushSystemHookEvent) {
         LOGGER.log(Level.FINE, "TagPush:{0}", tagPushSystemHookEvent.toString());
-        PushBuildAction pushBuildAction = new PushBuildAction(project, tagPushSystemHookEvent, request.getHeader("X-GitLab-Token"));
+        PushBuildAction pushBuildAction =
+                new PushBuildAction(project, tagPushSystemHookEvent, request.getHeader("X-GitLab-Token"));
         pushBuildAction.execute(response);
     }
 
     @Override
     public void onTagPushEvent(TagPushEvent tagPushEvent) {
         LOGGER.log(Level.FINE, "TagPush:{0}", tagPushEvent.toString());
-        PushBuildAction pushBuildAction = new PushBuildAction(project, tagPushEvent, request.getHeader("X-GitLab-Token"));
+        PushBuildAction pushBuildAction =
+                new PushBuildAction(project, tagPushEvent, request.getHeader("X-GitLab-Token"));
         pushBuildAction.execute(response);
     }
 
     @Override
     public void onPipelineEvent(PipelineEvent pipelineEvent) {
         LOGGER.log(Level.FINE, "Pipeline:{0}", pipelineEvent.toString());
-        PipelineBuildAction pipelineBuildAction = new PipelineBuildAction(project, pipelineEvent, request.getHeader("X-GitLab-Token"));
+        PipelineBuildAction pipelineBuildAction =
+                new PipelineBuildAction(project, pipelineEvent, request.getHeader("X-GitLab-Token"));
         pipelineBuildAction.execute(response);
     }
 }

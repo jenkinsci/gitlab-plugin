@@ -56,7 +56,7 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         pushEvent.setRef("refs/heads/test-new-branch1");
         pushEvent.setBefore(COMMIT_7A);
         pushEvent.setAfter(COMMIT_21);
-        //pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_21).build()));
+        // pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_21).build()));
         return pushEvent;
     }
 
@@ -74,10 +74,10 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         pushEvent.setBefore("ca84f96a846b0e241808ea7b75dfa3bf4cd3b98b");
         pushEvent.setAfter(COMMIT_9d);
         // pushEvent.setCommits(Arrays.asList(
-                        // commit().withId(COMMIT_21).build(),
-                        // commit().withId("c04c8822d1df397fb7e6dd3dd133018a0af567a8")
-                        //         .build(),
-                        // commit().withId(COMMIT_9d).build()));
+        // commit().withId(COMMIT_21).build(),
+        // commit().withId("c04c8822d1df397fb7e6dd3dd133018a0af567a8")
+        //         .build(),
+        // commit().withId(COMMIT_9d).build()));
         return pushEvent;
     }
 
@@ -94,7 +94,7 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         pushEvent.setRef("refs/tags/test-tag-1");
         pushEvent.setBefore(ZERO_SHA);
         pushEvent.setAfter(COMMIT_21);
-        //pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_21).build()));
+        // pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_21).build()));
         return pushEvent;
     }
 

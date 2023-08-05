@@ -1,8 +1,9 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+
 import hudson.markup.EscapedMarkupFormatter;
 import hudson.model.Run;
-
 import java.util.*;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -14,7 +15,6 @@ import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.MergeRequest;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
-import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
 
 /**
  * @author Robin Müller

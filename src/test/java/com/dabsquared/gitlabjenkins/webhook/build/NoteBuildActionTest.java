@@ -15,16 +15,11 @@ import hudson.plugins.git.GitSCM;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutionException;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.gitlab4j.api.models.AccessLevel;
 import org.gitlab4j.api.models.Assignee;
 import org.gitlab4j.api.models.Author;
-import org.gitlab4j.api.models.MergeRequest;
-import org.gitlab4j.api.models.Milestone;
 import org.gitlab4j.api.models.User;
-import org.gitlab4j.api.models.Visibility;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventMergeRequest;
 import org.gitlab4j.api.webhook.EventProject;
@@ -43,7 +38,6 @@ import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.expression.spel.ast.Assign;
 
 /**
  * @author Nikolay Ustinov
@@ -142,7 +136,8 @@ public class NoteBuildActionTest {
         mergeRequest.setMergeStatus("cannot_be_merged");
         mergeRequest.setTargetProjectId(5L);
         mergeRequest.setIid(1L);
-        mergeRequest.setDescription("Et voluptas corrupti assumenda temporibus. Architecto cum animi eveniet amet asperiores. Vitae numquam voluptate est natus sit et ad id.");
+        mergeRequest.setDescription(
+                "Et voluptas corrupti assumenda temporibus. Architecto cum animi eveniet amet asperiores. Vitae numquam voluptate est natus sit et ad id.");
         mergeRequest.setPosition(0);
         mergeRequest.setLockedAt(null);
         EventProject sourceortargetproject = new EventProject();

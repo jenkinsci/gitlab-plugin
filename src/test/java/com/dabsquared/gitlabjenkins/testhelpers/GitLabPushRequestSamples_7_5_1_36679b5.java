@@ -37,7 +37,7 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
         pushEvent.setRef("refs/heads/test-new-branch1");
         pushEvent.setBefore(ZERO_SHA);
         pushEvent.setAfter("2bf4170829aedd706d7485d40091a01637b9abf4");
-        return pushEvent; 
+        return pushEvent;
     }
 
     public PushEvent pushCommitRequest() {
@@ -54,7 +54,7 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
         pushEvent.setBefore("2bf4170829aedd706d7485d40091a01637b9abf4");
         pushEvent.setAfter("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb");
         // no checkout_sha
-        //pushEvent.setCommits(Collections.singletonList(commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb"));
+        // pushEvent.setCommits(Collections.singletonList(commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb"));
         return pushEvent;
     }
 
@@ -73,12 +73,12 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
         pushEvent.setAfter("3ebb6927ad4afbe8a11830938b3584cdaf4d657b");
         // no checkout_sha
         // pushEvent.setCommits(Arrays.asList(
-                        // commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
-                        //         .build(),
-                        // commit().withId("be473fcc670b920cc9795581a5cd8f00fa7afddd")
-                        //         .build(),
-                        // commit().withId("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
-                        //         .build()));
+        // commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
+        //         .build(),
+        // commit().withId("be473fcc670b920cc9795581a5cd8f00fa7afddd")
+        //         .build(),
+        // commit().withId("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
+        //         .build()));
         return pushEvent;
         // and afterwards the "delete branch" request comes in
     }

@@ -28,12 +28,10 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import javax.servlet.ServletException;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeCommand.FastForwardMode.Merge;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.gitlab4j.api.models.Assignee;
 import org.gitlab4j.api.models.Author;
 import org.gitlab4j.api.models.User;
-import org.gitlab4j.api.models.Visibility;
 import org.gitlab4j.api.webhook.ChangeContainer;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
@@ -154,7 +152,8 @@ public class MergeRequestBuildActionTest {
         lastCommit.setId("da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
         lastCommit.setMessage("fixed readme");
         lastCommit.setTimestamp(dateFormat.parse("2012-01-03T23:36:29+02:00"));
-        lastCommit.setUrl("http://example.com/awesome_space/awesome_project/commits/da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
+        lastCommit.setUrl(
+                "http://example.com/awesome_space/awesome_project/commits/da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
         Author commitAuthor = new Author();
         commitAuthor.setName("GitLab dev user");
         commitAuthor.setEmail("gitlabdev@dv6700.(none)");
@@ -236,7 +235,10 @@ public class MergeRequestBuildActionTest {
         MergeRequestEvent mergeRequestEvent_alreadyBuiltMR = mergeRequestEvent;
         mergeRequestEvent_alreadyBuiltMR.getObjectAttributes().setAction("reopen");
         MergeRequestEvent mergeRequestEvent_alreadyBuiltMR_initialBuild = mergeRequestEvent;
-        mergeRequestEvent_alreadyBuiltMR_initialBuild.getObjectAttributes().getLastCommit().setId("${commitSha1}");
+        mergeRequestEvent_alreadyBuiltMR_initialBuild
+                .getObjectAttributes()
+                .getLastCommit()
+                .setId("${commitSha1}");
         executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR_initialBuild);
         jenkins.waitUntilNoActivity();
         executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR);
@@ -275,6 +277,7 @@ public class MergeRequestBuildActionTest {
         executeMergeRequestAction(testProject, mergeRequestEvent_merged);
         assertTrue(wouldFire);
     }
+
     @Test
     public void build_alreadyBuiltMR_differentTargetBranch()
             throws IOException, ExecutionException, InterruptedException {
@@ -311,9 +314,16 @@ public class MergeRequestBuildActionTest {
         future.get();
 
         MergeRequestEvent mergeRequestEvent_alreadyBuiltMR_differentTargetBranch = mergeRequestEvent;
-        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch.getObjectAttributes().setTargetBranch("develop");
-        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch.getObjectAttributes().getLastCommit().setId("${commitSha1}");
-        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch.getObjectAttributes().setAction("update");
+        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch
+                .getObjectAttributes()
+                .setTargetBranch("develop");
+        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch
+                .getObjectAttributes()
+                .getLastCommit()
+                .setId("${commitSha1}");
+        mergeRequestEvent_alreadyBuiltMR_differentTargetBranch
+                .getObjectAttributes()
+                .setAction("update");
         executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR_differentTargetBranch);
 
         assertTrue(wouldFire);

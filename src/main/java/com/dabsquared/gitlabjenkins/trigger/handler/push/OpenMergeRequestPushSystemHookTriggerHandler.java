@@ -61,9 +61,8 @@ class OpenMergeRequestPushSystemHookTriggerHandler implements PushSystemHookTrig
                 Collection<Trigger<?>> triggerList = project.getTriggers().values();
                 for (Trigger<?> t : triggerList) {
                     if (t instanceof GitLabPushTrigger) {
-                        final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
                         Long projectId = event.getProjectId();
-                        if (property != null && property.getClient() != null && projectId != null && trigger != null) {
+                        if (property != null && property.getClient() != null && projectId != null) {
                             GitLabApi client = property.getClient();
                             for (MergeRequest mergeRequest :
                                     client.getMergeRequestApi().getMergeRequests(projectId, MergeRequestState.OPENED)) {

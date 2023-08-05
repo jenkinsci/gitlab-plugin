@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -37,6 +38,9 @@ public class ActionResolverTest {
     @Mock
     private StaplerRequest request;
 
+    @Mock
+    private StaplerResponse response;
+
     @Test
     public void getBranchBuildPageRedirect() throws IOException {
         String projectName = "getBranchBuildPageRedirect";
@@ -45,7 +49,7 @@ public class ActionResolverTest {
         when(request.hasParameter("ref")).thenReturn(true);
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(BranchBuildPageRedirectAction.class));
     }
@@ -57,7 +61,7 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("builds/1234abcd/status.json");
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(StatusJsonAction.class));
     }
@@ -69,7 +73,7 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("builds/1234abcd");
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(CommitBuildPageRedirectAction.class));
     }
@@ -81,7 +85,7 @@ public class ActionResolverTest {
         when(request.getRestOfPath()).thenReturn("commits/7890efab");
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(CommitBuildPageRedirectAction.class));
     }
@@ -94,7 +98,7 @@ public class ActionResolverTest {
         when(request.hasParameter("ref")).thenReturn(true);
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(BranchStatusPngAction.class));
     }
@@ -107,7 +111,7 @@ public class ActionResolverTest {
         when(request.hasParameter("ref")).thenReturn(false);
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(CommitStatusPngAction.class));
     }
@@ -122,7 +126,7 @@ public class ActionResolverTest {
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
     }
@@ -137,7 +141,7 @@ public class ActionResolverTest {
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
     }
@@ -152,7 +156,7 @@ public class ActionResolverTest {
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -167,7 +171,7 @@ public class ActionResolverTest {
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -181,7 +185,7 @@ public class ActionResolverTest {
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Note Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postNote.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(NoteBuildAction.class));
     }
@@ -195,7 +199,7 @@ public class ActionResolverTest {
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Push Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -210,7 +214,7 @@ public class ActionResolverTest {
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -224,7 +228,7 @@ public class ActionResolverTest {
         when(request.getHeader("X-Gitlab-Event")).thenReturn(null);
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
@@ -238,7 +242,7 @@ public class ActionResolverTest {
         when(request.getHeader("X-Gitlab-Event")).thenReturn("__Not Supported Header__");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request, response);
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }

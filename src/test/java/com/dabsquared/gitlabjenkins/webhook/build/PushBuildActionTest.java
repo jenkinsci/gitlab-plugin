@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
-
 import hudson.model.FreeStyleProject;
 import java.io.IOException;
 import java.text.ParseException;
@@ -22,18 +21,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
 import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
+import org.gitlab4j.api.models.AccessLevel;
 import org.gitlab4j.api.models.Author;
-import org.gitlab4j.api.models.Visibility;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.PushEvent;
-import org.gitlab4j.api.models.AccessLevel;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -78,7 +75,8 @@ public class PushBuildActionTest {
         pushEvent.setUserName("John Smith");
         pushEvent.setUserUsername("jsmith");
         pushEvent.setUserEmail("john@example.com");
-        pushEvent.setUserAvatar("https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=8://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80");
+        pushEvent.setUserAvatar(
+                "https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=8://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80");
         pushEvent.setProjectId(15L);
         EventProject project = new EventProject();
         project.setName("Diaspora");
@@ -110,7 +108,7 @@ public class PushBuildActionTest {
         commit1.setMessage("Update Catalan translation to e38cb41.");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         Date date1 = dateFormat.parse("2011-12-12T14:27:31+02:00");
-        commit1.setTimestamp(date1); 
+        commit1.setTimestamp(date1);
         commit1.setUrl("http://example.com/mike/diaspora/commit/b6568db1bc1dcd7f8b4d5a946b0b91f9dacd7327");
         Author author = new Author();
         author.setName("Jordi Mallach");
@@ -138,7 +136,7 @@ public class PushBuildActionTest {
         pushEvent.setTotalCommitsCount(4);
         List<EventCommit> commits = Arrays.asList(commit1, commit2);
         pushEvent.setCommits(commits);
-    } 
+    }
 
     @Test
     public void skip_missingRepositoryUrl() throws IOException {
@@ -194,9 +192,8 @@ public class PushBuildActionTest {
         GitSCMSource source = new GitSCMSource("http://test");
         SCMSourceOwner item = mock(SCMSourceOwner.class);
         when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
-        Assert.assertThrows(
-                HttpResponses.HttpResponseException.class,
-                () -> new PushBuildAction(item, pushEvent, null).execute(response));
+        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, pushEvent, null)
+                .execute(response));
         verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
     }
 
@@ -206,9 +203,8 @@ public class PushBuildActionTest {
         source.getTraits().add(new IgnoreOnPushNotificationTrait());
         SCMSourceOwner item = mock(SCMSourceOwner.class);
         when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
-        Assert.assertThrows(
-                HttpResponses.HttpResponseException.class,
-                () -> new PushBuildAction(item, pushEvent, null).execute(response));
+        Assert.assertThrows(HttpResponses.HttpResponseException.class, () -> new PushBuildAction(item, pushEvent, null)
+                .execute(response));
         verify(item, never()).onSCMSourceUpdated(isA(GitSCMSource.class));
     }
 }

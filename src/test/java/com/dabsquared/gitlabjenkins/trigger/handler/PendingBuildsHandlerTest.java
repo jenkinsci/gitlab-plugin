@@ -1,8 +1,5 @@
 package com.dabsquared.gitlabjenkins.trigger.handler;
 
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder.mergeRequestObjectAttributes;
-import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,11 +10,6 @@ import static org.mockito.Mockito.when;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestHookBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.model.FreeStyleProject;
@@ -34,14 +26,12 @@ import org.gitlab4j.api.Constants.MergeRequestState;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.models.Author;
 import org.gitlab4j.api.models.CommitStatus;
-import org.gitlab4j.api.models.Repository;
-import org.gitlab4j.api.models.User;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.MergeRequestEvent;
-import org.gitlab4j.api.webhook.PushEvent;
 import org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes;
+import org.gitlab4j.api.webhook.PushEvent;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.After;
 import org.junit.Before;

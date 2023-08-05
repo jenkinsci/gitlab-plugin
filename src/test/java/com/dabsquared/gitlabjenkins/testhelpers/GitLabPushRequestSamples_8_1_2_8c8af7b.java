@@ -58,7 +58,7 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
         pushEvent.setRef("refs/heads/test-new-branch1");
         pushEvent.setBefore(COMMIT_25);
         pushEvent.setAfter(COMMIT_74);
-        //pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_74).build()));
+        // pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_74).build()));
         return pushEvent;
     }
 
@@ -97,9 +97,9 @@ public class GitLabPushRequestSamples_8_1_2_8c8af7b implements GitLabPushRequest
         pushEvent.setRef("refs/tags/test-tag-2");
         pushEvent.setBefore(ZERO_SHA);
         pushEvent.setAfter(COMMIT_64);
-        //pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_64).build()));
+        // pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_64).build()));
         return pushEvent;
-     }
+    }
 
     public PushEvent deleteBranchRequest() {
         PushEvent pushEvent = new PushEvent();

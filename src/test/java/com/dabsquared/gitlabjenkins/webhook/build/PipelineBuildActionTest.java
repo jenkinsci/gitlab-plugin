@@ -6,20 +6,12 @@ import static org.mockito.Mockito.verify;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.ibm.icu.text.SimpleDateFormat;
-
 import hudson.model.FreeStyleProject;
-import javassist.Loader.Simple;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
-
-import org.apache.commons.io.IOUtils;
-import org.checkerframework.checker.units.qual.m;
-import org.gitlab4j.api.models.AccessLevel;
 import org.gitlab4j.api.models.Author;
 import org.gitlab4j.api.models.User;
-import org.gitlab4j.api.models.Visibility;
 import org.gitlab4j.api.webhook.BuildEvent;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
@@ -88,7 +80,7 @@ public class PipelineBuildActionTest {
         project.setGitSshUrl("git@192.168.64.1:gitlab-org/gitlab-test.git");
         project.setGitHttpUrl("http://192.168.64.1:3005/gitlab-org/gitlab-test.git");
         project.setNamespace("Gitlab Org");
-        //project.setVisibilityLevel(Visibility.PUBLIC); 
+        // project.setVisibilityLevel(Visibility.PUBLIC);
         project.setPathWithNamespace("gitlab-org/gitlab-test");
         project.setDefaultBranch("master");
         EventCommit commit = new EventCommit();
@@ -106,7 +98,7 @@ public class PipelineBuildActionTest {
         buildEvent1.setBuildName("production");
         buildEvent1.setBuildStatus("skipped");
         // createdat is missing in buildevent
-        // buildEvent1.setCreatedAt(dateFormat.parse("2016-08-12 15:26:29 UTC")); 
+        // buildEvent1.setCreatedAt(dateFormat.parse("2016-08-12 15:26:29 UTC"));
         buildEvent1.setBuildStarted_at(null);
         buildEvent1.setBuildFinished_at(null);
         buildEvent1.setUser(user);
@@ -116,7 +108,7 @@ public class PipelineBuildActionTest {
         buildEvent2.setBuildStage("test");
         buildEvent2.setBuildName("test-image");
         buildEvent2.setBuildStatus("success");
-        // buildEvent2.setCreatedAt(dateFormat.parse("2016-08-12 15:23:28 UTC")); 
+        // buildEvent2.setCreatedAt(dateFormat.parse("2016-08-12 15:23:28 UTC"));
         buildEvent2.setBuildStarted_at(dateFormat.parse("2016-08-12 15:26:12 UTC"));
         buildEvent2.setBuildFinished_at(null);
         buildEvent2.setUser(user);
@@ -125,7 +117,7 @@ public class PipelineBuildActionTest {
         buildEvent3.setBuildStage("test");
         buildEvent3.setBuildName("test-build");
         buildEvent3.setBuildStatus("success");
-        // buildEvent3.setCreatedAt("2016-08-12 15:23:28 UTC"); 
+        // buildEvent3.setCreatedAt("2016-08-12 15:23:28 UTC");
         buildEvent3.setBuildStarted_at(dateFormat.parse("2016-08-12 15:26:12 UTC"));
         buildEvent3.setBuildFinished_at(dateFormat.parse("2016-08-12 15:26:29 UTC"));
         buildEvent3.setUser(user);
@@ -134,7 +126,7 @@ public class PipelineBuildActionTest {
         buildEvent4.setBuildStage("build");
         buildEvent4.setBuildName("build-image");
         buildEvent4.setBuildStatus("success");
-        // buildEvent4.setCreatedAt(dateFormat.parse("2016-08-12 15:23:28 UTC")); 
+        // buildEvent4.setCreatedAt(dateFormat.parse("2016-08-12 15:23:28 UTC"));
         buildEvent4.setBuildStarted_at(dateFormat.parse("2016-08-12 15:24:56 UTC"));
         buildEvent4.setBuildFinished_at(dateFormat.parse("2016-08-12 15:25:26 UTC"));
         buildEvent4.setUser(user);
@@ -143,7 +135,7 @@ public class PipelineBuildActionTest {
         buildEvent5.setBuildStage("deploy");
         buildEvent5.setBuildName("staging");
         buildEvent5.setBuildStatus("created");
-        // buildEvent5.setCreatedAt(dateFormat.parse("2016-08-12 15:23:28 UTC")); 
+        // buildEvent5.setCreatedAt(dateFormat.parse("2016-08-12 15:23:28 UTC"));
         buildEvent5.setBuildStarted_at(null);
         buildEvent5.setBuildFinished_at(null);
         buildEvent5.setUser(user);

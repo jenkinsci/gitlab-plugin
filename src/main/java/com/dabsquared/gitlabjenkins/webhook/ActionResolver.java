@@ -37,7 +37,7 @@ public class ActionResolver {
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
-    public void resolve(final String projectName, StaplerRequest request, StaplerResponse response) {
+    public WebHookAction resolve(final String projectName, StaplerRequest request, StaplerResponse response) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
                 .filter(s -> !s.isEmpty())
                 .iterator();
@@ -50,6 +50,7 @@ public class ActionResolver {
             restOfPath.add(restOfPathParts.next());
         }
         resolveAction(project, restOfPath.toString(), request, response);
+        return null;
     }
 
     private void resolveAction(Item project, String restOfPath, StaplerRequest request, StaplerResponse response) {
@@ -85,7 +86,8 @@ public class ActionResolver {
     private void onGet(Job<?, ?> project, String restOfPath, StaplerRequest request, StaplerResponse response) {
         Matcher commitMatcher = COMMIT_STATUS_PATTERN.matcher(restOfPath);
         if (restOfPath.isEmpty() && request.hasParameter("ref")) {
-            BranchBuildPageRedirectAction branchBuildPageRedirectAction = new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
+            BranchBuildPageRedirectAction branchBuildPageRedirectAction =
+                    new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
             branchBuildPageRedirectAction.execute(response);
         } else if (restOfPath.endsWith("status.png")) {
             onGetStatusPng(project, request, response);
@@ -107,10 +109,12 @@ public class ActionResolver {
 
     private void onGetStatusPng(Job<?, ?> project, StaplerRequest request, StaplerResponse response) {
         if (request.hasParameter("ref")) {
-            BranchStatusPngAction branchStatusPngAction = new BranchStatusPngAction(project, request.getParameter("ref"));
+            BranchStatusPngAction branchStatusPngAction =
+                    new BranchStatusPngAction(project, request.getParameter("ref"));
             branchStatusPngAction.execute(response);
         } else {
-            CommitStatusPngAction commitStatusPngAction = new CommitStatusPngAction(project, request.getParameter("sha1"));
+            CommitStatusPngAction commitStatusPngAction =
+                    new CommitStatusPngAction(project, request.getParameter("sha1"));
             commitStatusPngAction.execute(response);
         }
     }

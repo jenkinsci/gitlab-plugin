@@ -23,7 +23,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.gitlab4j.api.Constants.MergeRequestState;
 import org.gitlab4j.api.models.Author;
-import org.gitlab4j.api.models.MergeRequest;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.MergeRequestEvent;
@@ -79,7 +78,8 @@ public class NoteHookTriggerHandlerImplTest {
         noteObjectAttributes.setUrl("https://gitlab.org/test/merge_requests/1#note_1");
         NoteEvent noteEvent = new NoteEvent();
         noteEvent.setObjectAttributes(noteObjectAttributes);
-        org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes mergeRequestObjectAttributes = new org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes();
+        org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes mergeRequestObjectAttributes =
+                new org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes();
         mergeRequestObjectAttributes.setDescription("[ci-skip]");
         MergeRequestEvent mergeRequestEvent = new MergeRequestEvent();
         mergeRequestEvent.setObjectAttributes(mergeRequestObjectAttributes);
@@ -128,9 +128,10 @@ public class NoteHookTriggerHandlerImplTest {
         noteObjectAttributes.setUrl("https://gitlab.org/test/merge_requests/1#note_1");
         NoteEvent noteEvent = new NoteEvent();
         noteEvent.setObjectAttributes(noteObjectAttributes);
-        org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes mergeRequestObjectAttributes = new org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes();
-        mergeRequestObjectAttributes.setTargetBranch("refs/heads/"
-                                        + git.nameRev().add(head).call().get(head));
+        org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes mergeRequestObjectAttributes =
+                new org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes();
+        mergeRequestObjectAttributes.setTargetBranch(
+                "refs/heads/" + git.nameRev().add(head).call().get(head));
         mergeRequestObjectAttributes.setState((MergeRequestState.OPENED).toString());
         mergeRequestObjectAttributes.setIid(1L);
         mergeRequestObjectAttributes.setTitle("test");
