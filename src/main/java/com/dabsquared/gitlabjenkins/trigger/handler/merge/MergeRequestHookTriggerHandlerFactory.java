@@ -36,7 +36,7 @@ public final class MergeRequestHookTriggerHandlerFactory {
                         of(MergeRequestState.ALL),
                         of(ActionType.UPDATED))
                 .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(ActionType.APPROVED))
-                .acceptIf(triggerOnMergeRequest, of(MergeRequestState.OPENED), null)
+                .acceptIf(triggerOnMergeRequest, of(MergeRequestState.ALL), null)
                 .acceptIf(triggerOnAcceptedMergeRequest, null, of(ActionType.MERGED))
                 .acceptIf(triggerOnClosedMergeRequest, null, of(ActionType.CLOSED))
                 .acceptIf(triggerOnClosedMergeRequest, of(MergeRequestState.CLOSED), null);
