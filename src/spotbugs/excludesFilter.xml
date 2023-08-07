@@ -89,19 +89,9 @@
     <Class name="com.dabsquared.gitlabjenkins.trigger.handler.push.OpenMergeRequestPushHookTriggerHandler"/>
   </Match>
   <Match>
-    <Bug pattern="SE_BAD_FIELD"/>
-    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.impl.ResteasyGitLabClientBuilder"/>
-    <Field name="mergeRequestIdProvider"/>
-  </Match>
-  <Match>
     <Bug pattern="UWF_UNWRITTEN_FIELD"/>
     <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnection"/>
     <Field name="apiToken"/>
-  </Match>
-  <Match>
-    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
-    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.impl.ResteasyGitLabClientBuilder$ClientHttpEngineBuilder43"/>
-    <Field name="that"/>
   </Match>
   <Match>
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
