@@ -36,7 +36,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
 
     @Deprecated
     public AcceptGitLabMergeRequestStep(
-            String mergeCommitMessage, boolean useMRDescription, boolean removeSourceBranch) {
+            String mergeCommitMessage, boolean useMRDescription, Boolean removeSourceBranch) {
         this.mergeCommitMessage = StringUtils.isEmpty(mergeCommitMessage) ? null : mergeCommitMessage;
         this.useMRDescription = useMRDescription;
         this.removeSourceBranch = removeSourceBranch;
@@ -73,7 +73,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
     }
 
     @DataBoundSetter
-    public void setRemoveSourceBranch(boolean removeSourceBranch) {
+    public void setRemoveSourceBranch(Boolean removeSourceBranch) {
         this.removeSourceBranch = removeSourceBranch;
     }
 

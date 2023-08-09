@@ -28,11 +28,11 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     public GitLabAcceptMergeRequestPublisher() {}
 
     @DataBoundSetter
-    public void setDeleteSourceBranch(boolean deleteSourceBranch) {
+    public void setDeleteSourceBranch(Boolean deleteSourceBranch) {
         this.deleteSourceBranch = deleteSourceBranch;
     }
 
-    public boolean isDeleteSourceBranch() {
+    public Boolean isDeleteSourceBranch() {
         return deleteSourceBranch;
     }
 
