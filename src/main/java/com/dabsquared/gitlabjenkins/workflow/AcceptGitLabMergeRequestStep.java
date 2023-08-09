@@ -106,8 +106,8 @@ public class AcceptGitLabMergeRequestStep extends Step {
                                             mergeRequest.getProjectId(),
                                             mergeRequest.getIid(),
                                             getCommitMessage(mergeRequest),
-                                            true,
-                                            true);
+                                            Boolean.TRUE,
+                                            Boolean.TRUE);
                         } catch (GitLabApiException e) {
                             printf(
                                     "Failed to accept merge request for project '%s': %s%n",
