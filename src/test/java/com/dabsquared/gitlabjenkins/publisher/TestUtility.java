@@ -15,7 +15,6 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
@@ -44,7 +43,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.junit.MockServerRule;
 
 final class TestUtility {
-    static final String GITLAB_CONNECTION_V3 = "GitLabV3";
     static final String GITLAB_CONNECTION_V4 = "GitLabV4";
     static final String BUILD_URL = "/build/123";
     static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
@@ -70,14 +68,6 @@ final class TestUtility {
                                 Secret.fromString(TestUtility.API_TOKEN)));
             }
         }
-        connectionConfig.addConnection(new GitLabConnection(
-                TestUtility.GITLAB_CONNECTION_V3,
-                "http://localhost:" + mockServer.getPort() + "/gitlab",
-                apiTokenId,
-                new V3GitLabClientBuilder(),
-                false,
-                10,
-                10));
         connectionConfig.addConnection(new GitLabConnection(
                 TestUtility.GITLAB_CONNECTION_V4,
                 "http://localhost:" + mockServer.getPort() + "/gitlab",

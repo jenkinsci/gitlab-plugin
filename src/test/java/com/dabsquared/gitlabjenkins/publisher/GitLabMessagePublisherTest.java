@@ -2,9 +2,7 @@ package com.dabsquared.gitlabjenkins.publisher;
 
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.BUILD_NUMBER;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.BUILD_URL;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.formatNote;
@@ -82,23 +80,6 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void canceled_v3() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.ABORTED);
-        String defaultNote =
-                formatNote(build, ":point_up: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
-
-        performAndVerify(
-                build,
-                defaultNote,
-                false,
-                false,
-                false,
-                false,
-                false,
-                prepareSendMessageWithSuccessResponse("v3", MERGE_REQUEST_ID, defaultNote));
-    }
-
-    @Test
     public void canceled_v4() throws IOException, InterruptedException {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED);
         String defaultNote =
@@ -113,23 +94,6 @@ public class GitLabMessagePublisherTest {
                 false,
                 false,
                 prepareSendMessageWithSuccessResponse("V4", MERGE_REQUEST_IID, defaultNote));
-    }
-
-    @Test
-    public void success_v3() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.SUCCESS);
-        String defaultNote = formatNote(
-                build, ":white_check_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
-
-        performAndVerify(
-                build,
-                defaultNote,
-                false,
-                false,
-                false,
-                false,
-                false,
-                prepareSendMessageWithSuccessResponse("V3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test
@@ -154,23 +118,6 @@ public class GitLabMessagePublisherTest {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
 
         performAndVerify(build, "test", true, false, false, false, false);
-    }
-
-    @Test
-    public void failed_v3() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.FAILURE);
-        String defaultNote =
-                formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
-
-        performAndVerify(
-                build,
-                defaultNote,
-                false,
-                false,
-                false,
-                false,
-                false,
-                prepareSendMessageWithSuccessResponse("V3", MERGE_REQUEST_ID, defaultNote));
     }
 
     @Test

@@ -21,16 +21,15 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
+import hudson.model.User;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import javax.ws.rs.core.Response;
 import jenkins.model.Jenkins;
 import org.apache.http.HttpHeaders;
@@ -41,6 +40,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.gitlab4j.api.GitLabApi;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,6 +48,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
+import org.springframework.security.core.Authentication;
 
 /**
  * @author Robin Müller
@@ -86,30 +87,28 @@ public class GitLabConnectionConfigTest {
     @Test
     public void doCheckConnection_success() {
         String expected = connection_success();
-        assertThat(doCheckConnection("V3", Response.Status.OK), is(expected));
         assertThat(doCheckConnection("V4", Response.Status.OK), is(expected));
     }
 
     @Test
     public void doCheckConnection_forbidden() {
         String expected = connection_error("Forbidden");
-        assertThat(doCheckConnection("V3", Response.Status.FORBIDDEN), is(expected));
         assertThat(doCheckConnection("V4", Response.Status.FORBIDDEN), is(expected));
     }
-    // TODO : adapt proxy tests during proxy implimentation
+    // TODO: Adapt proxy tests during proxy implementation
     // @Test
     // public void doCheckConnection_proxy() {
     //     jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
     //     GitLabConnection.DescriptorImpl descriptor =
     //             (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
-    //     FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V3", false, 10, 10);
+    //     FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 10, 10);
     //     assertThat(result.getMessage(), containsString("Connection refused"));
     // }
 
     // @Test
     // public void doCheckConnection_noProxy() {
     //     jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
-    //     assertThat(doCheckConnection("V3", Response.Status.OK), is(connection_success()));
+    //     assertThat(doCheckConnection("4", Response.Status.OK), is(connection_success()));
     // }
 
     private String doCheckConnection(String clientBuilderId, Response.Status status) {
@@ -127,18 +126,19 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void authenticationEnabled_anonymous_forbidden() throws IOException {
-        Boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
+        boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
         assertTrue(defaultValue);
         jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
-        FreeStyleProject project = jenkins.createFreeStyleProject("test");
-        GitLabPushTrigger trigger = mock(GitLabPushTrigger.class);
-        project.addTrigger(trigger);
+        jenkins.createFreeStyleProject("test");
 
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
         request.addHeader("X-Gitlab-Event", "Push Hook");
-        request.setEntity(new StringEntity("{}"));
+        request.setEntity(new StringEntity("{" +
+            "  \"object_kind\": \"push\"," +
+            "  \"event_name\": \"push\"" +
+            "}"));
 
         CloseableHttpResponse response = client.execute(request);
 
@@ -161,8 +161,11 @@ public class GitLabConnectionConfigTest {
         String auth = username + ":" + username;
         request.addHeader(
                 HttpHeaders.AUTHORIZATION,
-                "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(Charset.forName("ISO-8859-1"))));
-        request.setEntity(new StringEntity("{}"));
+                "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1)));
+        request.setEntity(new StringEntity("{" +
+            "  \"object_kind\": \"push\"," +
+            "  \"event_name\": \"push\"" +
+            "}"));
 
         CloseableHttpResponse response = client.execute(request);
 
@@ -170,7 +173,7 @@ public class GitLabConnectionConfigTest {
     }
 
     @Test
-    public void authenticationDisabled_anonymous_success() throws IOException, URISyntaxException {
+    public void authenticationDisabled_anonymous_success() throws IOException {
         jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(false);
         jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
         URL jenkinsURL = jenkins.getURL();
@@ -179,7 +182,10 @@ public class GitLabConnectionConfigTest {
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
         request.addHeader("X-Gitlab-Event", "Push Hook");
-        request.setEntity(new StringEntity("{}"));
+        request.setEntity(new StringEntity("{" +
+            "  \"object_kind\": \"push\"," +
+            "  \"event_name\": \"push\"" +
+            "}"));
 
         CloseableHttpResponse response = client.execute(request);
 

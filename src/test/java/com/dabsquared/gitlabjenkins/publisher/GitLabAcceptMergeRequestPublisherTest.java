@@ -1,8 +1,6 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.mockSimpleBuild;
@@ -66,17 +64,14 @@ public class GitLabAcceptMergeRequestPublisherTest {
 
     @Test
     public void success() throws IOException, InterruptedException, GitLabApiException {
-        publish(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS));
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
         mockServerClient.verify(
-                prepareAcceptMergeRequestWithSuccessResponse("v3", MERGE_REQUEST_ID, null),
-                prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID, null));
+                prepareAcceptMergeRequestWithSuccessResponse("V4", MERGE_REQUEST_IID, null));
     }
 
     @Test
     public void failed() throws IOException, InterruptedException, GitLabApiException {
-        publish(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE));
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE));
 
         mockServerClient.verifyZeroInteractions();
