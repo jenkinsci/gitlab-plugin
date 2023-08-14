@@ -75,10 +75,10 @@ public class PushBuildAction extends BuildWebHookAction {
                         project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
                         this.pushEvent.setProject(project);
                     } else {
-                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace");
                     }
                 } catch (MalformedURLException ignored) {
-                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace");
                 }
             }
         }
@@ -91,10 +91,10 @@ public class PushBuildAction extends BuildWebHookAction {
                         project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
                         this.tagPushEvent.setProject(project);
                     } else {
-                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace");
                     }
                 } catch (MalformedURLException ignored) {
-                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace");
                 }
             }
         }
@@ -108,10 +108,10 @@ public class PushBuildAction extends BuildWebHookAction {
                         project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
                         this.pushSystemHookEvent.setProject(project);
                     } else {
-                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace");
                     }
                 } catch (MalformedURLException ignored) {
-                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace");
                 }
             }
         }
@@ -126,10 +126,10 @@ public class PushBuildAction extends BuildWebHookAction {
                         project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
                         this.tagPushSystemHookEvent.setProject(project);
                     } else {
-                        LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
+                        LOGGER.log(Level.WARNING, "Could not find suitable namespace");
                     }
                 } catch (MalformedURLException ignored) {
-                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+                    LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace");
                 }
             }
         }
@@ -138,7 +138,7 @@ public class PushBuildAction extends BuildWebHookAction {
     public void execute() {
         if (pushEvent != null) {
             if (pushEvent.getRepository() != null && pushEvent.getRepository().getUrl() == null) {
-                LOGGER.log(Level.WARNING, "No repository url found.");
+                LOGGER.log(Level.WARNING, "No repository url found");
                 return;
             }
 
@@ -155,7 +155,7 @@ public class PushBuildAction extends BuildWebHookAction {
         if (tagPushEvent != null) {
             if (tagPushEvent.getRepository() != null
                     && tagPushEvent.getRepository().getUrl() == null) {
-                LOGGER.log(Level.WARNING, "No repository url found.");
+                LOGGER.log(Level.WARNING, "No repository url found");
                 return;
             }
 
@@ -172,7 +172,7 @@ public class PushBuildAction extends BuildWebHookAction {
         if (pushSystemHookEvent != null) {
             if (pushSystemHookEvent.getRepository() != null
                     && pushSystemHookEvent.getRepository().getUrl() == null) {
-                LOGGER.log(Level.WARNING, "No repository url found.");
+                LOGGER.log(Level.WARNING, "No repository url found");
                 return;
             }
 
@@ -189,7 +189,7 @@ public class PushBuildAction extends BuildWebHookAction {
         if (tagPushSystemHookEvent != null) {
             if (tagPushSystemHookEvent.getRepository() != null
                     && tagPushSystemHookEvent.getRepository().getUrl() == null) {
-                LOGGER.log(Level.WARNING, "No repository url found.");
+                LOGGER.log(Level.WARNING, "No repository url found");
                 return;
             }
 
