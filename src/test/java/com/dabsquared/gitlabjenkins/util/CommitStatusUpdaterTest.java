@@ -169,7 +169,6 @@ public class CommitStatusUpdaterTest {
                 .withTargetProjectUrl("https://gitlab.org/test")
                 .build();
 
-        when(gitlabCause.getData()).thenReturn(causeData);
     }
 
     @After
@@ -187,7 +186,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage((Float.valueOf(null)))
+                .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
@@ -200,7 +199,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage((Float.valueOf(null)))
+                .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
@@ -215,7 +214,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage((Float.valueOf(null)))
+                .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         when(gitLabApi.getCommitsApi()).thenReturn(commitsApi);
@@ -232,7 +231,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef(null)
                 .withName(STAGE)
-                .withCoverage(Float.valueOf(null))
+                .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
@@ -274,7 +273,7 @@ public class CommitStatusUpdaterTest {
         CommitStatus status = new CommitStatus();
         status.withRef("3.0.0")
                 .withName(STAGE)
-                .withCoverage((Float.valueOf(null)))
+                .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
         verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
