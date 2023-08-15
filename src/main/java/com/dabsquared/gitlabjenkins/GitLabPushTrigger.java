@@ -100,7 +100,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
     private transient boolean addVoteOnMergeRequest;
-    private transient boolean allowAllBranches = false;
+    private final transient boolean allowAllBranches = false;
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
@@ -209,8 +209,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                                 oldConfig.gitlabApiToken,
                                 "autodetect",
                                 oldConfig.ignoreCertificateErrors,
-                                10,
-                                10));
+                                60,
+                                60));
             }
 
             String defaultConnectionName = null;
@@ -257,26 +257,26 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     }
 
     public boolean getTriggerOnPush() {
-        return triggerOnPush;
+        return this.triggerOnPush;
     }
 
     public boolean getTriggerToBranchDeleteRequest() {
-        return triggerToBranchDeleteRequest;
+        return this.triggerToBranchDeleteRequest;
     }
 
     @Override
     public boolean getTriggerOnMergeRequest() {
-        return triggerOnMergeRequest;
+        return this.triggerOnMergeRequest;
     }
 
     @Override
     public boolean isTriggerOnlyIfNewCommitsPushed() {
-        return triggerOnlyIfNewCommitsPushed;
+        return this.triggerOnlyIfNewCommitsPushed;
     }
 
     @Override
     public boolean isTriggerOnAcceptedMergeRequest() {
-        return triggerOnAcceptedMergeRequest;
+        return this.triggerOnAcceptedMergeRequest;
     }
 
     @Override
@@ -286,15 +286,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     @Override
     public boolean isTriggerOnClosedMergeRequest() {
-        return triggerOnClosedMergeRequest;
+        return this.triggerOnClosedMergeRequest;
     }
 
     public boolean getTriggerOnNoteRequest() {
-        return triggerOnNoteRequest;
+        return this.triggerOnNoteRequest;
     }
 
     public boolean getTriggerOnPipelineEvent() {
-        return triggerOnPipelineEvent;
+        return this.triggerOnPipelineEvent;
     }
 
     public String getNoteRegex() {
@@ -303,57 +303,57 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     @Override
     public TriggerOpenMergeRequest getTriggerOpenMergeRequestOnPush() {
-        return triggerOpenMergeRequestOnPush;
+        return this.triggerOpenMergeRequestOnPush;
     }
 
     public boolean getSetBuildDescription() {
-        return setBuildDescription;
+        return this.setBuildDescription;
     }
 
     public boolean getCiSkip() {
-        return ciSkip;
+        return this.ciSkip;
     }
 
     @Override
     public boolean isSkipWorkInProgressMergeRequest() {
-        return skipWorkInProgressMergeRequest;
+        return this.skipWorkInProgressMergeRequest;
     }
 
     @Override
     public String getLabelsThatForcesBuildIfAdded() {
-        return labelsThatForcesBuildIfAdded;
+        return this.labelsThatForcesBuildIfAdded;
     }
 
     public BranchFilterType getBranchFilterType() {
-        return branchFilterType;
+        return this.branchFilterType;
     }
 
     public String getIncludeBranchesSpec() {
-        return includeBranchesSpec;
+        return this.includeBranchesSpec;
     }
 
     public String getExcludeBranchesSpec() {
-        return excludeBranchesSpec;
+        return this.excludeBranchesSpec;
     }
 
     public String getSourceBranchRegex() {
-        return sourceBranchRegex;
+        return this.sourceBranchRegex;
     }
 
     public String getTargetBranchRegex() {
-        return targetBranchRegex;
+        return this.targetBranchRegex;
     }
 
     public MergeRequestLabelFilterConfig getMergeRequestLabelFilterConfig() {
-        return mergeRequestLabelFilterConfig;
+        return this.mergeRequestLabelFilterConfig;
     }
 
     public String getSecretToken() {
-        return secretToken == null ? null : secretToken.getPlainText();
+        return this.secretToken == null ? null : this.secretToken.getPlainText();
     }
 
     public String getPendingBuildName() {
-        return pendingBuildName;
+        return this.pendingBuildName;
     }
 
     @Override
@@ -558,100 +558,100 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         tagPushHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
-    // executes when the Trigger receives a push systemhook request
+    // Executes when the Trigger receives a push system hook request
     public void onPost(final PushSystemHookEvent event) {
-        if (branchFilter == null) {
+        if (this.branchFilter == null) {
             initializeBranchFilter();
         }
-        if (mergeRequestLabelFilter == null) {
+        if (this.mergeRequestLabelFilter == null) {
             initializeMergeRequestLabelFilter();
         }
-        if (pushHookTriggerHandler == null) {
+        if (this.pushHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        pushSystemHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+        this.pushSystemHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
-    // executes when the Trigger receives a tag push systemhook request
+    // executes when the Trigger receives a tag push system hook request
     public void onPost(final TagPushSystemHookEvent event) {
-        if (branchFilter == null) {
+        if (this.branchFilter == null) {
             initializeBranchFilter();
         }
-        if (mergeRequestLabelFilter == null) {
+        if (this.mergeRequestLabelFilter == null) {
             initializeMergeRequestLabelFilter();
         }
-        if (pushHookTriggerHandler == null) {
+        if (this.pushHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        tagPushSystemHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+        this.tagPushSystemHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a merge webhook request
     public void onPost(final MergeRequestEvent event) {
-        if (branchFilter == null) {
+        if (this.branchFilter == null) {
             initializeBranchFilter();
         }
-        if (mergeRequestLabelFilter == null) {
+        if (this.mergeRequestLabelFilter == null) {
             initializeMergeRequestLabelFilter();
         }
-        if (mergeRequestHookTriggerHandler == null) {
+        if (this.mergeRequestHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+        this.mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a merge systemhook request
     public void onPost(final MergeRequestSystemHookEvent event) {
-        if (branchFilter == null) {
+        if (this.branchFilter == null) {
             initializeBranchFilter();
         }
-        if (mergeRequestLabelFilter == null) {
+        if (this.mergeRequestLabelFilter == null) {
             initializeMergeRequestLabelFilter();
         }
-        if (mergeRequestHookTriggerHandler == null) {
+        if (this.mergeRequestHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+        this.mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a note request
     public void onPost(final NoteEvent event) {
-        if (branchFilter == null) {
+        if (this.branchFilter == null) {
             initializeBranchFilter();
         }
-        if (mergeRequestLabelFilter == null) {
+        if (this.mergeRequestLabelFilter == null) {
             initializeMergeRequestLabelFilter();
         }
-        if (noteHookTriggerHandler == null) {
+        if (this.noteHookTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        noteHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+        this.noteHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     // executes when the Trigger receives a pipeline event
     public void onPost(final PipelineEvent event) {
-        if (branchFilter == null) {
+        if (this.branchFilter == null) {
             initializeBranchFilter();
         }
-        if (pipelineTriggerHandler == null) {
+        if (this.pipelineTriggerHandler == null) {
             initializeTriggerHandler();
         }
-        pipelineTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
+        this.pipelineTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
     private void initializeTriggerHandler() {
-        mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(this);
-        noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
-        pushHookTriggerHandler = newPushHookTriggerHandler(
+        this.mergeRequestHookTriggerHandler = newMergeRequestHookTriggerHandler(this);
+        this.noteHookTriggerHandler = newNoteHookTriggerHandler(triggerOnNoteRequest, noteRegex);
+        this.pushHookTriggerHandler = newPushHookTriggerHandler(
                 triggerOnPush,
                 triggerToBranchDeleteRequest,
                 triggerOpenMergeRequestOnPush,
                 skipWorkInProgressMergeRequest);
-        pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
+        this.pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
     }
 
     private void initializeBranchFilter() {
-        branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
+        this.branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec(includeBranchesSpec)
                 .withExcludeBranchesSpec(excludeBranchesSpec)
                 .withSourceBranchRegex(sourceBranchRegex)
@@ -660,14 +660,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     }
 
     private void initializeMergeRequestLabelFilter() {
-        mergeRequestLabelFilter =
+        this.mergeRequestLabelFilter =
                 MergeRequestLabelFilterFactory.newMergeRequestLabelFilter(mergeRequestLabelFilterConfig);
     }
 
     @Override
     protected Object readResolve() throws ObjectStreamException {
-        if (branchFilterType == null) {
-            branchFilterType = StringUtils.isNotBlank(branchFilterName)
+        if (this.branchFilterType == null) {
+            this.branchFilterType = StringUtils.isNotBlank(branchFilterName)
                     ? BranchFilterType.valueOf(branchFilterName)
                     : BranchFilterType.All;
         }
@@ -722,7 +722,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                     return "Build when a change is pushed to GitLab. GitLab webhook URL: "
                             + retrieveProjectUrl(project);
                 } catch (IllegalStateException e) {
-                    // nothing to do
+                    // Nothing to do
                 }
             }
             return "Build when a change is pushed to GitLab, unknown URL";

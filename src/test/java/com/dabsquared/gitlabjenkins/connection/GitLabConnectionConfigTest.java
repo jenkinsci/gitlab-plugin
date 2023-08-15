@@ -4,10 +4,9 @@ import static com.dabsquared.gitlabjenkins.connection.Messages.connection_error;
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_success;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -16,17 +15,14 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
-import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
-import hudson.model.FreeStyleProject;
+import hudson.ProxyConfiguration;
 import hudson.model.Item;
-import hudson.model.User;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -40,7 +36,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.gitlab4j.api.GitLabApi;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,7 +43,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
-import org.springframework.security.core.Authentication;
 
 /**
  * @author Robin Müller
@@ -96,20 +90,20 @@ public class GitLabConnectionConfigTest {
         assertThat(doCheckConnection("V4", Response.Status.FORBIDDEN), is(expected));
     }
     // TODO: Adapt proxy tests during proxy implementation
-    // @Test
-    // public void doCheckConnection_proxy() {
-    //     jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
-    //     GitLabConnection.DescriptorImpl descriptor =
-    //             (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
-    //     FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 10, 10);
-    //     assertThat(result.getMessage(), containsString("Connection refused"));
-    // }
-
-    // @Test
-    // public void doCheckConnection_noProxy() {
-    //     jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
-    //     assertThat(doCheckConnection("4", Response.Status.OK), is(connection_success()));
-    // }
+//     @Test
+//     public void doCheckConnection_proxy() {
+//         jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
+//         GitLabConnection.DescriptorImpl descriptor =
+//                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
+//         FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 10, 10);
+//         assertThat(result.getMessage(), containsString("Connection refused"));
+//     }
+//
+//     @Test
+//     public void doCheckConnection_noProxy() {
+//         jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
+//         assertThat(doCheckConnection("4", Response.Status.OK), is(connection_success()));
+//     }
 
     private String doCheckConnection(String clientBuilderId, Response.Status status) {
         HttpRequest request =
@@ -126,15 +120,20 @@ public class GitLabConnectionConfigTest {
 
     @Test
     public void authenticationEnabled_anonymous_forbidden() throws IOException {
-        boolean defaultValue = jenkins.get(GitLabConnectionConfig.class).isUseAuthenticatedEndpoint();
-        assertTrue(defaultValue);
-        jenkins.getInstance().setAuthorizationStrategy(new GlobalMatrixAuthorizationStrategy());
+        jenkins.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
+        String username = "anonymous";
+        jenkins.getInstance().setSecurityRealm(jenkins.createDummySecurityRealm());
+        GlobalMatrixAuthorizationStrategy authorizationStrategy = new GlobalMatrixAuthorizationStrategy();
+        authorizationStrategy.add(Jenkins.READ, username);
         URL jenkinsURL = jenkins.getURL();
+
         jenkins.createFreeStyleProject("test");
 
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(jenkinsURL.toExternalForm() + "project/test");
         request.addHeader("X-Gitlab-Event", "Push Hook");
+        String auth = username + ":" + username;
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1)));
         request.setEntity(new StringEntity("{" +
             "  \"object_kind\": \"push\"," +
             "  \"event_name\": \"push\"" +

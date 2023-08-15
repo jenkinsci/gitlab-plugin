@@ -110,6 +110,5 @@ public class GitLabAcceptMergeRequestPublisherTest {
                     "application",
                     "x-www-form-urlencoded"
             )));
-
     }
 }
