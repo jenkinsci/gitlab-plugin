@@ -287,7 +287,7 @@ public class GitLabCommitStatusPublisherTest {
                 // .withBody("type", "STRING")
                 // .withBody("rawBytes", "c3RhdGU9ZmFpbGVkJm5hbWU9amVua2lucyZ0YXJnZXRfdXJsPWh0dHAlM0ElMkYlMkZsb2NhbGhvc3QlM0E1OTc1MiUyRmplbmtpbnMlMkYlMkZidWlsZCUyRjEyM2Rpc3BsYXklMkZyZWRpcmVjdA==")
                 // .withBody("string", string)
-                .withHeader("PRIVATE-TOKEN", "0")
+                .withHeader("Content-Length", "0")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withHeader("Accept", "application/json")
                 .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
