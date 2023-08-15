@@ -312,7 +312,7 @@ public final class CauseData {
             return null;
         }
 
-        MergeRequest mergeRequest = getClient(run)
+        return getClient(run)
                 .getMergeRequestApi()
                 .createMergeRequest(
                         sourceProjectId,
@@ -326,7 +326,6 @@ public final class CauseData {
                         null,
                         false,
                         null);
-        return mergeRequest;
     }
 
     @Exported

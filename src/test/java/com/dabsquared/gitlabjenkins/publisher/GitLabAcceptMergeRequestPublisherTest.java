@@ -15,7 +15,6 @@ import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import org.gitlab4j.api.GitLabApiException;
 import org.junit.After;
@@ -26,7 +25,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
-import org.mockserver.model.HttpRequest;
+import org.mockserver.model.*;
 
 /**
  * @author Nikolay Ustinov
@@ -67,7 +66,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
         mockServerClient.verify(
-                prepareAcceptMergeRequestWithSuccessResponse("V4", MERGE_REQUEST_IID, null));
+            prepareAcceptMergeRequestWithSuccessResponse("V4", MERGE_REQUEST_IID, null));
     }
 
     @Test
@@ -77,30 +76,40 @@ public class GitLabAcceptMergeRequestPublisherTest {
         mockServerClient.verifyZeroInteractions();
     }
 
-    private void publish(AbstractBuild build) throws InterruptedException, IOException, GitLabApiException {
+    private void publish(AbstractBuild<?, ?> build) throws InterruptedException, IOException, GitLabApiException {
         GitLabAcceptMergeRequestPublisher publisher = preparePublisher(new GitLabAcceptMergeRequestPublisher(), build);
         publisher.perform(build, null, listener);
     }
 
     private HttpRequest prepareAcceptMergeRequestWithSuccessResponse(
-            String apiLevel, Long mergeRequestId, Boolean shouldRemoveSourceBranch)
-            throws UnsupportedEncodingException {
+            String apiLevel, Long mergeRequestId, Boolean shouldRemoveSourceBranch) {
         HttpRequest updateCommitStatus = prepareAcceptMergeRequest(apiLevel, mergeRequestId, shouldRemoveSourceBranch);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareAcceptMergeRequest(String apiLevel, Long mergeRequestId, Boolean removeSourceBranch)
-            throws UnsupportedEncodingException {
-        String body = "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success";
+    private HttpRequest prepareAcceptMergeRequest(String apiLevel, Long mergeRequestId, Boolean removeSourceBranch) {
+        String string = "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&merge_when_pipeline_succeeds=true";
         if (removeSourceBranch != null) {
-            body += "&should_remove_source_branch=" + removeSourceBranch;
+            string += "&should_remove_source_branch=" + removeSourceBranch;
         }
         return request()
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
-                        + "/merge")
-                .withMethod("PUT")
-                .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody(body);
+            .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
+                    + "/merge")
+            .withMethod("PUT")
+            .withHeader("PRIVATE-TOKEN", "secret")
+            .withHeader("Accept", "application/json")
+            .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.17)")
+            .withHeader("Connection", "keep-alive")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
+            .withHeader("Host", "localhost:" + mockServer.getPort())
+            .withHeader("Content-Length", String.valueOf(string.length()))
+            .withSecure(false)
+            .withKeepAlive(true)
+            .withBody(new StringBody(string, new MediaType(
+                    "application",
+                    "x-www-form-urlencoded"
+            )));
+
     }
 }

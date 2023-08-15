@@ -18,6 +18,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -28,6 +29,8 @@ import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -49,6 +52,8 @@ import org.mockserver.model.HttpRequest;
  * @author Nikolay Ustinov
  */
 public class GitLabMessagePublisherTest {
+    private static final Logger LOGGER = Logger.getLogger(PendingBuildsHandler.class.getName());
+
     @ClassRule
     public static MockServerRule mockServer = new MockServerRule(new Object());
 
@@ -98,7 +103,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void success_v4() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
         String defaultNote = formatNote(
                 build, ":white_check_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
@@ -115,14 +120,14 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void success_withOnlyForFailure() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
 
         performAndVerify(build, "test", true, false, false, false, false);
     }
 
     @Test
     public void failed_v4() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         String defaultNote =
                 formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
@@ -139,7 +144,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void failed_withOnlyForFailed() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         String defaultNote =
                 formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
 
@@ -156,7 +161,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void canceledWithCustomNote() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED);
         String defaultNote = "abort";
 
         performAndVerify(
@@ -172,7 +177,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void successWithCustomNote() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
         String defaultNote = "success";
 
         performAndVerify(
@@ -188,7 +193,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void failedWithCustomNote() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         String defaultNote = "failure";
 
         performAndVerify(
@@ -204,7 +209,7 @@ public class GitLabMessagePublisherTest {
 
     @Test
     public void unstableWithCustomNote() throws IOException, InterruptedException {
-        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.UNSTABLE);
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.UNSTABLE);
         String defaultNote = "unstable";
 
         performAndVerify(
@@ -219,7 +224,7 @@ public class GitLabMessagePublisherTest {
     }
 
     private void performAndVerify(
-            AbstractBuild build,
+            AbstractBuild<?, ?> build,
             String note,
             boolean onlyForFailure,
             boolean replaceSuccessNote,
@@ -248,7 +253,7 @@ public class GitLabMessagePublisherTest {
                     build);
             publisher.perform(build, null, listener);
         } catch (GitLabApiException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage());
         }
 
         if (requests.length > 0) {
@@ -275,8 +280,8 @@ public class GitLabMessagePublisherTest {
                 .withBody("body=" + URLEncoder.encode(body, "UTF-8"));
     }
 
-    private AbstractBuild mockBuild(String gitLabConnection, Result result, String... remoteUrls) {
-        AbstractBuild build = mock(AbstractBuild.class);
+    private AbstractBuild<?, ?> mockBuild(String gitLabConnection, Result result, String... remoteUrls) {
+        AbstractBuild<?, ?> build = mock(AbstractBuild.class);
         BuildData buildData = mock(BuildData.class);
         when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
         when(build.getAction(BuildData.class)).thenReturn(buildData);

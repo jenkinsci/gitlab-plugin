@@ -60,7 +60,7 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
             if (build.getResult() == Result.SUCCESS) {
                 client.getMergeRequestApi()
                         .acceptMergeRequest(
-                                mergeRequest,
+                                mergeRequest.getTargetProjectId(),
                                 mergeRequest.getIid(),
                                 "Merge Request accepted by jenkins build success",
                                 isDeleteSourceBranch(),

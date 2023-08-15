@@ -46,10 +46,10 @@ final class TestUtility {
     static final String GITLAB_CONNECTION_V4 = "GitLabV4";
     static final String BUILD_URL = "/build/123";
     static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
-    static final int BUILD_NUMBER = 1;
-    static final long PROJECT_ID = 3;
-    static final long MERGE_REQUEST_ID = 1;
-    static final long MERGE_REQUEST_IID = 2;
+    static final Integer BUILD_NUMBER = 1;
+    static final Long PROJECT_ID = 3L;
+    static final Long MERGE_REQUEST_ID = 1L;
+    static final Long MERGE_REQUEST_IID = 2L;
 
     private static final String API_TOKEN = "secret";
 
@@ -97,8 +97,8 @@ final class TestUtility {
         verify(publisher).perform(parentBuild, null, listener);
     }
 
-    static AbstractBuild mockSimpleBuild(String gitLabConnection, Result result, String... remoteUrls) {
-        AbstractBuild build = mock(AbstractBuild.class);
+    static AbstractBuild<?, ?> mockSimpleBuild(String gitLabConnection, Result result, String... remoteUrls) {
+        AbstractBuild<?, ?> build = mock(AbstractBuild.class);
         BuildData buildData = mock(BuildData.class);
         when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
         when(build.getAction(BuildData.class)).thenReturn(buildData);
@@ -122,7 +122,7 @@ final class TestUtility {
                 note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
     }
 
-    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build)
+    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild<?, ?> build)
             throws GitLabApiException {
         GitLabApi client = mock(GitLabApi.class);
         MergeRequestApi mergeRequestApi = mock(MergeRequestApi.class);
@@ -138,7 +138,7 @@ final class TestUtility {
         mergeRequest.setSourceProjectId(PROJECT_ID);
         mergeRequest.setTargetProjectId(PROJECT_ID);
         mergeRequest.setDescription("");
-        doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
+        doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build); // bug here
         return spyPublisher;
     }
 
