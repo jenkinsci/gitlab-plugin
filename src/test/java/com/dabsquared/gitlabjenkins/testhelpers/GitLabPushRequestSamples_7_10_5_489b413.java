@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
+import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.PushEvent;
 
@@ -19,10 +20,13 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
         repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        EventProject project = new EventProject();
+        project.setUrl("http://gitlabserver.example.com/project");
         pushEvent.setRepository(repository);
         pushEvent.setRef("refs/heads/master");
         pushEvent.setBefore(ZERO_SHA);
         pushEvent.setAfter(COMMIT_7A);
+        pushEvent.setProject(project);
         // no commit on new branches
         return pushEvent;
     }
