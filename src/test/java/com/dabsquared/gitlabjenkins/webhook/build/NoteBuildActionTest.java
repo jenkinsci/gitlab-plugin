@@ -160,7 +160,8 @@ public class NoteBuildActionTest {
         EventCommit lastCommit = new EventCommit();
         lastCommit.setId("562e173be03b8ff2efb05345d12df18815438a4b");
         lastCommit.setMessage("Merge branch 'another-branch' into 'master'\n\nCheck in this test\n");
-        lastCommit.setTimestamp(dateFormat.parse("2015-04-08T21: 00:25-07:00"));
+        SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        lastCommit.setTimestamp(dateFormat2.parse("2015-04-08T21: 00:25-07:00"));
         lastCommit.setUrl("http://example.com/gitlab-org/gitlab-test/commit/562e173be03b8ff2efb05345d12df18815438a4b");
         Author commitAuthor = new Author();
         commitAuthor.setName("John Smith");

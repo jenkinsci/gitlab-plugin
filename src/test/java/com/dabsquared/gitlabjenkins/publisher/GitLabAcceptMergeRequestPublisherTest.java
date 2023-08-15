@@ -68,7 +68,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
         mockServerClient.verify(
-            prepareAcceptMergeRequestWithSuccessResponse("V4", MERGE_REQUEST_IID, null));
+            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID, null));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
             .withMethod("PUT")
             .withHeader("PRIVATE-TOKEN", "secret")
             .withHeader("Accept", "application/json")
-            .withHeader(header("User-Agent", "Jersey/2.*"))
+            .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
             .withHeader("Connection", "keep-alive")
             .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withHeader("Host", "localhost:" + mockServer.getPort())

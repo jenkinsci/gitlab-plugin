@@ -151,7 +151,8 @@ public class MergeRequestBuildActionTest {
         EventCommit lastCommit = new EventCommit();
         lastCommit.setId("da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
         lastCommit.setMessage("fixed readme");
-        lastCommit.setTimestamp(dateFormat.parse("2012-01-03T23:36:29+02:00"));
+        SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        lastCommit.setTimestamp(dateFormat2.parse("2012-01-03T23:36:29+02:00"));
         lastCommit.setUrl(
                 "http://example.com/awesome_space/awesome_project/commits/da1560886d4f094c3e6c9ef40349f7d38b5d27d7");
         Author commitAuthor = new Author();

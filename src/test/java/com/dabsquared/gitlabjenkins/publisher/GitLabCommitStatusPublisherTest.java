@@ -52,6 +52,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.model.Body;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.MediaType;
@@ -268,34 +269,34 @@ public class GitLabCommitStatusPublisherTest {
     }
 
     private HttpRequest prepareUpdateCommitStatus(
-            final String apiLevel, String projectName, Run<?, ?> build, CommitBuildState state) {
+            final String apiLevel, String projectName, Run<?, ?> build, CommitBuildState state) throws UnsupportedEncodingException {
         return request()
                 .withSecure(false)
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, StandardCharsets.UTF_8)
                         + "/statuses/" + SHA1)
                 .withMethod("POST")
-                .withKeepAlive(true)
+                .withBody(new StringBody("contentType", new MediaType(
+                    "application",
+                    "x-www-form-urlencoded")))
+                .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url="
+                        + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), "UTF-8") + "&description="
+                        + URLEncoder.encode(state.name(), "UTF-8"))
+                // construct the body.
+                // .withBody(new StringBody("type", new MediaType(
+                //     "STRING")))
+                // .withBody("type", "STRING")
+                // .withBody("rawBytes", "c3RhdGU9ZmFpbGVkJm5hbWU9amVua2lucyZ0YXJnZXRfdXJsPWh0dHAlM0ElMkYlMkZsb2NhbGhvc3QlM0E1OTc1MiUyRmplbmtpbnMlMkYlMkZidWlsZCUyRjEyM2Rpc3BsYXklMkZyZWRpcmVjdA==")
+                // .withBody("string", string)
+                .withHeader("PRIVATE-TOKEN", "0")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withHeader("Accept", "application/json")
-                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.17)")
+                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
                 .withHeader("Connection", "keep-alive")
-                .withHeader("Host", "localhost:" + mockServer.getPort())
-                .withHeader("Content-Length", "113")
                 .withHeader("Content-Type", "application/x-www-form-urlencoded")
-                .withBody(new StringBody("c3RhdGU9c3VjY2VzcyZuYW1lPWplbmtpbnMmdGFyZ2V0X3VybD1odHRwJTNBJTJGJTJGbG9jYWxob3N0JTNBNTc3NjElMkZqZW5raW5zJTJGJTJGYnVpbGQlMkYxMjNkaXNwbGF5JTJGcmVkaXJlY3Q=", new MediaType(
-                    "application",
-                    "x-www-form-urlencoded"
-                )));
-//                .withBody("state=" + URLEncoder.encode(state.name(), StandardCharsets.UTF_8) + "&context=jenkins&" + "target_url="
-//                    + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), StandardCharsets.UTF_8));
-
-//                        + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), StandardCharsets.UTF_8));
-//                .withBody("type " + ":" + " STRING")
-//                .withBody(
-//                        "c3RhdGU9c3VjY2VzcyZuYW1lPWplbmtpbnMmdGFyZ2V0X3VybD1odHRwJTNBJTJGJTJGbG9jYWxob3N0JTNBNTc3NjElMkZqZW5raW5zJTJGJTJGYnVpbGQlMkYxMjNkaXNwbGF5JTJGcmVkaXJlY3Q=") // type string
-//                .withBody("state=" + URLEncoder.encode(state.name(), "UTF-8") + "&context=jenkins&" + "target_url="
-//                        + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), StandardCharsets.UTF_8))
-//                .withBody("Content-type " + ":" + " application/x-www-form-urlencoded");
+                .withHeader("Host", "localhost:" + mockServer.getPort())
+                .withQueryStringParameter("per_page", "96")
+                .withSecure(false)
+                .withKeepAlive(true);
     }
 
     private HttpRequest prepareExistsCommitWithSuccessResponse(String apiLevel, String projectName)
@@ -307,30 +308,35 @@ public class GitLabCommitStatusPublisherTest {
 
     private HttpRequest prepareExistsCommit(String apiLevel, String projectName) {
         return request()
-                .withSecure(false)
-                .withQueryStringParameter("per_page", "96")
-                .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, StandardCharsets.UTF_8)
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + URLEncoder.encode(projectName, "UTF-8")
                         + "/repository/commits/" + SHA1)
-                .withMethod("POST")
-                .withKeepAlive(true)
+                .withMethod("GET")
                 .withHeader("Content-Length", "0")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withHeader("Accept", "application/json")
-                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.17)")
+                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
+
                 .withHeader("Connection", "keep-alive")
-                .withHeader("Host", "localhost:" + mockServer.getPort());
+                .withHeader("Content-Type", "application/x-www-form-urlencoded")
+                .withHeader("Host", "localhost:" + mockServer.getPort())
+                .withQueryStringParameter("per_page", "96")
+                .withSecure(false)
+                .withKeepAlive(true);
     }
 
     private HttpRequest prepareGetProjectResponse(String projectName) throws IOException {
         HttpRequest request = request()
                 .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode(projectName, StandardCharsets.UTF_8))
                 .withMethod("GET")
-                .withHeader("Content-Length", "0")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withHeader("Accept", "application/json")
-                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.17)")
+                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
                 .withHeader("Connection", "keep-alive")
-                .withHeader("Host", "localhost:" + mockServer.getPort());
+                .withHeader("Content-Type", "application/x-www-form-urlencoded")
+                .withHeader("Host", "localhost:" + mockServer.getPort())
+                .withQueryStringParameter("per_page", "96")
+                .withSecure(false)
+                .withKeepAlive(true);      
 
         HttpResponse response =
                 response().withBody(getSingleProjectJson("GetSingleProject.json", projectName, PROJECT_ID));
