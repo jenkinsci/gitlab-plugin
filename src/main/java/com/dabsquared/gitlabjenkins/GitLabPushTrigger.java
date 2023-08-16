@@ -209,8 +209,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                                 oldConfig.gitlabApiToken,
                                 "autodetect",
                                 oldConfig.ignoreCertificateErrors,
-                                60,
-                                60));
+                                5000,
+                                5000));
             }
 
             String defaultConnectionName = null;

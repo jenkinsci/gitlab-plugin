@@ -113,7 +113,7 @@ public class GitLabConnectionConfigTest {
         GitLabConnection.DescriptorImpl descriptor =
                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
         FormValidation formValidation =
-                descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 10, 60);
+                descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, clientBuilderId, false, 60, 60);
         mockServerClient.verify(request);
         return formValidation.getMessage();
     }

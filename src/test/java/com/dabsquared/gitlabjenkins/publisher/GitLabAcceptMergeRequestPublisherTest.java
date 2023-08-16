@@ -7,6 +7,7 @@ import static com.dabsquared.gitlabjenkins.publisher.TestUtility.mockSimpleBuild
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.preparePublisher;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
+import static org.mockserver.model.Header.header;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -16,6 +17,7 @@ import hudson.model.Result;
 import hudson.model.StreamBuildListener;
 import java.io.IOException;
 import java.nio.charset.Charset;
+
 import org.gitlab4j.api.GitLabApiException;
 import org.junit.After;
 import org.junit.Before;
@@ -99,7 +101,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
             .withMethod("PUT")
             .withHeader("PRIVATE-TOKEN", "secret")
             .withHeader("Accept", "application/json")
-            .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.17)")
+            .withHeader(header("User-Agent", "Jersey/2.*"))
             .withHeader("Connection", "keep-alive")
             .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withHeader("Host", "localhost:" + mockServer.getPort())

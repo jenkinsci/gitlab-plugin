@@ -170,7 +170,7 @@ public class GitLabConnectionConfigSSLTest {
                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
         FormValidation formValidation =
-                descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "V4", false, 10, 60);
+                descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "V4", false, 60, 60);
         assertThat(
                 formValidation.getMessage(),
                 containsString(

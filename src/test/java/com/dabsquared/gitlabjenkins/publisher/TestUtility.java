@@ -133,8 +133,9 @@ final class TestUtility {
         mergeRequest.setIid(MERGE_REQUEST_IID);
         mergeRequest.setMergeCommitSha(MERGE_COMMIT_SHA);
         mergeRequest.setTitle("");
-        mergeRequest.setSourceBranch("");
-        mergeRequest.setTargetBranch("");
+        mergeRequest.setSourceBranch("master");
+        mergeRequest.setTargetBranch("master");
+        mergeRequest.setProjectId(PROJECT_ID);
         mergeRequest.setSourceProjectId(PROJECT_ID);
         mergeRequest.setTargetProjectId(PROJECT_ID);
         mergeRequest.setDescription("");
