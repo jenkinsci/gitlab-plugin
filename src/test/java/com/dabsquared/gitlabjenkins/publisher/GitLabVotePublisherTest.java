@@ -1,7 +1,6 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.formatNote;

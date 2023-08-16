@@ -168,7 +168,6 @@ public class CommitStatusUpdaterTest {
                 .withLastCommit(REVISION)
                 .withTargetProjectUrl("https://gitlab.org/test")
                 .build();
-
     }
 
     @After

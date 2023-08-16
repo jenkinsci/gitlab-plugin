@@ -17,7 +17,6 @@ import hudson.model.Result;
 import hudson.model.StreamBuildListener;
 import java.io.IOException;
 import java.nio.charset.Charset;
-
 import org.gitlab4j.api.GitLabApiException;
 import org.junit.After;
 import org.junit.Before;
@@ -67,8 +66,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
     public void success() throws IOException, InterruptedException, GitLabApiException {
         publish(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS));
 
-        mockServerClient.verify(
-            prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID, null));
+        mockServerClient.verify(prepareAcceptMergeRequestWithSuccessResponse("v4", MERGE_REQUEST_IID, null));
     }
 
     @Test
@@ -91,26 +89,24 @@ public class GitLabAcceptMergeRequestPublisherTest {
     }
 
     private HttpRequest prepareAcceptMergeRequest(String apiLevel, Long mergeRequestId, Boolean removeSourceBranch) {
-        String string = "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&merge_when_pipeline_succeeds=true";
+        String string =
+                "merge_commit_message=Merge+Request+accepted+by+jenkins+build+success&merge_when_pipeline_succeeds=true";
         if (removeSourceBranch != null) {
             string += "&should_remove_source_branch=" + removeSourceBranch;
         }
         return request()
-            .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
-                    + "/merge")
-            .withMethod("PUT")
-            .withHeader("PRIVATE-TOKEN", "secret")
-            .withHeader("Accept", "application/json")
-            .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
-            .withHeader("Connection", "keep-alive")
-            .withHeader("Content-Type", "application/x-www-form-urlencoded")
-            .withHeader("Host", "localhost:" + mockServer.getPort())
-            .withHeader("Content-Length", String.valueOf(string.length()))
-            .withSecure(false)
-            .withKeepAlive(true)
-            .withBody(new StringBody(string, new MediaType(
-                    "application",
-                    "x-www-form-urlencoded"
-            )));
+                .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
+                        + "/merge")
+                .withMethod("PUT")
+                .withHeader("PRIVATE-TOKEN", "secret")
+                .withHeader("Accept", "application/json")
+                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
+                .withHeader("Connection", "keep-alive")
+                .withHeader("Content-Type", "application/x-www-form-urlencoded")
+                .withHeader("Host", "localhost:" + mockServer.getPort())
+                .withHeader("Content-Length", String.valueOf(string.length()))
+                .withSecure(false)
+                .withKeepAlive(true)
+                .withBody(new StringBody(string, new MediaType("application", "x-www-form-urlencoded")));
     }
 }

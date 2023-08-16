@@ -249,13 +249,13 @@ public class PushBuildAction extends BuildWebHookAction {
 
         private void checkPermission(Permission permission) {
             GitLabConnectionConfig gitlabConfig =
-                (GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class);
+                    (GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class);
             if (gitlabConfig != null) {
                 if (gitlabConfig.isUseAuthenticatedEndpoint()) {
                     if (!project.getACL().hasPermission(authentication, permission)) {
                         String message = String.format(
-                            "%s is missing the %s/%s permission",
-                            authentication.getName(), permission.group.title, permission.name);
+                                "%s is missing the %s/%s permission",
+                                authentication.getName(), permission.group.title, permission.name);
                         LOGGER.finest("Unauthorized, cannot start indexing on SCMSourceOwner object");
                         throw HttpResponses.errorWithoutStack(403, message);
                     }

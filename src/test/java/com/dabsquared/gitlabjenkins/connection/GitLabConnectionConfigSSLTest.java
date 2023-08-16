@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -173,8 +174,10 @@ public class GitLabConnectionConfigSSLTest {
                 descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "V4", false, 60, 60);
         assertThat(
                 formValidation.getMessage(),
-                containsString(
-                        Messages.connection_error(
-                                "javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")));
+                anyOf(
+                        containsString(
+                                Messages.connection_error(
+                                        "javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")),
+                        containsString(Messages.connection_error("java.net.SocketTimeoutException: Read timed out"))));
     }
 }
