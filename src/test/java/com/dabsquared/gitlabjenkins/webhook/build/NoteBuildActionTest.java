@@ -73,7 +73,7 @@ public class NoteBuildActionTest {
         RevCommit commit = git.commit().setMessage("test").call();
         commitSha1 = commit.getId().getName();
         gitRepoUrl = tmp.getRoot().toURI().toString();
-
+        noteEvent = new NoteEvent();
         noteEvent.setObjectKind("note");
         User user = new User();
         user.setName("Administrator");
@@ -175,6 +175,7 @@ public class NoteBuildActionTest {
         assignee2.setUsername("user1");
         assignee2.setAvatarUrl("http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=40\u0026d=identicon");
         mergeRequest.setAssignee(assignee2);
+        noteEvent.setMergeRequest(mergeRequest);
     }
 
     @Test
