@@ -54,7 +54,7 @@ public class PipelineBuildActionTest {
     public void setUp() throws IOException, ParseException {
         testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
-
+        pipelineEvent = new PipelineEvent();
         pipelineEvent.setObjectKind("pipeline");
         ObjectAttributes objectAttributes = new ObjectAttributes();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");

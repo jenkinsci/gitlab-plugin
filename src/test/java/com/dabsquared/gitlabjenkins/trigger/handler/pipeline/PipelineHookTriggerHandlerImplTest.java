@@ -84,7 +84,7 @@ public class PipelineHookTriggerHandlerImplTest {
         repository.setGit_http_url("https://gitlab.org/test.git");
         repository.setGit_ssh_url("git@gitlab.org:test.git");
         // not able to set Repository
-        PipelineEvent pipelineEvent = new PipelineEvent();
+        pipelineEvent = new PipelineEvent();
         pipelineEvent.setUser(user);
         pipelineEvent.setObjectAttributes(objectAttributes);
         pipelineEvent.setProject(project);

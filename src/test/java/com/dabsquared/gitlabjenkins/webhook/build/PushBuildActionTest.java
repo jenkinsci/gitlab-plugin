@@ -63,10 +63,11 @@ public class PushBuildActionTest {
     @Mock
     private GitLabPushTrigger trigger;
 
-    private PushEvent pushEvent = new PushEvent();
+    private PushEvent pushEvent;
 
     @Before
     public void setUp() throws ParseException {
+        pushEvent = new PushEvent();
         pushEvent.setObjectKind("push");
         pushEvent.setBefore("95790bf891e76fee5e1747ab589903a6a1f80f22");
         pushEvent.setAfter("da1560886d4f094c3e6c9ef40349f7d38b5d27d7");

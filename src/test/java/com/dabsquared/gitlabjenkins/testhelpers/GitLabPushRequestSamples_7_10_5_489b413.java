@@ -40,10 +40,13 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
         repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        EventProject project = new EventProject();
+        project.setUrl("http://gitlabserver.example.com/project");
         pushEvent.setRepository(repository);
         pushEvent.setRef("refs/heads/test-new-branch1");
         pushEvent.setBefore(ZERO_SHA);
         pushEvent.setAfter(COMMIT_7A);
+        pushEvent.setProject(project);
         return pushEvent;
     }
 
@@ -56,10 +59,13 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
         repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        EventProject project = new EventProject();
+        project.setUrl("http://gitlabserver.example.com/project");
         pushEvent.setRepository(repository);
         pushEvent.setRef("refs/heads/test-new-branch1");
         pushEvent.setBefore(COMMIT_7A);
         pushEvent.setAfter(COMMIT_21);
+        pushEvent.setProject(project);
         // pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_21).build()));
         return pushEvent;
     }
@@ -73,10 +79,13 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
         repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        EventProject project = new EventProject();
+        project.setUrl("http://gitlabserver.example.com/project");
         pushEvent.setRepository(repository);
         pushEvent.setRef("refs/heads/master");
         pushEvent.setBefore("ca84f96a846b0e241808ea7b75dfa3bf4cd3b98b");
         pushEvent.setAfter(COMMIT_9d);
+        pushEvent.setProject(project);
         // pushEvent.setCommits(Arrays.asList(
         // commit().withId(COMMIT_21).build(),
         // commit().withId("c04c8822d1df397fb7e6dd3dd133018a0af567a8")
@@ -94,10 +103,13 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
         repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        EventProject project = new EventProject();
+        project.setUrl("http://gitlabserver.example.com/project");
         pushEvent.setRepository(repository);
         pushEvent.setRef("refs/tags/test-tag-1");
         pushEvent.setBefore(ZERO_SHA);
         pushEvent.setAfter(COMMIT_21);
+        pushEvent.setProject(project);
         // pushEvent.setCommits(Collections.singletonList(commit().withId(COMMIT_21).build()));
         return pushEvent;
     }
@@ -111,10 +123,13 @@ public class GitLabPushRequestSamples_7_10_5_489b413 implements GitLabPushReques
         repository.setName("test-repo");
         repository.setUrl("git@gitlabserver.example.com:test-group/test-repo.git");
         repository.setHomepage("http://gitlabserver.example.com/test-group/test-repo");
+        EventProject project = new EventProject();
+        project.setUrl("http://gitlabserver.example.com/project");
         pushEvent.setRepository(repository);
         pushEvent.setRef("refs/heads/test-branch-3-delete");
         pushEvent.setBefore("c34984ff6ed9935b3d843237947adbaaa85fc5f9");
         pushEvent.setAfter(ZERO_SHA);
+        pushEvent.setProject(project);
         return pushEvent;
     }
 }

@@ -62,7 +62,7 @@ public class NoteBuildActionTest {
 
     private String gitRepoUrl;
     private String commitSha1;
-    private NoteEvent noteEvent = new NoteEvent();
+    private NoteEvent noteEvent;
 
     @Before
     public void setup() throws Exception {
@@ -79,6 +79,7 @@ public class NoteBuildActionTest {
         user.setName("Administrator");
         user.setUsername("root");
         user.setAvatarUrl("http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon");
+        noteEvent = new NoteEvent();
         noteEvent.setUser(user);
         noteEvent.setProjectId(5L);
         EventProject project = new EventProject();
