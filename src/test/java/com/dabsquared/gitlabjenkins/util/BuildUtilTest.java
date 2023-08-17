@@ -96,14 +96,14 @@ public class BuildUtilTest {
 
     private AbstractProject<?, ?> createProject(String... shas) {
         AbstractBuild build = mock(AbstractBuild.class);
-        List<BuildData> buildDatas = new ArrayList<BuildData>();
+        List<BuildData> buildDataList = new ArrayList<BuildData>();
         for (String sha : shas) {
             BuildData buildData = createBuildData(sha);
-            buildDatas.add(buildData);
+            buildDataList.add(buildData);
         }
 
-        when(build.getAction(BuildData.class)).thenReturn(buildDatas.get(0));
-        when(build.getActions(BuildData.class)).thenReturn(buildDatas);
+        when(build.getAction(BuildData.class)).thenReturn(buildDataList.get(0));
+        when(build.getActions(BuildData.class)).thenReturn(buildDataList);
 
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);

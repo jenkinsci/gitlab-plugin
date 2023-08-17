@@ -51,7 +51,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     private transient String apiToken;
     // TODO make final when migration code gets removed
     private String apiTokenId;
-    private GitLabClientBuilder clientBuilder;
+    private final GitLabClientBuilder clientBuilder;
     private final boolean ignoreCertificateErrors;
     private final Integer connectionTimeout;
     private final Integer readTimeout;

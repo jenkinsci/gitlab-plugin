@@ -199,15 +199,15 @@ public class CommitStatusUpdater {
             return result;
         }
 
-        final List<BuildData> buildDatas = build.getActions(BuildData.class);
-        if (CollectionUtils.isEmpty(buildDatas)) {
+        final List<BuildData> buildDataList = build.getActions(BuildData.class);
+        if (CollectionUtils.isEmpty(buildDataList)) {
             LOGGER.log(Level.INFO, "Build does not contain build data.");
             return result;
         }
 
-        if (buildDatas.size() == 1) {
+        if (buildDataList.size() == 1) {
             addGitLabBranchBuild(
-                    result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
+                    result, getBuildRevision(build), buildDataList.get(0).getRemoteUrls(), environment, gitLabClient);
         } else {
             final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
 
@@ -230,7 +230,7 @@ public class CommitStatusUpdater {
                     return result;
                 }
 
-                for (final BuildData buildData : buildDatas) {
+                for (final BuildData buildData : buildDataList) {
                     for (final Entry<String, Build> buildByBranchName :
                             buildData.getBuildsByBranchName().entrySet()) {
                         if (buildByBranchName.getValue().getSHA1() != null) {

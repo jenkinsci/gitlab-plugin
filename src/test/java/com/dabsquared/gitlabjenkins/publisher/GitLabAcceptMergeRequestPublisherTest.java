@@ -7,7 +7,6 @@ import static com.dabsquared.gitlabjenkins.publisher.TestUtility.mockSimpleBuild
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.preparePublisher;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.setupGitLabConnections;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.verifyMatrixAggregatable;
-import static org.mockserver.model.Header.header;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
