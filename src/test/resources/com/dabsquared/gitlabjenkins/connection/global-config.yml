@@ -13,8 +13,8 @@ unclassified:
     connections:
       - apiTokenId: gitlab_token
         clientBuilderId: "autodetect"
-        connectionTimeout: 5000
+        connectionTimeout: 60
         ignoreCertificateErrors: true
         name: "my_gitlab_server"
-        readTimeout: 5000
+        readTimeout: 60
         url: "https://gitlab.com/"
