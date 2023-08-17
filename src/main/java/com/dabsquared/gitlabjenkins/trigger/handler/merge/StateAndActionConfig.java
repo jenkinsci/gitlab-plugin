@@ -22,8 +22,8 @@ class StateAndActionConfig implements Predicate<ObjectAttributes> {
 
     @Override
     public boolean test(ObjectAttributes mergeRequestObjectAttributes) {
-        return states.test(MergeRequestState.valueOf(mergeRequestObjectAttributes.getState()))
-                && actions.test(ActionType.valueOf(mergeRequestObjectAttributes.getAction()));
+        return states.test(MergeRequestState.valueOf(mergeRequestObjectAttributes.getState().toUpperCase()))
+                && actions.test(ActionType.valueOf(mergeRequestObjectAttributes.getAction().toUpperCase()));
     }
 
     static <T> Predicate<T> nullOrContains(final Collection<T> collection) {

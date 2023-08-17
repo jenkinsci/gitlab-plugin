@@ -123,7 +123,7 @@ public class PushHookTriggerHandlerImplTest {
         pushEvent.setAfter(commit.name());
         pushEvent.setProjectId(1L);
         pushEvent.setUserName("test");
-        pushEvent.setObjectKind("tag_push");
+        pushEvent.setObjectKind("push");
         pushHookTriggerHandler.handle(
                 project,
                 pushEvent,
