@@ -161,7 +161,7 @@ public class MergeRequestBuildActionTest {
         lastCommit.setAuthor(commitAuthor);
         objectAttributes.setLastCommit(lastCommit);
         objectAttributes.setWorkInProgress(false);
-        objectAttributes.setAction("open");
+        objectAttributes.setAction("opened");
         Assignee assignee2 = new Assignee();
         assignee2.setName("User1");
         assignee2.setUsername("user1");
@@ -234,7 +234,7 @@ public class MergeRequestBuildActionTest {
         testProject.addTrigger(trigger);
         testProject.setScm(new GitSCM(gitRepoUrl));
         MergeRequestEvent mergeRequestEvent_alreadyBuiltMR = mergeRequestEvent;
-        mergeRequestEvent_alreadyBuiltMR.getObjectAttributes().setAction("reopen");
+        mergeRequestEvent_alreadyBuiltMR.getObjectAttributes().setAction("reopened");
         MergeRequestEvent mergeRequestEvent_alreadyBuiltMR_initialBuild = mergeRequestEvent;
         mergeRequestEvent_alreadyBuiltMR_initialBuild
                 .getObjectAttributes()
@@ -324,7 +324,7 @@ public class MergeRequestBuildActionTest {
                 .setId("${commitSha1}");
         mergeRequestEvent_alreadyBuiltMR_differentTargetBranch
                 .getObjectAttributes()
-                .setAction("update");
+                .setAction("updated");
         executeMergeRequestAction(testProject, mergeRequestEvent_alreadyBuiltMR_differentTargetBranch);
 
         assertTrue(wouldFire);

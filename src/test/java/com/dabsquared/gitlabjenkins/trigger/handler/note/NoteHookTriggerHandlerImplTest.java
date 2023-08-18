@@ -143,6 +143,7 @@ public class NoteHookTriggerHandlerImplTest {
         author.setName("test");
         EventCommit lastCommit = new EventCommit();
         lastCommit.setAuthor(author);
+        lastCommit.setId(commit.getId().getName());
         mergeRequestObjectAttributes.setLastCommit(lastCommit);
         EventProject eventProject = new EventProject();
         eventProject.setName("test");
@@ -156,6 +157,7 @@ public class NoteHookTriggerHandlerImplTest {
         MergeRequestEvent mergeRequestEvent = new MergeRequestEvent();
         mergeRequestEvent.setObjectAttributes(mergeRequestObjectAttributes);
         noteEvent.setMergeRequest(mergeRequestObjectAttributes);
+        noteEvent.setProject(eventProject);
         noteHookTriggerHandler.handle(
                 project,
                 noteEvent,

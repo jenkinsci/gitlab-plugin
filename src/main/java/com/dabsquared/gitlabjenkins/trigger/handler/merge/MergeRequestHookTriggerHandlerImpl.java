@@ -124,7 +124,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     protected boolean isNewCommitPushed(MergeRequestEvent event) {
         if (this.onlyIfNewCommitsPushed) {
-            if (valueOf(event.getObjectAttributes().getAction()).equals(ActionType.UPDATED)) {
+            if (valueOf(event.getObjectAttributes().getAction().toUpperCase()).equals(ActionType.UPDATED)) {
                 if (event.getObjectAttributes().getOldrev() != null) {
                     return false;
                 }
@@ -174,7 +174,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         if (!this.cancelPendingBuildsOnUpdate) {
             return;
         }
-        if (!valueOf(event.getObjectAttributes().getAction()).equals(ActionType.UPDATED)) {
+        if (!valueOf(event.getObjectAttributes().getAction().toUpperCase()).equals(ActionType.UPDATED)) {
             return;
         }
         this.pendingBuildsHandler.cancelPendingBuilds(
@@ -292,7 +292,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             return true;
         }
 
-        String action = objectAttributes.getAction();
+        String action = objectAttributes.getAction().toUpperCase();
         if (skipBuiltYetCheckActions.contains(valueOf(action))) {
             LOGGER.log(Level.FINEST, "Skipping LastCommitNotYetBuild check for {0} action", action);
             return true;
