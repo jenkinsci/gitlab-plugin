@@ -87,7 +87,7 @@ public class PushBuildActionTest {
         project.setGitSshUrl("git@example.com:mike/diaspora.git");
         project.setGitHttpUrl("http://example.com/mike/diaspora.git");
         project.setNamespace("Mike");
-        // project.setVisibilityLevel(Visibility.PRIVATE);
+        project.setVisibilityLevel(AccessLevel.NONE);
         project.setPathWithNamespace("mike/diaspora");
         project.setDefaultBranch("master");
         project.setHomepage("http://example.com/mike/diaspora");
