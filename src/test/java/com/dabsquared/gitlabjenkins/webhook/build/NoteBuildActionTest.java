@@ -25,6 +25,7 @@ import org.gitlab4j.api.webhook.EventMergeRequest;
 import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.NoteEvent;
+import org.gitlab4j.api.webhook.NoteEvent.NoteableType;
 import org.gitlab4j.api.webhook.NoteEvent.ObjectAttributes;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -106,6 +107,7 @@ public class NoteBuildActionTest {
         ObjectAttributes objectAttributes = new ObjectAttributes();
         objectAttributes.setId(1244L);
         objectAttributes.setNote("This MR needs work.");
+        objectAttributes.NoteableType(NoteableType.MERGE_REQUEST);
         objectAttributes.setAuthorId(1L);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
         objectAttributes.setCreatedAt(dateFormat.parse("2015-05-17 18:21:36 UTC"));

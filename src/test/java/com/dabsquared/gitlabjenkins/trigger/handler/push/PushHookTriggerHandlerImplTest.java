@@ -115,7 +115,7 @@ public class PushHookTriggerHandlerImplTest {
         repository.setGit_http_url("https://gitlab.org/test.git");
         pushEvent.setRepository(repository);
         EventProject project1 = new EventProject();
-        project1.setName("test-namespace");
+        project1.setNamespace("test-namespace");
         project1.setWebUrl("https://gitlab.org/test");
         pushEvent.setProject(project1);
         pushEvent.setRef("refs/heads/" + git.nameRev().add(head).call().get(head));

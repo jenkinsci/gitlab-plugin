@@ -99,7 +99,7 @@ public class GitLabAcceptMergeRequestPublisherTest {
                 .withMethod("PUT")
                 .withHeader("PRIVATE-TOKEN", "secret")
                 .withHeader("Accept", "application/json")
-                .withHeader("User-Agent", "Jersey/2.40 (HttpUrlConnection 11.0.20)")
+                .withHeader("User-Agent", System.getProperty("http.agent"))
                 .withHeader("Connection", "keep-alive")
                 .withHeader("Content-Type", "application/x-www-form-urlencoded")
                 .withHeader("Host", "localhost:" + mockServer.getPort())
