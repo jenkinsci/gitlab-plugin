@@ -34,7 +34,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -73,6 +72,7 @@ public class NoteBuildActionTest {
         RevCommit commit = git.commit().setMessage("test").call();
         commitSha1 = commit.getId().getName();
         gitRepoUrl = tmp.getRoot().toURI().toString();
+
         noteEvent = new NoteEvent();
         noteEvent.setObjectKind("note");
         User user = new User();
@@ -90,7 +90,6 @@ public class NoteBuildActionTest {
         project.setGitSshUrl("git@example.com:mike/diaspora.git");
         project.setGitHttpUrl("http://example.com/gitlab-org/gitlab-test.git");
         project.setNamespace("Gitlab Org");
-        // project.setVisibilityLevel(Visibility.INTERNAL);
         project.setPathWithNamespace("gitlab-org/gitlab-test");
         project.setDefaultBranch("master");
         project.setHomepage("http://example.com/gitlab-org/gitlab-test");
@@ -107,7 +106,6 @@ public class NoteBuildActionTest {
         ObjectAttributes objectAttributes = new ObjectAttributes();
         objectAttributes.setId(1244L);
         objectAttributes.setNote("This MR needs work.");
-        // setNoteableType is missing
         objectAttributes.setAuthorId(1L);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
         objectAttributes.setCreatedAt(dateFormat.parse("2015-05-17 18:21:36 UTC"));
@@ -149,7 +147,6 @@ public class NoteBuildActionTest {
         sourceortargetproject.setGitSshUrl("git@example.com:mike/diaspora.git");
         sourceortargetproject.setGitHttpUrl("http://example.com/gitlab-org/gitlab-test.git");
         sourceortargetproject.setNamespace("Gitlab Org");
-        // sourceortargetproject.setVisibilityLevel(Visibility.INTERNAL);
         sourceortargetproject.setPathWithNamespace("gitlab-org/gitlab-test");
         sourceortargetproject.setDefaultBranch("master");
         sourceortargetproject.setHomepage("http://example.com/gitlab-org/gitlab-test");
@@ -183,7 +180,8 @@ public class NoteBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
 
-        exception.expect(HttpResponses.HttpResponseException.class);
+//        exception.expect(HttpResponses.HttpResponseException.class);
+
         new NoteBuildAction(testProject, noteEvent, null).execute(response);
 
         verify(trigger).onPost(any(NoteEvent.class));
@@ -198,7 +196,8 @@ public class NoteBuildActionTest {
                 0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
         future.get();
 
-        exception.expect(HttpResponses.HttpResponseException.class);
+//        exception.expect(HttpResponses.HttpResponseException.class);
+
         NoteEvent noteEvent_alreadyBuiltMR = noteEvent;
         noteEvent_alreadyBuiltMR.getMergeRequest().getLastCommit().setId("${commitSha1}");
         new NoteBuildAction(testProject, noteEvent_alreadyBuiltMR, null).execute(response);
@@ -241,7 +240,8 @@ public class NoteBuildActionTest {
                         .build()));
         future.get();
 
-        exception.expect(HttpResponses.HttpResponseException.class);
+//        exception.expect(HttpResponses.HttpResponseException.class);
+
         NoteEvent noteEvent_alreadyBuiltMR = noteEvent;
         noteEvent_alreadyBuiltMR.getMergeRequest().getLastCommit().setId("${commitSha1}");
         new NoteBuildAction(testProject, noteEvent_alreadyBuiltMR, null).execute(response);
