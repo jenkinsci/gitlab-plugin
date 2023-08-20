@@ -4,7 +4,6 @@ import static com.dabsquared.gitlabjenkins.connection.Messages.connection_error;
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_success;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockserver.model.HttpRequest.request;
@@ -17,8 +16,6 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
-
-import hudson.ProxyConfiguration;
 import hudson.model.Item;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.util.FormValidation;
@@ -91,20 +88,20 @@ public class GitLabConnectionConfigTest {
         assertThat(doCheckConnection("V4", Response.Status.FORBIDDEN), is(expected));
     }
     // TODO: Adapt proxy tests during proxy implementation
-//        @Test
-//        public void doCheckConnection_proxy() {
-//            jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
-//            GitLabConnection.DescriptorImpl descriptor =
-//                    (DescriptorImpl) jenkins.jenkins.getDescriptorOrDie(GitLabConnection.class);
-//            FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 10, 10);
-//            assertThat(result.getMessage(), containsString("Connection refused"));
-//        }
-//
-//        @Test
-//        public void doCheckConnection_noProxy() {
-//            jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
-//            assertThat(doCheckConnection("V4", Response.Status.OK), is(connection_success()));
-//        }
+    //        @Test
+    //        public void doCheckConnection_proxy() {
+    //            jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
+    //            GitLabConnection.DescriptorImpl descriptor =
+    //                    (DescriptorImpl) jenkins.jenkins.getDescriptorOrDie(GitLabConnection.class);
+    //            FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 10, 10);
+    //            assertThat(result.getMessage(), containsString("Connection refused"));
+    //        }
+    //
+    //        @Test
+    //        public void doCheckConnection_noProxy() {
+    //            jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
+    //            assertThat(doCheckConnection("V4", Response.Status.OK), is(connection_success()));
+    //        }
 
     private String doCheckConnection(String clientBuilderId, Response.Status status) {
         HttpRequest request =

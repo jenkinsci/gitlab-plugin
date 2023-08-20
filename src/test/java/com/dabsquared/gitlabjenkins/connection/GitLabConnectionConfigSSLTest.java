@@ -170,10 +170,10 @@ public class GitLabConnectionConfigSSLTest {
         GitLabConnection.DescriptorImpl descriptor =
                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation =
-            null;
+        FormValidation formValidation = null;
         if (descriptor != null) {
-            formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "V4", false, 60, 60);
+            formValidation = descriptor.doTestConnection(
+                    "https://localhost:" + port + "/gitlab", API_TOKEN_ID, "V4", false, 60, 60);
         }
         if (formValidation != null) {
             assertThat(
@@ -182,7 +182,8 @@ public class GitLabConnectionConfigSSLTest {
                             containsString(
                                     Messages.connection_error(
                                             "javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")),
-                            containsString(Messages.connection_error("java.net.SocketTimeoutException: Read timed out"))));
+                            containsString(
+                                    Messages.connection_error("java.net.SocketTimeoutException: Read timed out"))));
         }
     }
 }
