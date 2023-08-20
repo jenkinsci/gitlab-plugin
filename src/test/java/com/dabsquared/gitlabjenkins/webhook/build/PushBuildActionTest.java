@@ -184,10 +184,6 @@ public class PushBuildActionTest {
         verify(trigger, never()).onPost(any(PushEvent.class));
     }
 
-    private String getJson(String name) throws IOException {
-        return IOUtils.toString(getClass().getResourceAsStream(name));
-    }
-
     @Test
     public void scmSourceOnUpdateExecuted() {
         GitSCMSource source = new GitSCMSource("http://test");
