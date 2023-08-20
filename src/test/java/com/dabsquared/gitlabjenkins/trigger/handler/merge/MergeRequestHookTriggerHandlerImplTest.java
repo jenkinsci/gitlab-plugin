@@ -31,6 +31,7 @@ import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.MergeRequestEvent;
 import org.gitlab4j.api.webhook.MergeRequestEvent.ObjectAttributes;
+import org.gitlab4j.api.Constants.ActionType;
 import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -511,19 +512,23 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     private OneShotEvent doHandle(MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, ActionType action)
             throws GitAPIException, IOException, InterruptedException {
-        return doHandle(mergeRequestHookTriggerHandler, action);
+        defaultMergeRequestObjectAttributes().setAction(action.name().toUpperCase());
+        return doHandle(mergeRequestHookTriggerHandler, defaultMergeRequestObjectAttributes());
     }
 
     private OneShotEvent doHandle(
             MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, MergeRequestState state)
             throws GitAPIException, IOException, InterruptedException {
-        return doHandle(mergeRequestHookTriggerHandler, state);
+        defaultMergeRequestObjectAttributes().setState(state.name().toUpperCase());
+        return doHandle(mergeRequestHookTriggerHandler, defaultMergeRequestObjectAttributes());
     }
 
     private OneShotEvent doHandle(
             MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, MergeRequestState state, ActionType action)
             throws GitAPIException, IOException, InterruptedException {
-        return doHandle(mergeRequestHookTriggerHandler, state, action);
+        defaultMergeRequestObjectAttributes().setAction(action.name().toUpperCase());
+        defaultMergeRequestObjectAttributes().setState(state.name().toUpperCase());
+        return doHandle(mergeRequestHookTriggerHandler, defaultMergeRequestObjectAttributes());
     }
 
     private OneShotEvent doHandle(
