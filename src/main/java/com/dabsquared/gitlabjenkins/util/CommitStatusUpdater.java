@@ -306,7 +306,7 @@ public class CommitStatusUpdater {
         for (Cause cause : causes) {
             if (cause instanceof UpstreamCause) {
                 List<Cause> upCauses =
-                        ((UpstreamCause) cause).getUpstreamCauses(); // Non null, returns empty list when none are set
+                        ((UpstreamCause) cause).getUpstreamCauses(); // Non-null, returns empty list when none are set
                 for (Cause upCause : upCauses) {
                     if (upCause instanceof GitLabWebHookCause) {
                         GitLabWebHookCause gitlabCause = (GitLabWebHookCause) upCause;

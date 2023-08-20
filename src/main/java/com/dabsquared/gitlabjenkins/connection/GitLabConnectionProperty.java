@@ -34,7 +34,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
  */
 public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
-    private String gitLabConnection;
+    private final String gitLabConnection;
     private String jobCredentialId;
     private boolean useAlternativeCredential = false;
 
