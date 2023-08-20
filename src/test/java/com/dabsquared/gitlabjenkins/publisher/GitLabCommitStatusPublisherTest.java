@@ -121,14 +121,14 @@ public class GitLabCommitStatusPublisherTest {
         prebuildAndVerify(build, listener, requests);
     }
 
-//    @Test
-//    public void canceled_v4() throws IOException, InterruptedException {
-//        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED, "test/project.git");
-//        HttpRequest[] requests =
-//                prepareCheckCommitStatusRequests(v4ApiLevel, build, CommitBuildState.CANCELED);
-//
-//        performAndVerify(build, false, requests);
-//    }
+    @Test
+    public void canceled_v4() throws IOException, InterruptedException {
+        AbstractBuild<?, ?> build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED, "test/project.git");
+        HttpRequest[] requests =
+                prepareCheckCommitStatusRequests(v4ApiLevel, build, CommitBuildState.CANCELED);
+
+        performAndVerify(build, false, requests);
+    }
 
 //    @Test
 //    public void canceledWithLibrary() throws IOException, InterruptedException {
