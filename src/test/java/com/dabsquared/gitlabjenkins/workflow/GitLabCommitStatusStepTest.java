@@ -16,6 +16,7 @@ public class GitLabCommitStatusStepTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
+    // TODO: may need to update test once the logic is checked
     @Test
     public void bare_gitlabCommitStatus() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -28,6 +29,7 @@ public class GitLabCommitStatusStepTest {
         j.assertLogContains("Started", build);
     }
 
+    // TODO: may need to update test once the logic is checked
     @Test
     public void named_simple_pipeline_builds_as_LString() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -40,6 +42,7 @@ public class GitLabCommitStatusStepTest {
         j.assertLogContains("Started", build);
     }
 
+    // TODO: may need to update test once the logic is checked
     @Test
     public void named_simple_pipeline_builds_as_String() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -52,6 +55,7 @@ public class GitLabCommitStatusStepTest {
         j.assertLogContains("Started", build);
     }
 
+    // TODO: may need to update test once the logic is checked
     @Test
     public void multisite() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -63,6 +67,7 @@ public class GitLabCommitStatusStepTest {
         j.assertLogContains("Started", build);
     }
 
+    // TODO: may need to update test once the logic is checked
     @Test
     public void multiproject_specific_connection() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -75,6 +80,7 @@ public class GitLabCommitStatusStepTest {
         j.assertLogContains("Started", build);
     }
 
+    // TODO: may need to update test once the logic is checked
     @Test
     public void multiproject() throws Exception {
         WorkflowJob project = j.createProject(WorkflowJob.class);
