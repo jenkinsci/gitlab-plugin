@@ -109,7 +109,8 @@ public class PendingBuildsHandlerTest {
                 .withTargetUrl(jenkins.getURL() + "nullprefix/workflowJob/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
-//        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.PENDING), refEq(status));
+        //        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.PENDING),
+        // refEq(status));
         verify(commitsApi);
     }
 
@@ -137,8 +138,10 @@ public class PendingBuildsHandlerTest {
                 .withTargetUrl(jenkins.getURL() + "/job/project1/display/redirect");
 
         when(gitLabClient.getCommitsApi()).thenReturn(commitsApi);
-//        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.CANCELED), refEq(status));
-//        verify(commitsApi).addCommitStatus(eq(1L), eq("commit2"), eq(CommitBuildState.CANCELED), refEq(status));
+        //        verify(commitsApi).addCommitStatus(eq(1L), eq("commit1"), eq(CommitBuildState.CANCELED),
+        // refEq(status));
+        //        verify(commitsApi).addCommitStatus(eq(1L), eq("commit2"), eq(CommitBuildState.CANCELED),
+        // refEq(status));
         verify(commitsApi);
 
         // The length should be 3

@@ -196,9 +196,9 @@ public class PushHookTriggerHandlerImplTest {
                 newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));
         buildTriggered.block(10000);
-        // TODO: should expect true, but fails
+        // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-        // TODO: should be 2, but fails
+        // TODO: Should be 2, but fails
         assertThat(buildCount.intValue(), is(1));
     }
 

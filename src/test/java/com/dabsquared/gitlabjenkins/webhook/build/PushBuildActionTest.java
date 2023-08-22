@@ -24,14 +24,12 @@ import java.util.List;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
 import jenkins.scm.api.SCMSourceOwner;
-import org.apache.commons.io.IOUtils;
 import org.gitlab4j.api.models.AccessLevel;
 import org.gitlab4j.api.models.Author;
 import org.gitlab4j.api.webhook.EventCommit;
 import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.PushEvent;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -177,7 +175,7 @@ public class PushBuildActionTest {
         when(trigger.getSecretToken()).thenReturn("secret");
         testProject.addTrigger(trigger);
 
-         exception.expect(HttpResponses.HttpResponseException.class);
+        exception.expect(HttpResponses.HttpResponseException.class);
         new PushBuildAction(testProject, pushEvent, "wrong-secret").execute(response);
 
         verify(trigger, never()).onPost(any(PushEvent.class));

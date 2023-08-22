@@ -192,7 +192,7 @@ public class CommitStatusUpdaterTest {
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
-//        verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
+        //        verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
 
         verifyNoInteractions(commitsApi);
     }
@@ -208,7 +208,8 @@ public class CommitStatusUpdaterTest {
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
-//        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
+        //        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS,
+        // status);
 
         verify(commitsApi);
     }
@@ -228,11 +229,12 @@ public class CommitStatusUpdaterTest {
 
         when(gitLabApi.getCommitsApi()).thenReturn(commitsApi);
 
-//        verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
+        //        verify(commitsApi).addCommitStatus(PROJECT_ID, REVISION, CommitBuildState.SUCCESS, status);
 
         verify(commitsApi, Mockito.atLeastOnce()).getCommit(any(String.class), any(String.class));
-        verify(commitsApi, Mockito.atLeastOnce()).addCommitStatus(any(String.class), any(String.class),
-            any(CommitBuildState.class), any(CommitStatus.class));
+        verify(commitsApi, Mockito.atLeastOnce())
+                .addCommitStatus(
+                        any(String.class), any(String.class), any(CommitBuildState.class), any(CommitStatus.class));
     }
 
     // TODO: Check test for logic and fix later if needed
@@ -249,11 +251,13 @@ public class CommitStatusUpdaterTest {
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
-//        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
+        //        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS,
+        // status);
 
         verify(commitsApi, Mockito.atLeastOnce()).getCommit(any(String.class), any(String.class));
-        verify(commitsApi, Mockito.atLeastOnce()).addCommitStatus(any(String.class), any(String.class),
-            any(CommitBuildState.class), any(CommitStatus.class));
+        verify(commitsApi, Mockito.atLeastOnce())
+                .addCommitStatus(
+                        any(String.class), any(String.class), any(CommitBuildState.class), any(CommitStatus.class));
     }
 
     // TODO: Check test for logic and fix later if needed
@@ -296,10 +300,12 @@ public class CommitStatusUpdaterTest {
                 .withCoverage(null)
                 .withTargetUrl(DisplayURLProvider.get().getRunURL(build));
 
-//        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS, status);
+        //        verify(commitsApi).addCommitStatus(Long.toString(PROJECT_ID), REVISION, CommitBuildState.SUCCESS,
+        // status);
 
         verify(commitsApi, Mockito.atLeastOnce()).getCommit(any(String.class), any(String.class));
-        verify(commitsApi, Mockito.atLeastOnce()).addCommitStatus(any(String.class), any(String.class),
-                any(CommitBuildState.class), any(CommitStatus.class));
+        verify(commitsApi, Mockito.atLeastOnce())
+                .addCommitStatus(
+                        any(String.class), any(String.class), any(CommitBuildState.class), any(CommitStatus.class));
     }
 }

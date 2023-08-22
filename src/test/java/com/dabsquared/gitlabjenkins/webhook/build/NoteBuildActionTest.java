@@ -182,7 +182,7 @@ public class NoteBuildActionTest {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
 
-//        exception.expect(HttpResponses.HttpResponseException.class);
+        //        exception.expect(HttpResponses.HttpResponseException.class);
 
         new NoteBuildAction(testProject, noteEvent, null).execute(response);
 
@@ -198,7 +198,7 @@ public class NoteBuildActionTest {
                 0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
         future.get();
 
-//        exception.expect(HttpResponses.HttpResponseException.class);
+        //        exception.expect(HttpResponses.HttpResponseException.class);
 
         NoteEvent noteEvent_alreadyBuiltMR = noteEvent;
         noteEvent_alreadyBuiltMR.getMergeRequest().getLastCommit().setId("${commitSha1}");
@@ -242,7 +242,7 @@ public class NoteBuildActionTest {
                         .build()));
         future.get();
 
-//        exception.expect(HttpResponses.HttpResponseException.class);
+        //        exception.expect(HttpResponses.HttpResponseException.class);
 
         NoteEvent noteEvent_alreadyBuiltMR = noteEvent;
         noteEvent_alreadyBuiltMR.getMergeRequest().getLastCommit().setId("${commitSha1}");
