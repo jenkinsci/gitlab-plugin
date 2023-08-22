@@ -310,6 +310,9 @@ public class CommitStatusUpdater {
                 for (Cause upCause : upCauses) {
                     if (upCause instanceof GitLabWebHookCause) {
                         GitLabWebHookCause gitlabCause = (GitLabWebHookCause) upCause;
+                        if (gitlabCause.getData() == null) {
+                            return Collections.emptyList();
+                        }
                         return Collections.singletonList(new GitLabBranchBuild(
                                 gitlabCause.getData().getSourceProjectId().toString(),
                                 gitlabCause.getData().getLastCommit()));
