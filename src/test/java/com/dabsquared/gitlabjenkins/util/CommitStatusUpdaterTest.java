@@ -183,7 +183,7 @@ public class CommitStatusUpdaterTest {
 
     // TODO: Check test for logic and fix later if needed
     @Test
-    public void buildStateUpdateTest() throws GitLabApiException {
+    public void buildStateUpdateTest() {
         CommitStatusUpdater.updateCommitStatus(build, taskListener, CommitBuildState.SUCCESS, STAGE);
 
         CommitStatus status = new CommitStatus();

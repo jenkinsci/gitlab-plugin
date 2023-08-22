@@ -263,8 +263,14 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     @Override
     protected URIish retrieveUrIish(MergeRequestEvent event) {
         try {
-            if (event.getProject().getUrl() != null) {
-                return new URIish(event.getProject().getUrl());
+            if (event.getProject() != null) {
+                if (event.getProject().getUrl() != null) {
+                    return new URIish(event.getProject().getUrl());
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
             }
         } catch (URISyntaxException e) {
             LOGGER.log(Level.WARNING, "could not parse URL");
