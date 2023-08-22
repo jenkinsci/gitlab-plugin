@@ -4,8 +4,6 @@ import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -13,15 +11,19 @@ import com.dabsquared.gitlabjenkins.trigger.handler.AbstractWebHookTriggerHandle
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.StringUtils;
+import org.gitlab4j.api.webhook.EventCommit;
+import org.gitlab4j.api.webhook.PushEvent;
 
 /**
  * @author Robin Müller
  */
-class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook> implements PushHookTriggerHandler {
+class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushEvent> implements PushHookTriggerHandler {
 
     private static final String NO_COMMIT = "0000000000000000000000000000000000000000";
     private boolean triggerToBranchDeleteRequest = false;
@@ -35,18 +37,18 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     @Override
     public void handle(
             Job<?, ?> job,
-            PushHook hook,
+            PushEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
-        if (isNoRemoveBranchPush(hook) || this.triggerToBranchDeleteRequest) {
-            super.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+        if (isNoRemoveBranchPush(event) || this.triggerToBranchDeleteRequest) {
+            super.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
 
     @Override
-    protected boolean isCiSkip(PushHook hook) {
-        List<Commit> commits = hook.getCommits();
+    protected boolean isCiSkip(PushEvent event) {
+        List<EventCommit> commits = event.getCommits();
         return commits != null
                 && !commits.isEmpty()
                 && commits.get(commits.size() - 1).getMessage() != null
@@ -54,25 +56,24 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected CauseData retrieveCauseData(PushHook hook) {
+    protected CauseData retrieveCauseData(PushEvent event) {
         try {
-            CauseData.ActionType actionType =
-                    hook.getObjectKind().equals("tag_push") ? CauseData.ActionType.TAG_PUSH : CauseData.ActionType.PUSH;
+            CauseData.ActionType actionType = CauseData.ActionType.PUSH;
             return causeData()
                     .withActionType(actionType)
-                    .withSourceProjectId(hook.getProjectId())
-                    .withTargetProjectId(hook.getProjectId())
-                    .withBranch(getTargetBranch(hook))
-                    .withSourceBranch(getTargetBranch(hook))
-                    .withUserName(hook.getUserName())
-                    .withUserUsername(hook.getUserUsername())
-                    .withUserEmail(hook.getUserEmail())
-                    .withSourceRepoHomepage(hook.getRepository().getHomepage())
-                    .withSourceRepoName(hook.getRepository().getName())
-                    .withSourceNamespace(hook.getProject().getNamespace())
-                    .withSourceRepoUrl(hook.getRepository().getUrl())
-                    .withSourceRepoSshUrl(hook.getRepository().getGitSshUrl())
-                    .withSourceRepoHttpUrl(hook.getRepository().getGitHttpUrl())
+                    .withSourceProjectId(event.getProjectId())
+                    .withTargetProjectId(event.getProjectId())
+                    .withBranch(getTargetBranch(event))
+                    .withSourceBranch(getTargetBranch(event))
+                    .withUserName(event.getUserName())
+                    .withUserUsername(event.getUserUsername())
+                    .withUserEmail(event.getUserEmail())
+                    .withSourceRepoHomepage(event.getRepository().getHomepage())
+                    .withSourceRepoName(event.getRepository().getName())
+                    .withSourceNamespace(event.getProject().getNamespace())
+                    .withSourceRepoUrl(event.getRepository().getUrl())
+                    .withSourceRepoSshUrl(event.getRepository().getGit_ssh_url())
+                    .withSourceRepoHttpUrl(event.getRepository().getGit_http_url())
                     .withMergeCommitSha(null)
                     .withMergeRequestTitle("")
                     .withMergeRequestDescription("")
@@ -82,16 +83,16 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
                     .withMergedByUser("")
                     .withMergeRequestAssignee("")
                     .withMergeRequestTargetProjectId(null)
-                    .withTargetBranch(getTargetBranch(hook))
+                    .withTargetBranch(getTargetBranch(event))
                     .withTargetRepoName("")
                     .withTargetNamespace("")
                     .withTargetRepoSshUrl("")
                     .withTargetRepoHttpUrl("")
-                    .withTriggeredByUser(retrievePushedBy(hook))
-                    .withBefore(hook.getBefore())
-                    .withAfter(hook.getAfter())
-                    .withLastCommit(hook.getAfter())
-                    .withTargetProjectUrl(hook.getProject().getWebUrl())
+                    .withTriggeredByUser(retrievePushedBy(event))
+                    .withBefore(event.getBefore())
+                    .withAfter(event.getAfter())
+                    .withLastCommit(event.getAfter())
+                    .withTargetProjectUrl(event.getProject().getWebUrl())
                     .build();
         } catch (NullPointerException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
@@ -100,13 +101,13 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected String getSourceBranch(PushHook hook) {
-        return hook.getRef() == null ? null : hook.getRef().replaceFirst("^refs/heads/", "");
+    protected String getSourceBranch(PushEvent event) {
+        return event.getRef() == null ? null : event.getRef().replaceFirst("^refs/heads/", "");
     }
 
     @Override
-    protected String getTargetBranch(PushHook hook) {
-        return hook.getRef() == null ? null : hook.getRef().replaceFirst("^refs/heads/", "");
+    protected String getTargetBranch(PushEvent event) {
+        return event.getRef() == null ? null : event.getRef().replaceFirst("^refs/heads/", "");
     }
 
     @Override
@@ -115,32 +116,44 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(PushHook hook, GitSCM gitSCM)
+    protected RevisionParameterAction createRevisionParameter(PushEvent event, GitSCM gitSCM)
             throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook, gitSCM), retrieveUrIish(hook));
+        return new RevisionParameterAction(retrieveRevisionToBuild(event, gitSCM), retrieveUrIish(event));
     }
 
     @Override
-    protected BuildStatusUpdate retrieveBuildStatusUpdate(PushHook hook) {
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(PushEvent event) {
         return buildStatusUpdate()
-                .withProjectId(hook.getProjectId())
-                .withSha(hook.getAfter())
-                .withRef(getTargetBranch(hook))
+                .withProjectId(event.getProjectId())
+                .withSha(event.getAfter())
+                .withRef(getTargetBranch(event))
                 .build();
     }
 
-    private String retrievePushedBy(final PushHook hook) {
-        final String userName = hook.getUserName();
+    @Override
+    protected URIish retrieveUrIish(PushEvent event) {
+        try {
+            if (event.getProject().getUrl() != null) {
+                return new URIish(event.getProject().getUrl());
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+        }
+        return null;
+    }
+
+    private String retrievePushedBy(final PushEvent event) {
+        final String userName = event.getUserName();
         if (!StringUtils.isEmptyOrNull(userName)) {
             return userName;
         }
 
-        final String userUsername = hook.getUserUsername();
+        final String userUsername = event.getUserUsername();
         if (!StringUtils.isEmptyOrNull(userUsername)) {
             return userUsername;
         }
 
-        final List<Commit> commits = hook.getCommits();
+        final List<EventCommit> commits = event.getCommits();
         if (commits != null && !commits.isEmpty()) {
             return commits.get(commits.size() - 1).getAuthor().getName();
         }
@@ -148,24 +161,24 @@ class PushHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PushHook>
         return null;
     }
 
-    private String retrieveRevisionToBuild(PushHook hook, GitSCM gitSCM) throws NoRevisionToBuildException {
-        if (inNoBranchDelete(hook)) {
+    private String retrieveRevisionToBuild(PushEvent event, GitSCM gitSCM) throws NoRevisionToBuildException {
+        if (inNoBranchDelete(event)) {
             if (gitSCM != null && gitSCM.getRepositories().size() == 1) {
                 String repositoryName = gitSCM.getRepositories().get(0).getName();
-                return hook.getRef().replaceFirst("^refs/heads", "remotes/" + repositoryName);
+                return event.getRef().replaceFirst("^refs/heads", "remotes/" + repositoryName);
             } else {
-                return hook.getAfter();
+                return event.getAfter();
             }
         } else {
             throw new NoRevisionToBuildException();
         }
     }
 
-    private boolean inNoBranchDelete(PushHook hook) {
-        return hook.getAfter() != null && !hook.getAfter().equals(NO_COMMIT);
+    private boolean inNoBranchDelete(PushEvent event) {
+        return event.getAfter() != null && !event.getAfter().equals(NO_COMMIT);
     }
 
-    private boolean isNoRemoveBranchPush(PushHook hook) {
-        return hook.getAfter() != null && !hook.getAfter().equals(NO_COMMIT);
+    private boolean isNoRemoveBranchPush(PushEvent event) {
+        return event.getAfter() != null && !event.getAfter().equals(NO_COMMIT);
     }
 }

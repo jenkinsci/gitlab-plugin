@@ -1,21 +1,16 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
-
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
-import com.dabsquared.gitlabjenkins.util.JsonUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.gitlab4j.api.webhook.EventProject;
+import org.gitlab4j.api.webhook.PipelineEvent;
+import org.gitlab4j.api.webhook.PipelineEvent.ObjectAttributes;
 
 /**
  * @author Milena Zachow
@@ -24,43 +19,27 @@ public class PipelineBuildAction extends BuildWebHookAction {
 
     private static final Logger LOGGER = Logger.getLogger(PipelineBuildAction.class.getName());
     private Item project;
-    private PipelineHook pipelineBuildHook;
+    private PipelineEvent pipelineEvent;
     private final String secretToken;
 
-    public PipelineBuildAction(Item project, String json, String secretToken) {
-        LOGGER.log(Level.FINE, "Pipeline event: {0}", toPrettyPrint(json));
+    public PipelineBuildAction(Item project, PipelineEvent pipelineEvent, String secretToken) {
+        LOGGER.log(Level.FINE, pipelineEvent.toString());
         this.project = project;
-        this.pipelineBuildHook = JsonUtil.read(json, PipelineHook.class);
-        this.secretToken = secretToken;
-    }
-
-    /**
-     * Alternative Constructor which takes in an already deserialized Json Tree.
-     * @param project Jenkins Project Item
-     * @param json Payload Json Tree
-     * @param secretToken Secret Token
-     */
-    public PipelineBuildAction(Item project, JsonNode json, String secretToken) {
-        LOGGER.log(Level.FINE, "Pipeline event: {0}", toPrettyPrint(json));
-        this.project = project;
-        this.pipelineBuildHook = JsonUtil.read(json, PipelineHook.class);
+        this.pipelineEvent = pipelineEvent;
         this.secretToken = secretToken;
     }
 
     void processForCompatibility() {
         // if no project is defined, set it here
-        if (this.pipelineBuildHook.getProject() == null && this.pipelineBuildHook.getRepository() != null) {
-            try {
-                String path = new URL(this.pipelineBuildHook.getRepository().getGitHttpUrl()).getPath();
-                if (StringUtils.isNotBlank(path)) {
-                    Project project = new Project();
-                    project.setNamespace(path.replaceFirst("/", "").substring(0, path.lastIndexOf("/")));
-                    this.pipelineBuildHook.setProject(project);
-                } else {
-                    LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
-                }
-            } catch (MalformedURLException ignored) {
-                LOGGER.log(Level.WARNING, "Invalid repository url found while building namespace.");
+        final ObjectAttributes attributes = this.pipelineEvent.getObjectAttributes();
+        if (this.pipelineEvent.getProject() == null && attributes != null) {
+            final String source = attributes.getSource();
+            if (source != null) {
+                EventProject project = new EventProject();
+                project.setNamespace(source.replaceFirst("/", "").substring(0, source.lastIndexOf("/")));
+                this.pipelineEvent.setProject(project);
+            } else {
+                LOGGER.log(Level.WARNING, "Could not find suitable namespace.");
             }
         }
     }
@@ -72,9 +51,9 @@ public class PipelineBuildAction extends BuildWebHookAction {
         ACL.impersonate(ACL.SYSTEM, new TriggerNotifier(project, secretToken, Jenkins.getAuthentication()) {
             @Override
             protected void performOnPost(GitLabPushTrigger trigger) {
-                trigger.onPost(pipelineBuildHook);
+                trigger.onPost(pipelineEvent);
             }
         });
-        throw HttpResponses.ok();
+        return;
     }
 }

@@ -3,7 +3,6 @@ package com.dabsquared.gitlabjenkins.trigger.handler;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -14,7 +13,6 @@ import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.scm.SCM;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +30,7 @@ import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 /**
  * @author Robin Müller
  */
-public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implements WebHookTriggerHandler<H> {
+public abstract class AbstractWebHookTriggerHandler<E> implements WebHookTriggerHandler<E> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
     protected PendingBuildsHandler pendingBuildsHandler = new PendingBuildsHandler();
@@ -40,22 +38,22 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     @Override
     public void handle(
             Job<?, ?> job,
-            H hook,
+            E event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
-        if (ciSkip && isCiSkip(hook)) {
+        if (ciSkip && isCiSkip(event)) {
             LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
             return;
         }
 
-        String sourceBranch = getSourceBranch(hook);
-        String targetBranch = getTargetBranch(hook);
+        String sourceBranch = getSourceBranch(event);
+        String targetBranch = getTargetBranch(event);
         if (branchFilter.isBranchAllowed(sourceBranch, targetBranch)) {
             LOGGER.log(Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
-            cancelPendingBuildsIfNecessary(job, hook);
-            setCommitStatusPendingIfNecessary(job, hook);
-            scheduleBuild(job, createActions(job, hook));
+            cancelPendingBuildsIfNecessary(job, event);
+            setCommitStatusPendingIfNecessary(job, event);
+            scheduleBuild(job, createActions(job, event));
         } else {
             LOGGER.log(Level.INFO, "Source branch {0} or target branch {1} is not allowed", new Object[] {
                 sourceBranch, targetBranch
@@ -65,15 +63,15 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected abstract String getTriggerType();
 
-    protected abstract boolean isCiSkip(H hook);
+    protected abstract boolean isCiSkip(E event);
 
-    private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
+    private void setCommitStatusPendingIfNecessary(Job<?, ?> job, E event) {
         try {
             String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
             if (StringUtils.isNotBlank(buildName)) {
                 GitLabApi client =
                         job.getProperty(GitLabConnectionProperty.class).getClient();
-                BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
+                BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(event);
                 try {
                     if (client == null) {
                         LOGGER.log(Level.SEVERE, "No GitLab connection configured");
@@ -99,45 +97,34 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         }
     }
 
-    protected Action[] createActions(Job<?, ?> job, H hook) {
+    protected Action[] createActions(Job<?, ?> job, E event) {
         ArrayList<Action> actions = new ArrayList<>();
-        actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook))));
+        actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(event))));
         try {
             SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
             GitSCM gitSCM = getGitSCM(item);
-            actions.add(createRevisionParameter(hook, gitSCM));
+            actions.add(createRevisionParameter(event, gitSCM));
         } catch (NoRevisionToBuildException e) {
             LOGGER.log(
                     Level.WARNING,
                     "unknown handled situation, dont know what revision to build for req {0} for job {1}",
-                    new Object[] {hook, (job != null ? job.getFullName() : null)});
+                    new Object[] {event, (job != null ? job.getFullName() : null)});
         }
         return actions.toArray(new Action[actions.size()]);
     }
 
-    protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, H hook) {}
+    protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, E event) {}
 
-    protected abstract CauseData retrieveCauseData(H hook);
+    protected abstract CauseData retrieveCauseData(E event);
 
-    protected abstract String getSourceBranch(H hook);
+    protected abstract String getSourceBranch(E event);
 
-    protected abstract String getTargetBranch(H hook);
+    protected abstract String getTargetBranch(E event);
 
-    protected abstract RevisionParameterAction createRevisionParameter(H hook, GitSCM gitSCM)
+    protected abstract RevisionParameterAction createRevisionParameter(E event, GitSCM gitSCM)
             throws NoRevisionToBuildException;
 
-    protected abstract BuildStatusUpdate retrieveBuildStatusUpdate(H hook);
-
-    protected URIish retrieveUrIish(WebHook hook) {
-        try {
-            if (hook.getRepository() != null) {
-                return new URIish(hook.getRepository().getUrl());
-            }
-        } catch (URISyntaxException e) {
-            LOGGER.log(Level.WARNING, "could not parse URL");
-        }
-        return null;
-    }
+    protected abstract URIish retrieveUrIish(E event);
 
     protected void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;
@@ -170,6 +157,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         }
         return null;
     }
+
+    protected abstract BuildStatusUpdate retrieveBuildStatusUpdate(E event);
 
     public static class BuildStatusUpdate {
         private final Long projectId;

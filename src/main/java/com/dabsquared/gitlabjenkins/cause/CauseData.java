@@ -1,6 +1,9 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.getClient;
+
 import hudson.markup.EscapedMarkupFormatter;
+import hudson.model.Run;
 import java.util.*;
 import jenkins.model.Jenkins;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
@@ -8,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.MergeRequest;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -299,6 +304,28 @@ public final class CauseData {
     @Exported
     public Long getMergeRequestTargetProjectId() {
         return mergeRequestTargetProjectId;
+    }
+
+    @Exported
+    public MergeRequest getMergeRequest(Run<?, ?> run) throws GitLabApiException {
+        if (mergeRequestId == null) {
+            return null;
+        }
+
+        return getClient(run)
+                .getMergeRequestApi()
+                .createMergeRequest(
+                        sourceProjectId,
+                        sourceBranch,
+                        targetBranch,
+                        mergeRequestTitle,
+                        mergeRequestDescription,
+                        null,
+                        targetProjectId,
+                        null,
+                        null,
+                        false,
+                        null);
     }
 
     @Exported
