@@ -54,7 +54,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
     static {
         // Every negative (or failing positive) test adds 10 seconds to run time. The default 180 seconds might not
         // suffice
-        System.setProperty("jenkins.test.timeout", "450");
+        System.setProperty("jenkins.test.timeout", "600");
         jenkins = new JenkinsRule();
     }
 
