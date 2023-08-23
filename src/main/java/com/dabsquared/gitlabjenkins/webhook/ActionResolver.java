@@ -143,7 +143,7 @@ public class ActionResolver {
         });
     }
 
-    private void setSecretToken(String token) {
+    private static void setSecretToken(String token) {
         secretToken = token;
     }
 

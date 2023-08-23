@@ -23,7 +23,7 @@ public final class V4GitLabClientBuilder extends GitLabClientBuilder {
 
     ProxyConfiguration httpProxyConfig = Jenkins.getActiveInstance().proxy;
     private static final int ORDINAL = 1;
-    GitLabApi client;
+    private transient GitLabApi client;
 
     public V4GitLabClientBuilder() {
         super("V4", ORDINAL);
