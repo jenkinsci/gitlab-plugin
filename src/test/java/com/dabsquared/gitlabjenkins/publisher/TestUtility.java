@@ -15,7 +15,6 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
@@ -44,14 +43,13 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.junit.MockServerRule;
 
 final class TestUtility {
-    static final String GITLAB_CONNECTION_V3 = "GitLabV3";
     static final String GITLAB_CONNECTION_V4 = "GitLabV4";
     static final String BUILD_URL = "/build/123";
     static final String MERGE_COMMIT_SHA = "eKJ3wuqJT98Kc8TCcBK7oggLR1E9Bty7eqSHfSLT";
-    static final int BUILD_NUMBER = 1;
-    static final long PROJECT_ID = 3;
-    static final long MERGE_REQUEST_ID = 1;
-    static final long MERGE_REQUEST_IID = 2;
+    static final Integer BUILD_NUMBER = 1;
+    static final Long PROJECT_ID = 3L;
+    static final Long MERGE_REQUEST_ID = 1L;
+    static final Long MERGE_REQUEST_IID = 2L;
 
     private static final String API_TOKEN = "secret";
 
@@ -70,14 +68,6 @@ final class TestUtility {
                                 Secret.fromString(TestUtility.API_TOKEN)));
             }
         }
-        connectionConfig.addConnection(new GitLabConnection(
-                TestUtility.GITLAB_CONNECTION_V3,
-                "http://localhost:" + mockServer.getPort() + "/gitlab",
-                apiTokenId,
-                new V3GitLabClientBuilder(),
-                false,
-                10,
-                10));
         connectionConfig.addConnection(new GitLabConnection(
                 TestUtility.GITLAB_CONNECTION_V4,
                 "http://localhost:" + mockServer.getPort() + "/gitlab",
@@ -107,8 +97,8 @@ final class TestUtility {
         verify(publisher).perform(parentBuild, null, listener);
     }
 
-    static AbstractBuild mockSimpleBuild(String gitLabConnection, Result result, String... remoteUrls) {
-        AbstractBuild build = mock(AbstractBuild.class);
+    static AbstractBuild<?, ?> mockSimpleBuild(String gitLabConnection, Result result, String... remoteUrls) {
+        AbstractBuild<?, ?> build = mock(AbstractBuild.class);
         BuildData buildData = mock(BuildData.class);
         when(buildData.getRemoteUrls()).thenReturn(new HashSet<>(Arrays.asList(remoteUrls)));
         when(build.getAction(BuildData.class)).thenReturn(buildData);
@@ -132,26 +122,24 @@ final class TestUtility {
                 note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
     }
 
-    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild build)
+    static <P extends MergeRequestNotifier> P preparePublisher(P publisher, AbstractBuild<?, ?> build)
             throws GitLabApiException {
         GitLabApi client = mock(GitLabApi.class);
         MergeRequestApi mergeRequestApi = mock(MergeRequestApi.class);
         P spyPublisher = spy(publisher);
         doReturn(mergeRequestApi).when(client).getMergeRequestApi();
-        MergeRequest mergeRequest = client.getMergeRequestApi()
-                .createMergeRequest(
-                        PROJECT_ID,
-                        "sourceBranch",
-                        "targetBranch",
-                        "title",
-                        "",
-                        null,
-                        PROJECT_ID,
-                        null,
-                        null,
-                        false,
-                        null);
-        doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build);
+        MergeRequest mergeRequest = new MergeRequest();
+        mergeRequest.setId(MERGE_REQUEST_ID);
+        mergeRequest.setIid(MERGE_REQUEST_IID);
+        mergeRequest.setMergeCommitSha(MERGE_COMMIT_SHA);
+        mergeRequest.setTitle("");
+        mergeRequest.setSourceBranch("master");
+        mergeRequest.setTargetBranch("master");
+        mergeRequest.setProjectId(PROJECT_ID);
+        mergeRequest.setSourceProjectId(PROJECT_ID);
+        mergeRequest.setTargetProjectId(PROJECT_ID);
+        mergeRequest.setDescription("");
+        doReturn(mergeRequest).when(spyPublisher).getMergeRequest(build); // bug here
         return spyPublisher;
     }
 

@@ -1,17 +1,17 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import org.gitlab4j.api.webhook.PushEvent;
 
 public interface GitLabPushRequestSamples {
-    PushHook pushBrandNewMasterBranchRequest();
+    PushEvent pushBrandNewMasterBranchRequest();
 
-    PushHook pushNewBranchRequest();
+    PushEvent pushNewBranchRequest();
 
-    PushHook pushCommitRequest();
+    PushEvent pushCommitRequest();
 
-    PushHook mergePushRequest();
+    PushEvent mergePushRequest();
 
-    PushHook pushNewTagRequest();
+    PushEvent pushNewTagRequest();
 
-    PushHook deleteBranchRequest();
+    PushEvent deleteBranchRequest();
 }

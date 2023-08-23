@@ -1,8 +1,6 @@
 package com.dabsquared.gitlabjenkins.publisher;
 
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V3;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.GITLAB_CONNECTION_V4;
-import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.MERGE_REQUEST_IID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.PROJECT_ID;
 import static com.dabsquared.gitlabjenkins.publisher.TestUtility.formatNote;
@@ -66,18 +64,8 @@ public class GitLabVotePublisherTest {
     }
 
     @Test
-    public void success_v3() throws IOException, InterruptedException, GitLabApiException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "V3", MERGE_REQUEST_ID, "thumbsup");
-    }
-
-    @Test
     public void success_v4() throws IOException, InterruptedException, GitLabApiException {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "V4", MERGE_REQUEST_IID, "thumbsup");
-    }
-
-    @Test
-    public void failed_v3() throws IOException, InterruptedException, GitLabApiException {
-        performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "V3", MERGE_REQUEST_ID, "thumbsdown");
     }
 
     @Test

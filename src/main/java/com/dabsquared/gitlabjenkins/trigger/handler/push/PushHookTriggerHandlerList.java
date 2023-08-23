@@ -1,10 +1,10 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import hudson.model.Job;
 import java.util.List;
+import org.gitlab4j.api.webhook.PushEvent;
 
 /**
  * @author Robin Müller
@@ -20,12 +20,12 @@ class PushHookTriggerHandlerList implements PushHookTriggerHandler {
     @Override
     public void handle(
             Job<?, ?> job,
-            PushHook hook,
+            PushEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
         for (PushHookTriggerHandler handler : handlers) {
-            handler.handle(job, hook, ciSkip, branchFilter, mergeRequestLabelFilter);
+            handler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
         }
     }
 }

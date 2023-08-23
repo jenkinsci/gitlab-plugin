@@ -6,11 +6,11 @@ import static org.apache.commons.lang.StringUtils.split;
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
 import com.dabsquared.gitlabjenkins.MergeRequestTriggerConfig;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.gitlab4j.api.Constants.ActionType;
+import org.gitlab4j.api.Constants.MergeRequestState;
 
 /**
  * @author Robin Müller
@@ -33,13 +33,13 @@ public final class MergeRequestHookTriggerHandlerFactory {
         TriggerConfigChain chain = new TriggerConfigChain();
         chain.acceptOnlyIf(
                         triggerOpenMergeRequest != TriggerOpenMergeRequest.never,
-                        of(State.opened, State.updated),
-                        of(Action.update))
-                .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
-                .acceptIf(triggerOnMergeRequest, of(State.opened, State.reopened), null)
-                .acceptIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
-                .acceptIf(triggerOnClosedMergeRequest, null, of(Action.close))
-                .acceptIf(triggerOnClosedMergeRequest, of(State.closed), null);
+                        of(MergeRequestState.ALL),
+                        of(ActionType.UPDATED))
+                .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(ActionType.APPROVED))
+                .acceptIf(triggerOnMergeRequest, of(MergeRequestState.ALL), null)
+                .acceptIf(triggerOnAcceptedMergeRequest, null, of(ActionType.MERGED))
+                .acceptIf(triggerOnClosedMergeRequest, null, of(ActionType.CLOSED))
+                .acceptIf(triggerOnClosedMergeRequest, of(MergeRequestState.CLOSED), null);
 
         Set<String> labelsThatForcesBuildIfAddedSet =
                 Stream.of(split(trimToEmpty(labelsThatForcesBuildIfAdded), ",")).collect(toSet());

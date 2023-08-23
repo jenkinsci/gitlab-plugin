@@ -28,11 +28,11 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     public GitLabAcceptMergeRequestPublisher() {}
 
     @DataBoundSetter
-    public void setDeleteSourceBranch(boolean deleteSourceBranch) {
+    public void setDeleteSourceBranch(Boolean deleteSourceBranch) {
         this.deleteSourceBranch = deleteSourceBranch;
     }
 
-    public boolean isDeleteSourceBranch() {
+    public Boolean isDeleteSourceBranch() {
         return deleteSourceBranch;
     }
 
@@ -57,14 +57,15 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     @Override
     protected void perform(Run<?, ?> build, TaskListener listener, GitLabApi client, MergeRequest mergeRequest) {
         try {
+
             if (build.getResult() == Result.SUCCESS) {
                 client.getMergeRequestApi()
                         .acceptMergeRequest(
-                                mergeRequest,
+                                mergeRequest.getProjectId(),
                                 mergeRequest.getIid(),
                                 "Merge Request accepted by jenkins build success",
                                 isDeleteSourceBranch(),
-                                true);
+                                Boolean.TRUE);
             }
         } catch (GitLabApiException e) {
             listener.getLogger()
