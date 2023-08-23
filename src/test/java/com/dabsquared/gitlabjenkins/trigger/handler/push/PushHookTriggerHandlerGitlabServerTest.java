@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_7_10_5_489b413;
 import com.dabsquared.gitlabjenkins.testhelpers.GitLabPushRequestSamples_7_5_1_36679b5;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.gitlab4j.api.webhook.PushEvent;
 import org.junit.Rule;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
@@ -43,104 +43,104 @@ public class PushHookTriggerHandlerGitlabServerTest {
     @Theory
     public void createRevisionParameterAction_pushBrandNewMasterBranchRequest(GitLabPushRequestSamples samples)
             throws Exception {
-        PushHook hook = samples.pushBrandNewMasterBranchRequest();
+        PushEvent event = samples.pushBrandNewMasterBranchRequest();
 
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void createRevisionParameterAction_mergeRequestMergePushRequest(GitLabPushRequestSamples samples)
             throws Exception {
-        PushHook hook = samples.mergePushRequest();
+        PushEvent event = samples.mergePushRequest();
 
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void createRevisionParameterAction_pushCommitRequest(GitLabPushRequestSamples samples) throws Exception {
-        PushHook hook = samples.pushCommitRequest();
+        PushEvent event = samples.pushCommitRequest();
 
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void createRevisionParameterAction_pushNewBranchRequest(GitLabPushRequestSamples samples) throws Exception {
-        PushHook hook = samples.pushNewBranchRequest();
+        PushEvent event = samples.pushNewBranchRequest();
 
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void createRevisionParameterAction_pushNewTagRequest(GitLabPushRequestSamples samples) throws Exception {
-        PushHook hook = samples.pushNewTagRequest();
+        PushEvent event = samples.pushNewTagRequest();
 
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, null);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void doNotCreateRevisionParameterAction_deleteBranchRequest(GitLabPushRequestSamples samples)
             throws Exception {
-        PushHook hook = samples.deleteBranchRequest();
+        PushEvent event = samples.deleteBranchRequest();
 
         exception.expect(NoRevisionToBuildException.class);
-        new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
+        new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, null);
     }
 
     @Theory
     public void createRevisionParameterAction__deleteBranchRequest(GitLabPushRequestSamples samples) throws Exception {
-        PushHook hook = samples.deleteBranchRequest();
+        PushEvent event = samples.deleteBranchRequest();
 
         exception.expect(NoRevisionToBuildException.class);
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(true).createRevisionParameter(hook, null);
+                new PushHookTriggerHandlerImpl(true).createRevisionParameter(event, null);
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void createRevisionParameterAction_pushCommitRequestWithGitScm(GitLabPushRequestSamples samples)
             throws Exception {
-        PushHook hook = samples.pushCommitRequest();
+        PushEvent event = samples.pushCommitRequest();
 
         GitSCM gitSCM = new GitSCM("git@test.tld:test.git");
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, gitSCM);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, gitSCM);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getRef().replaceFirst("^refs/heads", "remotes/origin")));
+        assertThat(revisionParameterAction.commit, is(event.getRef().replaceFirst("^refs/heads", "remotes/origin")));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 
     @Theory
     public void createRevisionParameterAction_pushCommitRequestWith2Remotes(GitLabPushRequestSamples samples)
             throws Exception {
-        PushHook hook = samples.pushCommitRequest();
+        PushEvent event = samples.pushCommitRequest();
 
         GitSCM gitSCM = new GitSCM(
                 Arrays.asList(
@@ -153,10 +153,10 @@ public class PushHookTriggerHandlerGitlabServerTest {
                 null,
                 null);
         RevisionParameterAction revisionParameterAction =
-                new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, gitSCM);
+                new PushHookTriggerHandlerImpl(false).createRevisionParameter(event, gitSCM);
 
         assertThat(revisionParameterAction, is(notNullValue()));
-        assertThat(revisionParameterAction.commit, is(hook.getAfter()));
+        assertThat(revisionParameterAction.commit, is(event.getAfter()));
         assertFalse(revisionParameterAction.canOriginateFrom(new ArrayList<RemoteConfig>()));
     }
 }

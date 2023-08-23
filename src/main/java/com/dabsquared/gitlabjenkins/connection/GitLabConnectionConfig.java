@@ -29,7 +29,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     }
 
     public boolean isUseAuthenticatedEndpoint() {
-        return useAuthenticatedEndpoint;
+        return this.useAuthenticatedEndpoint;
     }
 
     @DataBoundSetter
@@ -43,14 +43,14 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     }
 
     public void addConnection(GitLabConnection connection) {
-        connections.add(connection);
-        connectionMap.put(connection.getName(), connection);
+        this.connections.add(connection);
+        this.connectionMap.put(connection.getName(), connection);
     }
 
     @DataBoundSetter
     public void setConnections(List<GitLabConnection> newConnections) {
-        connections = new ArrayList<>();
-        connectionMap = new HashMap<>();
+        this.connections = new ArrayList<>();
+        this.connectionMap = new HashMap<>();
         for (GitLabConnection connection : newConnections) {
             addConnection(connection);
         }
@@ -58,23 +58,23 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     }
 
     public GitLabApi getClient(String connectionName, Item item, String jobCredentialId) {
-        if (!connectionMap.containsKey(connectionName)) {
+        if (!this.connectionMap.containsKey(connectionName)) {
             return null;
         }
-        return connectionMap.get(connectionName).getClient(item, jobCredentialId);
+        return this.connectionMap.get(connectionName).getClient(item, jobCredentialId);
     }
 
     private void refreshConnectionMap() {
-        connectionMap.clear();
-        for (GitLabConnection connection : connections) {
-            connectionMap.put(connection.getName(), connection);
+        this.connectionMap.clear();
+        for (GitLabConnection connection : this.connections) {
+            this.connectionMap.put(connection.getName(), connection);
         }
     }
 
-    // For backwards compatibility. ReadResolve is called on startup
+    // For backwards compatibility, readResolve is called on startup
     protected GitLabConnectionConfig readResolve() {
-        if (useAuthenticatedEndpoint == null) {
-            setUseAuthenticatedEndpoint(false);
+        if (this.useAuthenticatedEndpoint == null) {
+            this.setUseAuthenticatedEndpoint(true);
         }
         return this;
     }
