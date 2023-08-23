@@ -47,10 +47,10 @@ This plugin allows GitLab to trigger builds in Jenkins when code is committed or
 This plugin is Open Source Software, developed on a volunteer basis by users of Jenkins and GitLab. It is not formally supported by either GitLab Inc. or CloudBees Inc.
 
 #### Supported GitLab versions
-GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the [current major release](https://about.gitlab.com/releases/categories/releases/).
+GitLab performs a new major release about every six to nine months, and they are constantly fixing bugs and adding new features. As a result, we cannot support this plugin when used with GitLab versions older than N-2, where N is the current major release. At the time of this writing, the current stable release of GitLab is 16.0, so the oldest release supported by this plugin is 14.0.
 
 #### Getting help
-If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the [GitHub project](https://github.com/jenkinsci/gitlab-plugin/issues/new/choose).
+If you have a problem or question about using the plugin, please make sure you are using the latest version. Then create an issue in the GitHub project.
 
 To enable debug logging in the plugin:
 
@@ -63,7 +63,7 @@ To enable debug logging in the plugin:
 
 ## Known bugs/issues
 
-The plugin tracks current issues with the [GitHub issue tracker](https://github.com/jenkinsci/gitlab-plugin/issues).  Some issues are reported in the [Jenkins Jira issue tracker](https://issues.jenkins.io/issues/?jql=component%3D19326). When searching for existng issues, please check both locations.
+Please search the [Issues](https://github.com/jenkinsci/gitlab-plugin/issues) section for relevant issues and open a new one if you don't find anything.
 
 ## Report an Issue
 
@@ -110,7 +110,7 @@ gitlabTriggerPhrase
 
 ## Global plugin configuration
 ### GitLab-to-Jenkins authentication
-The plugin requires authentication to connect from GitLab to Jenkins. This prevents unauthorized persons from triggering jobs.
+By default the plugin will require authentication to be set up for the connection from GitLab to Jenkins, in order to prevent unauthorized persons from being able to trigger jobs.
 
 #### Authentication Security
 
@@ -119,9 +119,12 @@ APITOKENS and other secrets MUST not be send over unsecure connections. So, all 
 
 
 #### Configuring global authentication
+
+> Note : For exposing Jenkins instance to the internet [ngrok](https://ngrok.com) can be used. Now you can use the obtained url instead of JENKINS_URL. You may find this helpful if your GitLab instance is not local.
+
 1. Create a user in Jenkins which has, at a minimum, Job/Build permissions
 2. Log in as that user (this is required even if you are a Jenkins admin user), then click on the user's name in the top right corner of the page
-3. Click 'Configure,' then 'Add new Token', and note/copy the User ID and API Token
+3. Click 'Configure,' then 'Show API Token...', and note/copy the User ID and API Token
 4. In GitLab, when you create webhooks to trigger Jenkins jobs, use this format for the URL and do not enter anything for 'Secret Token': `https://USERID:APITOKEN@JENKINS_URL/project/YOUR_JOB`
 5. After you add the webhook, click the 'Test' button, and it should succeed
 
@@ -345,7 +348,7 @@ Also make sure you have chosen the appropriate GitLab instance from the 'GitLab 
         }
     }
     ```
-* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented [here](https://docs.gitlab.com/ee/api/commits.html#set-the-pipeline-status-of-a-commit).
+* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented here: https://docs.gitlab.com/ee/api/commits.html#post-the-build-status-to-a-commit
     ```groovy
     node() {
         stage('Checkout') { checkout <your-scm-config> }
@@ -578,6 +581,9 @@ gitlabCommitStatus(
             echo 'Hello World'
     }
 ```
+
+## Jenkins Behind Proxy
+Information related to Jenkins behind a reverse Proxy configuration is available [here](https://www.jenkins.io/doc/book/system-administration/reverse-proxy-configuration-with-jenkins/).
 
 ### Cancel pending builds on merge request update
 To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.

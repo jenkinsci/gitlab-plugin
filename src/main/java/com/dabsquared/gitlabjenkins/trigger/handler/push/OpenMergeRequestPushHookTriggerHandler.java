@@ -7,7 +7,6 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
@@ -35,6 +34,7 @@ import org.gitlab4j.api.models.Branch;
 import org.gitlab4j.api.models.CommitStatus;
 import org.gitlab4j.api.models.MergeRequest;
 import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.webhook.PushEvent;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 /**
@@ -53,7 +53,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     @Override
     public void handle(
             Job<?, ?> job,
-            PushHook hook,
+            PushEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
@@ -65,13 +65,13 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 for (Trigger<?> t : triggerList) {
                     if (t instanceof GitLabPushTrigger) {
                         final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
-                        Long projectId = hook.getProjectId();
+                        Long projectId = event.getProjectId();
                         if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                             GitLabApi client = property.getClient();
                             for (MergeRequest mergeRequest :
                                     client.getMergeRequestApi().getMergeRequests(projectId, MergeRequestState.OPENED)) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                                    handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                    handleMergeRequest(job, event, ciSkip, branchFilter, client, mergeRequest);
                                 }
                             }
                         }
@@ -95,7 +95,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     private void handleMergeRequest(
             Job<?, ?> job,
-            PushHook hook,
+            PushEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             GitLabApi client,
@@ -120,7 +120,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         String targetBranch = mergeRequest.getTargetBranch();
         if (targetBranch != null
                 && branchFilter.isBranchAllowed(sourceBranch, targetBranch)
-                && hook.getRef().equals("refs/heads/" + targetBranch)
+                && event.getRef().equals("refs/heads/" + targetBranch)
                 && sourceBranch != null) {
             LOGGER.log(
                     Level.INFO,
@@ -134,8 +134,9 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 Project project = client.getProjectApi().getProject(mergeRequest.getSourceProjectId());
                 setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
                 List<Action> actions = Arrays.<Action>asList(
-                        new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
-                        new RevisionParameterAction(commit, retrieveUrIish(hook)));
+                        new CauseAction(
+                                new GitLabWebHookCause(retrieveCauseData(event, project, mergeRequest, branch))),
+                        new RevisionParameterAction(commit, retrieveUrIish(event)));
                 scheduleBuild(job, actions.toArray(new Action[actions.size()]));
             } catch (GitLabApiException e) {
                 LOGGER.log(
@@ -147,11 +148,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         }
     }
 
-    private CauseData retrieveCauseData(PushHook hook, Project project, MergeRequest mergeRequest, Branch branch) {
+    private CauseData retrieveCauseData(PushEvent event, Project project, MergeRequest mergeRequest, Branch branch) {
         return causeData()
                 .withActionType(CauseData.ActionType.MERGE)
                 .withSourceProjectId(mergeRequest.getSourceProjectId())
-                .withTargetProjectId(hook.getProjectId())
+                .withTargetProjectId(event.getProjectId())
                 .withBranch(branch.getName())
                 .withSourceBranch(branch.getName())
                 .withUserName(branch.getCommit().getAuthorName())
@@ -169,11 +170,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withMergeRequestIid(mergeRequest.getIid())
                 .withMergeRequestTargetProjectId(mergeRequest.getTargetProjectId())
                 .withTargetBranch(mergeRequest.getTargetBranch())
-                .withTargetRepoName(hook.getRepository().getName())
-                .withTargetNamespace(hook.getProject().getNamespace())
-                .withTargetRepoSshUrl(hook.getRepository().getGitSshUrl())
-                .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
-                .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
+                .withTargetRepoName(event.getRepository().getName())
+                .withTargetNamespace(event.getProject().getNamespace())
+                .withTargetRepoSshUrl(event.getRepository().getGit_ssh_url())
+                .withTargetRepoHttpUrl(event.getRepository().getGit_http_url())
+                .withTriggeredByUser(event.getCommits().get(0).getAuthor().getName())
                 .withLastCommit(branch.getCommit().getId())
                 .withTargetProjectUrl(project.getWebUrl())
                 .build();
@@ -221,10 +222,10 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         };
     }
 
-    private URIish retrieveUrIish(PushHook hook) {
+    private URIish retrieveUrIish(PushEvent event) {
         try {
-            if (hook.getRepository() != null) {
-                return new URIish(hook.getRepository().getUrl());
+            if (event.getRepository() != null) {
+                return new URIish(event.getRepository().getUrl());
             }
         } catch (URISyntaxException e) {
             LOGGER.log(Level.WARNING, "could not parse URL");

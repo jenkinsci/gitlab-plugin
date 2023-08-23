@@ -52,7 +52,6 @@ public class ProjectIdUtilTest {
 
     @Theory
     public void retrieveProjectId(TestData testData) throws ProjectIdUtil.ProjectIdResolutionException {
-
         when(gitLabApi.getGitLabServerUrl()).thenReturn(testData.hostUrl);
 
         String projectId = ProjectIdUtil.retrieveProjectId(gitLabApi, testData.remoteUrl);

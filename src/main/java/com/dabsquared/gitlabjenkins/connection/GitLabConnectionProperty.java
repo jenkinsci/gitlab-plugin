@@ -34,7 +34,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
  */
 public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
-    private String gitLabConnection;
+    private final String gitLabConnection;
     private String jobCredentialId;
     private boolean useAlternativeCredential = false;
 
@@ -83,13 +83,8 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
     public static GitLabApi getClient(@NonNull Run<?, ?> build) {
         Job<?, ?> job = build.getParent();
-        if (job != null) {
-            final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
-            if (connectionProperty != null) {
-                return connectionProperty.getClient();
-            }
-        }
-        return null;
+        final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
+        return connectionProperty.getClient();
     }
 
     @Extension
