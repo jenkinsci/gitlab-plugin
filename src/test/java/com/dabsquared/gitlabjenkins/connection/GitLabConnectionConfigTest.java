@@ -96,7 +96,7 @@ public class GitLabConnectionConfigTest {
         jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80);
         GitLabConnection.DescriptorImpl descriptor =
                 (DescriptorImpl) jenkins.jenkins.getDescriptorOrDie(GitLabConnection.class);
-        FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 10, 10);
+        FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", false, 60, 60);
         assertThat(result.getMessage(), containsString("Connection refused"));
     }
     
