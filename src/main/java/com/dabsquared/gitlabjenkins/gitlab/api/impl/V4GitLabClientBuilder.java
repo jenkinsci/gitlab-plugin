@@ -1,20 +1,19 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
-import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import static com.dabsquared.gitlabjenkins.webhook.ActionResolver.getSecretToken;
+
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
-import jenkins.model.Jenkins;
-
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
-
+import jenkins.model.Jenkins;
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.ProxyClientConfig;
 import org.gitlab4j.api.GitLabApi.ApiVersion;
+import org.gitlab4j.api.ProxyClientConfig;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -39,12 +38,12 @@ public final class V4GitLabClientBuilder extends GitLabClientBuilder {
             String proxyHost = address.getHostString();
             int proxyPort = address.getPort();
             String proxyUri = "http://" + proxyHost + ":" + proxyPort;
-                if (httpProxyConfig.getUserName() != null && httpProxyConfig.getPassword() != null) {
-                    Map<String, Object> clientConfig = ProxyClientConfig.createProxyClientConfig(proxyUri, httpProxyConfig.getUserName(), httpProxyConfig.getPassword());
-                    client = new GitLabApi(ApiVersion.V4, url, token, getSecretToken(), clientConfig);
-                }
-        }
-        else {
+            if (httpProxyConfig.getUserName() != null && httpProxyConfig.getPassword() != null) {
+                Map<String, Object> clientConfig = ProxyClientConfig.createProxyClientConfig(
+                        proxyUri, httpProxyConfig.getUserName(), httpProxyConfig.getPassword());
+                client = new GitLabApi(ApiVersion.V4, url, token, getSecretToken(), clientConfig);
+            }
+        } else {
             client = new GitLabApi(ApiVersion.V4, url, token, getSecretToken());
         }
         client.setIgnoreCertificateErrors(ignoreCertificateErrors);

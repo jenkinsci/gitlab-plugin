@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.connection;
 
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_error;
 import static com.dabsquared.gitlabjenkins.connection.Messages.connection_success;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -16,7 +17,6 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
-
 import hudson.ProxyConfiguration;
 import hudson.model.Item;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
@@ -43,7 +43,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
-import static org.hamcrest.CoreMatchers.containsString;
 
 /**
  * @author Robin Müller
@@ -98,9 +97,10 @@ public class GitLabConnectionConfigTest {
                 (DescriptorImpl) jenkins.jenkins.getDescriptorOrDie(GitLabConnection.class);
         FormValidation result = descriptor.doTestConnection(gitLabUrl, API_TOKEN_ID, "V4", true, 60, 60);
         // TODO: Should be "connection refused" instead of "connection timeout"
-        assertThat(result.getMessage(), containsString("Client error: java.net.SocketTimeoutException: Read timed out"));
+        assertThat(
+                result.getMessage(), containsString("Client error: java.net.SocketTimeoutException: Read timed out"));
     }
-    
+
     @Test
     public void doCheckConnection_noProxy() {
         jenkins.getInstance().proxy = new ProxyConfiguration("0.0.0.0", 80, "", "", "localhost");
