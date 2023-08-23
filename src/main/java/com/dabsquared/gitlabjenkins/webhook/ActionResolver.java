@@ -89,7 +89,8 @@ public class ActionResolver {
     private void onGet(Job<?, ?> project, String restOfPath, StaplerRequest request, StaplerResponse response) {
         Matcher commitMatcher = COMMIT_STATUS_PATTERN.matcher(restOfPath);
         if (restOfPath.isEmpty() && request.hasParameter("ref")) {
-            BranchBuildPageRedirectAction branchBuildPageRedirectAction = new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
+            BranchBuildPageRedirectAction branchBuildPageRedirectAction =
+                    new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
             branchBuildPageRedirectAction.execute(response);
         } else if (restOfPath.endsWith("status.png")) {
             onGetStatusPng(project, request, response);
@@ -111,10 +112,12 @@ public class ActionResolver {
 
     private void onGetStatusPng(Job<?, ?> project, StaplerRequest request, StaplerResponse response) {
         if (request.hasParameter("ref")) {
-            BranchStatusPngAction branchStatusPngAction = new BranchStatusPngAction(project, request.getParameter("ref"));
+            BranchStatusPngAction branchStatusPngAction =
+                    new BranchStatusPngAction(project, request.getParameter("ref"));
             branchStatusPngAction.execute(response);
         } else {
-            CommitStatusPngAction commitStatusPngAction = new CommitStatusPngAction(project, request.getParameter("sha1"));
+            CommitStatusPngAction commitStatusPngAction =
+                    new CommitStatusPngAction(project, request.getParameter("sha1"));
             commitStatusPngAction.execute(response);
         }
     }
@@ -140,7 +143,7 @@ public class ActionResolver {
         });
     }
 
-    private void setSecretToken(String token) {
+    private static void setSecretToken(String token) {
         secretToken = token;
     }
 
