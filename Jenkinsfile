@@ -10,7 +10,7 @@ buildPlugin(
   failFast: false,
   // Test Java 17 and 21
   configurations: [
-    [platform: 'linux',   jdk: '21'], // Linux first for coverage report on ci.jenkins.io
-    [platform: 'windows', jdk: '17'],
+    [platform: 'linux',   jdk: 21], // Linux first for coverage report on ci.jenkins.io
+    [platform: 'windows', jdk: 17],
   ]
 )
