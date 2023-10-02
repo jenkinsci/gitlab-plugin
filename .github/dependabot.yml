@@ -2,6 +2,8 @@
 
 version: 2
 updates:
+
+  # Maintain dependencies for maven
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -18,6 +20,8 @@ updates:
       # Newer versions require code changes
       - dependency-name: "org.jboss.resteasy:resteasy-client"
         versions: [">=4.0.0"]
+
+  # Maintain dependencies for GitHub actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
