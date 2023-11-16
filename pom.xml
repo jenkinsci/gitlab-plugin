@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.71</version>
+    <version>4.75</version>
     <relativePath />
   </parent>
 
@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.7.16</revision>
+    <revision>1.7.17</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.387.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -67,7 +67,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.387.x</artifactId>
-        <version>2278.v47b_4508e256a</version>
+        <version>2543.vfb_1a_5fb_9496d</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -198,28 +198,11 @@
       <groupId>io.jenkins</groupId>
       <artifactId>configuration-as-code</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <!-- Provided by mockserver when running in tests -->
-        <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-lang3</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.jenkins.configuration-as-code</groupId>
       <artifactId>test-harness</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jenkins-ci.main</groupId>
-          <artifactId>jenkins-test-harness</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jetbrains</groupId>
-          <artifactId>annotations</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -300,13 +283,6 @@
       <artifactId>postgresql</artifactId>
       <version>42.6.0</version>
       <scope>test</scope>
-      <exclusions>
-        <!-- Upper bounds with Guava -->
-        <exclusion>
-          <groupId>org.checkerframework</groupId>
-          <artifactId>checker-qual</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 
@@ -368,7 +344,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.1.2</version>
+            <version>3.2.2</version>
             <executions>
               <execution>
                 <goals>
@@ -420,7 +396,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.43.0</version>
+            <version>0.43.4</version>
             <configuration>
               <verbose>true</verbose>
               <images>
