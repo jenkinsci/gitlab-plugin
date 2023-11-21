@@ -162,6 +162,9 @@ public class CommitStatusUpdater {
         if (cause == null) {
             return environment == null ? null : environment.get("BRANCH_NAME", null);
         }
+        if (cause.getData().getActionType() == CauseData.ActionType.MERGE) {
+            return String.format("refs/merge-requests/%s/head", cause.getData().getMergeRequestIid());
+        }
         if (cause.getData().getActionType() == CauseData.ActionType.TAG_PUSH) {
             return StringUtils.removeStart(cause.getData().getSourceBranch(), "refs/tags/");
         }
