@@ -500,9 +500,7 @@ This plugin can be used with Matrix/Multi-configuration jobs together with the [
           4. Add GitLab actions as required
 
 ### See also
--   [Violation Comments to GitLab
-    Plugin](https://wiki.jenkins.io/display/JENKINS/Violation+Comments+to+GitLab+Plugin) for
-    pipeline and job DSL examples.
+-   [Violation Comments to GitLab Plugin](https://plugins.jenkins.io/violation-comments-to-gitlab/) for pipeline and job DSL examples.
 
 ## Advanced features
 ### Branch filtering
