@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.75</version>
+    <version>4.76</version>
     <relativePath />
   </parent>
 
@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.7.17</revision>
+    <revision>1.7.19</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.387.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -281,7 +281,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.6.0</version>
+      <version>42.7.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -344,7 +344,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.2.2</version>
+            <version>3.2.3</version>
             <executions>
               <execution>
                 <goals>
@@ -480,7 +480,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>3.5.0</version>
             <executions>
               <execution>
                 <id>add-source</id>

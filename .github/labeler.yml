@@ -1,0 +1,15 @@
+skip-changelog:
+- changed-files:
+  - any-glob-to-any-file: [ '.gitattributes', '.github/**/*', '.gitignore', 'crowdin.yml', '.mvn/**/*' ]
+
+dependencies:
+- changed-files:
+  - any-glob-to-any-file: [ 'pom.xml' ]
+
+documentation:
+- changed-files:
+  - any-glob-to-any-file: [ '*.adoc', '*.md', '*.txt', '**/*.html', '**/*.png', 'LICENSE*' ]
+
+tests:
+- changed-files:
+  - any-glob-to-any-file: [ 'src/test/**/*' ]
