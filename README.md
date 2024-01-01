@@ -287,6 +287,22 @@ properties([
             branchFilterType: "NameBasedFilter",
             includeBranchesSpec: "release/qat",
             excludeBranchesSpec: "",
+            triggerOnBranchDeleteRequest: true,
+            triggerOnlyIfNewCommitsPushed: false,
+            triggerOnPipelineEvent: false,
+            triggerOnAcceptedMergeRequest: true,
+            triggerOnClosedMergeRequest: false,
+            triggerOnApprovedMergeRequest: false,
+            labelsThatForcesBuildIfAdded: "",
+            branchFilterName: "",
+            sourceBranchRegex: "",
+            targetBranchRegex: '^(.*/)?main$',
+            mergeRequestLabelFilterConfig: [
+                include: "",
+                exclude: ""
+            ],
+            pendingBuildName: "jenkins",
+            cancelPendingBuildsOnUpdate: true
         ]
     ])
 ])
@@ -451,7 +467,19 @@ triggers {
       excludeBranchesSpec: "",
       pendingBuildName: "Jenkins",
       cancelPendingBuildsOnUpdate: false,
-      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF",
+      triggerToBranchDeleteRequest: false,
+      triggerOnlyIfNewCommitsPushed: false,
+      triggerOnPipelineEvent: false,
+      triggerOnAcceptedMergeRequest: true,
+      triggerOnClosedMergeRequest: false,
+      triggerOnApprovedMergeRequest: false,
+      labelsThatForcesBuildIfAdded: "",
+      branchFilterName: "",
+      sourceBranchRegex: "",
+      targetBranchRegex: '^(.*/)?main$',
+      mergeRequestLabelFilterConfig: [include: "", exclude: ""]
+    )
 }
 ```
 
