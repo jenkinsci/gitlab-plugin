@@ -71,11 +71,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
-        <version>2.12.5</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -95,6 +90,10 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>joda-time-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
