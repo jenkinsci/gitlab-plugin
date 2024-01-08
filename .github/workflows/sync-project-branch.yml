@@ -7,6 +7,7 @@ on:
 jobs:
   sync-project-branch:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'jenkinsci'
     steps:
       - uses: actions/checkout@v4
         with:
