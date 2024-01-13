@@ -132,7 +132,7 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                                 ? ""
                                 : hook.getRepository().getGitSshUrl())
                 .withSourceRepoHttpUrl(
-                        hook.getRepository() == null || hook.getRepository() == null
+                        hook.getRepository() == null
                                 ? ""
                                 : hook.getRepository().getGitHttpUrl())
                 .withMergeRequestTitle("")
