@@ -115,7 +115,7 @@ public final class ProjectBranchesProvider {
     private String[] getProjectBranchesAsArray(Job<?, ?> job) {
         try {
             List<String> branches = getProjectBranches(job);
-            return branches.toArray(new String[0]);
+            return branches.toArray(new String[branches.size()]);
         } catch (GitLabProjectBranchesService.BranchLoadingException e) {
             LOGGER.log(
                     Level.FINEST,

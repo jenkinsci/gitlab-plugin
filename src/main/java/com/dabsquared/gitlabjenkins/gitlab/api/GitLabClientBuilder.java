@@ -8,8 +8,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
-
 import jenkins.model.Jenkins;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -28,7 +26,7 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
 
     public static List<GitLabClientBuilder> getAllGitLabClientBuilders() {
         List<GitLabClientBuilder> builders =
-                new ArrayList<>(Objects.requireNonNull(Jenkins.getInstance()).getExtensionList(GitLabClientBuilder.class));
+                new ArrayList<>(Jenkins.getInstance().getExtensionList(GitLabClientBuilder.class));
         sort(builders);
         return builders;
     }

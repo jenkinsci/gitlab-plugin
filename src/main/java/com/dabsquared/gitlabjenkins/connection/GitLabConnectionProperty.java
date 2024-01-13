@@ -30,8 +30,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import java.util.Objects;
-
 /**
  * @author Robin Müller
  */
@@ -88,7 +86,9 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         Job<?, ?> job = build.getParent();
         if (job != null) {
             final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
-            if (connectionProperty != null) return connectionProperty.getClient();
+            if (connectionProperty != null) {
+                return connectionProperty.getClient();
+            }
         }
         return null;
     }
@@ -109,15 +109,13 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
         @Override
         public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            assert req != null;
             return req.bindJSON(GitLabConnectionProperty.class, formData);
         }
 
         public ListBoxModel doFillGitLabConnectionItems() {
             ListBoxModel options = new ListBoxModel();
             GitLabConnectionConfig descriptor =
-                    (GitLabConnectionConfig) Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
-            assert descriptor != null;
+                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
             for (GitLabConnection connection : descriptor.getConnections()) {
                 options.add(connection.getName(), connection.getName());
             }
@@ -156,8 +154,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
             try {
                 GitLabConnection gitLabConnectionTested = null;
                 GitLabConnectionConfig descriptor =
-                        (GitLabConnectionConfig) Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
-                assert descriptor != null;
+                        (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
                 for (GitLabConnection connection : descriptor.getConnections()) {
                     if (gitLabConnection.equals(connection.getName())) {
                         gitLabConnectionTested = connection;

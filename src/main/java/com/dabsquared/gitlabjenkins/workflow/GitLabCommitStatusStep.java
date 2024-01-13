@@ -132,7 +132,6 @@ public class GitLabCommitStatusStep extends Step {
 
                             CommitStatusUpdater.updateCommitStatus(
                                     run, getTaskListener(context), state, name, step.builds, step.connection);
-                            assert t != null;
                             context.onFailure(t);
                         }
                     })
