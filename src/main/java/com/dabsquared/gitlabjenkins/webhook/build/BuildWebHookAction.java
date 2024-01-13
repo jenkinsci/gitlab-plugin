@@ -11,6 +11,7 @@ import hudson.util.HttpResponses;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
@@ -88,7 +89,7 @@ abstract class BuildWebHookAction implements WebHookAction {
         }
 
         private void checkPermission(Permission permission, Item project) {
-            if (((GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class))
+            if (((GitLabConnectionConfig) Objects.requireNonNull(Jenkins.get().getDescriptor(GitLabConnectionConfig.class)))
                     .isUseAuthenticatedEndpoint()) {
                 if (!project.getACL().hasPermission(authentication, permission)) {
                     String message = String.format(

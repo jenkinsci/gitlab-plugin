@@ -50,6 +50,8 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.Objects;
+
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
@@ -187,9 +189,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @Initializer(after = InitMilestone.JOB_LOADED)
     public static void migrateJobs() throws IOException {
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
+        assert oldConfig != null;
         if (!oldConfig.jobsMigrated) {
             GitLabConnectionConfig gitLabConfig =
-                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+                    (GitLabConnectionConfig) Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+            assert gitLabConfig != null;
             gitLabConfig
                     .getConnections()
                     .add(new GitLabConnection(
@@ -217,7 +221,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
             oldConfig.save();
         }
         if (!oldConfig.jobsMigrated2) {
-            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+            for (AbstractProject<?, ?> project : Objects.requireNonNull(Jenkins.getInstance()).getAllItems(AbstractProject.class)) {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     if (trigger.addNoteOnMergeRequest) {
@@ -655,7 +659,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
         private StringBuilder retrieveProjectUrl(Job<?, ?> project) {
             return new StringBuilder()
-                    .append(Jenkins.getInstance().getRootUrl())
+                    .append(Objects.requireNonNull(Jenkins.getInstance()).getRootUrl())
                     .append(GitLabWebHook.WEBHOOK_URL)
                     .append(retrieveParentUrl(project))
                     .append('/')

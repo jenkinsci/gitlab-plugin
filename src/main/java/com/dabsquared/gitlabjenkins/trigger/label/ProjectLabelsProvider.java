@@ -113,7 +113,7 @@ public final class ProjectLabelsProvider {
     private String[] getProjectLabelsAsArray(Job<?, ?> job) {
         try {
             List<String> labels = getProjectLabels(job);
-            return labels.toArray(new String[labels.size()]);
+            return labels.toArray(new String[0]);
         } catch (GitLabProjectLabelsService.LabelLoadingException e) {
             LOGGER.log(
                     Level.FINEST,

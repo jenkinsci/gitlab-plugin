@@ -12,6 +12,8 @@ import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Queue;
+
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
@@ -24,7 +26,7 @@ public class PendingBuildsHandler {
     private static final Logger LOGGER = Logger.getLogger(PendingBuildsHandler.class.getName());
 
     public void cancelPendingBuilds(Job<?, ?> job, Integer projectId, String branch) {
-        Queue queue = Jenkins.getInstance().getQueue();
+        Queue queue = Objects.requireNonNull(Jenkins.getInstance()).getQueue();
         for (Queue.Item item : queue.getItems()) {
             if (!job.getName().equals(item.task.getName())) {
                 continue;
