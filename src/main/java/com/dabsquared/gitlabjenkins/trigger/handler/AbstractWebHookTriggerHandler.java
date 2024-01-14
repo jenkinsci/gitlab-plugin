@@ -71,32 +71,36 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         try {
             String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
             if (StringUtils.isNotBlank(buildName)) {
-                GitLabClient client =
-                        job.getProperty(GitLabConnectionProperty.class).getClient();
-                BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
-                try {
-                    if (client == null) {
-                        LOGGER.log(Level.SEVERE, "No GitLab connection configured");
+                GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
+                if (connectionProperty != null) {
+                    GitLabClient client = connectionProperty.getClient();
+                    if (client != null) {
+                        BuildStatusUpdate buildStatusUpdate = retrieveBuildStatusUpdate(hook);
+                        try {
+                            String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
+                            String targetUrl = DisplayURLProvider.get().getJobURL(job);
+                            client.changeBuildStatus(
+                                    buildStatusUpdate.getProjectId(),
+                                    buildStatusUpdate.getSha(),
+                                    BuildState.pending,
+                                    ref,
+                                    buildName,
+                                    targetUrl,
+                                    BuildState.pending.name());
+                        } catch (WebApplicationException | ProcessingException e) {
+                            LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
+                        }
                     } else {
-                        String ref = StringUtils.removeStart(buildStatusUpdate.getRef(), "refs/tags/");
-                        String targetUrl = DisplayURLProvider.get().getJobURL(job);
-                        client.changeBuildStatus(
-                                buildStatusUpdate.getProjectId(),
-                                buildStatusUpdate.getSha(),
-                                BuildState.pending,
-                                ref,
-                                buildName,
-                                targetUrl,
-                                BuildState.pending.name());
+                        LOGGER.log(Level.WARNING, "GitLabClient is null");
                     }
-                } catch (WebApplicationException | ProcessingException e) {
-                    LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
+                } else {
+                    LOGGER.log(Level.WARNING, "GitLabConnectionProperty is null");
                 }
             }
         } catch (NullPointerException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
-    }
+    }    
 
     protected Action[] createActions(Job<?, ?> job, H hook) {
         ArrayList<Action> actions = new ArrayList<>();
