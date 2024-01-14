@@ -100,7 +100,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
         } catch (NullPointerException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
-    }    
+    }
 
     protected Action[] createActions(Job<?, ?> job, H hook) {
         ArrayList<Action> actions = new ArrayList<>();
