@@ -15,6 +15,7 @@ import hudson.model.Run;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import java.util.Objects;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
@@ -109,13 +110,15 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
         @Override
         public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            assert req != null;
             return req.bindJSON(GitLabConnectionProperty.class, formData);
         }
 
         public ListBoxModel doFillGitLabConnectionItems() {
             ListBoxModel options = new ListBoxModel();
-            GitLabConnectionConfig descriptor =
-                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+            GitLabConnectionConfig descriptor = (GitLabConnectionConfig)
+                    Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+            assert descriptor != null;
             for (GitLabConnection connection : descriptor.getConnections()) {
                 options.add(connection.getName(), connection.getName());
             }
@@ -153,8 +156,9 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
             item.checkPermission(Item.CONFIGURE);
             try {
                 GitLabConnection gitLabConnectionTested = null;
-                GitLabConnectionConfig descriptor =
-                        (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
+                GitLabConnectionConfig descriptor = (GitLabConnectionConfig)
+                        Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+                assert descriptor != null;
                 for (GitLabConnection connection : descriptor.getConnections()) {
                     if (gitLabConnection.equals(connection.getName())) {
                         gitLabConnectionTested = connection;
