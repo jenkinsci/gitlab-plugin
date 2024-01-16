@@ -13,6 +13,7 @@ import hudson.tasks.Publisher;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.ProcessingException;
@@ -245,11 +246,11 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
             message = replaceMacros(build, listener, this.getFailureNoteText());
         } else {
             String icon = getResultIcon(build.getResult());
-            String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
+            String buildUrl = Objects.requireNonNull(Jenkins.getInstance()).getRootUrl() + build.getUrl();
             message = MessageFormat.format(
                     "{0} Jenkins Build {1}\n\nResults available at: [Jenkins [{2} #{3}]]({4})",
                     icon,
-                    build.getResult().toString(),
+                    Objects.requireNonNull(build.getResult()).toString(),
                     build.getParent().getDisplayName(),
                     build.getNumber(),
                     buildUrl);
