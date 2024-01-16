@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -13,7 +14,10 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class PipelineHook extends WebHook {
 
     private User user;
+
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "API compatibility")
     public Integer projectId;
+
     private List<Commit> commits;
     private Project project;
     private PipelineEventObjectAttributes objectAttributes;

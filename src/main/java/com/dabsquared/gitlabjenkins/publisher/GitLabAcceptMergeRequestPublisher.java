@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.publisher;
 
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
@@ -23,6 +24,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
     private static final Logger LOGGER = Logger.getLogger(GitLabAcceptMergeRequestPublisher.class.getName());
 
+    @SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     private Boolean deleteSourceBranch;
 
     @DataBoundConstructor
