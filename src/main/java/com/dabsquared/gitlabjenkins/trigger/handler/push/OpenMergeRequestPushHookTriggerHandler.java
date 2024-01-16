@@ -146,7 +146,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             List<Action> actions = Arrays.<Action>asList(
                     new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
                     new RevisionParameterAction(commit, retrieveUrIish(hook)));
-            scheduleBuild(job, actions.toArray(new Action[actions.size()]));
+            scheduleBuild(job, actions.toArray(new Action[0]));
         }
     }
 
