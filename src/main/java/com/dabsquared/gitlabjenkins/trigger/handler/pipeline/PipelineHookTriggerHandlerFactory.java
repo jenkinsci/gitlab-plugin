@@ -14,7 +14,7 @@ public final class PipelineHookTriggerHandlerFactory {
 
     public static PipelineHookTriggerHandler newPipelineHookTriggerHandler(boolean triggerOnPipelineEvent) {
         if (triggerOnPipelineEvent) {
-            return new PipelineHookTriggerHandlerImpl(retrieve(true));
+            return new PipelineHookTriggerHandlerImpl(retrieve(triggerOnPipelineEvent));
         } else {
             return new NopPipelineHookTriggerHandler();
         }
