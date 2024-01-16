@@ -31,6 +31,7 @@ import com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTrigger
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
@@ -93,7 +94,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
     private transient boolean addVoteOnMergeRequest;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "API compatibility")
     private transient boolean allowAllBranches = false;
+
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
@@ -624,7 +628,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                 new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private boolean jobsMigrated = false;
         private boolean jobsMigrated2 = false;
+
+        @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "API compatibility")
         private String gitlabApiToken;
+
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
 
