@@ -115,7 +115,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
                     "unknown handled situation, dont know what revision to build for req {0} for job {1}",
                     new Object[] {hook, (job != null ? job.getFullName() : null)});
         }
-        return actions.toArray(new Action[0]);
+        return actions.toArray(new Action[actions.size()]);
     }
 
     protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, H hook) {}
