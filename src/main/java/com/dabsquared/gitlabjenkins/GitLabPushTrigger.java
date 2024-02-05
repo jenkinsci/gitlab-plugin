@@ -31,6 +31,7 @@ import com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTrigger
 import com.dabsquared.gitlabjenkins.trigger.handler.push.PushHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.Objects;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
@@ -93,7 +95,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
     private transient boolean addVoteOnMergeRequest;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "API compatibility")
     private transient boolean allowAllBranches = false;
+
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
@@ -187,10 +192,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @Initializer(after = InitMilestone.JOB_LOADED)
     public static void migrateJobs() throws IOException {
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
-        if (!oldConfig.jobsMigrated) {
-            GitLabConnectionConfig gitLabConfig =
-                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            gitLabConfig
+        if (oldConfig != null && !oldConfig.jobsMigrated) {
+            GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig)
+                    Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+            Objects.requireNonNull(gitLabConfig)
                     .getConnections()
                     .add(new GitLabConnection(
                             oldConfig.gitlabHostUrl,
@@ -216,8 +221,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
             oldConfig.jobsMigrated = true;
             oldConfig.save();
         }
-        if (!oldConfig.jobsMigrated2) {
-            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+        if (oldConfig != null && !oldConfig.jobsMigrated2) {
+            for (AbstractProject<?, ?> project :
+                    Objects.requireNonNull(Jenkins.getInstance()).getAllItems(AbstractProject.class)) {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     if (trigger.addNoteOnMergeRequest) {
@@ -624,7 +630,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                 new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private boolean jobsMigrated = false;
         private boolean jobsMigrated2 = false;
+
+        @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "API compatibility")
         private String gitlabApiToken;
+
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
 
@@ -655,7 +664,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
         private StringBuilder retrieveProjectUrl(Job<?, ?> project) {
             return new StringBuilder()
-                    .append(Jenkins.getInstance().getRootUrl())
+                    .append(Objects.requireNonNull(Jenkins.getInstance()).getRootUrl())
                     .append(GitLabWebHook.WEBHOOK_URL)
                     .append(retrieveParentUrl(project))
                     .append('/')

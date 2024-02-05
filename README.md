@@ -287,6 +287,22 @@ properties([
             branchFilterType: "NameBasedFilter",
             includeBranchesSpec: "release/qat",
             excludeBranchesSpec: "",
+            triggerOnBranchDeleteRequest: true,
+            triggerOnlyIfNewCommitsPushed: false,
+            triggerOnPipelineEvent: false,
+            triggerOnAcceptedMergeRequest: true,
+            triggerOnClosedMergeRequest: false,
+            triggerOnApprovedMergeRequest: false,
+            labelsThatForcesBuildIfAdded: "",
+            branchFilterName: "",
+            sourceBranchRegex: "",
+            targetBranchRegex: '^(.*/)?main$',
+            mergeRequestLabelFilterConfig: [
+                include: "",
+                exclude: ""
+            ],
+            pendingBuildName: "jenkins",
+            cancelPendingBuildsOnUpdate: true
         ]
     ])
 ])
@@ -451,7 +467,19 @@ triggers {
       excludeBranchesSpec: "",
       pendingBuildName: "Jenkins",
       cancelPendingBuildsOnUpdate: false,
-      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+      secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF",
+      triggerToBranchDeleteRequest: false,
+      triggerOnlyIfNewCommitsPushed: false,
+      triggerOnPipelineEvent: false,
+      triggerOnAcceptedMergeRequest: true,
+      triggerOnClosedMergeRequest: false,
+      triggerOnApprovedMergeRequest: false,
+      labelsThatForcesBuildIfAdded: "",
+      branchFilterName: "",
+      sourceBranchRegex: "",
+      targetBranchRegex: '^(.*/)?main$',
+      mergeRequestLabelFilterConfig: [include: "", exclude: ""]
+    )
 }
 ```
 
@@ -472,9 +500,7 @@ This plugin can be used with Matrix/Multi-configuration jobs together with the [
           4. Add GitLab actions as required
 
 ### See also
--   [Violation Comments to GitLab
-    Plugin](https://wiki.jenkins.io/display/JENKINS/Violation+Comments+to+GitLab+Plugin) for
-    pipeline and job DSL examples.
+-   [Violation Comments to GitLab Plugin](https://plugins.jenkins.io/violation-comments-to-gitlab/) for pipeline and job DSL examples.
 
 ## Advanced features
 ### Branch filtering

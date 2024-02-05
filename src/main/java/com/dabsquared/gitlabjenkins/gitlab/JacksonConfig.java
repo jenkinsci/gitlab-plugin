@@ -18,7 +18,7 @@ import javax.ws.rs.ext.Provider;
 public class JacksonConfig implements ContextResolver<ObjectMapper> {
     public ObjectMapper getContext(Class<?> type) {
         return new ObjectMapper()
-                .setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES)
+                .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
     }

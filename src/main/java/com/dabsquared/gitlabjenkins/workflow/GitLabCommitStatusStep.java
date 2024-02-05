@@ -7,11 +7,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.BodyExecution;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
@@ -132,7 +128,7 @@ public class GitLabCommitStatusStep extends Step {
 
                             CommitStatusUpdater.updateCommitStatus(
                                     run, getTaskListener(context), state, name, step.builds, step.connection);
-                            context.onFailure(t);
+                            context.onFailure(Objects.requireNonNull(t));
                         }
                     })
                     .start();
