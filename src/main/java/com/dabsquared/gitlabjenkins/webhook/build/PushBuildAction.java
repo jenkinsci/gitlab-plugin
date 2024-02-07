@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import jenkins.plugins.git.GitSCMSource;
+import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.plugins.git.traits.IgnoreOnPushNotificationTrait;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
@@ -108,8 +108,8 @@ public class PushBuildAction extends BuildWebHookAction {
 
         public void run() {
             for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
-                if (scmSource instanceof GitSCMSource) {
-                    GitSCMSource gitSCMSource = (GitSCMSource) scmSource;
+                if (scmSource instanceof AbstractGitSCMSource) {
+                    AbstractGitSCMSource gitSCMSource = (AbstractGitSCMSource) scmSource;
                     try {
                         if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
                             if (SCMTrait.find(gitSCMSource.getTraits(), IgnoreOnPushNotificationTrait.class) == null) {
