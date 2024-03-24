@@ -126,7 +126,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
                 return step.mergeCommitMessage;
             }
 
-            return String.format("Merge branch '%s' into '%s'\n\n%s\n\n%s\n\nSee merge request !%d",
+            return String.format("Merge branch '%s' into '%s'%n%n%s%n%n%s%n%nSee merge request !%d",
                     mergeRequest.getSourceBranch(), mergeRequest.getTargetBranch(),
                     mergeRequest.getTitle(), mergeRequest.getDescription(), mergeRequest.getIid());
         }
