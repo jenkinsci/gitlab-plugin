@@ -122,7 +122,9 @@ public class AcceptGitLabMergeRequestStep extends Step {
         }
 
         private String getCommitMessage(MergeRequest mergeRequest) {
-            if (!step.useMRDescription) return step.mergeCommitMessage;
+            if (!step.useMRDescription || StringUtils.isEmpty(step.mergeCommitMessage)) {
+                return step.mergeCommitMessage;
+            }
 
             return String.format(
                     "Merge branch '%s' into '%s'%n%n%s%n%n%s%n%nSee merge request !%d",
