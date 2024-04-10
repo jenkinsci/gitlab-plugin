@@ -122,7 +122,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
         }
 
         private String getCommitMessage(MergeRequest mergeRequest) {
-            if (!step.useMRDescription || StringUtils.isEmpty(step.mergeCommitMessage)) {
+            if (!step.useMRDescription || !StringUtils.isEmpty(step.mergeCommitMessage)) {
                 return step.mergeCommitMessage;
             }
 
