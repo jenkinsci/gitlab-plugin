@@ -7,8 +7,9 @@ on:
 jobs:
   sync-project-branch:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'jenkinsci'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: gsoc-2023-project
       - run: |
@@ -16,7 +17,7 @@ jobs:
           git config user.email "sync-project-branch@jenkins.io"
           git config user.name "Sync project branch action"
           git merge --no-edit origin/master
-      - uses: peter-evans/create-pull-request@v5
+      - uses: peter-evans/create-pull-request@v6
         with:
           title: Merge remote-tracking branch `origin/master` into `gsoc-2023-project`
           branch: sync-project-branch

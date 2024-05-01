@@ -66,7 +66,7 @@ public class CommitStatusUpdater {
                     gitLabBranchBuilds = retrieveGitlabProjectIds(build, environment);
                 }
             } catch (IOException | InterruptedException e) {
-                printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
+                printf(listener, "Failed to get GitLab Build list to update status: %s%n", e.getMessage());
             }
         }
 
@@ -110,13 +110,13 @@ public class CommitStatusUpdater {
                 } catch (GitLabApiException e) {
                     printf(
                             listener,
-                            "Failed to update Gitlab commit status for project '%s': %s%n",
+                            "Failed to update GitLab commit status for project '%s': %s%n",
                             gitLabBranchBuild.getProjectId(),
                             e.getMessage());
                     LOGGER.log(
                             Level.SEVERE,
                             String.format(
-                                    "Failed to update Gitlab commit status for project '%s'",
+                                    "Failed to update GitLab commit status for project '%s'",
                                     gitLabBranchBuild.getProjectId()),
                             e);
                 }
@@ -128,7 +128,7 @@ public class CommitStatusUpdater {
         try {
             updateCommitStatus(build, listener, state, name, null, null);
         } catch (IllegalStateException e) {
-            printf(listener, "Failed to update Gitlab commit status: %s%n", e.getMessage());
+            printf(listener, "Failed to update GitLab commit status: %s%n", e.getMessage());
         }
     }
 

@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.Objects;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
@@ -198,27 +199,26 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     public static void migrateJobs() throws IOException {
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
         if (oldConfig != null && !oldConfig.jobsMigrated) {
-            GitLabConnectionConfig gitLabConfig =
-                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            if (gitLabConfig != null) {
-                gitLabConfig
-                        .getConnections()
-                        .add(new GitLabConnection(
-                                oldConfig.gitlabHostUrl,
-                                oldConfig.gitlabHostUrl,
-                                oldConfig.gitlabApiToken,
-                                "autodetect",
-                                oldConfig.ignoreCertificateErrors,
-                                5000,
-                                5000));
-            }
+            GitLabConnectionConfig gitLabConfig = (GitLabConnectionConfig)
+                    Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+            Objects.requireNonNull(gitLabConfig)
+                    .getConnections()
+                    .add(new GitLabConnection(
+                            oldConfig.gitlabHostUrl,
+                            oldConfig.gitlabHostUrl,
+                            oldConfig.gitlabApiToken,
+                            "autodetect",
+                            oldConfig.ignoreCertificateErrors,
+                            5000,
+                            5000));
 
             String defaultConnectionName = null;
             if (gitLabConfig != null) {
                 defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
             }
             if (defaultConnectionName != null) {
-                for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                for (AbstractProject<?, ?> project :
+                        Objects.requireNonNull(Jenkins.getInstance()).getAllItems(AbstractProject.class)) {
                     GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                     if (trigger != null) {
                         if (trigger.addCiMessage) {
@@ -730,7 +730,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
         private StringBuilder retrieveProjectUrl(Job<?, ?> project) {
             return new StringBuilder()
-                    .append(Jenkins.getInstance().getRootUrl())
+                    .append(Objects.requireNonNull(Jenkins.getInstance()).getRootUrl())
                     .append(GitLabWebHook.WEBHOOK_URL)
                     .append(retrieveParentUrl(project))
                     .append('/')
