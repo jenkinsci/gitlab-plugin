@@ -100,7 +100,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
     private transient boolean addVoteOnMergeRequest;
-    private final transient boolean allowAllBranches = false;
+    private static final boolean allowAllBranches = false;
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
@@ -699,7 +699,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                 new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private boolean jobsMigrated = false;
         private boolean jobsMigrated2 = false;
-        private String gitlabApiToken;
+        private String gitlabApiToken = "";
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
 
