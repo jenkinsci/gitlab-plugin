@@ -40,7 +40,7 @@ public class GitLabConnectionConfigAsCodeTest {
                 (GitLabApiToken) gitLabCredential.getCredentials().get(0);
         assertEquals("gitlab_token", apiToken.getId());
         assertEquals("qwertyuiopasdfghjklzxcvbnm", apiToken.getApiToken().getPlainText());
-        assertEquals("Gitlab Token", apiToken.getDescription());
+        assertEquals("GitLab Token", apiToken.getDescription());
     }
 
     @Test

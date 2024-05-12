@@ -4,6 +4,7 @@ import com.dabsquared.gitlabjenkins.webhook.WebHookAction;
 import hudson.model.Run;
 import hudson.util.HttpResponses;
 import java.io.IOException;
+import java.util.Objects;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -21,7 +22,8 @@ abstract class BuildPageRedirectAction implements WebHookAction {
     public void execute(StaplerResponse response) {
         if (build != null) {
             try {
-                response.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getUrl());
+                response.sendRedirect2(
+                        Objects.requireNonNull(Jenkins.getInstance()).getRootUrl() + build.getUrl());
             } catch (IOException e) {
                 try {
                     response.sendRedirect2(Jenkins.getInstance().getRootUrl() + build.getBuildStatusUrl());
