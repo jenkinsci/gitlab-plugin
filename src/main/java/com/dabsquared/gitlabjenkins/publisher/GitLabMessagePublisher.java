@@ -11,6 +11,7 @@ import hudson.tasks.Publisher;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
@@ -19,7 +20,6 @@ import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.MergeRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import java.util.Objects;
 
 /**
  * @author Nikolay Ustinov
@@ -72,8 +72,7 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     }
 
     @DataBoundConstructor
-    public GitLabMessagePublisher() {
-    }
+    public GitLabMessagePublisher() {}
 
     public boolean isOnlyForFailure() {
         return onlyForFailure;

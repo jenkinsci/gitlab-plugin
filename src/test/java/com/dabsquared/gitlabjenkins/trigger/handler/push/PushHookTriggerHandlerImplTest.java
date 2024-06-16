@@ -135,12 +135,11 @@ public class PushHookTriggerHandlerImplTest {
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
-    public void push_build2DifferentBranchesButSameCommit()
-            throws Exception {
+    public void push_build2DifferentBranchesButSameCommit() throws Exception {
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
@@ -204,6 +203,6 @@ public class PushHookTriggerHandlerImplTest {
         assertThat(buildTriggered.isSignaled(), is(false));
         // TODO: Should be 2, but fails
         assertThat(buildCount.intValue(), is(1));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 }

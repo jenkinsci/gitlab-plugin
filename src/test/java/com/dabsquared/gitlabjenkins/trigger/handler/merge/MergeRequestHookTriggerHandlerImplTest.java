@@ -92,7 +92,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, buildHolder);
         // TODO: should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
@@ -100,12 +100,12 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.source)
                 .build();
-                final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-                OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, buildHolder);
+        final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, buildHolder);
 
         // TODO: should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
@@ -113,9 +113,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.never)
                 .build();
-                final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-                OneShotEvent buildTriggered =
-                        doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.UPDATED, buildHolder);
+        final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.UPDATED, buildHolder);
 
         // TODO: should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -126,26 +126,27 @@ public class MergeRequestHookTriggerHandlerImplTest {
     public void mergeRequest_build_when_reopened() throws Exception {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().build();
-                final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-                OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, buildHolder); // REOPENED not available
+        final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler, MergeRequestState.OPENED, buildHolder); // REOPENED not available
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
     }
 
     @Test
-    public void mergeRequest_build_when_opened_with_approved_action_enabled()
-            throws Exception {
+    public void mergeRequest_build_when_opened_with_approved_action_enabled() throws Exception {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOnApprovedMergeRequest(true)
                 .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.source)
                 .build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.MERGED, buildHolder);
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.MERGED, buildHolder);
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
@@ -153,26 +154,27 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().setTriggerOnAcceptedMergeRequest(true).build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.MERGED, ActionType.MERGED, buildHolder);
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.MERGED, ActionType.MERGED, buildHolder);
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
-    public void mergeRequest_build_when_accepted_with_approved_action_enabled()
-            throws Exception {
+    public void mergeRequest_build_when_accepted_with_approved_action_enabled() throws Exception {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOnAcceptedMergeRequest(true)
                 .setTriggerOnApprovedMergeRequest(true)
                 .build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.MERGED, ActionType.MERGED, buildHolder);
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.MERGED, ActionType.MERGED, buildHolder);
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
@@ -180,11 +182,12 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().setTriggerOnClosedMergeRequest(true).build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.CLOSED, ActionType.CLOSED, buildHolder);
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.CLOSED, ActionType.CLOSED, buildHolder);
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
@@ -196,51 +199,46 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
-    public void mergeRequest_build_when_closed_with_actions_enabled()
-            throws Exception {
+    public void mergeRequest_build_when_closed_with_actions_enabled() throws Exception {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOnClosedMergeRequest(true)
                 .setTriggerOnApprovedMergeRequest(true)
                 .build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.CLOSED, ActionType.CLOSED, buildHolder);
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.CLOSED, ActionType.CLOSED, buildHolder);
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
-//        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 
     @Test
-    public void mergeRequest_do_not_build_for_accepted_when_nothing_enabled()
-            throws Exception {
+    public void mergeRequest_do_not_build_for_accepted_when_nothing_enabled() throws Exception {
         do_not_build_for_state_when_nothing_enabled(MergeRequestState.MERGED);
     }
 
     @Test
-    public void mergeRequest_do_not_build_for_updated_when_nothing_enabled()
-            throws Exception {
+    public void mergeRequest_do_not_build_for_updated_when_nothing_enabled() throws Exception {
         do_not_build_for_state_when_nothing_enabled(MergeRequestState.OPENED); // UPDATED is not available
     }
 
     @Test
-    public void mergeRequest_do_not_build_for_reopened_when_nothing_enabled()
-            throws Exception {
+    public void mergeRequest_do_not_build_for_reopened_when_nothing_enabled() throws Exception {
         do_not_build_for_state_when_nothing_enabled(MergeRequestState.OPENED); // REOPENED is not available
     }
 
     @Test
-    public void mergeRequest_do_not_build_for_opened_when_nothing_enabled()
-            throws Exception {
+    public void mergeRequest_do_not_build_for_opened_when_nothing_enabled() throws Exception {
         do_not_build_for_state_when_nothing_enabled(MergeRequestState.OPENED);
     }
 
     @Test
-    public void mergeRequest_do_not_build_when_accepted_some_enabled()
-            throws Exception {
+    public void mergeRequest_do_not_build_when_accepted_some_enabled() throws Exception {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.source)
                 .setTriggerOnApprovedMergeRequest(true)
@@ -253,15 +251,14 @@ public class MergeRequestHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void mergeRequest_build_for_accepted_state_when_approved_action_triggered()
-            throws Exception {
+    public void mergeRequest_build_for_accepted_state_when_approved_action_triggered() throws Exception {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOnApprovedMergeRequest(true)
                 .setTriggerOnAcceptedMergeRequest(true)
                 .build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         OneShotEvent buildTriggered =
-                        doHandle(mergeRequestHookTriggerHandler, MergeRequestState.MERGED, ActionType.APPROVED, buildHolder);
+                doHandle(mergeRequestHookTriggerHandler, MergeRequestState.MERGED, ActionType.APPROVED, buildHolder);
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -286,7 +283,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.APPROVED, buildHolder); // UPDATED is not available
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler,
+                MergeRequestState.OPENED,
+                ActionType.APPROVED,
+                buildHolder); // UPDATED is not available
 
         assertThat(buildTriggered.isSignaled(), is(false));
     }
@@ -297,7 +298,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.APPROVED, buildHolder); // UPDATED is not available
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler,
+                MergeRequestState.OPENED,
+                ActionType.APPROVED,
+                buildHolder); // UPDATED is not available
 
         assertThat(buildTriggered.isSignaled(), is(false));
     }
@@ -308,7 +313,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().setTriggerOnApprovedMergeRequest(true).build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.APPROVED, buildHolder); // UPDATED is not available
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler,
+                MergeRequestState.OPENED,
+                ActionType.APPROVED,
+                buildHolder); // UPDATED is not available
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -347,7 +356,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().setTriggerOnAcceptedMergeRequest(true).build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.MERGED, buildHolder); // UPDATED is not available
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler,
+                MergeRequestState.OPENED,
+                ActionType.MERGED,
+                buildHolder); // UPDATED is not available
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -359,7 +372,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 withConfig().setTriggerOnApprovedMergeRequest(true).build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.APPROVED, buildHolder); // UPDATED is not available
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler,
+                MergeRequestState.OPENED,
+                ActionType.APPROVED,
+                buildHolder); // UPDATED is not available
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -373,7 +390,11 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 .setTriggerOnApprovedMergeRequest(true)
                 .build();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
-        OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, MergeRequestState.OPENED, ActionType.APPROVED, buildHolder); // UPDATED is not available
+        OneShotEvent buildTriggered = doHandle(
+                mergeRequestHookTriggerHandler,
+                MergeRequestState.OPENED,
+                ActionType.APPROVED,
+                buildHolder); // UPDATED is not available
 
         // TODO: Should expect true, but fails
         assertThat(buildTriggered.isSignaled(), is(false));
@@ -526,27 +547,35 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 .setTriggerOnMergeRequest(false)
                 .setTriggerOnApprovedMergeRequest(true)
                 .build();
-                final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         OneShotEvent buildTriggered = doHandle(mergeRequestHookTriggerHandler, action, buildHolder);
 
         assertThat(buildTriggered.isSignaled(), is(false));
     }
 
-    private OneShotEvent doHandle(MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, ActionType action,  AtomicReference<FreeStyleBuild> buildHolder)
+    private OneShotEvent doHandle(
+            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler,
+            ActionType action,
+            AtomicReference<FreeStyleBuild> buildHolder)
             throws GitAPIException, IOException, InterruptedException {
         defaultMergeRequestObjectAttributes().setAction(action.name().toUpperCase());
         return doHandle(mergeRequestHookTriggerHandler, defaultMergeRequestObjectAttributes(), buildHolder);
     }
 
     private OneShotEvent doHandle(
-            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, MergeRequestState state,  AtomicReference<FreeStyleBuild> buildHolder)
+            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler,
+            MergeRequestState state,
+            AtomicReference<FreeStyleBuild> buildHolder)
             throws GitAPIException, IOException, InterruptedException {
         defaultMergeRequestObjectAttributes().setState(state.name().toUpperCase());
         return doHandle(mergeRequestHookTriggerHandler, defaultMergeRequestObjectAttributes(), buildHolder);
     }
 
     private OneShotEvent doHandle(
-            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, MergeRequestState state, ActionType action,  AtomicReference<FreeStyleBuild> buildHolder)
+            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler,
+            MergeRequestState state,
+            ActionType action,
+            AtomicReference<FreeStyleBuild> buildHolder)
             throws GitAPIException, IOException, InterruptedException {
         defaultMergeRequestObjectAttributes().setAction(action.name().toUpperCase());
         defaultMergeRequestObjectAttributes().setState(state.name().toUpperCase());
@@ -554,7 +583,9 @@ public class MergeRequestHookTriggerHandlerImplTest {
     }
 
     private OneShotEvent doHandle(
-            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler, ObjectAttributes objectAttributes,  AtomicReference<FreeStyleBuild> buildHolder)
+            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler,
+            ObjectAttributes objectAttributes,
+            AtomicReference<FreeStyleBuild> buildHolder)
             throws GitAPIException, IOException, InterruptedException {
         Git.init().setDirectory(tmp.getRoot()).call();
         tmp.newFile("test");
@@ -600,7 +631,8 @@ public class MergeRequestHookTriggerHandlerImplTest {
         return buildTriggered;
     }
 
-    private boolean ciSkipTestHelper(String MRDescription, String lastCommitMsg, AtomicReference<FreeStyleBuild> buildHolder)
+    private boolean ciSkipTestHelper(
+            String MRDescription, String lastCommitMsg, AtomicReference<FreeStyleBuild> buildHolder)
             throws IOException, InterruptedException {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
