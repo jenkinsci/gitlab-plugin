@@ -5,8 +5,6 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.Bui
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineEventObjectAttributes;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
@@ -18,22 +16,30 @@ import hudson.model.Job;
 import hudson.model.Run;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.WebApplicationException;
+import org.eclipse.jgit.transport.URIish;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.ProjectHook;
+import org.gitlab4j.api.webhook.PipelineEvent;
+import org.gitlab4j.api.webhook.PipelineEvent.ObjectAttributes;
 
 /**
  * @author Milena Zachow
  */
-class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PipelineHook>
+class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<PipelineEvent>
         implements PipelineHookTriggerHandler {
 
     private static final Logger LOGGER = Logger.getLogger(PipelineHookTriggerHandlerImpl.class.getName());
 
     private final List<String> allowedStates;
+
+    private ProjectHook hook;
 
     PipelineHookTriggerHandlerImpl(List<String> allowedStates) {
         this.allowedStates = allowedStates;
@@ -42,11 +48,11 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     @Override
     public void handle(
             Job<?, ?> job,
-            PipelineHook hook,
+            PipelineEvent event,
             boolean ciSkip,
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
-        PipelineEventObjectAttributes objectAttributes = hook.getObjectAttributes();
+        ObjectAttributes objectAttributes = event.getObjectAttributes();
         try {
             if (job instanceof AbstractProject<?, ?>) {
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
@@ -54,30 +60,33 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                 if (property != null && property.getClient() != null) {
                     GitLabApi client = property.getClient();
                     Project projectForName =
-                            client.getProjectApi().getProject(hook.getProject().getPathWithNamespace());
-                    hook.setProjectId(projectForName.getId());
+                            client.getProjectApi().getProject(event.getProject().getPathWithNamespace());
+                    hook = client.getProjectApi()
+                            .getHook(
+                                    projectForName.getId(),
+                                    event.getObjectAttributes().getId());
                 }
             }
-        } catch (GitLabApiException e) {
+        } catch (WebApplicationException | GitLabApiException e) {
             LOGGER.log(
                     Level.WARNING,
                     "Failed to communicate with gitlab server to determine project id: " + e.getMessage(),
                     e);
         }
-        if (allowedStates.contains(objectAttributes.getStatus()) && !isLastAlreadyBuild(job, hook)) {
-            if (ciSkip && isCiSkip(hook)) {
+        if (allowedStates.contains(objectAttributes.getStatus()) && !isLastAlreadyBuild(job, event)) {
+            if (ciSkip && isCiSkip(event)) {
                 LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
                 return;
             }
             // we do not call super here, since we do not want the status to be changed
             // in case of pipeline events that could lead to a deadlock
-            String sourceBranch = getSourceBranch(hook);
-            String targetBranch = getTargetBranch(hook);
+            String sourceBranch = getSourceBranch(event);
+            String targetBranch = getTargetBranch(event);
             if (branchFilter.isBranchAllowed(sourceBranch, targetBranch)) {
                 LOGGER.log(
                         Level.INFO, "{0} triggered for {1}.", LoggerUtil.toArray(job.getFullName(), getTriggerType()));
 
-                super.scheduleBuild(job, createActions(job, hook));
+                super.scheduleBuild(job, createActions(job, event));
             } else {
                 LOGGER.log(Level.INFO, "branch {0} is not allowed", sourceBranch + " or " + targetBranch);
             }
@@ -85,23 +94,23 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     }
 
     @Override
-    protected boolean isCiSkip(PipelineHook hook) {
+    protected boolean isCiSkip(PipelineEvent event) {
         // we don't get a commit message or suchlike that could contain ci-skip
         return false;
     }
 
     @Override
-    protected String getSourceBranch(PipelineHook hook) {
-        return hook.getObjectAttributes().getRef() == null
+    protected String getSourceBranch(PipelineEvent event) {
+        return event.getObjectAttributes().getRef() == null
                 ? null
-                : hook.getObjectAttributes().getRef().replaceFirst("^refs/heads/", "");
+                : event.getObjectAttributes().getRef().replaceFirst("^refs/heads/", "");
     }
 
     @Override
-    protected String getTargetBranch(PipelineHook hook) {
-        return hook.getObjectAttributes().getRef() == null
+    protected String getTargetBranch(PipelineEvent event) {
+        return event.getObjectAttributes().getRef() == null
                 ? null
-                : hook.getObjectAttributes().getRef().replaceFirst("^refs/heads/", "");
+                : event.getObjectAttributes().getRef().replaceFirst("^refs/heads/", "");
     }
 
     @Override
@@ -110,101 +119,116 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     }
 
     @Override
-    protected CauseData retrieveCauseData(PipelineHook hook) {
+    protected CauseData retrieveCauseData(PipelineEvent event) {
+
         return causeData()
                 .withActionType(CauseData.ActionType.PIPELINE)
-                .withSourceProjectId(hook.getProject().getId())
-                .withBranch(getTargetBranch(hook) == null ? "" : getTargetBranch(hook))
-                .withSourceBranch(getTargetBranch(hook) == null ? "" : getTargetBranch(hook))
+                .withSourceProjectId(event.getProject().getId())
+                .withBranch(getTargetBranch(event) == null ? "" : getTargetBranch(event))
+                .withSourceBranch(getTargetBranch(event) == null ? "" : getTargetBranch(event))
                 .withUserName(
-                        hook.getUser() == null || hook.getUser().getName() == null
+                        event.getUser() == null || event.getUser().getName() == null
                                 ? ""
-                                : hook.getUser().getName())
+                                : event.getUser().getName())
                 .withSourceRepoName(
-                        hook.getRepository() == null || hook.getRepository().getName() == null
+                        //                        event.getRepository() == null || event.getRepository().getName() ==
+                        // null
+                        event.getProject().getName() == null
                                 ? ""
-                                : hook.getRepository().getName())
+                                : event.getProject().getName())
                 .withSourceNamespace(
-                        hook.getProject() == null || hook.getProject().getNamespace() == null
+                        event.getProject() == null || event.getProject().getNamespace() == null
                                 ? ""
-                                : hook.getProject().getNamespace())
+                                : event.getProject().getNamespace())
                 .withSourceRepoSshUrl(
-                        hook.getRepository() == null || hook.getRepository().getGitSshUrl() == null
+                        event.getProject() == null || event.getProject().getGitSshUrl() == null
                                 ? ""
-                                : hook.getRepository().getGitSshUrl())
+                                : event.getProject().getGitSshUrl())
                 .withSourceRepoHttpUrl(
-                        hook.getRepository() == null || hook.getRepository() == null
+                        event.getProject() == null || event.getProject().getGitHttpUrl() == null
                                 ? ""
-                                : hook.getRepository().getGitHttpUrl())
+                                : event.getProject().getGitHttpUrl())
                 .withMergeRequestTitle("")
-                .withTargetProjectId(hook.getProject().getId())
-                .withTargetBranch(getTargetBranch(hook) == null ? "" : getTargetBranch(hook))
+                .withTargetProjectId(event.getProject().getId())
+                .withTargetBranch(getTargetBranch(event) == null ? "" : getTargetBranch(event))
                 .withTargetRepoName("")
                 .withTargetNamespace("")
                 .withTargetRepoSshUrl("")
                 .withTargetRepoHttpUrl("")
-                .withLastCommit(hook.getObjectAttributes().getSha())
+                .withLastCommit(event.getObjectAttributes().getSha())
                 .withTriggeredByUser(
-                        hook.getUser() == null || hook.getUser().getName() == null
+                        event.getUser() == null || event.getUser().getName() == null
                                 ? ""
-                                : hook.getUser().getName())
+                                : event.getUser().getName())
                 .withRef(
-                        hook.getObjectAttributes().getRef() == null
+                        event.getObjectAttributes().getRef() == null
                                 ? ""
-                                : hook.getObjectAttributes().getRef())
+                                : event.getObjectAttributes().getRef())
                 .withSha(
-                        hook.getObjectAttributes().getSha() == null
+                        event.getObjectAttributes().getSha() == null
                                 ? ""
-                                : hook.getObjectAttributes().getSha())
+                                : event.getObjectAttributes().getSha())
                 .withBeforeSha(
-                        hook.getObjectAttributes().getBeforeSha() == null
+                        event.getObjectAttributes().getBeforeSha() == null
                                 ? ""
-                                : hook.getObjectAttributes().getBeforeSha())
+                                : event.getObjectAttributes().getBeforeSha())
                 .withStatus(
-                        hook.getObjectAttributes().getStatus() == null
+                        event.getObjectAttributes().getStatus() == null
                                 ? ""
-                                : hook.getObjectAttributes().getStatus())
+                                : event.getObjectAttributes().getStatus())
                 .withStages(
-                        hook.getObjectAttributes().getStages() == null
+                        event.getObjectAttributes().getStages() == null
                                 ? ""
-                                : hook.getObjectAttributes().getStages().toString())
+                                : event.getObjectAttributes().getStages().toString())
                 .withCreatedAt(
-                        hook.getObjectAttributes().getCreatedAt() == null
+                        event.getObjectAttributes().getCreatedAt() == null
                                 ? ""
-                                : hook.getObjectAttributes().getCreatedAt().toString())
+                                : event.getObjectAttributes().getCreatedAt().toString())
                 .withFinishedAt(
-                        hook.getObjectAttributes().getFinishedAt() == null
+                        event.getObjectAttributes().getFinishedAt() == null
                                 ? ""
-                                : hook.getObjectAttributes().getFinishedAt().toString())
-                .withBuildDuration(String.valueOf(hook.getObjectAttributes().getDuration()))
+                                : event.getObjectAttributes().getFinishedAt().toString())
+                .withBuildDuration(String.valueOf(event.getObjectAttributes().getDuration()))
                 .build();
     }
 
     @Override
-    protected RevisionParameterAction createRevisionParameter(PipelineHook hook, GitSCM gitSCM)
+    protected RevisionParameterAction createRevisionParameter(PipelineEvent event, GitSCM gitSCM)
             throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+        return new RevisionParameterAction(retrieveRevisionToBuild(event), retrieveUrIish(event));
     }
 
     @Override
-    protected BuildStatusUpdate retrieveBuildStatusUpdate(PipelineHook hook) {
+    protected URIish retrieveUrIish(PipelineEvent event) {
+        try {
+            if (event.getProject().getUrl() != null) {
+                return new URIish(event.getProject().getUrl());
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.log(Level.WARNING, "could not parse URL");
+        }
+        return null;
+    }
+
+    @Override
+    protected BuildStatusUpdate retrieveBuildStatusUpdate(PipelineEvent event) {
         return buildStatusUpdate()
-                .withProjectId(hook.getProject().getId())
-                .withSha(hook.getObjectAttributes().getSha())
-                .withRef(hook.getObjectAttributes().getRef())
+                .withProjectId(event.getProject().getId())
+                .withSha(event.getObjectAttributes().getSha())
+                .withRef(event.getObjectAttributes().getRef())
                 .build();
     }
 
-    private String retrieveRevisionToBuild(PipelineHook hook) throws NoRevisionToBuildException {
-        if (hook.getObjectAttributes() != null && hook.getObjectAttributes().getSha() != null) {
-            return hook.getObjectAttributes().getSha();
+    private String retrieveRevisionToBuild(PipelineEvent event) throws NoRevisionToBuildException {
+        if (event.getObjectAttributes() != null && event.getObjectAttributes().getSha() != null) {
+            return event.getObjectAttributes().getSha();
         } else {
             throw new NoRevisionToBuildException();
         }
     }
 
-    private boolean isLastAlreadyBuild(Job<?, ?> project, PipelineHook hook) {
-        PipelineEventObjectAttributes objectAttributes = hook.getObjectAttributes();
+    private boolean isLastAlreadyBuild(Job<?, ?> project, PipelineEvent event) {
+        ObjectAttributes objectAttributes = event.getObjectAttributes();
         if (objectAttributes != null && objectAttributes.getSha() != null) {
             Run<?, ?> lastBuild = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, objectAttributes.getSha());
             if (lastBuild != null) {

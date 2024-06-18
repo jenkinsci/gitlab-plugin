@@ -14,6 +14,7 @@ import hudson.model.Run;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import java.util.Objects;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +35,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
  */
 public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
-    private String gitLabConnection;
+    private final String gitLabConnection;
     private String jobCredentialId;
     private boolean useAlternativeCredential = false;
 
@@ -83,13 +84,8 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
     public static GitLabApi getClient(@NonNull Run<?, ?> build) {
         Job<?, ?> job = build.getParent();
-        if (job != null) {
-            final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
-            if (connectionProperty != null) {
-                return connectionProperty.getClient();
-            }
-        }
-        return null;
+        final GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
+        return connectionProperty.getClient();
     }
 
     @Extension
@@ -108,15 +104,24 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
 
         @Override
         public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return req.bindJSON(GitLabConnectionProperty.class, formData);
+            if (req != null) {
+                return req.bindJSON(GitLabConnectionProperty.class, formData);
+            } else {
+                throw new IllegalArgumentException("StaplerRequest 'req' cannot be null.");
+            }
         }
 
         public ListBoxModel doFillGitLabConnectionItems() {
             ListBoxModel options = new ListBoxModel();
-            GitLabConnectionConfig descriptor =
-                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            for (GitLabConnection connection : descriptor.getConnections()) {
-                options.add(connection.getName(), connection.getName());
+            GitLabConnectionConfig descriptor = (GitLabConnectionConfig)
+                    Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+
+            if (descriptor != null) {
+                for (GitLabConnection connection : descriptor.getConnections()) {
+                    options.add(connection.getName(), connection.getName());
+                }
+            } else {
+                throw new IllegalStateException("GitLabConnectionConfig descriptor cannot be null.");
             }
             return options;
         }
@@ -152,12 +157,17 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
             item.checkPermission(Item.CONFIGURE);
             try {
                 GitLabConnection gitLabConnectionTested = null;
-                GitLabConnectionConfig descriptor =
-                        (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-                for (GitLabConnection connection : descriptor.getConnections()) {
-                    if (gitLabConnection.equals(connection.getName())) {
-                        gitLabConnectionTested = connection;
+                GitLabConnectionConfig descriptor = (GitLabConnectionConfig)
+                        Objects.requireNonNull(Jenkins.getInstance()).getDescriptor(GitLabConnectionConfig.class);
+
+                if (descriptor != null) {
+                    for (GitLabConnection connection : descriptor.getConnections()) {
+                        if (gitLabConnection.equals(connection.getName())) {
+                            gitLabConnectionTested = connection;
+                        }
                     }
+                } else {
+                    throw new IllegalStateException("GitLabConnectionConfig descriptor cannot be null.");
                 }
                 if (gitLabConnectionTested == null) {
                     return FormValidation.error(Messages.connection_error("The GitLab Connection does not exist"));

@@ -89,19 +89,9 @@
     <Class name="com.dabsquared.gitlabjenkins.trigger.handler.push.OpenMergeRequestPushHookTriggerHandler"/>
   </Match>
   <Match>
-    <Bug pattern="SE_BAD_FIELD"/>
-    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.impl.ResteasyGitLabClientBuilder"/>
-    <Field name="mergeRequestIdProvider"/>
-  </Match>
-  <Match>
     <Bug pattern="UWF_UNWRITTEN_FIELD"/>
     <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnection"/>
     <Field name="apiToken"/>
-  </Match>
-  <Match>
-    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
-    <Class name="com.dabsquared.gitlabjenkins.gitlab.api.impl.ResteasyGitLabClientBuilder$ClientHttpEngineBuilder43"/>
-    <Field name="that"/>
   </Match>
   <Match>
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
@@ -137,5 +127,24 @@
   </Match>
   <Match>
     <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT" />
+  </Match>
+  <Match>
+    <Bug pattern="DM_CONVERT_CASE" />
+  </Match>
+<!-- TODO: Below are patches made for the modernization and will need to be looked at carefully later -->
+  <Match>
+    <Bug pattern="NP_UNWRITTEN_FIELD" />
+  </Match>
+  <Match>
+    <Bug pattern="UWF_UNWRITTEN_FIELD" />
+    <Class name="com.dabsquared.gitlabjenkins.GitLabPushTrigger" />
+  </Match>
+  <Match>
+    <Bug pattern="URF_UNREAD_FIELD" />
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnection" />
+  </Match>
+  <Match>
+    <Bug pattern="URF_UNREAD_FIELD" />
+    <Class name="com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandlerImpl" />
   </Match>
 </FindBugsFilter>

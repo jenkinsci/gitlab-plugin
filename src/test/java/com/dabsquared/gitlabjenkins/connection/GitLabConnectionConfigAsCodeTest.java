@@ -40,7 +40,7 @@ public class GitLabConnectionConfigAsCodeTest {
                 (GitLabApiToken) gitLabCredential.getCredentials().get(0);
         assertEquals("gitlab_token", apiToken.getId());
         assertEquals("qwertyuiopasdfghjklzxcvbnm", apiToken.getApiToken().getPlainText());
-        assertEquals("Gitlab Token", apiToken.getDescription());
+        assertEquals("GitLab Token", apiToken.getDescription());
     }
 
     @Test
@@ -55,8 +55,8 @@ public class GitLabConnectionConfigAsCodeTest {
         assertEquals("my_gitlab_server", gitLabConnection.getName());
         assertEquals("autodetect", gitLabConnection.getClientBuilderId());
         assertEquals("https://gitlab.com/", gitLabConnection.getUrl());
-        assertEquals(20, gitLabConnection.getConnectionTimeout());
-        assertEquals(10, gitLabConnection.getReadTimeout());
+        assertEquals(60, gitLabConnection.getConnectionTimeout());
+        assertEquals(60, gitLabConnection.getReadTimeout());
         assertTrue(gitLabConnection.isIgnoreCertificateErrors());
     }
 

@@ -11,6 +11,7 @@ import hudson.tasks.Publisher;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
@@ -36,16 +37,17 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
     private String unstableNoteText;
 
     /**
-     * @deprecated use {@link #GitLabMessagePublisher()} with setters to configure an instance of this class.
-     * @param onlyForFailure Option to only post message on failure
-     * @param replaceSuccessNote Option to replace message on success
-     * @param replaceFailureNote Option to replace message on failure
-     * @param replaceAbortNote Option to replace message on abort
+     * @deprecated use {@link #GitLabMessagePublisher()} with setters to configure
+     *             an instance of this class.
+     * @param onlyForFailure      Option to only post message on failure
+     * @param replaceSuccessNote  Option to replace message on success
+     * @param replaceFailureNote  Option to replace message on failure
+     * @param replaceAbortNote    Option to replace message on abort
      * @param replaceUnstableNote Option to replace message on unstable
-     * @param successNoteText Text of message for build success
-     * @param failureNoteText Text of message for build failure
-     * @param abortNoteText Text of message for build abort
-     * @param unstableNoteText Text of message for unstable build
+     * @param successNoteText     Text of message for build success
+     * @param failureNoteText     Text of message for build failure
+     * @param abortNoteText       Text of message for build abort
+     * @param unstableNoteText    Text of message for unstable build
      */
     @Deprecated
     public GitLabMessagePublisher(
@@ -246,11 +248,11 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
             message = replaceMacros(build, listener, this.getFailureNoteText());
         } else {
             String icon = getResultIcon(build.getResult());
-            String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
+            String buildUrl = Objects.requireNonNull(Jenkins.getInstance()).getRootUrl() + build.getUrl();
             message = MessageFormat.format(
                     "{0} Jenkins Build {1}\n\nResults available at: [Jenkins [{2} #{3}]]({4})",
                     icon,
-                    build.getResult().toString(),
+                    Objects.requireNonNull(build.getResult()).toString(),
                     build.getParent().getDisplayName(),
                     build.getNumber(),
                     buildUrl);

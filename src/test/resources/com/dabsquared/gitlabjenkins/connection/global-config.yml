@@ -6,15 +6,15 @@ credentials:
               scope: SYSTEM
               id: gitlab_token
               apiToken: "${BIND_TOKEN}"
-              description: "Gitlab Token"
+              description: "GitLab Token"
 unclassified:
   gitlabconnectionconfig:
     useAuthenticatedEndpoint: true
     connections:
       - apiTokenId: gitlab_token
         clientBuilderId: "autodetect"
-        connectionTimeout: 20
+        connectionTimeout: 60
         ignoreCertificateErrors: true
         name: "my_gitlab_server"
-        readTimeout: 10
+        readTimeout: 60
         url: "https://gitlab.com/"

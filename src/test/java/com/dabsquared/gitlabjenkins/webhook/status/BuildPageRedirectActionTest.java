@@ -50,7 +50,7 @@ public abstract class BuildPageRedirectActionTest {
         tmp.newFile("test");
         Git git = Git.open(tmp.getRoot());
         git.add().addFilepattern("test");
-        RevCommit commit = git.commit().setMessage("test").call();
+        RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         commitSha1 = commit.getId().getName();
         gitRepoUrl = tmp.getRoot().toURI().toString();
     }

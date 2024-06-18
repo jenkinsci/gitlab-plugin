@@ -2,6 +2,7 @@
 
 version: 2
 updates:
+# Maintain dependencies for maven
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -16,8 +17,8 @@ updates:
       # Provided by the web container, so aligned with Jetty
       - dependency-name: "javax.servlet:javax.servlet-api"
       # Newer versions require code changes
-      - dependency-name: "org.jboss.resteasy:resteasy-client"
-        versions: [">=4.0.0"]
+      # N/A
+  # Maintain dependencies for GitHub actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

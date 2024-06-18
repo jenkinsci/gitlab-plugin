@@ -66,7 +66,7 @@ public class CommitStatusUpdater {
                     gitLabBranchBuilds = retrieveGitlabProjectIds(build, environment);
                 }
             } catch (IOException | InterruptedException e) {
-                printf(listener, "Failed to get Gitlab Build list to update status: %s%n", e.getMessage());
+                printf(listener, "Failed to get GitLab Build list to update status: %s%n", e.getMessage());
             }
         }
 
@@ -110,13 +110,13 @@ public class CommitStatusUpdater {
                 } catch (GitLabApiException e) {
                     printf(
                             listener,
-                            "Failed to update Gitlab commit status for project '%s': %s%n",
+                            "Failed to update GitLab commit status for project '%s': %s%n",
                             gitLabBranchBuild.getProjectId(),
                             e.getMessage());
                     LOGGER.log(
                             Level.SEVERE,
                             String.format(
-                                    "Failed to update Gitlab commit status for project '%s'",
+                                    "Failed to update GitLab commit status for project '%s'",
                                     gitLabBranchBuild.getProjectId()),
                             e);
                 }
@@ -128,7 +128,7 @@ public class CommitStatusUpdater {
         try {
             updateCommitStatus(build, listener, state, name, null, null);
         } catch (IllegalStateException e) {
-            printf(listener, "Failed to update Gitlab commit status: %s%n", e.getMessage());
+            printf(listener, "Failed to update GitLab commit status: %s%n", e.getMessage());
         }
     }
 
@@ -199,15 +199,15 @@ public class CommitStatusUpdater {
             return result;
         }
 
-        final List<BuildData> buildDatas = build.getActions(BuildData.class);
-        if (CollectionUtils.isEmpty(buildDatas)) {
+        final List<BuildData> buildDataList = build.getActions(BuildData.class);
+        if (CollectionUtils.isEmpty(buildDataList)) {
             LOGGER.log(Level.INFO, "Build does not contain build data.");
             return result;
         }
 
-        if (buildDatas.size() == 1) {
+        if (buildDataList.size() == 1) {
             addGitLabBranchBuild(
-                    result, getBuildRevision(build), buildDatas.get(0).getRemoteUrls(), environment, gitLabClient);
+                    result, getBuildRevision(build), buildDataList.get(0).getRemoteUrls(), environment, gitLabClient);
         } else {
             final SCMRevisionAction scmRevisionAction = build.getAction(SCMRevisionAction.class);
 
@@ -230,7 +230,7 @@ public class CommitStatusUpdater {
                     return result;
                 }
 
-                for (final BuildData buildData : buildDatas) {
+                for (final BuildData buildData : buildDataList) {
                     for (final Entry<String, Build> buildByBranchName :
                             buildData.getBuildsByBranchName().entrySet()) {
                         if (buildByBranchName.getValue().getSHA1() != null) {
@@ -306,10 +306,13 @@ public class CommitStatusUpdater {
         for (Cause cause : causes) {
             if (cause instanceof UpstreamCause) {
                 List<Cause> upCauses =
-                        ((UpstreamCause) cause).getUpstreamCauses(); // Non null, returns empty list when none are set
+                        ((UpstreamCause) cause).getUpstreamCauses(); // Non-null, returns empty list when none are set
                 for (Cause upCause : upCauses) {
                     if (upCause instanceof GitLabWebHookCause) {
                         GitLabWebHookCause gitlabCause = (GitLabWebHookCause) upCause;
+                        if (gitlabCause.getData() == null) {
+                            return Collections.emptyList();
+                        }
                         return Collections.singletonList(new GitLabBranchBuild(
                                 gitlabCause.getData().getSourceProjectId().toString(),
                                 gitlabCause.getData().getLastCommit()));
