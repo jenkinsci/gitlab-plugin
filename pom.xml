@@ -52,8 +52,8 @@
   <properties>
     <revision>1.8.2</revision>
     <changelist>-SNAPSHOT</changelist>
-    <!-- TODO JENKINS-73130 https://ci.jenkins.io/job/Core/job/jenkins/job/prototype/ -->
-    <jenkins.version>2.464-rc35068.0fff405a_c344</jenkins.version>
+    <!-- TODO JENKINS-73278 https://ci.jenkins.io/job/Core/job/jenkins/job/jakarta/ -->
+    <jenkins.version>2.464-rc35069.54d5e6a_108a_0</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
@@ -74,6 +74,12 @@
         <version>2982.vdce2153031a_0</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- TODO JENKINS-73339 until in parent POM, work around https://github.com/jenkinsci/plugin-pom/issues/936 -->
+      <dependency>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>5.0.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

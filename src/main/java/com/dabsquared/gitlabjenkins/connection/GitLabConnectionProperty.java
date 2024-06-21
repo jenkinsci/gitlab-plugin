@@ -28,7 +28,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
@@ -109,11 +109,11 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
         }
 
         @Override
-        public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public JobProperty<?> newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             if (req != null) {
                 return req.bindJSON(GitLabConnectionProperty.class, formData);
             } else {
-                throw new IllegalArgumentException("StaplerRequest 'req' cannot be null.");
+                throw new IllegalArgumentException("StaplerRequest2 'req' cannot be null.");
             }
         }
 
