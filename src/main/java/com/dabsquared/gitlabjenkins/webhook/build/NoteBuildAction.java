@@ -14,7 +14,7 @@ import hudson.util.HttpResponses;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Nikolay Ustinov
@@ -46,7 +46,7 @@ public class NoteBuildAction implements WebHookAction {
         this.secretToken = secretToken;
     }
 
-    public void execute(StaplerResponse response) {
+    public void execute(StaplerResponse2 response) {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Note Hook is not supported for this project");
         }

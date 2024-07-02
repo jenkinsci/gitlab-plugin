@@ -6,7 +6,7 @@ import hudson.util.HttpResponses;
 import java.io.IOException;
 import java.util.Objects;
 import jenkins.model.Jenkins;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Robin Müller
@@ -19,7 +19,7 @@ abstract class BuildPageRedirectAction implements WebHookAction {
         this.build = build;
     }
 
-    public void execute(StaplerResponse response) {
+    public void execute(StaplerResponse2 response) {
         if (build != null) {
             try {
                 response.sendRedirect2(

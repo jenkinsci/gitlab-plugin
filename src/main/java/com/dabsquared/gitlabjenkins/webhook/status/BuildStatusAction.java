@@ -8,7 +8,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
 import hudson.util.HttpResponses;
 import jenkins.triggers.SCMTriggerItem;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Robin Müller
@@ -23,7 +23,7 @@ abstract class BuildStatusAction implements WebHookAction {
         this.build = build;
     }
 
-    public void execute(StaplerResponse response) {
+    public void execute(StaplerResponse2 response) {
         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
         if (!hasGitSCM(item)) {
             throw HttpResponses.error(409, "The project has no GitSCM configured");
@@ -31,7 +31,7 @@ abstract class BuildStatusAction implements WebHookAction {
         writeStatusBody(response, build, getStatus(build));
     }
 
-    protected abstract void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status);
+    protected abstract void writeStatusBody(StaplerResponse2 response, Run<?, ?> build, BuildStatus status);
 
     private boolean hasGitSCM(SCMTriggerItem item) {
         if (item != null) {
