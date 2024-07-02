@@ -198,6 +198,7 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withSourceBranch(hook.getObjectAttributes().getSourceBranch())
                 .withUserName(
                         hook.getObjectAttributes().getLastCommit().getAuthor().getName())
+                .withUserUsername(hook.getUser().getUsername())
                 .withUserEmail(
                         hook.getObjectAttributes().getLastCommit().getAuthor().getEmail())
                 .withSourceRepoHomepage(hook.getObjectAttributes().getSource().getHomepage())
@@ -360,10 +361,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 changedLabels.getPrevious() != null ? changedLabels.getPrevious() : emptyList();
 
         return current.stream()
-                .filter(currentLabel -> !previous.stream()
-                        .anyMatch(previousLabel -> Objects.equals(currentLabel.getId(), previousLabel.getId())))
-                .map(label -> label.getTitle())
-                .anyMatch(label -> labelsThatForcesBuildIfAdded.contains(label));
+                .filter(currentLabel -> previous.stream()
+                        .noneMatch(previousLabel -> Objects.equals(currentLabel.getId(), previousLabel.getId())))
+                .map(MergeRequestLabel::getTitle)
+                .anyMatch(labelsThatForcesBuildIfAdded::contains);
     }
 
     private boolean isNotSkipWorkInProgressMergeRequest(MergeRequestObjectAttributes objectAttributes) {

@@ -1,6 +1,10 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -14,6 +18,8 @@ import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
@@ -28,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -68,13 +75,19 @@ public class NoteBuildActionTest {
 
     @Test
     public void build() throws IOException {
-        FreeStyleProject testProject = jenkins.createFreeStyleProject();
-        testProject.addTrigger(trigger);
+        try {
+            FreeStyleProject testProject = jenkins.createFreeStyleProject();
+            testProject.addTrigger(trigger);
 
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new NoteBuildAction(testProject, getJson("NoteEvent.json"), null).execute(response);
-
-        verify(trigger).onPost(any(NoteHook.class));
+            exception.expect(HttpResponses.HttpResponseException.class);
+            new NoteBuildAction(testProject, getJson("NoteEvent.json"), null).execute(response);
+        } finally {
+            ArgumentCaptor<NoteHook> noteHookArgumentCaptor = ArgumentCaptor.forClass(NoteHook.class);
+            verify(trigger).onPost(noteHookArgumentCaptor.capture());
+            assertThat(noteHookArgumentCaptor.getValue().getUser(), is(notNullValue()));
+            assertThat(noteHookArgumentCaptor.getValue().getUser().getName(), containsString("Administrator"));
+            assertThat(noteHookArgumentCaptor.getValue().getUser().getUsername(), containsString("root"));
+        }
     }
 
     @Test
@@ -84,7 +97,9 @@ public class NoteBuildActionTest {
         testProject.setScm(new GitSCM(gitRepoUrl));
         QueueTaskFuture<?> future = testProject.scheduleBuild2(
                 0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
-        future.get();
+        if (future != null) {
+            future.get();
+        }
 
         exception.expect(HttpResponses.HttpResponseException.class);
         new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null).execute(response);
@@ -134,6 +149,7 @@ public class NoteBuildActionTest {
     }
 
     private String getJson(String name) throws IOException {
-        return IOUtils.toString(getClass().getResourceAsStream(name)).replace("${commitSha1}", commitSha1);
+        return IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream(name)), StandardCharsets.UTF_8)
+                .replace("${commitSha1}", commitSha1);
     }
 }
