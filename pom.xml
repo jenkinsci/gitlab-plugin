@@ -52,13 +52,17 @@
   <properties>
     <revision>1.8.2</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.426.3</jenkins.version>
+    <!-- TODO JENKINS-73130 https://ci.jenkins.io/job/Core/job/jenkins/job/prototype/ -->
+    <jenkins.version>2.468-rc35110.010999645350</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <mockserver.version>5.15.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
+    <!-- TODO JENKINS-73339 until in parent POM -->
+    <jenkins-test-harness.version>2244.v77428109fd1f</jenkins-test-harness.version>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
   <dependencyManagement>
