@@ -5,7 +5,7 @@ import hudson.model.Run;
 import hudson.util.HttpResponses;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Robin Müller
@@ -16,7 +16,7 @@ class StatusPngAction extends BuildStatusAction {
     }
 
     @Override
-    protected void writeStatusBody(StaplerResponse response, Run<?, ?> build, BuildStatus status) {
+    protected void writeStatusBody(StaplerResponse2 response, Run<?, ?> build, BuildStatus status) {
         try {
             response.setHeader("Expires", "Fri, 01 Jan 1984 00:00:00 GMT");
             response.setHeader("Cache-Control", "no-cache, private");

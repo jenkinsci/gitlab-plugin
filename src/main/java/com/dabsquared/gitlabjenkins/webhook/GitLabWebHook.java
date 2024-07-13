@@ -3,15 +3,15 @@ package com.dabsquared.gitlabjenkins.webhook;
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
 import hudson.security.csrf.CrumbExclusion;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Daniel Brooks
@@ -37,7 +37,7 @@ public class GitLabWebHook implements UnprotectedRootAction {
         return WEBHOOK_URL;
     }
 
-    public void getDynamic(final String projectName, final StaplerRequest request, StaplerResponse response) {
+    public void getDynamic(final String projectName, final StaplerRequest2 request, StaplerResponse2 response) {
         LOGGER.log(Level.INFO, "WebHook called with url: {0}", request.getRequestURIWithQueryString());
         actionResolver.resolve(projectName, request).execute(response);
     }
