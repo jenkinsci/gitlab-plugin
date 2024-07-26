@@ -52,7 +52,7 @@
   <properties>
     <revision>1.8.2</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.426.3</jenkins.version>
+    <jenkins.version>2.440.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
