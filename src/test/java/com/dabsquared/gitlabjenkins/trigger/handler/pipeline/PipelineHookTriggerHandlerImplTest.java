@@ -26,7 +26,6 @@ import org.gitlab4j.api.webhook.EventProject;
 import org.gitlab4j.api.webhook.EventRepository;
 import org.gitlab4j.api.webhook.PipelineEvent;
 import org.gitlab4j.api.webhook.PipelineEvent.ObjectAttributes;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
