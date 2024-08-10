@@ -37,7 +37,11 @@ public class ActionResolver {
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
-    public WebHookAction resolve(final String projectName, StaplerRequest request, StaplerResponse response) {
+    WebHookManager webHookManager = new WebHookManager();
+    SystemHookManager systemHookManager = new SystemHookManager();
+    static String secretToken;
+
+    public void resolve(final String projectName, StaplerRequest request, StaplerResponse response) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
                 .filter(s -> !s.isEmpty())
                 .iterator();
@@ -50,23 +54,22 @@ public class ActionResolver {
             restOfPath.add(restOfPathParts.next());
         }
         resolveAction(project, restOfPath.toString(), request, response);
-        return null;
     }
 
     private void resolveAction(Item project, String restOfPath, StaplerRequest request, StaplerResponse response) {
         String method = request.getMethod();
         try {
-            WebHookManager webHookManager = new WebHookManager();
             webHookManager.addListener(new GitLabHookResolver(project, request, response));
             webHookManager.handleEvent(request);
+            setSecretToken(webHookManager.getSecretToken());
             throw HttpResponses.ok();
         } catch (GitLabApiException e) {
             LOGGER.log(Level.FINE, "WebHook was not supported for this project {0}", project.getName());
         }
         try {
-            SystemHookManager systemHookManager = new SystemHookManager();
             systemHookManager.addListener(new GitLabHookResolver(project, request, response));
             systemHookManager.handleEvent(request);
+            setSecretToken(systemHookManager.getSecretToken());
             throw HttpResponses.ok();
         } catch (GitLabApiException e) {
             LOGGER.log(Level.FINE, "SystemHook was not supported for this project {0}", project.getName());
@@ -138,6 +141,14 @@ public class ActionResolver {
                 return null;
             }
         });
+    }
+
+    private static void setSecretToken(String token) {
+        secretToken = token;
+    }
+
+    public static String getSecretToken() {
+        return secretToken;
     }
 
     static class NoopAction implements WebHookAction {

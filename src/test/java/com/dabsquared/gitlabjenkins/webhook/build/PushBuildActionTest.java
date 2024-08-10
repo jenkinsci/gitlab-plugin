@@ -181,20 +181,15 @@ public class PushBuildActionTest {
         verify(trigger, never()).onPost(any(PushEvent.class));
     }
 
-    // TODO : Will be fixed in later milestone PRs
-    // @Test
-    // public void scmSourceOnUpdateExecuted() {
-    //     GitSCMSource source = new GitSCMSource("http://test");
-    //     SCMSourceOwner item = mock(SCMSourceOwner.class);
-    //     ACL acl = mock(ACL.class);
-    //     when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
-    //     when(item.getACL()).thenReturn(acl);
-    //     Assert.assertThrows(
-    //             HttpResponses.HttpResponseException.class,
-    //             () -> new PushBuildAction(item, getJson("PushEvent.json"), null).execute(response));
-    //     item.onSCMSourceUpdated(source);
-    //     verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
-    // }
+    @Test
+    public void scmSourceOnUpdateExecuted() {
+        GitSCMSource source = new GitSCMSource("http://test");
+        SCMSourceOwner item = mock(SCMSourceOwner.class);
+        when(item.getSCMSources()).thenReturn(Collections.singletonList(source));
+        exception.expect(NullPointerException.class);
+        new PushBuildAction(item, pushEvent, null).execute(response);
+        verify(item).onSCMSourceUpdated(isA(GitSCMSource.class));
+    }
 
     @Test
     public void scmSourceOnUpdateNotExecuted() {

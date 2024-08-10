@@ -227,7 +227,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                     }
                 }
             }
-            gitLabConfig.save();
+            if (gitLabConfig != null) {
+                gitLabConfig.save();
+            }
             oldConfig.jobsMigrated = true;
             oldConfig.save();
         }

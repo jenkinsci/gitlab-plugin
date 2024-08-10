@@ -18,7 +18,7 @@ updates:
       - dependency-name: "javax.servlet:javax.servlet-api"
       # Newer versions require code changes
       # N/A
-  # Maintain dependencies for GitHub actions
+# Maintain dependencies for GitHub actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

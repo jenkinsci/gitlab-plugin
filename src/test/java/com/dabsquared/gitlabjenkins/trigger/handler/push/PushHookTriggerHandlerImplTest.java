@@ -203,6 +203,5 @@ public class PushHookTriggerHandlerImplTest {
         assertThat(buildTriggered.isSignaled(), is(false));
         // TODO: Should be 2, but fails
         assertThat(buildCount.intValue(), is(1));
-        //        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
 }

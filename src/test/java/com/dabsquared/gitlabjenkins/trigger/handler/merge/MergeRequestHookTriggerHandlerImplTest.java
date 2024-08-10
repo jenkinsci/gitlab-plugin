@@ -136,6 +136,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
 
     @Test
     public void mergeRequest_build_when_opened_with_approved_action_enabled() throws Exception {
+
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler = withConfig()
                 .setTriggerOnApprovedMergeRequest(true)
                 .setTriggerOpenMergeRequest(TriggerOpenMergeRequest.source)
@@ -208,6 +209,7 @@ public class MergeRequestHookTriggerHandlerImplTest {
                 .setTriggerOnClosedMergeRequest(true)
                 .setTriggerOnApprovedMergeRequest(true)
                 .build();
+
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         OneShotEvent buildTriggered =
                 doHandle(mergeRequestHookTriggerHandler, MergeRequestState.CLOSED, ActionType.CLOSED, buildHolder);
