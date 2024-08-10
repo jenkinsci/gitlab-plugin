@@ -14,12 +14,11 @@ Before submitting your change make sure that:
 * your changes work with the oldest and latest supported GitLab version
 * new features are provided with tests
 * refactored code is provided with regression tests
-* the code formatting follows the plugin standard
+* the code formatting follows the plugin standard (use `mvn spotless:apply` to format the code)
 * imports are organised
 * you updated the help docs
 * you updated the README
 * you have used spotbugs to see if you haven't introduced any new warnings
-* you can run `mvn spotless:apply` to confirm that the code formatting is as expected
 
 ## Testing With Docker
 

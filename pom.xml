@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.70</version>
+    <version>4.79</version>
     <relativePath />
   </parent>
 
@@ -52,7 +52,7 @@
   <properties>
     <revision>1.7.15</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.387.3</jenkins.version>
+    <jenkins.version>2.426.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
@@ -66,15 +66,14 @@
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.387.x</artifactId>
-        <version>2230.v0cb_4040cde55</version>
+        <artifactId>bom-2.414.x</artifactId>
+        <version>2982.vdce2153031a_0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
-        <version>2.12.5</version>
+        <groupId>io.jenkins.plugins</groupId>
+        <artifactId>joda-time-api</artifactId>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -149,28 +148,11 @@
       <groupId>io.jenkins</groupId>
       <artifactId>configuration-as-code</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <!-- Provided by mockserver when running in tests -->
-        <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-lang3</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.jenkins.configuration-as-code</groupId>
       <artifactId>test-harness</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.jenkins-ci.main</groupId>
-          <artifactId>jenkins-test-harness</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jetbrains</groupId>
-          <artifactId>annotations</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -249,15 +231,8 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.6.0</version>
+      <version>42.7.3</version>
       <scope>test</scope>
-      <exclusions>
-        <!-- Upper bounds with Guava -->
-        <exclusion>
-          <groupId>org.checkerframework</groupId>
-          <artifactId>checker-qual</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 
@@ -329,7 +304,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.1.2</version>
+            <version>3.2.2</version>
             <executions>
               <execution>
                 <goals>
@@ -381,7 +356,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.43.0</version>
+            <version>0.44.0</version>
             <configuration>
               <verbose>true</verbose>
               <images>
@@ -465,7 +440,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>3.5.0</version>
             <executions>
               <execution>
                 <id>add-source</id>

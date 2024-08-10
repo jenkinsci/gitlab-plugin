@@ -2,6 +2,7 @@
 
 version: 2
 updates:
+# Maintain dependencies for maven
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -17,6 +18,7 @@ updates:
       - dependency-name: "javax.servlet:javax.servlet-api"
       # Newer versions require code changes
       # N/A
+# Maintain dependencies for GitHub actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

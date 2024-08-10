@@ -30,6 +30,7 @@ import com.dabsquared.gitlabjenkins.trigger.handler.push.TagPushHookTriggerHandl
 import com.dabsquared.gitlabjenkins.trigger.handler.push.TagPushSystemHookTriggerHandler;
 import com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider;
 import com.dabsquared.gitlabjenkins.webhook.GitLabWebHook;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
@@ -49,6 +50,7 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.Objects;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem.SCMTriggerItems;
@@ -100,7 +102,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private transient boolean addNoteOnMergeRequest;
     private transient boolean addCiMessage;
     private transient boolean addVoteOnMergeRequest;
-    private final transient boolean allowAllBranches = false;
+    private static final boolean allowAllBranches = false;
     private transient String branchFilterName;
     private BranchFilterType branchFilterType;
     private String includeBranchesSpec;
@@ -199,26 +201,22 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         GitLabPushTrigger.DescriptorImpl oldConfig = Trigger.all().get(GitLabPushTrigger.DescriptorImpl.class);
         if (oldConfig != null && !oldConfig.jobsMigrated) {
             GitLabConnectionConfig gitLabConfig =
-                    (GitLabConnectionConfig) Jenkins.getInstance().getDescriptor(GitLabConnectionConfig.class);
-            if (gitLabConfig != null) {
-                gitLabConfig
-                        .getConnections()
-                        .add(new GitLabConnection(
-                                oldConfig.gitlabHostUrl,
-                                oldConfig.gitlabHostUrl,
-                                oldConfig.gitlabApiToken,
-                                "autodetect",
-                                oldConfig.ignoreCertificateErrors,
-                                5000,
-                                5000));
-            }
+                    (GitLabConnectionConfig) Jenkins.get().getDescriptor(GitLabConnectionConfig.class);
+            Objects.requireNonNull(gitLabConfig)
+                    .getConnections()
+                    .add(new GitLabConnection(
+                            oldConfig.gitlabHostUrl,
+                            oldConfig.gitlabHostUrl,
+                            oldConfig.gitlabApiToken,
+                            "autodetect",
+                            oldConfig.ignoreCertificateErrors,
+                            5000,
+                            5000));
 
-            String defaultConnectionName = null;
-            if (gitLabConfig != null) {
-                defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
-            }
+            String defaultConnectionName = gitLabConfig.getConnections().get(0).getName();
             if (defaultConnectionName != null) {
-                for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                for (AbstractProject<?, ?> project :
+                        Objects.requireNonNull(Jenkins.get()).getAllItems(AbstractProject.class)) {
                     GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                     if (trigger != null) {
                         if (trigger.addCiMessage) {
@@ -236,7 +234,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
             oldConfig.save();
         }
         if (oldConfig != null && !oldConfig.jobsMigrated2) {
-            for (AbstractProject<?, ?> project : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+            for (AbstractProject<?, ?> project : Jenkins.get().getAllItems(AbstractProject.class)) {
                 GitLabPushTrigger trigger = project.getTrigger(GitLabPushTrigger.class);
                 if (trigger != null) {
                     if (trigger.addNoteOnMergeRequest) {
@@ -600,7 +598,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.mergeRequestHookTriggerHandler.handle(job, event, ciSkip, branchFilter, mergeRequestLabelFilter);
     }
 
-    // executes when the Trigger receives a merge systemhook request
+    // executes when the Trigger receives a merge system hook request
     public void onPost(final MergeRequestSystemHookEvent event) {
         if (this.branchFilter == null) {
             initializeBranchFilter();
@@ -699,7 +697,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                 new SequentialExecutionQueue(Jenkins.MasterComputer.threadPoolForRemoting);
         private boolean jobsMigrated = false;
         private boolean jobsMigrated2 = false;
-        private String gitlabApiToken;
+        private String gitlabApiToken = "";
         private String gitlabHostUrl = "";
         private boolean ignoreCertificateErrors = false;
 
@@ -714,6 +712,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                     && item instanceof ParameterizedJobMixIn.ParameterizedJob;
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             Job<?, ?> project = retrieveCurrentJob();
@@ -730,7 +729,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
         private StringBuilder retrieveProjectUrl(Job<?, ?> project) {
             return new StringBuilder()
-                    .append(Jenkins.getInstance().getRootUrl())
+                    .append(Objects.requireNonNull(Jenkins.get()).getRootUrl())
                     .append(GitLabWebHook.WEBHOOK_URL)
                     .append(retrieveParentUrl(project))
                     .append('/')

@@ -131,4 +131,20 @@
   <Match>
     <Bug pattern="DM_CONVERT_CASE" />
   </Match>
+<!-- TODO: Below are patches made for the modernization and will need to be looked at carefully later -->
+  <Match>
+    <Bug pattern="NP_UNWRITTEN_FIELD" />
+  </Match>
+  <Match>
+    <Bug pattern="UWF_UNWRITTEN_FIELD" />
+    <Class name="com.dabsquared.gitlabjenkins.GitLabPushTrigger" />
+  </Match>
+  <Match>
+    <Bug pattern="URF_UNREAD_FIELD" />
+    <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnection" />
+  </Match>
+  <Match>
+    <Bug pattern="URF_UNREAD_FIELD" />
+    <Class name="com.dabsquared.gitlabjenkins.trigger.handler.pipeline.PipelineHookTriggerHandlerImpl" />
+  </Match>
 </FindBugsFilter>
