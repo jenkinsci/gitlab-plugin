@@ -13,9 +13,7 @@ import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.http.HttpStatus;
 import jenkins.model.Jenkins;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.Connector;
@@ -23,12 +21,12 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.AfterClass;
@@ -128,18 +126,13 @@ public class GitLabConnectionConfigSSLTest {
         // Set the connectors
         server.setConnectors(new Connector[] {http, https});
 
-        HandlerCollection handlerCollection = new HandlerCollection();
-        handlerCollection.setHandlers(new Handler[] {
-            new AbstractHandler() {
-                public void handle(
-                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                        throws IOException, ServletException {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    baseRequest.setHandled(true);
-                }
+        server.setHandler(new Handler.Abstract() {
+            @Override
+            public boolean handle(Request request, Response response, Callback callback) throws IOException {
+                response.setStatus(HttpStatus.OK_200);
+                return true;
             }
         });
-        server.setHandler(handlerCollection);
         server.start();
     }
 
