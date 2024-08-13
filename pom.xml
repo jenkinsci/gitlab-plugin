@@ -52,14 +52,18 @@
   <properties>
     <revision>1.8.2</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.baseline>2.440</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
+    <jenkins.baseline>2.462</jenkins.baseline>
+    <!-- <jenkins.version>${jenkins.baseline}.3</jenkins.version> -->
+    <!-- TODO: Remove when 2.472 is available in LTS -->
+    <jenkins.version>2.472</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <mockserver.version>5.15.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
+    <jenkins-test-harness.version>2250.v03a_1295b_0a_30</jenkins-test-harness.version>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
   <dependencyManagement>
