@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.9.0</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
@@ -32,7 +32,7 @@
   <scm>
     <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-    <tag>gitlab-plugin-1.9.0</tag>
+    <tag>${scmTag}</tag>
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
@@ -50,7 +50,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.8.2</revision>
+    <revision>1.9.1</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.baseline>2.462</jenkins.baseline>
     <!-- <jenkins.version>${jenkins.baseline}.3</jenkins.version> -->
