@@ -12,3 +12,4 @@ work
 .settings
 .DS_Store
 META-INF/
+.vscode/
