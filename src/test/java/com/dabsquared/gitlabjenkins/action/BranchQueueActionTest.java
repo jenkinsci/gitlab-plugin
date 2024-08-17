@@ -5,6 +5,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
@@ -21,6 +22,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Project;
 import hudson.model.Queue;
 import java.io.IOException;
+import java.util.Arrays;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -86,6 +88,18 @@ public class BranchQueueActionTest {
         gitLabPushTrigger.onPost(mergeRequestHook(1, "sourceBranch", "commit1")); // Same commit and branches
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(1));
+    }
+
+    @Test
+    public void testNullSourceBranch() {
+        BranchQueueAction action1 = new BranchQueueAction(null);
+        BranchQueueAction action2 = new BranchQueueAction("sourceBranch");
+
+        boolean resultOfScheduleNull = action1.shouldSchedule(Arrays.asList(action2));
+        boolean resultOfQueuedNull = action2.shouldSchedule(Arrays.asList(action1));
+
+        assertTrue(resultOfScheduleNull);
+        assertTrue(resultOfQueuedNull);
     }
 
     private GitLabPushTrigger gitLabPushTrigger(Project project) throws IOException {
