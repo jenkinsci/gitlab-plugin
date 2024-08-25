@@ -72,7 +72,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>3276.vcd71db_867fb_2</version>
+        <version>3289.v3ff9637cd241</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -285,7 +285,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
+      <version>42.7.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
