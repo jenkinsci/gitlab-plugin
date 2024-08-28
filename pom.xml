@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.81</version>
+    <version>4.87</version>
     <relativePath />
   </parent>
 
@@ -50,15 +50,20 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.8.1</revision>
+    <revision>1.9.2</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.426.3</jenkins.version>
+    <jenkins.baseline>2.462</jenkins.baseline>
+    <!-- <jenkins.version>${jenkins.baseline}.3</jenkins.version> -->
+    <!-- TODO: Remove when 2.472 is available in LTS -->
+    <jenkins.version>2.472</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <mockserver.version>5.15.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
+    <jenkins-test-harness.version>2250.v03a_1295b_0a_30</jenkins-test-harness.version>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
   <dependencyManagement>
@@ -66,8 +71,8 @@
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.414.x</artifactId>
-        <version>2977.vdf61ecb_fb_e2d</version>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
+        <version>3289.v3ff9637cd241</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -280,7 +285,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
+      <version>42.7.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -343,7 +348,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.2.5</version>
+            <version>3.5.0</version>
             <executions>
               <execution>
                 <goals>
@@ -395,7 +400,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.44.0</version>
+            <version>0.45.0</version>
             <configuration>
               <verbose>true</verbose>
               <images>
@@ -479,7 +484,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.5.0</version>
+            <version>3.6.0</version>
             <executions>
               <execution>
                 <id>add-source</id>
