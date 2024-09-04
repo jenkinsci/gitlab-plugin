@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -103,10 +104,14 @@ public class MergeRequestBuildActionTest {
             testProject.addTrigger(mockTrigger);
             executeMergeRequestAction(testProject, getJson("MergeRequestEvent.json"));
         } finally {
-            ArgumentCaptor<MergeRequestHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(MergeRequestHook.class);
-            verify(mockTrigger).onPost(pushHookArgumentCaptor.capture());
-            assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
-            assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+            ArgumentCaptor<MergeRequestHook> mergeRequestHookArgumentCaptor =
+                    ArgumentCaptor.forClass(MergeRequestHook.class);
+            verify(mockTrigger).onPost(mergeRequestHookArgumentCaptor.capture());
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getUser(), is(notNullValue()));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getUser().getName(), containsString("Administrator"));
+            assertThat(mergeRequestHookArgumentCaptor.getValue().getUser().getUsername(), containsString("root"));
         }
     }
 
