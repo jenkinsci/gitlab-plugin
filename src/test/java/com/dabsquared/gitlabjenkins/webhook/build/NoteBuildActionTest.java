@@ -27,7 +27,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.HttpResponses;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -47,7 +47,7 @@ public class NoteBuildActionTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private StaplerResponse response;
+    private StaplerResponse2 response;
 
     @Mock
     private GitLabPushTrigger trigger;

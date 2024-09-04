@@ -10,12 +10,12 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.ExecutionException;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -46,7 +46,7 @@ public abstract class BuildStatusActionTest {
     protected String branch = "master";
 
     @Mock
-    private StaplerResponse response;
+    private StaplerResponse2 response;
 
     private String gitRepoUrl;
 
@@ -182,21 +182,22 @@ public abstract class BuildStatusActionTest {
     protected abstract BuildStatusAction getBuildStatusAction(FreeStyleProject project);
 
     protected abstract void assertSuccessfulBuild(
-            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) throws IOException;
 
-    protected abstract void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
-            throws IOException;
+    protected abstract void assertFailedBuild(
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) throws IOException;
 
     protected abstract void assertRunningBuild(
-            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) throws IOException;
 
     protected abstract void assertCanceledBuild(
-            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) throws IOException;
 
     protected abstract void assertUnstableBuild(
-            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+            FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) throws IOException;
 
-    protected abstract void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse response) throws IOException;
+    protected abstract void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse2 response)
+            throws IOException;
 
     private void mockResponse(final ByteArrayOutputStream out) throws IOException {
         ServletOutputStream servletOutputStream = new ServletOutputStream() {
@@ -206,7 +207,7 @@ public abstract class BuildStatusActionTest {
             }
 
             @Override
-            public void setWriteListener(javax.servlet.WriteListener writeListener) {}
+            public void setWriteListener(jakarta.servlet.WriteListener writeListener) {}
 
             @Override
             public boolean isReady() {

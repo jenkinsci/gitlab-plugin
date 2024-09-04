@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Xinran Xiao
@@ -29,7 +29,7 @@ abstract class BuildWebHookAction implements WebHookAction {
 
     abstract void execute();
 
-    public final void execute(StaplerResponse response) {
+    public final void execute(StaplerResponse2 response) {
         processForCompatibility();
         execute();
     }

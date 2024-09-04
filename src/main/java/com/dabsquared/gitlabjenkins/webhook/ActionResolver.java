@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Robin Müller
@@ -44,7 +44,7 @@ public class ActionResolver {
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
-    public WebHookAction resolve(final String projectName, StaplerRequest request) {
+    public WebHookAction resolve(final String projectName, StaplerRequest2 request) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
                 .filter(s -> !s.isEmpty())
                 .iterator();
@@ -59,7 +59,7 @@ public class ActionResolver {
         return resolveAction(project, restOfPath.toString(), request);
     }
 
-    private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
+    private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest2 request) {
         String method = request.getMethod();
         if (method.equals("POST")) {
             return onPost(project, request);
@@ -75,7 +75,7 @@ public class ActionResolver {
         return new NoopAction();
     }
 
-    private WebHookAction onGet(Job<?, ?> project, String restOfPath, StaplerRequest request) {
+    private WebHookAction onGet(Job<?, ?> project, String restOfPath, StaplerRequest2 request) {
         Matcher commitMatcher = COMMIT_STATUS_PATTERN.matcher(restOfPath);
         if (restOfPath.isEmpty() && request.hasParameter("ref")) {
             return new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
@@ -96,7 +96,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onGetStatusPng(Job<?, ?> project, StaplerRequest request) {
+    private WebHookAction onGetStatusPng(Job<?, ?> project, StaplerRequest2 request) {
         if (request.hasParameter("ref")) {
             return new BranchStatusPngAction(project, request.getParameter("ref"));
         } else {
@@ -104,7 +104,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onPost(Item project, StaplerRequest request) {
+    private WebHookAction onPost(Item project, StaplerRequest2 request) {
         String eventHeader = request.getHeader("X-Gitlab-Event");
         if (eventHeader == null) {
             LOGGER.log(Level.FINE, "Missing X-Gitlab-Event header");
@@ -156,7 +156,7 @@ public class ActionResolver {
         }
     }
 
-    private String getRequestBody(StaplerRequest request) {
+    private String getRequestBody(StaplerRequest2 request) {
         String requestBody;
         try {
             Charset charset =
@@ -190,6 +190,6 @@ public class ActionResolver {
     }
 
     static class NoopAction implements WebHookAction {
-        public void execute(StaplerResponse response) {}
+        public void execute(StaplerResponse2 response) {}
     }
 }

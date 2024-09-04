@@ -54,15 +54,16 @@
     <changelist>-SNAPSHOT</changelist>
     <jenkins.baseline>2.462</jenkins.baseline>
     <!-- <jenkins.version>${jenkins.baseline}.3</jenkins.version> -->
-    <!-- TODO: Remove when 2.472 is available in LTS -->
-    <jenkins.version>2.472</jenkins.version>
+    <!-- TODO: Remove when 2.475 is available in LTS -->
+    <jenkins.version>2.475</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <mockserver.version>5.15.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
-    <jenkins-test-harness.version>2250.v03a_1295b_0a_30</jenkins-test-harness.version>
+    <!-- TODO JENKINS-73339 until in parent POM -->
+    <jenkins-test-harness.version>2265.v3da_49c8134d6</jenkins-test-harness.version>
     <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
@@ -75,6 +76,12 @@
         <version>3307.v2769886db_63b_</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- TODO JENKINS-73339 until in parent POM, work around https://github.com/jenkinsci/plugin-pom/issues/936 -->
+      <dependency>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>5.0.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
