@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -40,7 +40,7 @@ public abstract class BuildPageRedirectActionTest {
     protected String branch = "master";
 
     @Mock
-    private StaplerResponse response;
+    private StaplerResponse2 response;
 
     private String gitRepoUrl;
 

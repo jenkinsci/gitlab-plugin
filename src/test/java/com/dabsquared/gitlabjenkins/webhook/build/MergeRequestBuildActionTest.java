@@ -22,9 +22,9 @@ import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueListener;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import javax.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -37,7 +37,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.HttpResponses;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -55,7 +55,7 @@ public class MergeRequestBuildActionTest {
     public TemporaryFolder tmp = new TemporaryFolder();
 
     @Mock
-    private StaplerResponse response;
+    private StaplerResponse2 response;
 
     private static volatile boolean wouldFire = false;
 
