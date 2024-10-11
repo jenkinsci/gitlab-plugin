@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import net.sf.json.JSONObject;
 import org.junit.runner.RunWith;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -24,7 +24,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertSuccessfulBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -32,7 +32,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertFailedBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -40,7 +40,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertRunningBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -48,7 +48,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertCanceledBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getInt("id"), is(build.getNumber()));
@@ -56,7 +56,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse response)
+    protected void assertUnstableBuild(FreeStyleBuild build, ByteArrayOutputStream out, StaplerResponse2 response)
             throws IOException {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
@@ -65,7 +65,7 @@ public class StatusJsonActionTest extends BuildStatusActionTest {
     }
 
     @Override
-    protected void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse response) {
+    protected void assertNotFoundBuild(ByteArrayOutputStream out, StaplerResponse2 response) {
         JSONObject object = JSONObject.fromObject(new String(out.toByteArray()));
         assertThat(object.getString("sha"), is(commitSha1));
         assertThat(object.getString("status"), is("not_found"));
