@@ -72,7 +72,7 @@ public class NoteHookTriggerHandlerImplTest {
                 project,
                 noteHook()
                         .withObjectAttributes(noteObjectAttributes()
-                                .withId(1)
+                                .withId(1L)
                                 .withNote("ci-run")
                                 .withAuthorId(1)
                                 .withProjectId(1)
@@ -119,7 +119,7 @@ public class NoteHookTriggerHandlerImplTest {
                 project,
                 noteHook()
                         .withObjectAttributes(noteObjectAttributes()
-                                .withId(1)
+                                .withId(1L)
                                 .withNote("ci-run")
                                 .withAuthorId(1)
                                 .withProjectId(1)

@@ -12,7 +12,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class NoteObjectAttributes {
 
-    private Integer id;
+    private Long id;
     private String note;
     private Integer authorId;
     private Integer projectId;
@@ -20,11 +20,11 @@ public class NoteObjectAttributes {
     private Date updatedAt;
     private String url;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
