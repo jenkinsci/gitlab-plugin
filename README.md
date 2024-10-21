@@ -96,6 +96,7 @@ gitlabMergedByUser
 gitlabMergeRequestAssignee
 gitlabMergeRequestLastCommit
 gitlabMergeRequestTargetProjectId
+gitlabMergeRequestLabels
 gitlabTargetBranch
 gitlabTargetRepoName
 gitlabTargetNamespace
