@@ -20,7 +20,11 @@ public final class AutodetectGitLabClientBuilder extends GitLabClientBuilder {
     @Override
     @NonNull
     public GitLabClient buildClient(
-        String url, GitlabCredentialResolver resolver, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+            String url,
+            GitlabCredentialResolver resolver,
+            boolean ignoreCertificateErrors,
+            int connectionTimeout,
+            int readTimeout) {
         Collection<GitLabClientBuilder> candidates = new ArrayList<>(getAllGitLabClientBuilders());
         candidates.remove(this);
         return new AutodetectingGitLabClient(

@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
+
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
@@ -21,6 +24,13 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.util.StringUtils;
 import org.kohsuke.accmod.Restricted;
@@ -29,17 +39,6 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.interceptor.RequirePOST;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
-import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
 
 /**
  * @author Robin Müller
@@ -156,7 +155,8 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         if (!clientCache.containsKey(clientId)) {
             clientCache.put(
                     clientId,
-                    clientBuilder.buildClient(url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout));
+                    clientBuilder.buildClient(
+                            url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout));
         }
         return clientCache.get(clientId);
     }

@@ -381,8 +381,8 @@ final class AutodetectingGitLabClient implements GitLabClient {
 
     private GitLabClient autodetect() {
         for (GitLabClientBuilder candidate : builders) {
-            GitLabClient client =
-                    candidate.buildClient(url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout);
+            GitLabClient client = candidate.buildClient(
+                    url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout);
             try {
                 client.getCurrentUser();
                 return client;

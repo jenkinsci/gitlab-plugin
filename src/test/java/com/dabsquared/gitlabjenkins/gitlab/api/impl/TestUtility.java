@@ -66,7 +66,12 @@ class TestUtility {
     }
 
     static GitLabClient buildClientWithDefaults(GitLabClientBuilder clientBuilder, String url) {
-        return clientBuilder.buildClient(url, new GitlabCredentialResolver(null, API_TOKEN_ID), IGNORE_CERTIFICATE_ERRORS, CONNECTION_TIMEOUT, READ_TIMEOUT);
+        return clientBuilder.buildClient(
+                url,
+                new GitlabCredentialResolver(null, API_TOKEN_ID),
+                IGNORE_CERTIFICATE_ERRORS,
+                CONNECTION_TIMEOUT,
+                READ_TIMEOUT);
     }
 
     static void assertApiImpl(GitLabClient client, Class<? extends GitLabApiProxy> apiImplClass) throws Exception {

@@ -19,6 +19,9 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.ProxyConfiguration;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
+import hudson.security.ACL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -46,10 +49,6 @@ import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.RuntimeDelegate;
-
-import hudson.model.Item;
-import hudson.model.ItemGroup;
-import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -100,7 +99,11 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     @NonNull
     @Override
     public final GitLabClient buildClient(
-        String url, GitlabCredentialResolver credentialResolver, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout) {
+            String url,
+            GitlabCredentialResolver credentialResolver,
+            boolean ignoreCertificateErrors,
+            int connectionTimeout,
+            int readTimeout) {
         return buildClient(
                 url,
                 credentialResolver,
@@ -178,6 +181,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
     private static class ApiHeaderTokenFilter implements ClientRequestFilter {
         private final GitlabCredentialResolver credentialResolver;
         private final String url;
+
         ApiHeaderTokenFilter(GitlabCredentialResolver credentialResolver, String url) {
             this.credentialResolver = credentialResolver;
             this.url = url;
@@ -188,12 +192,12 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             Item item = credentialResolver.getItem();
             ItemGroup<?> context = item != null ? item.getParent() : Jenkins.get();
             StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-                lookupCredentials(
-                    StandardCredentials.class,
-                    context,
-                    ACL.SYSTEM,
-                    URIRequirementBuilder.fromUri(url).build()),
-                CredentialsMatchers.withId(credentialResolver.getCredentialsId()));
+                    lookupCredentials(
+                            StandardCredentials.class,
+                            context,
+                            ACL.SYSTEM,
+                            URIRequirementBuilder.fromUri(url).build()),
+                    CredentialsMatchers.withId(credentialResolver.getCredentialsId()));
 
             if (item != null) {
                 com.cloudbees.plugins.credentials.CredentialsProvider.track(item, credentials);
@@ -207,9 +211,9 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                     return ((StringCredentials) credentials).getSecret().getPlainText();
                 }
             }
-            throw new IllegalStateException("No credentials found for credentialsId: " + credentialResolver.getCredentialsId());
+            throw new IllegalStateException(
+                    "No credentials found for credentialsId: " + credentialResolver.getCredentialsId());
         }
-
 
         public void filter(ClientRequestContext requestContext) {
             requestContext.getHeaders().putSingle(PRIVATE_TOKEN, getApiToken(credentialResolver));

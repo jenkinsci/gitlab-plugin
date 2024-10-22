@@ -7,8 +7,7 @@ public class GitlabCredentialResolver {
     private Item item;
     private String credentialsId;
 
-    public GitlabCredentialResolver() {
-    }
+    public GitlabCredentialResolver() {}
 
     public GitlabCredentialResolver(Item item, String credentialsId) {
         this.item = item;
