@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Evgeni Golov
@@ -88,6 +90,7 @@ public class GitLabEnvironmentContributorTest {
                 .withMergeRequestTitle("Test")
                 .withMergeRequestId(1)
                 .withMergeRequestIid(1)
+                .withMergeRequestLabels(Arrays.asList("important", "test", "label"))
                 .withTargetBranch("master")
                 .withTargetRepoName("test")
                 .withTargetNamespace("test-namespace")
@@ -106,5 +109,6 @@ public class GitLabEnvironmentContributorTest {
         assertEquals("test", env.get("gitlabTargetRepoName"));
         assertEquals("feature", env.get("gitlabSourceBranch"));
         assertEquals("test", env.get("gitlabSourceRepoName"));
+        assertEquals("important,test,label", env.get("gitlabMergeRequestLabels"));
     }
 }
