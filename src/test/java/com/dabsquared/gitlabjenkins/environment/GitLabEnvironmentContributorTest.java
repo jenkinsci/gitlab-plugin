@@ -74,7 +74,8 @@ public class GitLabEnvironmentContributorTest {
         }
     }
 
-    public void testFreeStyleProjectNoLabelsBase(CauseData causeData) throws IOException, InterruptedException, ExecutionException {
+    public void testFreeStyleProjectNoLabelsBase(CauseData causeData)
+            throws IOException, InterruptedException, ExecutionException {
         FreeStyleProject p = jenkins.createFreeStyleProject();
         GitLabWebHookCause cause = new GitLabWebHookCause(causeData);
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
@@ -86,7 +87,7 @@ public class GitLabEnvironmentContributorTest {
     public void freeStyleProjectTestNoLabels() throws IOException, InterruptedException, ExecutionException {
         testFreeStyleProjectNoLabelsBase(generateCauseData());
     }
-        
+
     @Test
     public void freeStyleProjectTestNullLabels() throws IOException, InterruptedException, ExecutionException {
         testFreeStyleProjectNoLabelsBase(generateCauseDataNullList());
@@ -147,9 +148,7 @@ public class GitLabEnvironmentContributorTest {
     }
 
     private CauseData generateCauseDataNullList() {
-        return generateCauseDataBase()
-                .withMergeRequestLabels(null)
-                .build();
+        return generateCauseDataBase().withMergeRequestLabels(null).build();
     }
 
     private CauseData generateCauseDataEmptyList() {
