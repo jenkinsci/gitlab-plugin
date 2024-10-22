@@ -18,14 +18,13 @@ import hudson.model.FreeStyleProject;
 import hudson.model.StreamBuildListener;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Evgeni Golov
