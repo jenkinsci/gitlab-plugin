@@ -1,10 +1,5 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
-import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
-import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
-
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
@@ -22,27 +17,29 @@ import hudson.init.Initializer;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.model.Item;
-import hudson.model.ItemGroup;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.util.StringUtils;
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getAllGitLabClientBuilders;
+import static com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder.getGitLabClientBuilderById;
 
 /**
  * @author Robin Müller
@@ -145,42 +142,23 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     public GitLabClient getClient(Item item, String jobCredentialId) {
         final String clientId;
         final String token;
+        GitlabCredentialResolver credentialResolver = new GitlabCredentialResolver();
         if ((jobCredentialId == null) || jobCredentialId.equals(apiTokenId)) {
             clientId = "global";
-            token = getApiToken(apiTokenId, null);
+            credentialResolver.setCredentialsId(apiTokenId);
         } else {
             // Add prefix to credential ID to avoid collision with "global"
             clientId = "alternative-" + jobCredentialId;
-            token = getApiToken(jobCredentialId, item);
+            credentialResolver.setCredentialsId(jobCredentialId);
+            credentialResolver.setItem(item);
         }
 
         if (!clientCache.containsKey(clientId)) {
             clientCache.put(
                     clientId,
-                    clientBuilder.buildClient(url, token, ignoreCertificateErrors, connectionTimeout, readTimeout));
+                    clientBuilder.buildClient(url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout));
         }
         return clientCache.get(clientId);
-    }
-
-    @Restricted(NoExternalUse.class)
-    private String getApiToken(String apiTokenId, Item item) {
-        ItemGroup<?> context = item != null ? item.getParent() : Jenkins.get();
-        StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-                lookupCredentials(
-                        StandardCredentials.class,
-                        context,
-                        ACL.SYSTEM,
-                        URIRequirementBuilder.fromUri(url).build()),
-                CredentialsMatchers.withId(apiTokenId));
-        if (credentials != null) {
-            if (credentials instanceof GitLabApiToken) {
-                return ((GitLabApiToken) credentials).getApiToken().getPlainText();
-            }
-            if (credentials instanceof StringCredentials) {
-                return ((StringCredentials) credentials).getSecret().getPlainText();
-            }
-        }
-        throw new IllegalStateException("No credentials found for credentialsId: " + apiTokenId);
     }
 
     protected GitLabConnection readResolve() {
