@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.EnvVars;
 import hudson.matrix.AxisList;
@@ -19,6 +20,7 @@ import hudson.model.StreamBuildListener;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
@@ -72,7 +74,52 @@ public class GitLabEnvironmentContributorTest {
         }
     }
 
-    private CauseData generateCauseData() {
+    @Test
+    public void freeStyleProjectTestNoLabels() throws IOException, InterruptedException, ExecutionException {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData());
+        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
+        EnvVars env = b.getEnvironment(listener);
+        assertEquals("", env.get("gitlabMergeRequestLabels"));
+    }
+        
+    @Test
+    public void freeStyleProjectTestNullLabels() throws IOException, InterruptedException, ExecutionException {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataNullList());
+        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
+        EnvVars env = b.getEnvironment(listener);
+        assertEquals("", env.get("gitlabMergeRequestLabels"));
+    }
+
+    @Test
+    public void freeStyleProjectTestEmptyLabels() throws IOException, InterruptedException, ExecutionException {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataEmptyList());
+        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
+        EnvVars env = b.getEnvironment(listener);
+        assertEquals("", env.get("gitlabMergeRequestLabels"));
+    }
+
+    @Test
+    public void freeStyleProjectTestOneLabel() throws IOException, InterruptedException, ExecutionException {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataOneLabel());
+        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
+        EnvVars env = b.getEnvironment(listener);
+        assertEquals("test1", env.get("gitlabMergeRequestLabels"));
+    }
+
+    @Test
+    public void freeStyleProjectTestTwoLabels() throws IOException, InterruptedException, ExecutionException {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataTwoLabels());
+        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
+        EnvVars env = b.getEnvironment(listener);
+        assertEquals("test1,test2", env.get("gitlabMergeRequestLabels"));
+    }
+
+    private CauseDataBuilder generateCauseDataBase() {
         return causeData()
                 .withActionType(CauseData.ActionType.MERGE)
                 .withSourceProjectId(1)
@@ -89,7 +136,6 @@ public class GitLabEnvironmentContributorTest {
                 .withMergeRequestTitle("Test")
                 .withMergeRequestId(1)
                 .withMergeRequestIid(1)
-                .withMergeRequestLabels(Arrays.asList("important", "test", "label"))
                 .withTargetBranch("master")
                 .withTargetRepoName("test")
                 .withTargetNamespace("test-namespace")
@@ -97,7 +143,34 @@ public class GitLabEnvironmentContributorTest {
                 .withTargetRepoHttpUrl("https://gitlab.org/test.git")
                 .withTriggeredByUser("test")
                 .withLastCommit("123")
-                .withTargetProjectUrl("https://gitlab.org/test")
+                .withTargetProjectUrl("https://gitlab.org/test");
+    }
+
+    private CauseData generateCauseData() {
+        return generateCauseDataBase().build();
+    }
+
+    private CauseData generateCauseDataNullList() {
+        return generateCauseDataBase()
+                .withMergeRequestLabels(null)
+                .build();
+    }
+
+    private CauseData generateCauseDataEmptyList() {
+        return generateCauseDataBase()
+                .withMergeRequestLabels(Collections.emptyList())
+                .build();
+    }
+
+    private CauseData generateCauseDataOneLabel() {
+        return generateCauseDataBase()
+                .withMergeRequestLabels(Arrays.asList("test1"))
+                .build();
+    }
+
+    private CauseData generateCauseDataTwoLabels() {
+        return generateCauseDataBase()
+                .withMergeRequestLabels(Arrays.asList("test1", "test2"))
                 .build();
     }
 
@@ -108,6 +181,5 @@ public class GitLabEnvironmentContributorTest {
         assertEquals("test", env.get("gitlabTargetRepoName"));
         assertEquals("feature", env.get("gitlabSourceBranch"));
         assertEquals("test", env.get("gitlabSourceRepoName"));
-        assertEquals("important,test,label", env.get("gitlabMergeRequestLabels"));
     }
 }
