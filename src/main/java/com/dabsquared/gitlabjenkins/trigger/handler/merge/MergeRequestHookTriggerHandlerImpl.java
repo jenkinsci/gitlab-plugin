@@ -219,8 +219,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withMergeRequestTargetProjectId(hook.getObjectAttributes().getTargetProjectId())
                 .withMergeRequestLabels(
                         hook.getLabels() == null
-                        ? null
-                        : hook.getLabels().stream().map(MergeRequestLabel::getTitle).collect(toList()))
+                                ? null
+                                : hook.getLabels().stream()
+                                        .map(MergeRequestLabel::getTitle)
+                                        .collect(toList()))
                 .withTargetBranch(hook.getObjectAttributes().getTargetBranch())
                 .withTargetRepoName(hook.getObjectAttributes().getTarget().getName())
                 .withTargetNamespace(hook.getObjectAttributes().getTarget().getNamespace())
