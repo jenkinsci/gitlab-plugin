@@ -1,15 +1,11 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.API_TOKEN;
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.addGitLabApiToken;
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.assertApiImpl;
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.responseNotFound;
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.responseOk;
-import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.versionRequest;
+import static com.dabsquared.gitlabjenkins.gitlab.api.impl.TestUtility.*;
 import static org.junit.Assert.fail;
 import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.matchers.Times.once;
 
+import com.dabsquared.gitlabjenkins.connection.GitlabCredentialResolver;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,7 +40,7 @@ public class AutodetectingGitLabClientTest {
 
         List<GitLabClientBuilder> builders =
                 Arrays.<GitLabClientBuilder>asList(new V3GitLabClientBuilder(), new V4GitLabClientBuilder());
-        api = new AutodetectingGitLabClient(builders, gitLabUrl, API_TOKEN, true, 10, 10);
+        api = new AutodetectingGitLabClient(builders, gitLabUrl, new GitlabCredentialResolver(null, API_TOKEN_ID), true, 10, 10);
 
         v3Request = versionRequest(V3GitLabApiProxy.ID);
         v4Request = versionRequest(V4GitLabApiProxy.ID);

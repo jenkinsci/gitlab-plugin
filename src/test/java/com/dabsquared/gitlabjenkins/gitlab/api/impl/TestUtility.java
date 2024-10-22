@@ -26,7 +26,7 @@ import org.mockserver.model.HttpResponse;
 
 class TestUtility {
     static final String API_TOKEN = "secret";
-    private static final String API_TOKEN_ID = "apiTokenId";
+    static final String API_TOKEN_ID = "apiTokenId";
     private static final boolean IGNORE_CERTIFICATE_ERRORS = true;
     private static final int CONNECTION_TIMEOUT = 10;
     private static final int READ_TIMEOUT = 10;
@@ -66,7 +66,7 @@ class TestUtility {
     }
 
     static GitLabClient buildClientWithDefaults(GitLabClientBuilder clientBuilder, String url) {
-        return clientBuilder.buildClient(url, new GitlabCredentialResolver(null, API_TOKEN), IGNORE_CERTIFICATE_ERRORS, CONNECTION_TIMEOUT, READ_TIMEOUT);
+        return clientBuilder.buildClient(url, new GitlabCredentialResolver(null, API_TOKEN_ID), IGNORE_CERTIFICATE_ERRORS, CONNECTION_TIMEOUT, READ_TIMEOUT);
     }
 
     static void assertApiImpl(GitLabClient client, Class<? extends GitLabApiProxy> apiImplClass) throws Exception {

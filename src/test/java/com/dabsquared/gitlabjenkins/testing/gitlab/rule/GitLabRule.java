@@ -91,7 +91,7 @@ public class GitLabRule implements TestRule {
                                 CredentialsScope.SYSTEM,
                                 API_TOKEN_ID,
                                 "GitLab API Token",
-                                Secret.fromString(getApiToken())));
+                                Secret.fromString(getApiToken().getCredentialsId())));
             }
         }
 
