@@ -74,31 +74,27 @@ public class GitLabEnvironmentContributorTest {
         }
     }
 
-    @Test
-    public void freeStyleProjectTestNoLabels() throws IOException, InterruptedException, ExecutionException {
+    public void testFreeStyleProjectNoLabelsBase(CauseData causeData) throws IOException, InterruptedException, ExecutionException {
         FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData());
+        GitLabWebHookCause cause = new GitLabWebHookCause(causeData);
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
         EnvVars env = b.getEnvironment(listener);
-        assertEquals("", env.get("gitlabMergeRequestLabels"));
+        assertEquals(null, env.get("gitlabMergeRequestLabels"));
+    }
+
+    @Test
+    public void freeStyleProjectTestNoLabels() throws IOException, InterruptedException, ExecutionException {
+        testFreeStyleProjectNoLabelsBase(generateCauseData());
     }
         
     @Test
     public void freeStyleProjectTestNullLabels() throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataNullList());
-        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
-        EnvVars env = b.getEnvironment(listener);
-        assertEquals("", env.get("gitlabMergeRequestLabels"));
+        testFreeStyleProjectNoLabelsBase(generateCauseDataNullList());
     }
 
     @Test
     public void freeStyleProjectTestEmptyLabels() throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataEmptyList());
-        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
-        EnvVars env = b.getEnvironment(listener);
-        assertEquals("", env.get("gitlabMergeRequestLabels"));
+        testFreeStyleProjectNoLabelsBase(generateCauseDataEmptyList());
     }
 
     @Test
