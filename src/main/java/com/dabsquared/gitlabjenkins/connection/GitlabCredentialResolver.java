@@ -20,6 +20,7 @@ public class GitlabCredentialResolver {
         return item;
     }
 
+    @Restricted(NoExternalUse.class)
     public void setItem(Item item) {
         this.item = item;
     }
