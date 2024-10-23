@@ -22,6 +22,7 @@ public class GitlabCredentialResolver {
         this.item = item;
     }
 
+    @Restricted(NoExternalUse.class)
     public String getCredentialsId() {
         return credentialsId;
     }
