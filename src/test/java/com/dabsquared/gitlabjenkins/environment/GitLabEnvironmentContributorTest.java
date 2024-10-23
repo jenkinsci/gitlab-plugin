@@ -74,46 +74,43 @@ public class GitLabEnvironmentContributorTest {
         }
     }
 
-    public void testFreeStyleProjectNoLabelsBase(CauseData causeData)
+    public void testFreeStyleProjectLabels(CauseData data, String expected)
             throws IOException, InterruptedException, ExecutionException {
         FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(causeData);
+        GitLabWebHookCause cause = new GitLabWebHookCause(data);
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
         EnvVars env = b.getEnvironment(listener);
-        assertEquals(null, env.get("gitlabMergeRequestLabels"));
+        assertEquals(expected, env.get("gitlabMergeRequestLabels"));
     }
 
     @Test
     public void freeStyleProjectTestNoLabels() throws IOException, InterruptedException, ExecutionException {
-        testFreeStyleProjectNoLabelsBase(generateCauseData());
+        // withMergeRequestLabels() not called on CauseDataBuilder
+        testFreeStyleProjectLabels(generateCauseData(), null);
     }
 
     @Test
     public void freeStyleProjectTestNullLabels() throws IOException, InterruptedException, ExecutionException {
-        testFreeStyleProjectNoLabelsBase(generateCauseDataNullList());
+        // null passed as labels
+        testFreeStyleProjectLabels(generateCauseDataWithLabels(null), null);
     }
 
     @Test
     public void freeStyleProjectTestEmptyLabels() throws IOException, InterruptedException, ExecutionException {
-        testFreeStyleProjectNoLabelsBase(generateCauseDataEmptyList());
+        // empty list passed as labels
+        testFreeStyleProjectLabels(generateCauseDataWithLabels(Collections.emptyList()), null);
     }
 
     @Test
     public void freeStyleProjectTestOneLabel() throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataOneLabel());
-        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
-        EnvVars env = b.getEnvironment(listener);
-        assertEquals("test1", env.get("gitlabMergeRequestLabels"));
+        testFreeStyleProjectLabels(generateCauseDataWithLabels(Arrays.asList("test1")), "test1");
     }
 
     @Test
     public void freeStyleProjectTestTwoLabels() throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseDataTwoLabels());
-        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
-        EnvVars env = b.getEnvironment(listener);
-        assertEquals("test1,test2", env.get("gitlabMergeRequestLabels"));
+        testFreeStyleProjectLabels(
+                generateCauseDataWithLabels(Arrays.asList("test1", "test2", "test with spaces")),
+                "test1,test2,test with spaces");
     }
 
     private CauseDataBuilder generateCauseDataBase() {
@@ -147,26 +144,8 @@ public class GitLabEnvironmentContributorTest {
         return generateCauseDataBase().build();
     }
 
-    private CauseData generateCauseDataNullList() {
-        return generateCauseDataBase().withMergeRequestLabels(null).build();
-    }
-
-    private CauseData generateCauseDataEmptyList() {
-        return generateCauseDataBase()
-                .withMergeRequestLabels(Collections.emptyList())
-                .build();
-    }
-
-    private CauseData generateCauseDataOneLabel() {
-        return generateCauseDataBase()
-                .withMergeRequestLabels(Arrays.asList("test1"))
-                .build();
-    }
-
-    private CauseData generateCauseDataTwoLabels() {
-        return generateCauseDataBase()
-                .withMergeRequestLabels(Arrays.asList("test1", "test2"))
-                .build();
+    private CauseData generateCauseDataWithLabels(List<String> labels) {
+        return generateCauseDataBase().withMergeRequestLabels(labels).build();
     }
 
     private void assertEnv(EnvVars env) {
