@@ -1,6 +1,8 @@
 package com.dabsquared.gitlabjenkins.connection;
 
 import hudson.model.Item;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 public class GitlabCredentialResolver {
 
