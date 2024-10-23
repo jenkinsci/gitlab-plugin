@@ -74,10 +74,10 @@ public class GitLabEnvironmentContributorTest {
         }
     }
 
-    public void testFreeStyleProjectLabels(CauseData data, String expected)
+    public void testFreeStyleProjectLabels(CauseData causeData, String expected)
             throws IOException, InterruptedException, ExecutionException {
         FreeStyleProject p = jenkins.createFreeStyleProject();
-        GitLabWebHookCause cause = new GitLabWebHookCause(data);
+        GitLabWebHookCause cause = new GitLabWebHookCause(causeData);
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
         EnvVars env = b.getEnvironment(listener);
         assertEquals(expected, env.get("gitlabMergeRequestLabels"));
