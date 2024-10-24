@@ -32,6 +32,7 @@
   - [Accept merge request after build](#accept-merge-request)
   - [Notify specific project by a specific GitLab connection](#notify-specific-project-by-a-specific-gitlab-connection)
   - [Cancel pending builds on merge request update](#cancel-pending-builds-on-merge-request-update)
+  - [Check if a label is applied to a merge request](#check-if-a-label-is-applied-to-a-merge-request)
 - [Compatibility](#compatibility)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Testing With Docker](src/docker/README.md#quick-test-environment-setup-using-docker-for-linuxamd64)
