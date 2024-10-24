@@ -610,6 +610,22 @@ gitlabCommitStatus(
 To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.
 This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
 
+### Check if a label is applied to a merge request  
+To handle conditional logic in your pipelines based on merge request labels, use:
+```groovy
+script {
+    if (GitLabMergeRequestLabelExists("bugfix"))
+    {
+        echo 'bugfix label detected!'
+    }
+}
+```  
+A comma separated string of the labels is also present as an environment variable: `gitlabMergeRequestLabels`.  
+e.g for a merge request with the labels: [`bugfix`, `review needed`], `env.gitlabMergeRequestLabels="bugfix,review needed"`.  
+#### *notes:*
+- The environment variable will be null if no labels are applied to the merge request.
+- This feature is not available for multibranch pipeline jobs or GitLab push hooks.
+
 ## Compatibility
 
 Version 1.2.1 of the plugin introduces a backwards-incompatible change
