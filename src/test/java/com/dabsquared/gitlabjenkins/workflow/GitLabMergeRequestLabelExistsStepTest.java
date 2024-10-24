@@ -32,7 +32,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
     @ClassRule
     public static JenkinsRule jenkins = new JenkinsRule();
 
-    private void test_webhook_base(CauseData causeData, String expected)
+    private void testWebhookBase(CauseData causeData, String expected)
             throws IOException, ExecutionException, InterruptedException, FormException {
         // load the pipeline script from resources
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
@@ -53,7 +53,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
     }
 
     @Test
-    public void test_label_exists_in_mr_webhook()
+    public void testLabelExistsInMrWebhook()
             throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseDataWithLabels(Arrays.asList("test label"));
@@ -61,7 +61,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
     }
 
     @Test
-    public void test_no_labels_in_mr_webhook()
+    public void testNoLabelsInMrWebhook()
             throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseData();
