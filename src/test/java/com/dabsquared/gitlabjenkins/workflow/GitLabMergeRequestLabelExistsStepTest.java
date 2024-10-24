@@ -6,6 +6,7 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.model.CauseAction;
+import hudson.model.Descriptor.FormException;
 import hudson.model.queue.QueueTaskFuture;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +17,6 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,20 +29,15 @@ public class GitLabMergeRequestLabelExistsStepTest {
     @ClassRule
     public static JenkinsRule jenkins = new JenkinsRule();
 
-    public static WorkflowJob project;
-
-    @Before
-    public void setup() throws Exception {
+    private void test_webhook_base(CauseData causeData, String expected_log_msg)
+            throws IOException, ExecutionException, InterruptedException, FormException {
         // load the pipeline script from resources
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
         String pipelineText = IOUtils.toString(
-                getClass().getResourceAsStream("jenkinsfile/GitLabMergeRequestLabel-jenkinsFile.groovy"),
+                getClass().getResourceAsStream("jenkinsFile/GitLabMergeRequestLabel-jenkinsFile.groovy"),
                 StandardCharsets.UTF_8);
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
-    }
 
-    private void test_webhook_base(CauseData causeData, String expected_log_msg)
-            throws IOException, ExecutionException, InterruptedException {
         // create a merge request webhook and schedule it
         GitLabWebHookCause cause = new GitLabWebHookCause(causeData);
         QueueTaskFuture<?> future = project.scheduleBuild2(0, new CauseAction(cause));
@@ -55,14 +50,16 @@ public class GitLabMergeRequestLabelExistsStepTest {
     }
 
     @Test
-    public void test_label_exists_in_mr_webhook() throws IOException, ExecutionException, InterruptedException {
+    public void test_label_exists_in_mr_webhook()
+            throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseDataWithLabels(Arrays.asList("test label"));
         test_webhook_base(causeData, "test label found");
     }
 
     @Test
-    public void test_label_doesnt_exist_in_mr_webhook() throws IOException, ExecutionException, InterruptedException {
+    public void test_label_doesnt_exist_in_mr_webhook()
+            throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseData();
         test_webhook_base(causeData, "test label not found");
