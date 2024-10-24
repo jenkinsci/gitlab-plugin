@@ -61,8 +61,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
     }
 
     @Test
-    public void testNoLabelsInMrWebhook()
-            throws IOException, ExecutionException, InterruptedException, FormException {
+    public void testNoLabelsInMrWebhook() throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseData();
         testWebhookBase(causeData, "test label not found");
