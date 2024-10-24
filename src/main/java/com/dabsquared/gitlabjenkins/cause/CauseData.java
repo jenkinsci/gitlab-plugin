@@ -40,6 +40,7 @@ public final class CauseData {
     private final String mergedByUser;
     private final String mergeRequestAssignee;
     private final Integer mergeRequestTargetProjectId;
+    private final List<String> mergeRequestLabels;
     private final String targetBranch;
     private final String targetRepoName;
     private final String targetNamespace;
@@ -84,6 +85,7 @@ public final class CauseData {
             Integer mergeRequestId,
             Integer mergeRequestIid,
             Integer mergeRequestTargetProjectId,
+            List<String> mergeRequestLabels,
             String targetBranch,
             String targetRepoName,
             String targetNamespace,
@@ -131,6 +133,7 @@ public final class CauseData {
         this.mergedByUser = mergedByUser == null ? "" : mergedByUser;
         this.mergeRequestAssignee = mergeRequestAssignee == null ? "" : mergeRequestAssignee;
         this.mergeRequestTargetProjectId = mergeRequestTargetProjectId;
+        this.mergeRequestLabels = mergeRequestLabels == null ? Collections.emptyList() : mergeRequestLabels;
         this.targetBranch = Objects.requireNonNull(targetBranch, "targetBranch must not be null.");
         this.targetRepoName = Objects.requireNonNull(targetRepoName, "targetRepoName must not be null.");
         this.targetNamespace = Objects.requireNonNull(targetNamespace, "targetNamespace must not be null.");
@@ -177,6 +180,7 @@ public final class CauseData {
         variables.put(
                 "gitlabMergeRequestTargetProjectId",
                 mergeRequestTargetProjectId == null ? "" : mergeRequestTargetProjectId.toString());
+        variables.put("gitlabMergeRequestLabels", StringUtils.join(mergeRequestLabels, ","));
         variables.put("gitlabMergeRequestLastCommit", lastCommit);
         variables.putIfNotNull("gitlabMergeRequestState", mergeRequestState);
         variables.putIfNotNull("gitlabMergedByUser", mergedByUser);
@@ -300,6 +304,11 @@ public final class CauseData {
     @Exported
     public Integer getMergeRequestTargetProjectId() {
         return mergeRequestTargetProjectId;
+    }
+
+    @Exported
+    public List<String> getMergeRequestLabels() {
+        return mergeRequestLabels;
     }
 
     @Exported
@@ -473,6 +482,7 @@ public final class CauseData {
                 .append(mergedByUser, causeData.mergedByUser)
                 .append(mergeRequestAssignee, causeData.mergeRequestAssignee)
                 .append(mergeRequestTargetProjectId, causeData.mergeRequestTargetProjectId)
+                .append(mergeRequestLabels, causeData.mergeRequestLabels)
                 .append(targetBranch, causeData.targetBranch)
                 .append(targetRepoName, causeData.targetRepoName)
                 .append(targetNamespace, causeData.targetNamespace)
@@ -522,6 +532,7 @@ public final class CauseData {
                 .append(mergedByUser)
                 .append(mergeRequestAssignee)
                 .append(mergeRequestTargetProjectId)
+                .append(mergeRequestLabels)
                 .append(targetBranch)
                 .append(targetRepoName)
                 .append(targetNamespace)
@@ -571,6 +582,7 @@ public final class CauseData {
                 .append("mergedByUser", mergedByUser)
                 .append("mergeRequestAssignee", mergeRequestAssignee)
                 .append("mergeRequestTargetProjectId", mergeRequestTargetProjectId)
+                .append("mergeRequestLabels", mergeRequestLabels)
                 .append("targetBranch", targetBranch)
                 .append("targetRepoName", targetRepoName)
                 .append("targetNamespace", targetNamespace)

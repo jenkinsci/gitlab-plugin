@@ -32,6 +32,7 @@
   - [Accept merge request after build](#accept-merge-request)
   - [Notify specific project by a specific GitLab connection](#notify-specific-project-by-a-specific-gitlab-connection)
   - [Cancel pending builds on merge request update](#cancel-pending-builds-on-merge-request-update)
+  - [Check if a label is applied to a merge request](#check-if-a-label-is-applied-to-a-merge-request)
 - [Compatibility](#compatibility)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
 - [Testing With Docker](src/docker/README.md#quick-test-environment-setup-using-docker-for-linuxamd64)
@@ -96,6 +97,7 @@ gitlabMergedByUser
 gitlabMergeRequestAssignee
 gitlabMergeRequestLastCommit
 gitlabMergeRequestTargetProjectId
+gitlabMergeRequestLabels
 gitlabTargetBranch
 gitlabTargetRepoName
 gitlabTargetNamespace
@@ -608,6 +610,22 @@ gitlabCommitStatus(
 ### Cancel pending builds on merge request update
 To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.
 This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
+
+### Check if a label is applied to a merge request  
+To handle conditional logic in your pipelines based on merge request labels, use:
+```groovy
+script {
+    if (GitLabMergeRequestLabelExists("bugfix"))
+    {
+        echo 'bugfix label detected!'
+    }
+}
+```  
+A comma separated string of the labels is also present as an environment variable: `gitlabMergeRequestLabels`.  
+e.g for a merge request with the labels: [`bugfix`, `review needed`], `env.gitlabMergeRequestLabels="bugfix,review needed"`.  
+#### *notes:*
+- The environment variable will be null if no labels are applied to the merge request.
+- This feature is not available for multibranch pipeline jobs or GitLab push hooks.
 
 ## Compatibility
 

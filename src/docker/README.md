@@ -5,10 +5,11 @@ In order to test the plugin on different versions of `GitLab` and `Jenkins` you 
 An example docker-compose file is available at `gitlab-plugin/src/docker` which the user can use to set up instances of the latest `GitLab` version and latest `Jenkins` LTS version for linux/amd64.
 
 If they don't already exist, create the following directories and make sure the user that Docker is running as owns them:
-* /srv/docker/gitlab/postgresql
-* /srv/docker/gitlab/gitlab
-* /srv/docker/gitlab/redis
-* /srv/docker/jenkins
+* /srv/docker/gitlab/postgresql  
+* /srv/docker/gitlab/gitlab  
+* /srv/docker/gitlab/redis  
+* /srv/docker/jenkins  
+
 To start the containers for Linux, run `docker-compose up -d` from the `src/docker` folder. If you have problems accessing the services in the containers, run `docker-compose up` by itself to see output from the services as they start, and the latter command is the verbose version of the former.
 
 ## Quick test environment setup using Docker for MacOS/arm64
