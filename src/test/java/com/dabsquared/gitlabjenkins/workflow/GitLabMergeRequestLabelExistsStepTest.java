@@ -29,7 +29,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
     @ClassRule
     public static JenkinsRule jenkins = new JenkinsRule();
 
-    private void test_webhook_base(CauseData causeData, String expected_log_msg)
+    private void test_webhook_base(CauseData causeData, String expected)
             throws IOException, ExecutionException, InterruptedException, FormException {
         // load the pipeline script from resources
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
@@ -46,7 +46,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
         WorkflowRun run = (WorkflowRun) future.get();
 
         // observe the logs to see if the label was detected or not
-        jenkins.assertLogContains(expected_log_msg, run);
+        jenkins.assertLogContains(expected, run);
     }
 
     @Test
@@ -58,10 +58,19 @@ public class GitLabMergeRequestLabelExistsStepTest {
     }
 
     @Test
-    public void test_label_doesnt_exist_in_mr_webhook()
+    public void test_no_labels_in_mr_webhook()
             throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseData();
+        test_webhook_base(causeData, "test label not found");
+    }
+
+    @Test
+    public void test_label_doesnt_exist_in_mr_webhook()
+            throws IOException, ExecutionException, InterruptedException, FormException {
+        // create a cause data object with a label
+        CauseData causeData = generateCauseDataWithLabels(
+                Arrays.asList("test", "label", "test label suffixed", "prefixed test label"));
         test_webhook_base(causeData, "test label not found");
     }
 
