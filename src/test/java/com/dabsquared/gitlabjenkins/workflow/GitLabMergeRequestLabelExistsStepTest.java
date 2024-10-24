@@ -34,7 +34,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
         // load the pipeline script from resources
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
         String pipelineText = IOUtils.toString(
-                getClass().getResourceAsStream("jenkinsFile/GitLabMergeRequestLabel-jenkinsFile.groovy"),
+                getClass().getResourceAsStream("pipeline/GitLabMergeRequestLabel-pipeline.groovy"),
                 StandardCharsets.UTF_8);
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
 

@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.workflow.jenkinsFile
+package com.dabsquared.gitlabjenkins.workflow.pipeline
 
 node {
   echo "build started"
