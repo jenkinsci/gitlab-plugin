@@ -8,6 +8,7 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
+import com.dabsquared.gitlabjenkins.connection.GitlabCredentialResolver;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
@@ -90,7 +91,7 @@ public class GitLabRule implements TestRule {
                                 CredentialsScope.SYSTEM,
                                 API_TOKEN_ID,
                                 "GitLab API Token",
-                                Secret.fromString(getApiToken())));
+                                Secret.fromString(getApiToken().getCredentialsId())));
             }
         }
 
@@ -128,7 +129,7 @@ public class GitLabRule implements TestRule {
         }
     }
 
-    private String getApiToken() {
+    private GitlabCredentialResolver getApiToken() {
         try {
             Class.forName("org.postgresql.Driver");
             try (Connection connection = DriverManager.getConnection(
@@ -137,7 +138,7 @@ public class GitLabRule implements TestRule {
                         .createStatement()
                         .executeQuery("SELECT authentication_token FROM users WHERE username = 'root'");
                 resultSet.next();
-                return resultSet.getString("authentication_token");
+                return new GitlabCredentialResolver(null, resultSet.getString("authentication_token"));
             }
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);

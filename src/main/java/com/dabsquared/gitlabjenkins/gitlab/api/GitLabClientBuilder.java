@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 
 import static java.util.Collections.sort;
 
+import com.dabsquared.gitlabjenkins.connection.GitlabCredentialResolver;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.ExtensionPoint;
 import java.io.Serializable;
@@ -47,7 +48,11 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
 
     @NonNull
     public abstract GitLabClient buildClient(
-            String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout);
+            String url,
+            GitlabCredentialResolver credentialResolver,
+            boolean ignoreCertificateErrors,
+            int connectionTimeout,
+            int readTimeout);
 
     @Override
     public final int compareTo(@NonNull GitLabClientBuilder other) {
