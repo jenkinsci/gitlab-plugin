@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
+import com.dabsquared.gitlabjenkins.connection.GitlabCredentialResolver;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
@@ -11,7 +12,7 @@ import javax.ws.rs.NotFoundException;
 final class AutodetectingGitLabClient implements GitLabClient {
     private final Iterable<GitLabClientBuilder> builders;
     private final String url;
-    private final String token;
+    private final GitlabCredentialResolver credentialResolver;
     private final boolean ignoreCertificateErrors;
     private final int connectionTimeout;
     private final int readTimeout;
@@ -20,13 +21,13 @@ final class AutodetectingGitLabClient implements GitLabClient {
     AutodetectingGitLabClient(
             Iterable<GitLabClientBuilder> builders,
             String url,
-            String token,
+            GitlabCredentialResolver credentialResolver,
             boolean ignoreCertificateErrors,
             int connectionTimeout,
             int readTimeout) {
         this.builders = builders;
         this.url = url;
-        this.token = token;
+        this.credentialResolver = credentialResolver;
         this.ignoreCertificateErrors = ignoreCertificateErrors;
         this.connectionTimeout = connectionTimeout;
         this.readTimeout = readTimeout;
@@ -380,8 +381,8 @@ final class AutodetectingGitLabClient implements GitLabClient {
 
     private GitLabClient autodetect() {
         for (GitLabClientBuilder candidate : builders) {
-            GitLabClient client =
-                    candidate.buildClient(url, token, ignoreCertificateErrors, connectionTimeout, readTimeout);
+            GitLabClient client = candidate.buildClient(
+                    url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout);
             try {
                 client.getCurrentUser();
                 return client;
