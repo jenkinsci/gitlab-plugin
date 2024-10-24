@@ -23,6 +23,9 @@ import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * @author Yiftah Waisman
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class GitLabMergeRequestLabelExistsStepTest {
 

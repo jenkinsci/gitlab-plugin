@@ -18,6 +18,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.export.ExportedBean;
 
+/**
+ * @author Yiftah Waisman
+ */
 @ExportedBean
 public class GitLabMergeRequestLabelExistsStep extends Step {
 
