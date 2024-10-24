@@ -57,7 +57,7 @@ public class GitLabMergeRequestLabelExistsStepTest {
             throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseDataWithLabels(Arrays.asList("test label"));
-        test_webhook_base(causeData, "test label found");
+        testWebhookBase(causeData, "test label found");
     }
 
     @Test
@@ -65,16 +65,16 @@ public class GitLabMergeRequestLabelExistsStepTest {
             throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseData();
-        test_webhook_base(causeData, "test label not found");
+        testWebhookBase(causeData, "test label not found");
     }
 
     @Test
-    public void test_label_doesnt_exist_in_mr_webhook()
+    public void testLabelDoesntExistInMrWebhook()
             throws IOException, ExecutionException, InterruptedException, FormException {
         // create a cause data object with a label
         CauseData causeData = generateCauseDataWithLabels(
                 Arrays.asList("test", "label", "test label suffixed", "prefixed test label"));
-        test_webhook_base(causeData, "test label not found");
+        testWebhookBase(causeData, "test label not found");
     }
 
     private CauseDataBuilder generateCauseDataBase() {
