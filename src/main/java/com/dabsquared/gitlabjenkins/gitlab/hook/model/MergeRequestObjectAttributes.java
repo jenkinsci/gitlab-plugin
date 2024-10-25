@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import java.util.Date;
+import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -34,6 +35,7 @@ public class MergeRequestObjectAttributes {
     private String url;
     private Action action;
     private Boolean workInProgress;
+    private List<MergeRequestLabel> labels;
 
     public Integer getId() {
         return id;
@@ -211,6 +213,14 @@ public class MergeRequestObjectAttributes {
         this.workInProgress = workInProgress;
     }
 
+    public List<MergeRequestLabel> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<MergeRequestLabel> labels) {
+        this.labels = labels;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -243,6 +253,7 @@ public class MergeRequestObjectAttributes {
                 .append(action, that.action)
                 .append(oldrev, that.oldrev)
                 .append(workInProgress, that.workInProgress)
+                .append(labels, that.labels)
                 .isEquals();
     }
 
@@ -270,6 +281,7 @@ public class MergeRequestObjectAttributes {
                 .append(url)
                 .append(action)
                 .append(workInProgress)
+                .append(labels)
                 .toHashCode();
     }
 
@@ -298,6 +310,7 @@ public class MergeRequestObjectAttributes {
                 .append("action", action)
                 .append("oldrev", oldrev)
                 .append("workInProgress", workInProgress)
+                .append("labels", labels)
                 .toString();
     }
 }

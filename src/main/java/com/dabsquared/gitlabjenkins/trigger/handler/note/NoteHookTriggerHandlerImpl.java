@@ -2,8 +2,10 @@ package com.dabsquared.gitlabjenkins.trigger.handler.note;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.BuildStatusUpdateBuilder.buildStatusUpdate;
+import static java.util.stream.Collectors.toList;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestLabel;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -97,6 +99,12 @@ class NoteHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<NoteHook>
                 .withTriggerPhrase(hook.getObjectAttributes().getNote())
                 .withCommentAuthor(
                         hook.getUser() == null ? null : hook.getUser().getUsername())
+                .withMergeRequestLabels(
+                        hook.getMergeRequest().getLabels() == null
+                                ? null
+                                : hook.getMergeRequest().getLabels().stream()
+                                        .map(MergeRequestLabel::getTitle)
+                                        .collect(toList()))
                 .build();
     }
 
