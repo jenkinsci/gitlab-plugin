@@ -5,6 +5,7 @@ import static com.dabsquared.gitlabjenkins.trigger.handler.builder.generated.Bui
 import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
@@ -216,6 +217,12 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
                 .withMergeRequestAssignee(
                         hook.getAssignee() == null ? null : hook.getAssignee().getUsername())
                 .withMergeRequestTargetProjectId(hook.getObjectAttributes().getTargetProjectId())
+                .withMergeRequestLabels(
+                        hook.getLabels() == null
+                                ? null
+                                : hook.getLabels().stream()
+                                        .map(MergeRequestLabel::getTitle)
+                                        .collect(toList()))
                 .withTargetBranch(hook.getObjectAttributes().getTargetBranch())
                 .withTargetRepoName(hook.getObjectAttributes().getTarget().getName())
                 .withTargetNamespace(hook.getObjectAttributes().getTarget().getNamespace())
