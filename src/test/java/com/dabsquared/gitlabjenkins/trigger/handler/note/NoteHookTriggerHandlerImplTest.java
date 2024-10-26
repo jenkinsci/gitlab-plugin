@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.note;
 
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestLabelBuilder.mergeRequestLabel;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder.mergeRequestObjectAttributes;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.NoteHookBuilder.noteHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.NoteObjectAttributesBuilder.noteObjectAttributes;
@@ -10,10 +11,12 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -21,6 +24,7 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.jgit.api.Git;
@@ -62,6 +66,8 @@ public class NoteHookTriggerHandlerImplTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
+                EnvVars env = build.getEnvironment(listener);
+                assertEquals(null, env.get("gitlabMergeRequestLabels"));
                 buildTriggered.signal();
                 return true;
             }
@@ -109,6 +115,8 @@ public class NoteHookTriggerHandlerImplTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
+                EnvVars env = build.getEnvironment(listener);
+                assertEquals("bugfix,help needed", env.get("gitlabMergeRequestLabels"));
                 buildTriggered.signal();
                 return true;
             }
@@ -137,6 +145,31 @@ public class NoteHookTriggerHandlerImplTest {
                                 .withSourceProjectId(1)
                                 .withSourceBranch("feature")
                                 .withTargetBranch("master")
+                                .withLabels(Arrays.asList(
+                                        mergeRequestLabel()
+                                                .withId(3)
+                                                .withTitle("bugfix")
+                                                .withColor("#009966")
+                                                .withProjectId(1)
+                                                .withCreatedAt(currentDate)
+                                                .withUpdatedAt(currentDate)
+                                                .withTemplate(false)
+                                                .withDescription(null)
+                                                .withType("ProjectLabel")
+                                                .withGroupId(null)
+                                                .build(),
+                                        mergeRequestLabel()
+                                                .withId(4)
+                                                .withTitle("help needed")
+                                                .withColor("#FF0000")
+                                                .withProjectId(1)
+                                                .withCreatedAt(currentDate)
+                                                .withUpdatedAt(currentDate)
+                                                .withTemplate(false)
+                                                .withDescription(null)
+                                                .withType("ProjectLabel")
+                                                .withGroupId(null)
+                                                .build()))
                                 .withLastCommit(commit().withAuthor(
                                                 user().withName("test").build())
                                         .withId(commit.getName())
