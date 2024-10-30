@@ -52,10 +52,9 @@
   <properties>
     <revision>1.9.6</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.baseline>2.462</jenkins.baseline>
-    <!-- <jenkins.version>${jenkins.baseline}.3</jenkins.version> -->
-    <!-- TODO: Remove when 2.479 is available in LTS -->
-    <jenkins.version>2.479</jenkins.version>
+    <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
