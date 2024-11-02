@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
 
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder;
@@ -499,6 +500,26 @@ public class MergeRequestHookTriggerHandlerImplTest {
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
         jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+    }
+
+    @Test
+    public void
+            mergeRequest_skips_build_when_not_push_and_not_merge_request_and_accepted_and_trigger_open_merge_request_unspecified()
+                    throws Exception {
+        GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger();
+        gitLabPushTrigger.setTriggerOnPush(false);
+        gitLabPushTrigger.setTriggerOnMergeRequest(false);
+        gitLabPushTrigger.setTriggerOnAcceptedMergeRequest(true);
+        gitLabPushTrigger.setBranchFilterType(BranchFilterType.All);
+
+        MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
+                MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(gitLabPushTrigger);
+        final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        OneShotEvent buildTriggered =
+                doHandle(mergeRequestHookTriggerHandler, State.opened, Action.update, buildHolder);
+
+        assertThat(buildTriggered.isSignaled(), is(false));
+        assertNull(buildHolder.get());
     }
 
     private void do_not_build_for_state_when_nothing_enabled(State state) throws Exception {
