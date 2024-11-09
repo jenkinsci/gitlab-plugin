@@ -20,6 +20,7 @@ public final class CauseData {
     private final ActionType actionType;
     private final Integer sourceProjectId;
     private final Integer targetProjectId;
+    private final Integer projectId;
     private final String branch;
     private final String sourceBranch;
     private final String userName;
@@ -68,6 +69,7 @@ public final class CauseData {
             ActionType actionType,
             Integer sourceProjectId,
             Integer targetProjectId,
+            Integer projectId,
             String branch,
             String sourceBranch,
             String userName,
@@ -113,6 +115,7 @@ public final class CauseData {
         this.actionType = Objects.requireNonNull(actionType, "actionType must not be null.");
         this.sourceProjectId = Objects.requireNonNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = Objects.requireNonNull(targetProjectId, "targetProjectId must not be null.");
+        this.projectId = projectId == null ? 0 : projectId;
         this.branch = Objects.requireNonNull(branch, "branch must not be null.");
         this.sourceBranch = Objects.requireNonNull(sourceBranch, "sourceBranch must not be null.");
         this.userName = Objects.requireNonNull(userName, "userName must not be null.");
@@ -160,6 +163,7 @@ public final class CauseData {
     @Exported
     public Map<String, String> getBuildVariables() {
         MapWrapper<String, String> variables = new MapWrapper<>(new HashMap<String, String>());
+        variables.put("gitlabProjectId", projectId == null ? "" : projectId.toString());
         variables.put("gitlabBranch", branch);
         variables.put("gitlabSourceBranch", sourceBranch);
         variables.put("gitlabActionType", actionType.name());
