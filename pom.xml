@@ -21,14 +21,6 @@
     </license>
   </licenses>
 
-  <developers>
-    <developer>
-      <id>markyjackson-taulia</id>
-      <name>Marky Jackson</name>
-      <email>marky.r.jackson@gmail.com</email>
-    </developer>
-  </developers>
-
   <scm>
     <connection>scm:git:https://github.com/${gitHubRepo}</connection>
     <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
