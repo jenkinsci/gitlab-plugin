@@ -10,6 +10,8 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
+import hudson.model.Item;
+import hudson.security.Permission;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.util.List;
@@ -18,7 +20,9 @@ import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
 public class GitLabConnectionTest {
     private static final String API_TOKEN = "secret";
@@ -54,6 +58,48 @@ public class GitLabConnectionTest {
 
         connection = new GitLabConnection(
                 "test", "http://localhost", API_TOKEN_ID, new V3GitLabClientBuilder(), false, 10, 10);
+    }
+
+    @Test
+    public void doFillApiTokenIdItemsTestAdmin() throws Exception {
+        String response = retrieveResponseForUserFromFillApiTokenIdItems("admin", Jenkins.ADMINISTER);
+        assertThat(response, containsString("gitlab-1"));
+    }
+
+    @Test
+    @Issue("SECURITY-3260")
+    public void doFillApiTokenIdItemsTestConfigure() throws Exception {
+        String response = retrieveResponseForUserFromFillApiTokenIdItems("config", Jenkins.READ, Item.CONFIGURE);
+        assertThat(response, containsString("\"values\":[]"));
+    }
+
+    @Test
+    public void doFillApiTokenIdItemsTestRead() throws Exception {
+        String response = retrieveResponseForUserFromFillApiTokenIdItems("dev", Jenkins.READ);
+        assertThat(response, not(containsString("gitlab-1")));
+    }
+
+    private String retrieveResponseForUserFromFillApiTokenIdItems(String userName, Permission... permissionList)
+            throws Exception {
+        jenkins.jenkins.setSecurityRealm(jenkins.createDummySecurityRealm());
+        jenkins.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(permissionList)
+                .everywhere()
+                .to(userName));
+
+        StringCredentialsImpl gitLabToken = new StringCredentialsImpl(
+                CredentialsScope.GLOBAL, "gitlab-1", "token", Secret.fromString("gitlab-token"));
+        SystemCredentialsProvider.getInstance().getCredentials().add(gitLabToken);
+
+        try (JenkinsRule.WebClient webClient = jenkins.createWebClient()) {
+            webClient.login(userName);
+            return webClient
+                    .goTo(
+                            "descriptorByName/com.dabsquared.gitlabjenkins.connection.GitLabConnection/fillApiTokenIdItems?url=http://xyz.com",
+                            "application/json")
+                    .getWebResponse()
+                    .getContentAsString();
+        }
     }
 
     @Test

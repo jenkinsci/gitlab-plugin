@@ -281,7 +281,7 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
         }
 
         public ListBoxModel doFillApiTokenIdItems(@QueryParameter String url, @QueryParameter String apiTokenId) {
-            if (Jenkins.get().hasPermission(Item.CONFIGURE)) {
+            if (Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return new StandardListBoxModel()
                         .includeEmptyValue()
                         .includeMatchingAs(
