@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.9.7</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
@@ -42,7 +42,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.9.7</revision>
+    <revision>1.9.8</revision>
     <changelist>-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
     <jenkins.baseline>2.479</jenkins.baseline>
