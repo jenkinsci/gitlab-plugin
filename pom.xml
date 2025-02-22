@@ -61,7 +61,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>4136.vca_c3202a_7fd1</version>
+        <version>4228.v0a_71308d905b_</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
