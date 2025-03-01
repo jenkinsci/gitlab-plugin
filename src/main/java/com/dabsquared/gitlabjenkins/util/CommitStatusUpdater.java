@@ -215,12 +215,12 @@ public class CommitStatusUpdater {
             final SCMRevision scmRevision = scmRevisionAction.getRevision();
 
             String scmRevisionHash = null;
-            if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl) {
+            if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl impl) {
                 if (scmRevision == null) {
                     LOGGER.log(Level.INFO, "Build does not contain SCM revision object.");
                     return result;
                 }
-                scmRevisionHash = ((AbstractGitSCMSource.SCMRevisionImpl) scmRevision).getHash();
+                scmRevisionHash = impl.getHash();
                 if (scmRevisionHash == null) {
                     LOGGER.log(Level.INFO, "Build does not contain SCM revision hash.");
                     return result;
@@ -299,12 +299,11 @@ public class CommitStatusUpdater {
 
     private static List<GitLabBranchBuild> findBuildsFromUpstreamCauses(List<Cause> causes) {
         for (Cause cause : causes) {
-            if (cause instanceof UpstreamCause) {
+            if (cause instanceof UpstreamCause upstreamCause) {
                 List<Cause> upCauses =
-                        ((UpstreamCause) cause).getUpstreamCauses(); // Non null, returns empty list when none are set
+                        upstreamCause.getUpstreamCauses(); // Non null, returns empty list when none are set
                 for (Cause upCause : upCauses) {
-                    if (upCause instanceof GitLabWebHookCause) {
-                        GitLabWebHookCause gitlabCause = (GitLabWebHookCause) upCause;
+                    if (upCause instanceof GitLabWebHookCause gitlabCause) {
                         return Collections.singletonList(new GitLabBranchBuild(
                                 gitlabCause.getData().getSourceProjectId().toString(),
                                 gitlabCause.getData().getLastCommit()));

@@ -146,8 +146,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;
-        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-            ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob) job;
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob abstractProject) {
             if (abstractProject.getQuietPeriod() > projectBuildDelay) {
                 projectBuildDelay = abstractProject.getQuietPeriod();
             }
@@ -168,8 +167,8 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
     private GitSCM getGitSCM(SCMTriggerItem item) {
         if (item != null) {
             for (SCM scm : item.getSCMs()) {
-                if (scm instanceof GitSCM) {
-                    return (GitSCM) scm;
+                if (scm instanceof GitSCM gitSCM) {
+                    return gitSCM;
                 }
             }
         }

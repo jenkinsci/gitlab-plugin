@@ -64,8 +64,8 @@ public class ActionResolver {
         if (method.equals("POST")) {
             return onPost(project, request);
         } else if (method.equals("GET")) {
-            if (project instanceof Job<?, ?>) {
-                return onGet((Job<?, ?>) project, restOfPath, request);
+            if (project instanceof Job<?, ?> job) {
+                return onGet(job, restOfPath, request);
             } else {
                 LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
                 return new NoopAction();

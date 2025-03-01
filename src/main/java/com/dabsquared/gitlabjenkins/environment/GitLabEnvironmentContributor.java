@@ -20,8 +20,8 @@ public class GitLabEnvironmentContributor extends EnvironmentContributor {
     public void buildEnvironmentFor(@NonNull Run r, @NonNull EnvVars envs, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         GitLabWebHookCause cause = null;
-        if (r instanceof MatrixRun) {
-            MatrixBuild parent = ((MatrixRun) r).getParentBuild();
+        if (r instanceof MatrixRun run) {
+            MatrixBuild parent = run.getParentBuild();
             if (parent != null) {
                 cause = (GitLabWebHookCause) parent.getCause(GitLabWebHookCause.class);
             }

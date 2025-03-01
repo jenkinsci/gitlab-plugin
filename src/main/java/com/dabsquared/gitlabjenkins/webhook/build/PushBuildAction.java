@@ -108,8 +108,7 @@ public class PushBuildAction extends BuildWebHookAction {
 
         public void run() {
             for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
-                if (scmSource instanceof AbstractGitSCMSource) {
-                    AbstractGitSCMSource gitSCMSource = (AbstractGitSCMSource) scmSource;
+                if (scmSource instanceof AbstractGitSCMSource gitSCMSource) {
                     try {
                         if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
                             if (SCMTrait.find(gitSCMSource.getTraits(), IgnoreOnPushNotificationTrait.class) == null) {
