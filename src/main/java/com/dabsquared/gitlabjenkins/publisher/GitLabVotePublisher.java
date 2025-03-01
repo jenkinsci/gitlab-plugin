@@ -68,8 +68,7 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
                             mergeRequest.getProjectId(), e.getMessage());
             LOGGER.log(
                     Level.SEVERE,
-                    String.format(
-                            "Failed to remove vote on Merge Request for project '%s'", mergeRequest.getProjectId()),
+                    "Failed to remove vote on Merge Request for project '%s'".formatted(mergeRequest.getProjectId()),
                     e);
         }
 
@@ -91,7 +90,7 @@ public class GitLabVotePublisher extends MergeRequestNotifier {
                             mergeRequest.getProjectId(), e.getMessage());
             LOGGER.log(
                     Level.SEVERE,
-                    String.format("Failed to add vote on Merge Request for project '%s'", mergeRequest.getProjectId()),
+                    "Failed to add vote on Merge Request for project '%s'".formatted(mergeRequest.getProjectId()),
                     e);
         }
     }

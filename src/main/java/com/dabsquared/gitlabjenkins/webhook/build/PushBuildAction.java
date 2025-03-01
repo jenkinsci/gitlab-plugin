@@ -138,9 +138,8 @@ public class PushBuildAction extends BuildWebHookAction {
             if (gitlabConfig != null) {
                 if (gitlabConfig.isUseAuthenticatedEndpoint()) {
                     if (!project.getACL().hasPermission(authentication, permission)) {
-                        String message = String.format(
-                                "%s is missing the %s/%s permission",
-                                authentication.getName(), permission.group.title, permission.name);
+                        String message = "%s is missing the %s/%s permission"
+                                .formatted(authentication.getName(), permission.group.title, permission.name);
                         LOGGER.finest("Unauthorized, cannot start indexing on SCMSourceOwner object");
                         throw HttpResponses.errorWithoutStack(403, message);
                     }

@@ -38,11 +38,11 @@ public final class ProjectIdUtil {
                 return matcher.group("projectId");
             } else {
                 throw new ProjectIdResolutionException(
-                        String.format("Failed to retrieve GitLab projectId for %s", remoteUrl));
+                        "Failed to retrieve GitLab projectId for %s".formatted(remoteUrl));
             }
         } catch (URISyntaxException e) {
             throw new ProjectIdResolutionException(
-                    String.format("Failed to retrieve GitLab projectId for %s", remoteUrl), e);
+                    "Failed to retrieve GitLab projectId for %s".formatted(remoteUrl), e);
         }
     }
 
