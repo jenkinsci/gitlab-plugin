@@ -187,8 +187,7 @@ public class GitLabMessagePublisher extends MergeRequestNotifier {
                             mergeRequest.getProjectId(), e.getMessage());
             LOGGER.log(
                     Level.SEVERE,
-                    String.format(
-                            "Failed to add comment on Merge Request for project '%s'", mergeRequest.getProjectId()),
+                    "Failed to add comment on Merge Request for project '%s'".formatted(mergeRequest.getProjectId()),
                     e);
         }
     }

@@ -71,7 +71,7 @@ public class GitLabAcceptMergeRequestPublisher extends MergeRequestNotifier {
                             mergeRequest.getProjectId(), e.getMessage());
             LOGGER.log(
                     Level.SEVERE,
-                    String.format("Failed to accept merge request for project '%s'", mergeRequest.getProjectId()),
+                    "Failed to accept merge request for project '%s'".formatted(mergeRequest.getProjectId()),
                     e);
         }
     }

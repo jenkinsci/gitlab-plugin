@@ -47,8 +47,8 @@ public class PendingBuildsHandler {
 
     private GitLabWebHookCause getGitLabWebHookCauseData(Queue.Item item) {
         for (Cause cause : item.getCauses()) {
-            if (cause instanceof GitLabWebHookCause) {
-                return (GitLabWebHookCause) cause;
+            if (cause instanceof GitLabWebHookCause hookCause) {
+                return hookCause;
             }
         }
         return null;
@@ -87,9 +87,9 @@ public class PendingBuildsHandler {
     }
 
     public static String resolvePendingBuildName(Job<?, ?> job) {
-        if (job instanceof AbstractProject) {
-            GitLabCommitStatusPublisher publisher = (GitLabCommitStatusPublisher)
-                    ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+        if (job instanceof AbstractProject project) {
+            GitLabCommitStatusPublisher publisher =
+                    (GitLabCommitStatusPublisher) project.getPublishersList().get(GitLabCommitStatusPublisher.class);
             if (publisher != null) {
                 return publisher.getName();
             }

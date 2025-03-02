@@ -118,8 +118,7 @@ public class GitLabCommitStatusStep extends Step {
                         public void onFailure(StepContext context, Throwable t) {
                             BuildState state = BuildState.failed;
                             if (t != null) {
-                                if (t instanceof FlowInterruptedException) {
-                                    FlowInterruptedException ex = (FlowInterruptedException) t;
+                                if (t instanceof FlowInterruptedException ex) {
                                     if (ex.isActualInterruption()) {
                                         state = BuildState.canceled;
                                     }

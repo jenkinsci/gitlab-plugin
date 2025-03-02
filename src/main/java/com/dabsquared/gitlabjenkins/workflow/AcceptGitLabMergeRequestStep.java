@@ -110,9 +110,8 @@ public class AcceptGitLabMergeRequestStep extends Step {
                                     mergeRequest.getProjectId(), e.getMessage());
                             LOGGER.log(
                                     Level.SEVERE,
-                                    String.format(
-                                            "Failed to accept merge request for project '%s'",
-                                            mergeRequest.getProjectId()),
+                                    "Failed to accept merge request for project '%s'"
+                                            .formatted(mergeRequest.getProjectId()),
                                     e);
                         }
                     }
@@ -124,13 +123,13 @@ public class AcceptGitLabMergeRequestStep extends Step {
         private String getCommitMessage(MergeRequest mergeRequest) {
             if (!step.useMRDescription) return step.mergeCommitMessage;
 
-            return String.format(
-                    "Merge branch '%s' into '%s'%n%n%s%n%n%s%n%nSee merge request !%d",
-                    mergeRequest.getSourceBranch(),
-                    mergeRequest.getTargetBranch(),
-                    mergeRequest.getTitle(),
-                    mergeRequest.getDescription(),
-                    mergeRequest.getIid());
+            return "Merge branch '%s' into '%s'%n%n%s%n%n%s%n%nSee merge request !%d"
+                    .formatted(
+                            mergeRequest.getSourceBranch(),
+                            mergeRequest.getTargetBranch(),
+                            mergeRequest.getTitle(),
+                            mergeRequest.getDescription(),
+                            mergeRequest.getIid());
         }
 
         private void println(String message) {
@@ -145,10 +144,7 @@ public class AcceptGitLabMergeRequestStep extends Step {
         private void printf(String message, Object... args) {
             TaskListener listener = getTaskListener();
             if (listener == null) {
-                LOGGER.log(
-                        Level.FINE,
-                        "failed to print message {0} due to null TaskListener",
-                        String.format(message, args));
+                LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", message.formatted(args));
             } else {
                 listener.getLogger().printf(message, args);
             }

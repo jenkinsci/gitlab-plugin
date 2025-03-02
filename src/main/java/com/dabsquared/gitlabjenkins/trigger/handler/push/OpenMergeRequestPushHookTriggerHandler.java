@@ -59,13 +59,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             BranchFilter branchFilter,
             MergeRequestLabelFilter mergeRequestLabelFilter) {
         try {
-            if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-                ParameterizedJob<?, ?> project = (ParameterizedJobMixIn.ParameterizedJob) job;
+            if (job instanceof ParameterizedJob<?, ?> project) {
                 GitLabConnectionProperty property = job.getProperty(GitLabConnectionProperty.class);
                 Collection<Trigger<?>> triggerList = project.getTriggers().values();
                 for (Trigger<?> t : triggerList) {
-                    if (t instanceof GitLabPushTrigger) {
-                        final GitLabPushTrigger trigger = (GitLabPushTrigger) t;
+                    if (t instanceof GitLabPushTrigger trigger) {
                         Integer projectId = hook.getProjectId();
                         if (property != null && property.getClient() != null && projectId != null && trigger != null) {
                             GitLabClient client = property.getClient();
@@ -206,8 +204,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
 
     private void scheduleBuild(Job<?, ?> job, Action[] actions) {
         int projectBuildDelay = 0;
-        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-            ParameterizedJobMixIn.ParameterizedJob abstractProject = (ParameterizedJobMixIn.ParameterizedJob) job;
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob abstractProject) {
             if (abstractProject.getQuietPeriod() > projectBuildDelay) {
                 projectBuildDelay = abstractProject.getQuietPeriod();
             }

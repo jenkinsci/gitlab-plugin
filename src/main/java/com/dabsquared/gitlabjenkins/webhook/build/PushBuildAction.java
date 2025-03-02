@@ -108,8 +108,7 @@ public class PushBuildAction extends BuildWebHookAction {
 
         public void run() {
             for (SCMSource scmSource : ((SCMSourceOwner) project).getSCMSources()) {
-                if (scmSource instanceof AbstractGitSCMSource) {
-                    AbstractGitSCMSource gitSCMSource = (AbstractGitSCMSource) scmSource;
+                if (scmSource instanceof AbstractGitSCMSource gitSCMSource) {
                     try {
                         if (new URIish(gitSCMSource.getRemote()).equals(new URIish(gitSCMSource.getRemote()))) {
                             if (SCMTrait.find(gitSCMSource.getTraits(), IgnoreOnPushNotificationTrait.class) == null) {
@@ -139,9 +138,8 @@ public class PushBuildAction extends BuildWebHookAction {
             if (gitlabConfig != null) {
                 if (gitlabConfig.isUseAuthenticatedEndpoint()) {
                     if (!project.getACL().hasPermission(authentication, permission)) {
-                        String message = String.format(
-                                "%s is missing the %s/%s permission",
-                                authentication.getName(), permission.group.title, permission.name);
+                        String message = "%s is missing the %s/%s permission"
+                                .formatted(authentication.getName(), permission.group.title, permission.name);
                         LOGGER.finest("Unauthorized, cannot start indexing on SCMSourceOwner object");
                         throw HttpResponses.errorWithoutStack(403, message);
                     }

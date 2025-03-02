@@ -93,7 +93,7 @@ public class CommitStatusUpdater {
                             current_client, gitLabBranchBuild.getProjectId(), gitLabBranchBuild.getRevisionHash())) {
                         LOGGER.log(
                                 Level.INFO,
-                                String.format("Updating build '%s' to '%s'", gitLabBranchBuild.getProjectId(), state));
+                                "Updating build '%s' to '%s'".formatted(gitLabBranchBuild.getProjectId(), state));
                         current_client.changeBuildStatus(
                                 gitLabBranchBuild.getProjectId(),
                                 gitLabBranchBuild.getRevisionHash(),
@@ -111,9 +111,8 @@ public class CommitStatusUpdater {
                             e.getMessage());
                     LOGGER.log(
                             Level.SEVERE,
-                            String.format(
-                                    "Failed to update GitLab commit status for project '%s'",
-                                    gitLabBranchBuild.getProjectId()),
+                            "Failed to update GitLab commit status for project '%s'"
+                                    .formatted(gitLabBranchBuild.getProjectId()),
                             e);
                 }
             }
@@ -138,8 +137,7 @@ public class CommitStatusUpdater {
 
     private static void printf(TaskListener listener, String message, Object... args) {
         if (listener == null) {
-            LOGGER.log(
-                    Level.FINE, "failed to print message {0} due to null TaskListener", String.format(message, args));
+            LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", message.formatted(args));
         } else {
             listener.getLogger().printf(message, args);
         }
@@ -152,7 +150,7 @@ public class CommitStatusUpdater {
         } catch (NotFoundException e) {
             LOGGER.log(
                     Level.FINE,
-                    String.format("Project (%s) and commit (%s) combination not found", gitlabProjectId, commitHash));
+                    "Project (%s) and commit (%s) combination not found".formatted(gitlabProjectId, commitHash));
             return false;
         }
     }
@@ -215,12 +213,12 @@ public class CommitStatusUpdater {
             final SCMRevision scmRevision = scmRevisionAction.getRevision();
 
             String scmRevisionHash = null;
-            if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl) {
+            if (scmRevision instanceof AbstractGitSCMSource.SCMRevisionImpl impl) {
                 if (scmRevision == null) {
                     LOGGER.log(Level.INFO, "Build does not contain SCM revision object.");
                     return result;
                 }
-                scmRevisionHash = ((AbstractGitSCMSource.SCMRevisionImpl) scmRevision).getHash();
+                scmRevisionHash = impl.getHash();
                 if (scmRevisionHash == null) {
                     LOGGER.log(Level.INFO, "Build does not contain SCM revision hash.");
                     return result;
@@ -284,8 +282,7 @@ public class CommitStatusUpdater {
                         } catch (WebApplicationException | ProcessingException e) {
                             LOGGER.log(
                                     Level.SEVERE,
-                                    String.format(
-                                            "Failed to retrieve projectId for project '%s'", projectNameWithNameSpace),
+                                    "Failed to retrieve projectId for project '%s'".formatted(projectNameWithNameSpace),
                                     e);
                         }
                     }
@@ -299,12 +296,11 @@ public class CommitStatusUpdater {
 
     private static List<GitLabBranchBuild> findBuildsFromUpstreamCauses(List<Cause> causes) {
         for (Cause cause : causes) {
-            if (cause instanceof UpstreamCause) {
+            if (cause instanceof UpstreamCause upstreamCause) {
                 List<Cause> upCauses =
-                        ((UpstreamCause) cause).getUpstreamCauses(); // Non null, returns empty list when none are set
+                        upstreamCause.getUpstreamCauses(); // Non null, returns empty list when none are set
                 for (Cause upCause : upCauses) {
-                    if (upCause instanceof GitLabWebHookCause) {
-                        GitLabWebHookCause gitlabCause = (GitLabWebHookCause) upCause;
+                    if (upCause instanceof GitLabWebHookCause gitlabCause) {
                         return Collections.singletonList(new GitLabBranchBuild(
                                 gitlabCause.getData().getSourceProjectId().toString(),
                                 gitlabCause.getData().getLastCommit()));

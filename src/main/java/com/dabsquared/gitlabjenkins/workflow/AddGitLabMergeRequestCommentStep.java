@@ -96,9 +96,8 @@ public class AddGitLabMergeRequestCommentStep extends Step {
                                     mergeRequest.getProjectId(), e.getMessage());
                             LOGGER.log(
                                     Level.SEVERE,
-                                    String.format(
-                                            "Failed to add comment on Merge Request for project '%s'",
-                                            mergeRequest.getProjectId()),
+                                    "Failed to add comment on Merge Request for project '%s'"
+                                            .formatted(mergeRequest.getProjectId()),
                                     e);
                         }
                     }
@@ -124,10 +123,7 @@ public class AddGitLabMergeRequestCommentStep extends Step {
         private void printf(String message, Object... args) {
             TaskListener listener = getTaskListener();
             if (listener == null) {
-                LOGGER.log(
-                        Level.FINE,
-                        "failed to print message {0} due to null TaskListener",
-                        String.format(message, args));
+                LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", message.formatted(args));
             } else {
                 listener.getLogger().printf(message, args);
             }

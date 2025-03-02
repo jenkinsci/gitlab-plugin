@@ -204,11 +204,11 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             }
 
             if (credentials != null) {
-                if (credentials instanceof GitLabApiToken) {
-                    return ((GitLabApiToken) credentials).getApiToken().getPlainText();
+                if (credentials instanceof GitLabApiToken token) {
+                    return token.getApiToken().getPlainText();
                 }
-                if (credentials instanceof StringCredentials) {
-                    return ((StringCredentials) credentials).getSecret().getPlainText();
+                if (credentials instanceof StringCredentials stringCredentials) {
+                    return stringCredentials.getSecret().getPlainText();
                 }
             }
             throw new IllegalStateException(

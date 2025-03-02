@@ -158,8 +158,8 @@ public final class ProjectBranchesProvider {
     private GitSCM getGitSCM(SCMTriggerItem item) {
         if (item != null) {
             for (SCM scm : item.getSCMs()) {
-                if (scm instanceof GitSCM) {
-                    return (GitSCM) scm;
+                if (scm instanceof GitSCM gitSCM) {
+                    return gitSCM;
                 }
             }
         }
