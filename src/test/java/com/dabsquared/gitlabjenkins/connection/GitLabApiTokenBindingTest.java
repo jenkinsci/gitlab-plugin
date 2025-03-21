@@ -1,16 +1,15 @@
-package com.dabsquared.gitlabjenkins.workflow;
+package com.dabsquared.gitlabjenkins.connection;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
-import com.dabsquared.gitlabjenkins.connection.GitLabApiTokenImpl;
 import hudson.model.Run;
-import hudson.util.IOUtils;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Before;
@@ -18,7 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-public class GitLabApiTokenWithCredentialsTest {
+public class GitLabApiTokenBindingTest {
 
     private static final String API_TOKEN = "secret";
     private static final String API_TOKEN_ID = "apiTokenId";

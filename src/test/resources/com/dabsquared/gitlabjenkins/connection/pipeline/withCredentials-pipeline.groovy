@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.workflow.pipeline
+package com.dabsquared.gitlabjenkins.connection.pipeline
 
 node {
 	withCredentials([[
