@@ -18,7 +18,7 @@ import org.jenkinsci.plugins.credentialsbinding.BindingDescriptor;
 import org.jenkinsci.plugins.credentialsbinding.MultiBinding;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class GitLabApiTokenBinding extends MultiBinding<GitLabApiTokenImpl> {
+public class GitLabApiTokenBinding extends MultiBinding<GitLabApiToken> {
 
     private final String variable;
 
@@ -29,8 +29,8 @@ public class GitLabApiTokenBinding extends MultiBinding<GitLabApiTokenImpl> {
     }
 
     @Override
-    protected Class<GitLabApiTokenImpl> type() {
-        return GitLabApiTokenImpl.class;
+    protected Class<GitLabApiToken> type() {
+        return GitLabApiToken.class;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class GitLabApiTokenBinding extends MultiBinding<GitLabApiTokenImpl> {
             @Nullable Launcher launcher,
             @NonNull TaskListener listener)
             throws IOException, InterruptedException {
-        GitLabApiTokenImpl credentials = getCredentials(build);
+        GitLabApiToken credentials = getCredentials(build);
         Map<String, String> values = new LinkedHashMap<>();
         values.put(variable, Secret.toString(credentials.getApiToken()));
         return new MultiEnvironment(values);
