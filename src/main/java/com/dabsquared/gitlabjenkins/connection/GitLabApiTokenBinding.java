@@ -63,7 +63,7 @@ public class GitLabApiTokenBinding extends MultiBinding<GitLabApiTokenImpl> {
         @NonNull
         @Override
         public String getDisplayName() {
-            return "gitlab api token";
+            return Messages.GitLabApiToken_name();
         }
 
         @Override
