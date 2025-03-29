@@ -90,6 +90,16 @@
       <artifactId>joda-time-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.jenkins.plugins.mina-sshd-api</groupId>
+      <artifactId>mina-sshd-api-common</artifactId>
+      <version>2.15.0-156.v48eb_e3c5a_805</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins.mina-sshd-api</groupId>
+      <artifactId>mina-sshd-api-core</artifactId>
+      <version>2.15.0-156.v48eb_e3c5a_805</version>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
       <version>3.15.6.Final</version>
@@ -149,6 +159,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>git-client</artifactId>
+      <version>6.2.0-rc3710.111f814fdc4b_</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
