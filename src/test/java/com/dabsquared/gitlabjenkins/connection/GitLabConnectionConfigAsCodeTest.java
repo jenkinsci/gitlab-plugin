@@ -1,8 +1,6 @@
 package com.dabsquared.gitlabjenkins.connection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
@@ -13,23 +11,20 @@ import io.jenkins.plugins.casc.ConfiguratorRegistry;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
 import io.jenkins.plugins.casc.misc.Util;
+import io.jenkins.plugins.casc.misc.junit.jupiter.WithJenkinsConfiguredWithCode;
 import io.jenkins.plugins.casc.model.CNode;
 import java.util.List;
 import jenkins.model.Jenkins;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.junit.rules.RuleChain;
+import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
-public class GitLabConnectionConfigAsCodeTest {
-    @Rule
-    public RuleChain chain = RuleChain.outerRule(
-                    new EnvironmentVariables().set("BIND_TOKEN", "qwertyuiopasdfghjklzxcvbnm"))
-            .around(new JenkinsConfiguredWithCodeRule());
+@WithJenkinsConfiguredWithCode
+@SetEnvironmentVariable(key = "BIND_TOKEN", value = "qwertyuiopasdfghjklzxcvbnm")
+class GitLabConnectionConfigAsCodeTest {
 
     @Test
     @ConfiguredWithCode("global-config.yml")
-    public void configure_gitlab_api_token() throws Exception {
+    void configure_gitlab_api_token(JenkinsConfiguredWithCodeRule r) {
         SystemCredentialsProvider systemCreds = SystemCredentialsProvider.getInstance();
         List<DomainCredentials> domainCredentials = systemCreds.getDomainCredentials();
         assertEquals(1, domainCredentials.size());
@@ -45,7 +40,7 @@ public class GitLabConnectionConfigAsCodeTest {
 
     @Test
     @ConfiguredWithCode("global-config.yml")
-    public void configure_gitlab_connection() throws Exception {
+    void configure_gitlab_connection(JenkinsConfiguredWithCodeRule r) {
         final Jenkins jenkins = Jenkins.get();
         final GitLabConnectionConfig gitLabConnections = jenkins.getDescriptorByType(GitLabConnectionConfig.class);
         assertEquals(1, gitLabConnections.getConnections().size());
@@ -62,7 +57,7 @@ public class GitLabConnectionConfigAsCodeTest {
 
     @Test
     @ConfiguredWithCode("global-config.yml")
-    public void export_configuration() throws Exception {
+    void export_configuration(JenkinsConfiguredWithCodeRule r) throws Exception {
         GitLabConnectionConfig globalConfiguration = GitLabConnectionConfig.get();
 
         ConfiguratorRegistry registry = ConfiguratorRegistry.get();

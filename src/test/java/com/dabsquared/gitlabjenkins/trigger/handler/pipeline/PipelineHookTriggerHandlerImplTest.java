@@ -19,39 +19,42 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.util.OneShotEvent;
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * @author Robin Müller
  */
-public class PipelineHookTriggerHandlerImplTest {
+@WithJenkins
+class PipelineHookTriggerHandlerImplTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    private File tmp;
 
     private PipelineHookTriggerHandler pipelineHookTriggerHandler;
     private PipelineHook pipelineHook;
 
-    @Before
-    public void setup() throws IOException, GitAPIException {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
+    @BeforeEach
+    void setUp() throws Exception {
         List<String> allowedStates = new ArrayList<>();
         allowedStates.add("success");
 
@@ -59,9 +62,9 @@ public class PipelineHookTriggerHandlerImplTest {
         user.setName("test");
         user.setId(1);
 
-        Git.init().setDirectory(tmp.getRoot()).call();
-        tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+        Git.init().setDirectory(tmp).call();
+        File.createTempFile("test", null, tmp);
+        Git git = Git.open(tmp);
         git.add().addFilepattern("test");
         git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
@@ -92,18 +95,17 @@ public class PipelineHookTriggerHandlerImplTest {
         git.close();
     }
 
-    @Test
     /**
      * always triggers since pipeline events do not contain ci skip message
      */
-    public void pipeline_ciSkip() throws Exception {
+    @Test
+    void pipeline_ciSkip() throws Exception {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                    throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 buildHolder.set((FreeStyleBuild) build);
                 buildTriggered.signal();
                 return true;
@@ -123,15 +125,14 @@ public class PipelineHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void pipeline_build() throws Exception {
+    void pipeline_build() throws Exception {
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                    throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 buildHolder.set((FreeStyleBuild) build);
                 buildTriggered.signal();
                 return true;

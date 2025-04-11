@@ -16,7 +16,6 @@ import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.EnvVars;
 import hudson.Functions;
 import hudson.Util;
-import hudson.model.Cause;
 import hudson.model.Cause.UpstreamCause;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -30,18 +29,21 @@ import java.util.Collections;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockserver.junit.jupiter.MockServerExtension;
 
 /**
  * @author Daumantas Stulgis
  */
-public class CommitStatusUpdaterTest {
+@ExtendWith(MockServerExtension.class)
+class CommitStatusUpdaterTest {
 
     private static final int PROJECT_ID = 1;
     private static final String BUILD_URL = "job/Test-Job";
@@ -50,46 +52,46 @@ public class CommitStatusUpdaterTest {
     private static final String JENKINS_URL = "https://gitlab.org/jenkins/";
 
     @Mock
-    Run<?, ?> build;
+    private Run<?, ?> build;
 
     @Mock
-    TaskListener taskListener;
+    private TaskListener taskListener;
 
     @Mock
-    GitLabConnectionConfig gitLabConnectionConfig;
+    private GitLabConnectionConfig gitLabConnectionConfig;
 
     @Mock
-    GitLabClient client;
+    private GitLabClient client;
 
     @Mock
-    GitLabWebHookCause gitlabCause;
+    private GitLabWebHookCause gitlabCause;
 
     @Mock
-    BuildData action;
+    private BuildData action;
 
     @Mock
-    Revision lastBuiltRevision;
+    private Revision lastBuiltRevision;
 
     @Mock
-    Build lastBuild;
+    private Build lastBuild;
 
     @Mock
-    Revision revision;
+    private Revision revision;
 
     @Mock
-    EnvVars environment;
+    private EnvVars environment;
 
     @Mock
-    UpstreamCause upCauseLevel1;
+    private UpstreamCause upCauseLevel1;
 
     @Mock
-    UpstreamCause upCauseLevel2;
+    private UpstreamCause upCauseLevel2;
 
     @Mock
-    Jenkins jenkins;
+    private Jenkins jenkins;
 
     @Mock
-    GitLabConnectionProperty connection;
+    private GitLabConnectionProperty connection;
 
     private AutoCloseable closeable;
     private MockedStatic<Jenkins> mockedJenkins;
@@ -98,8 +100,8 @@ public class CommitStatusUpdaterTest {
 
     CauseData causeData;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
         mockedJenkins = Mockito.mockStatic(Jenkins.class);
         mockedJenkins.when(Jenkins::getInstance).thenReturn(jenkins);
@@ -120,11 +122,9 @@ public class CommitStatusUpdaterTest {
         when(revision.getSha1String()).thenReturn(REVISION);
         when(build.getUrl()).thenReturn(BUILD_URL);
         when(build.getEnvironment(any(TaskListener.class))).thenReturn(environment);
-        when(build.getCauses()).thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel1)));
-        when(upCauseLevel1.getUpstreamCauses())
-                .thenReturn(new ArrayList<Cause>(Collections.singletonList(upCauseLevel2)));
-        when(upCauseLevel2.getUpstreamCauses())
-                .thenReturn(new ArrayList<Cause>(Collections.singletonList(gitlabCause)));
+        when(build.getCauses()).thenReturn(new ArrayList<>(Collections.singletonList(upCauseLevel1)));
+        when(upCauseLevel1.getUpstreamCauses()).thenReturn(new ArrayList<>(Collections.singletonList(upCauseLevel2)));
+        when(upCauseLevel2.getUpstreamCauses()).thenReturn(new ArrayList<>(Collections.singletonList(gitlabCause)));
         if (Functions.isWindows()) {
             when(taskListener.getLogger()).thenReturn(new PrintStream("nul"));
         } else {
@@ -165,8 +165,8 @@ public class CommitStatusUpdaterTest {
         when(gitlabCause.getData()).thenReturn(causeData);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         mockedDisplayURLProvider.close();
         mockedGitLabConnectionProperty.close();
         mockedJenkins.close();
@@ -174,7 +174,7 @@ public class CommitStatusUpdaterTest {
     }
 
     @Test
-    public void buildStateUpdateTest() {
+    void buildStateUpdateTest() {
         CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
 
         verify(client)
@@ -189,7 +189,7 @@ public class CommitStatusUpdaterTest {
     }
 
     @Test
-    public void buildStateUpdateTestSpecificConnection() {
+    void buildStateUpdateTestSpecificConnection() {
         CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, null, connection);
 
         verify(client)
@@ -204,7 +204,7 @@ public class CommitStatusUpdaterTest {
     }
 
     @Test
-    public void buildStateUpdateTestSpecificBuild() {
+    void buildStateUpdateTestSpecificBuild() {
         ArrayList builds = new ArrayList();
         builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
         CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, null);
@@ -221,7 +221,7 @@ public class CommitStatusUpdaterTest {
     }
 
     @Test
-    public void buildStateUpdateTestSpecificConnectionSpecificBuild() {
+    void buildStateUpdateTestSpecificConnectionSpecificBuild() {
         ArrayList builds = new ArrayList();
         builds.add(new GitLabBranchBuild(Integer.toString(PROJECT_ID), REVISION));
         CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, builds, connection);
@@ -238,7 +238,7 @@ public class CommitStatusUpdaterTest {
     }
 
     @Test
-    public void testTagEvent() {
+    void testTagEvent() {
         causeData = CauseDataBuilder.causeData()
                 .withActionType(CauseData.ActionType.TAG_PUSH)
                 .withSourceProjectId(PROJECT_ID)

@@ -11,7 +11,8 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
@@ -23,43 +24,47 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * @author Nikolay Ustinov
  */
-public class NoteHookTriggerHandlerImplTest {
+@WithJenkins
+class NoteHookTriggerHandlerImplTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    private File tmp;
 
     private NoteHookTriggerHandler noteHookTriggerHandler;
 
-    @Before
-    public void setup() {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() {
         noteHookTriggerHandler = new NoteHookTriggerHandlerImpl("ci-run");
     }
 
     @Test
-    public void note_ciSkip() throws IOException, InterruptedException {
+    void note_ciSkip() throws Exception {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(new TestBuilder() {
@@ -67,7 +72,7 @@ public class NoteHookTriggerHandlerImplTest {
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
                 EnvVars env = build.getEnvironment(listener);
-                assertEquals(null, env.get("gitlabMergeRequestLabels"));
+                assertNull(env.get("gitlabMergeRequestLabels"));
                 buildTriggered.signal();
                 return true;
             }
@@ -99,14 +104,14 @@ public class NoteHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void note_build() throws IOException, InterruptedException, GitAPIException, ExecutionException {
-        Git.init().setDirectory(tmp.getRoot()).call();
-        tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+    void note_build() throws Exception {
+        Git.init().setDirectory(tmp).call();
+        File.createTempFile("test", null, tmp);
+        Git git = Git.open(tmp);
         git.add().addFilepattern("test");
         RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
-        String repositoryUrl = tmp.getRoot().toURI().toString();
+        String repositoryUrl = tmp.toURI().toString();
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();

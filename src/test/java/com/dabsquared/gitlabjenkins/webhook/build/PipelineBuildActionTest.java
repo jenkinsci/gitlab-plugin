@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -7,31 +8,27 @@ import static org.mockito.Mockito.verify;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import hudson.model.FreeStyleProject;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Milena Zachow
  */
-@RunWith(MockitoJUnitRunner.class)
-public class PipelineBuildActionTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+class PipelineBuildActionTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+    private static JenkinsRule jenkins;
 
     @Mock
     private StaplerResponse2 response;
@@ -39,31 +36,38 @@ public class PipelineBuildActionTest {
     @Mock
     private GitLabPushTrigger trigger;
 
-    FreeStyleProject testProject;
+    private FreeStyleProject testProject;
 
-    @Before
-    public void setUp() throws IOException {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
         testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
     }
 
     @Test
-    public void buildOnSuccess() throws IOException {
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response);
+    void buildOnSuccess() {
+        assertThrows(HttpResponses.HttpResponseException.class, () -> {
+            new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response);
 
-        verify(trigger).onPost(any(PipelineHook.class));
+            verify(trigger).onPost(any(PipelineHook.class));
+        });
     }
 
     @Test
-    public void doNotBuildOnFailure() throws IOException {
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null).execute(response);
+    void doNotBuildOnFailure() {
+        assertThrows(HttpResponses.HttpResponseException.class, () -> {
+            new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null).execute(response);
 
-        verify(trigger, never()).onPost(any(PipelineHook.class));
+            verify(trigger, never()).onPost(any(PipelineHook.class));
+        });
     }
 
-    private String getJson(String name) throws IOException {
-        return IOUtils.toString(getClass().getResourceAsStream(name));
+    private String getJson(String name) throws Exception {
+        return IOUtils.toString(getClass().getResourceAsStream(name), StandardCharsets.UTF_8);
     }
 }

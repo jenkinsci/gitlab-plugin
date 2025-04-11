@@ -3,15 +3,15 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Robin Müller
  */
-public class NameBasedFilterTest {
+class NameBasedFilterTest {
 
     @Test
-    public void includeBranches() {
+    void includeBranches() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("master, develop", "");
 
         assertThat(nameBasedFilter.isBranchAllowed(null, "master"), is(true));
@@ -20,7 +20,7 @@ public class NameBasedFilterTest {
     }
 
     @Test
-    public void excludeBranches() {
+    void excludeBranches() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("", "master, develop");
 
         assertThat(nameBasedFilter.isBranchAllowed(null, "master"), is(false));
@@ -29,7 +29,7 @@ public class NameBasedFilterTest {
     }
 
     @Test
-    public void includeAndExcludeBranches() {
+    void includeAndExcludeBranches() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("master", "develop");
 
         assertThat(nameBasedFilter.isBranchAllowed(null, "master"), is(true));
@@ -38,14 +38,14 @@ public class NameBasedFilterTest {
     }
 
     @Test
-    public void allowIncludeAndExcludeToBeNull() {
+    void allowIncludeAndExcludeToBeNull() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter(null, null);
 
         assertThat(nameBasedFilter.isBranchAllowed(null, "master"), is(true));
     }
 
     @Test
-    public void allowIncludeToBeNull() {
+    void allowIncludeToBeNull() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter(null, "master, develop");
 
         assertThat(nameBasedFilter.isBranchAllowed(null, "master"), is(false));
@@ -54,7 +54,7 @@ public class NameBasedFilterTest {
     }
 
     @Test
-    public void allowExcludeToBeNull() {
+    void allowExcludeToBeNull() {
         NameBasedFilter nameBasedFilter = new NameBasedFilter("master, develop", null);
 
         assertThat(nameBasedFilter.isBranchAllowed(null, "master"), is(true));

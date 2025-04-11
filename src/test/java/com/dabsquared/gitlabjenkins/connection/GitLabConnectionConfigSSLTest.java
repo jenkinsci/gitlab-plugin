@@ -11,7 +11,6 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
-import java.io.IOException;
 import java.util.List;
 import jenkins.model.Jenkins;
 import org.eclipse.jetty.http.HttpStatus;
@@ -29,18 +28,19 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockserver.socket.PortFactory;
 
 /**
  * @author Robin Müller
  */
-public class GitLabConnectionConfigSSLTest {
+@WithJenkins
+class GitLabConnectionConfigSSLTest {
 
     private static final String API_TOKEN_ID = "apiTokenId";
 
@@ -48,12 +48,12 @@ public class GitLabConnectionConfigSSLTest {
 
     private static Server server;
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    @BeforeClass
-    // based on https://www.eclipse.org/jetty/documentation/9.4.x/embedded-examples.html#Multiple%20Connectors
-    public static void startJetty() throws Exception {
+    @BeforeAll // based on
+    // https://www.eclipse.org/jetty/documentation/9.4.x/embedded-examples.html#Multiple%20Connectors
+    static void setUp(JenkinsRule rule) throws Exception {
+        jenkins = rule;
         port = PortFactory.findFreePort();
         int _http_port = PortFactory.findFreePort();
 
@@ -128,7 +128,7 @@ public class GitLabConnectionConfigSSLTest {
 
         server.setHandler(new Handler.Abstract() {
             @Override
-            public boolean handle(Request request, Response response, Callback callback) throws IOException {
+            public boolean handle(Request request, Response response, Callback callback) {
                 response.setStatus(HttpStatus.OK_200);
                 return true;
             }
@@ -136,14 +136,14 @@ public class GitLabConnectionConfigSSLTest {
         server.start();
     }
 
-    @AfterClass
-    public static void stopJetty() throws Exception {
+    @AfterAll
+    static void tearDown() throws Exception {
         server.stop();
     }
 
-    @Before
-    public void setup() throws IOException {
-        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+    @BeforeEach
+    void setUp() throws Exception {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstanceOrNull())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
                 credentialsStore.addCredentials(
@@ -158,7 +158,7 @@ public class GitLabConnectionConfigSSLTest {
     }
 
     @Test
-    public void doCheckConnection_certificateError() throws IOException {
+    void doCheckConnection_certificateError() {
         GitLabConnection.DescriptorImpl descriptor =
                 (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 

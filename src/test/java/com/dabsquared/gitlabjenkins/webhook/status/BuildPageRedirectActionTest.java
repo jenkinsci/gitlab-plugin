@@ -7,34 +7,33 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.git.GitSCM;
+import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Robin Müller
  */
-@RunWith(MockitoJUnitRunner.class)
-public abstract class BuildPageRedirectActionTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+abstract class BuildPageRedirectActionTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    protected static JenkinsRule jenkins;
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    protected File tmp;
 
     protected String commitSha1;
     protected String branch = "master";
@@ -44,19 +43,24 @@ public abstract class BuildPageRedirectActionTest {
 
     private String gitRepoUrl;
 
-    @Before
-    public void setup() throws Exception {
-        Git.init().setDirectory(tmp.getRoot()).call();
-        tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
+        Git.init().setDirectory(tmp).call();
+        File.createTempFile("test", null, tmp);
+        Git git = Git.open(tmp);
         git.add().addFilepattern("test");
         RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         commitSha1 = commit.getId().getName();
-        gitRepoUrl = tmp.getRoot().toURI().toString();
+        gitRepoUrl = tmp.toURI().toString();
     }
 
     @Test
-    public void redirectToBuildUrl() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    void redirectToBuildUrl() throws Exception {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);
@@ -69,8 +73,7 @@ public abstract class BuildPageRedirectActionTest {
     }
 
     @Test
-    public void redirectToBuildStatusUrl()
-            throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    void redirectToBuildStatusUrl() throws Exception {
         FreeStyleProject testProject = jenkins.createFreeStyleProject();
         testProject.setScm(new GitSCM(gitRepoUrl));
         testProject.setQuietPeriod(0);

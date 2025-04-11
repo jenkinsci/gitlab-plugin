@@ -4,15 +4,15 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Robin Müller
  */
-public class AllBranchesFilterTest {
+class AllBranchesFilterTest {
 
     @Test
-    public void isRandomBranchNameAllowed() {
+    void isRandomBranchNameAllowed() {
         String randomBranchName = RandomStringUtils.random(10, true, false);
 
         assertThat(new AllBranchesFilter().isBranchAllowed(null, randomBranchName), is(true));

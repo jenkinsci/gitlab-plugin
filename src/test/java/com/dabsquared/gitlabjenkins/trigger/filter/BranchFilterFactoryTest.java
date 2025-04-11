@@ -4,15 +4,15 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.Bra
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Robin Müller
  */
-public class BranchFilterFactoryTest {
+class BranchFilterFactoryTest {
 
     @Test
-    public void getAllBranchesFilter() {
+    void getAllBranchesFilter() {
         BranchFilter branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec("master")
                 .withExcludeBranchesSpec("develop")
@@ -23,7 +23,7 @@ public class BranchFilterFactoryTest {
     }
 
     @Test
-    public void getNameBasedFilterFilter() {
+    void getNameBasedFilterFilter() {
         BranchFilter branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec("master")
                 .withExcludeBranchesSpec("develop")
@@ -34,7 +34,7 @@ public class BranchFilterFactoryTest {
     }
 
     @Test
-    public void getRegexBasedFilterFilter() {
+    void getRegexBasedFilterFilter() {
         BranchFilter branchFilter = BranchFilterFactory.newBranchFilter(branchFilterConfig()
                 .withIncludeBranchesSpec("master")
                 .withExcludeBranchesSpec("develop")

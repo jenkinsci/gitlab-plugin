@@ -35,25 +35,25 @@ import hudson.model.ItemGroup;
 import hudson.model.Project;
 import hudson.model.Queue;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PendingBuildsHandlerTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+class PendingBuildsHandlerTest {
 
     private static final String GITLAB_BUILD_NAME = "Jenkins";
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
     @Mock
     private GitLabClient gitLabClient;
@@ -61,13 +61,18 @@ public class PendingBuildsHandlerTest {
     @Mock
     private GitLabConnectionProperty gitLabConnectionProperty;
 
-    @Before
-    public void init() {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() {
         when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
     }
 
-    @After
-    public void clearQueue() {
+    @AfterEach
+    void tearDown() {
         Queue queue = jenkins.getInstance().getQueue();
         for (Queue.Item item : queue.getItems()) {
             queue.cancel(item);
@@ -75,7 +80,7 @@ public class PendingBuildsHandlerTest {
     }
 
     @Test
-    public void projectCanBeConfiguredToSendPendingBuildStatusWhenTriggered() throws IOException {
+    void projectCanBeConfiguredToSendPendingBuildStatusWhenTriggered() throws Exception {
         Project project =
                 freestyleProject("freestyleProject1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
@@ -96,7 +101,7 @@ public class PendingBuildsHandlerTest {
     }
 
     @Test
-    public void workflowJobCanConfiguredToSendToPendingBuildStatusWhenTriggered() throws IOException {
+    void workflowJobCanConfiguredToSendToPendingBuildStatusWhenTriggered() throws Exception {
         WorkflowJob workflowJob = workflowJob();
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(workflowJob);
@@ -117,7 +122,7 @@ public class PendingBuildsHandlerTest {
     }
 
     @Test
-    public void queuedMergeRequestBuildsCanBeCancelledOnMergeRequestUpdate() throws IOException {
+    void queuedMergeRequestBuildsCanBeCancelledOnMergeRequestUpdate() throws Exception {
         Project project = freestyleProject("project1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
@@ -153,14 +158,14 @@ public class PendingBuildsHandlerTest {
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
     }
 
-    private GitLabPushTrigger gitLabPushTrigger(Project project) throws IOException {
+    private GitLabPushTrigger gitLabPushTrigger(Project project) throws Exception {
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger();
         project.addTrigger(gitLabPushTrigger);
         gitLabPushTrigger.start(project, true);
         return gitLabPushTrigger;
     }
 
-    private GitLabPushTrigger gitLabPushTrigger(WorkflowJob workflowJob) throws IOException {
+    private GitLabPushTrigger gitLabPushTrigger(WorkflowJob workflowJob) throws Exception {
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger();
         workflowJob.addTrigger(gitLabPushTrigger);
         gitLabPushTrigger.start(workflowJob, true);
@@ -239,7 +244,7 @@ public class PendingBuildsHandlerTest {
     }
 
     private Project freestyleProject(String name, GitLabCommitStatusPublisher gitLabCommitStatusPublisher)
-            throws IOException {
+            throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject(name);
         project.setQuietPeriod(5000);
         project.getPublishersList().add(gitLabCommitStatusPublisher);
@@ -247,7 +252,7 @@ public class PendingBuildsHandlerTest {
         return project;
     }
 
-    private WorkflowJob workflowJob() throws IOException {
+    private WorkflowJob workflowJob() throws Exception {
         ItemGroup itemGroup = mock(ItemGroup.class);
         when(itemGroup.getFullName()).thenReturn("parent");
         when(itemGroup.getUrlChildPrefix()).thenReturn("prefix");

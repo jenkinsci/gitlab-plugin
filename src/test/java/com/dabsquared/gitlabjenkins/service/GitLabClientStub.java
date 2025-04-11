@@ -46,7 +46,7 @@ class GitLabClientStub implements GitLabClient {
 
     int calls(String projectId, Class dataClass) {
         Pair<String, Class> key = createKey(projectId, dataClass);
-        return calls.containsKey(key) ? calls.get(key) : 0;
+        return calls.getOrDefault(key, 0);
     }
 
     @Override

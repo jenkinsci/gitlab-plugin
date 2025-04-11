@@ -10,6 +10,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V4GitLabClientBuilder;
 import hudson.model.Run;
 import hudson.util.Secret;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
@@ -35,20 +36,20 @@ public class UpdateGitLabCommitStatusStepTest {
     private MockServerClient mockServerClient;
 
     @Before
-    public void setup() {
+    public void setUp() {
         mockServerClient = new MockServerClient("localhost", mockServer.getPort());
     }
 
     @After
-    public void cleanup() {
+    public void tearDown() {
         mockServerClient.reset();
     }
 
     @Test
     public void updateGitlabCommitStatus() throws Throwable {
         int port = mockServer.getPort();
-        String pipelineText =
-                IOUtils.toString(getClass().getResourceAsStream("pipeline/updateGitlabCommitStatus.groovy"));
+        String pipelineText = IOUtils.toString(
+                getClass().getResourceAsStream("pipeline/updateGitlabCommitStatus.groovy"), StandardCharsets.UTF_8);
         rr.then(j -> {
             _updateGitlabCommitStatus(j, port, pipelineText);
         });
