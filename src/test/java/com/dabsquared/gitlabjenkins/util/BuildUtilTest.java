@@ -20,18 +20,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.jgit.lib.ObjectId;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Joshua Barker
  */
-public class BuildUtilTest {
+class BuildUtilTest {
 
     private static final String SHA1 = "0616d12a3a24068691027a1e113147e3c1cfa2f4";
     private static final String SHALIB = "a53131154f6dfc0d1642451679fb977c5ecf31c0";
     private static final String WRONGSHA = "5f106d47c2ce17dd65774c12c0826785d16b26f7";
 
-    public void getBuildBySHA1WithoutMergeBuilds_sha_found() {
+    @Test
+    void getBuildBySHA1WithoutMergeBuilds_sha_found() {
         Job<?, ?> project = createProject(SHA1);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1WithoutMergeBuilds(project, SHA1);
@@ -39,7 +40,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1WithoutMergeBuilds_sha_missing() {
+    void getBuildBySHA1WithoutMergeBuilds_sha_missing() {
         Job<?, ?> project = createProject(SHA1);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1WithoutMergeBuilds(project, WRONGSHA);
@@ -47,7 +48,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1WithoutMergeBuilds_libraryFirst() {
+    void getBuildBySHA1WithoutMergeBuilds_libraryFirst() {
         Job<?, ?> project = createProject(SHA1, SHALIB);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1WithoutMergeBuilds(project, SHA1);
@@ -55,7 +56,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1WithoutMergeBuilds_libraryLast() {
+    void getBuildBySHA1WithoutMergeBuilds_libraryLast() {
         Job<?, ?> project = createProject(SHA1, SHALIB);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1WithoutMergeBuilds(project, SHA1);
@@ -63,7 +64,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1IncludingMergeBuilds_sha_found() {
+    void getBuildBySHA1IncludingMergeBuilds_sha_found() {
         Job<?, ?> project = createProject(SHA1);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, SHA1);
@@ -71,7 +72,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1IncludingMergeBuilds_sha_missing() {
+    void getBuildBySHA1IncludingMergeBuilds_sha_missing() {
         Job<?, ?> project = createProject(SHA1);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, WRONGSHA);
@@ -79,7 +80,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1IncludingMergeBuilds_libraryFirst() {
+    void getBuildBySHA1IncludingMergeBuilds_libraryFirst() {
         Job<?, ?> project = createProject(SHA1, SHALIB);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, SHA1);
@@ -87,7 +88,7 @@ public class BuildUtilTest {
     }
 
     @Test
-    public void getBuildBySHA1IncludingMergeBuilds_libraryLast() {
+    void getBuildBySHA1IncludingMergeBuilds_libraryLast() {
         Job<?, ?> project = createProject(SHA1, SHALIB);
 
         Run<?, ?> build = BuildUtil.getBuildBySHA1IncludingMergeBuilds(project, SHA1);
@@ -96,7 +97,7 @@ public class BuildUtilTest {
 
     private AbstractProject<?, ?> createProject(String... shas) {
         AbstractBuild build = mock(AbstractBuild.class);
-        List<BuildData> buildDatas = new ArrayList<BuildData>();
+        List<BuildData> buildDatas = new ArrayList<>();
         for (String sha : shas) {
             BuildData buildData = createBuildData(sha);
             buildDatas.add(buildData);

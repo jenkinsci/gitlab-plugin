@@ -9,7 +9,7 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory.ne
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
@@ -20,7 +20,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
 import hudson.util.OneShotEvent;
-import java.io.IOException;
+import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,41 +28,45 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * @author Robin Müller
  */
-public class PushHookTriggerHandlerImplTest {
+@WithJenkins
+class PushHookTriggerHandlerImplTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    @Rule
-    public TemporaryFolder tmp = new TemporaryFolder();
+    @TempDir
+    private File tmp;
 
     private PushHookTriggerHandler pushHookTriggerHandler;
 
-    @Before
-    public void setup() {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() {
         pushHookTriggerHandler = new PushHookTriggerHandlerImpl(false);
     }
 
     @Test
-    public void push_ciSkip() throws Exception {
+    void push_ciSkip() throws Exception {
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                    throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 buildHolder.set((FreeStyleBuild) build);
                 buildTriggered.signal();
                 return true;
@@ -86,14 +90,14 @@ public class PushHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void push_build() throws Exception {
-        Git.init().setDirectory(tmp.getRoot()).call();
-        tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+    void push_build() throws Exception {
+        Git.init().setDirectory(tmp).call();
+        File.createTempFile("test", null, tmp);
+        Git git = Git.open(tmp);
         git.add().addFilepattern("test");
         RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
-        String repositoryUrl = tmp.getRoot().toURI().toString();
+        String repositoryUrl = tmp.toURI().toString();
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
@@ -101,8 +105,7 @@ public class PushHookTriggerHandlerImplTest {
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                    throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 buildHolder.set((FreeStyleBuild) build);
                 buildTriggered.signal();
                 return true;
@@ -140,14 +143,14 @@ public class PushHookTriggerHandlerImplTest {
     }
 
     @Test
-    public void push_build2DifferentBranchesButSameCommit() throws Exception {
-        Git.init().setDirectory(tmp.getRoot()).call();
-        tmp.newFile("test");
-        Git git = Git.open(tmp.getRoot());
+    void push_build2DifferentBranchesButSameCommit() throws Exception {
+        Git.init().setDirectory(tmp).call();
+        File.createTempFile("test", null, tmp);
+        Git git = Git.open(tmp);
         git.add().addFilepattern("test");
         RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
-        String repositoryUrl = tmp.getRoot().toURI().toString();
+        String repositoryUrl = tmp.toURI().toString();
 
         final AtomicInteger buildCount = new AtomicInteger(0);
 
@@ -158,8 +161,7 @@ public class PushHookTriggerHandlerImplTest {
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                    throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 buildHolder.set((FreeStyleBuild) build);
                 int count = buildCount.incrementAndGet();
                 if (count == 2) {

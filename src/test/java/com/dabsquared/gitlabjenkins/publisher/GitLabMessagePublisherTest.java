@@ -29,59 +29,59 @@ import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockito.invocation.InvocationOnMock;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockito.stubbing.Answer;
 import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.model.HttpRequest;
 
 /**
  * @author Nikolay Ustinov
  */
-public class GitLabMessagePublisherTest {
-    @ClassRule
-    public static MockServerRule mockServer = new MockServerRule(new Object());
+@WithJenkins
+@ExtendWith(MockServerExtension.class)
+class GitLabMessagePublisherTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    private MockServerClient mockServerClient;
+    private static MockServerClient mockServerClient;
     private BuildListener listener;
 
-    @BeforeClass
-    public static void setupClass() throws IOException {
-        setupGitLabConnections(jenkins, mockServer);
+    @BeforeAll
+    static void setUp(JenkinsRule rule, MockServerClient client) throws Exception {
+        jenkins = rule;
+        mockServerClient = client;
+        setupGitLabConnections(jenkins, client);
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setUp() {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
-        mockServerClient = new MockServerClient("localhost", mockServer.getPort());
     }
 
-    @After
-    public void cleanup() {
+    @AfterEach
+    void tearDown() {
         mockServerClient.reset();
     }
 
     @Test
-    public void matrixAggregatable() throws InterruptedException, IOException {
+    void matrixAggregatable() throws Exception {
         verifyMatrixAggregatable(GitLabMessagePublisher.class, listener);
     }
 
     @Test
-    public void canceled_v3() throws IOException, InterruptedException {
+    void canceled_v3() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.ABORTED);
         String defaultNote =
                 formatNote(build, ":point_up: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -98,7 +98,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void canceled_v4() throws IOException, InterruptedException {
+    void canceled_v4() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED);
         String defaultNote =
                 formatNote(build, ":point_up: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -115,7 +115,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void success_v3() throws IOException, InterruptedException {
+    void success_v3() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.SUCCESS);
         String defaultNote = formatNote(
                 build, ":white_check_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -132,7 +132,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void success_v4() throws IOException, InterruptedException {
+    void success_v4() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
         String defaultNote = formatNote(
                 build, ":white_check_mark: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -149,14 +149,14 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void success_withOnlyForFailure() throws IOException, InterruptedException {
+    void success_withOnlyForFailure() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
 
         performAndVerify(build, "test", true, false, false, false, false);
     }
 
     @Test
-    public void failed_v3() throws IOException, InterruptedException {
+    void failed_v3() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, Result.FAILURE);
         String defaultNote =
                 formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -173,7 +173,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void failed_v4() throws IOException, InterruptedException {
+    void failed_v4() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         String defaultNote =
                 formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -190,7 +190,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void failed_withOnlyForFailed() throws IOException, InterruptedException {
+    void failed_withOnlyForFailed() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         String defaultNote =
                 formatNote(build, ":x: Jenkins Build {0}\n\nResults available at: [Jenkins [{1} #{2}]]({3})");
@@ -207,7 +207,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void canceledWithCustomNote() throws IOException, InterruptedException {
+    void canceledWithCustomNote() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.ABORTED);
         String defaultNote = "abort";
 
@@ -223,7 +223,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void successWithCustomNote() throws IOException, InterruptedException {
+    void successWithCustomNote() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.SUCCESS);
         String defaultNote = "success";
 
@@ -239,7 +239,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void failedWithCustomNote() throws IOException, InterruptedException {
+    void failedWithCustomNote() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         String defaultNote = "failure";
 
@@ -255,7 +255,7 @@ public class GitLabMessagePublisherTest {
     }
 
     @Test
-    public void unstableWithCustomNote() throws IOException, InterruptedException {
+    void unstableWithCustomNote() throws Exception {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, Result.UNSTABLE);
         String defaultNote = "unstable";
 
@@ -279,7 +279,7 @@ public class GitLabMessagePublisherTest {
             boolean replaceAbortNote,
             boolean replaceUnstableNote,
             HttpRequest... requests)
-            throws InterruptedException, IOException {
+            throws Exception {
         String successNoteText = replaceSuccessNote ? note : null;
         String failureNoteText = replaceFailureNote ? note : null;
         String abortNoteText = replaceAbortNote ? note : null;
@@ -305,21 +305,19 @@ public class GitLabMessagePublisherTest {
         }
     }
 
-    private HttpRequest prepareSendMessageWithSuccessResponse(String apiLevel, int mergeRequestId, String body)
-            throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageWithSuccessResponse(String apiLevel, int mergeRequestId, String body) {
         HttpRequest updateCommitStatus = prepareSendMessageStatus(apiLevel, mergeRequestId, body);
         mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
         return updateCommitStatus;
     }
 
-    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String body)
-            throws UnsupportedEncodingException {
+    private HttpRequest prepareSendMessageStatus(final String apiLevel, int mergeRequestId, String body) {
         return request()
                 .withPath("/gitlab/api/" + apiLevel + "/projects/" + PROJECT_ID + "/merge_requests/" + mergeRequestId
                         + "/notes")
                 .withMethod("POST")
                 .withHeader("PRIVATE-TOKEN", "secret")
-                .withBody("body=" + URLEncoder.encode(body, "UTF-8"));
+                .withBody("body=" + URLEncoder.encode(body, StandardCharsets.UTF_8));
     }
 
     private AbstractBuild mockBuild(String gitLabConnection, Result result, String... remoteUrls) {
@@ -338,12 +336,8 @@ public class GitLabMessagePublisherTest {
         doReturn(project).when(build).getParent();
         doReturn(project).when(build).getProject();
         EnvVars environment = mock(EnvVars.class);
-        when(environment.expand(anyString())).thenAnswer(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) throws Throwable {
-                return (String) invocation.getArguments()[0];
-            }
-        });
+        when(environment.expand(anyString()))
+                .thenAnswer((Answer<String>) invocation -> (String) invocation.getArguments()[0]);
         try {
             when(build.getEnvironment(any(TaskListener.class))).thenReturn(environment);
         } catch (IOException | InterruptedException e) {

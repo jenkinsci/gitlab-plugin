@@ -5,7 +5,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
@@ -21,24 +21,27 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.model.FreeStyleProject;
 import hudson.model.Project;
 import hudson.model.Queue;
-import java.io.IOException;
 import java.util.Arrays;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BranchQueueActionTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BranchQueueActionTest {
 
     private static final String GITLAB_BUILD_NAME = "Jenkins";
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
     @Mock
     private GitLabClient gitLabClient;
@@ -46,13 +49,18 @@ public class BranchQueueActionTest {
     @Mock
     private GitLabConnectionProperty gitLabConnectionProperty;
 
-    @Before
-    public void init() {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() {
         when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
     }
 
-    @After
-    public void clearQueue() {
+    @AfterEach
+    void tearDown() {
         Queue queue = jenkins.getInstance().getQueue();
         for (Queue.Item item : queue.getItems()) {
             queue.cancel(item);
@@ -60,7 +68,7 @@ public class BranchQueueActionTest {
     }
 
     @Test
-    public void queuedMergeRequestBuildsAreNotCancelledForDifferentSourceBranch() throws IOException {
+    void queuedMergeRequestBuildsAreNotCancelledForDifferentSourceBranch() throws Exception {
         Project project = freestyleProject("project1", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
@@ -76,7 +84,7 @@ public class BranchQueueActionTest {
     }
 
     @Test
-    public void queuedMergeRequestBuildsAreCancelledForSameBranches() throws IOException {
+    void queuedMergeRequestBuildsAreCancelledForSameBranches() throws Exception {
         Project project = freestyleProject("project3", new GitLabCommitStatusPublisher(GITLAB_BUILD_NAME, false));
 
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger(project);
@@ -91,7 +99,7 @@ public class BranchQueueActionTest {
     }
 
     @Test
-    public void testNullSourceBranch() {
+    void testNullSourceBranch() {
         BranchQueueAction action1 = new BranchQueueAction(null);
         BranchQueueAction action2 = new BranchQueueAction("sourceBranch");
 
@@ -102,7 +110,7 @@ public class BranchQueueActionTest {
         assertTrue(resultOfQueuedNull);
     }
 
-    private GitLabPushTrigger gitLabPushTrigger(Project project) throws IOException {
+    private GitLabPushTrigger gitLabPushTrigger(Project project) throws Exception {
         GitLabPushTrigger gitLabPushTrigger = gitLabPushTrigger();
         project.addTrigger(gitLabPushTrigger);
         gitLabPushTrigger.start(project, true);
@@ -158,7 +166,7 @@ public class BranchQueueActionTest {
     }
 
     private Project freestyleProject(String name, GitLabCommitStatusPublisher gitLabCommitStatusPublisher)
-            throws IOException {
+            throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject(name);
         project.setQuietPeriod(5000);
         project.getPublishersList().add(gitLabCommitStatusPublisher);

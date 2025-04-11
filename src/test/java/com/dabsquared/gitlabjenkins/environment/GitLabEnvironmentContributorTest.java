@@ -1,8 +1,8 @@
 package com.dabsquared.gitlabjenkins.environment;
 
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
@@ -17,34 +17,38 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.StreamBuildListener;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * @author Evgeni Golov
  */
-public class GitLabEnvironmentContributorTest {
+@WithJenkins
+class GitLabEnvironmentContributorTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
     private BuildListener listener;
 
-    @Before
-    public void setup() {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
     }
 
     @Test
-    public void freeStyleProjectTest() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTest() throws Exception {
         FreeStyleProject p = jenkins.createFreeStyleProject();
         GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData());
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
@@ -54,7 +58,7 @@ public class GitLabEnvironmentContributorTest {
     }
 
     @Test
-    public void matrixProjectTest() throws IOException, InterruptedException, ExecutionException {
+    void matrixProjectTest() throws Exception {
         EnvVars env;
         MatrixProject p = jenkins.jenkins.createProject(MatrixProject.class, "matrixbuild");
         GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData());
@@ -74,8 +78,7 @@ public class GitLabEnvironmentContributorTest {
         }
     }
 
-    public void testFreeStyleProjectLabels(CauseData causeData, String expected)
-            throws IOException, InterruptedException, ExecutionException {
+    private void testFreeStyleProjectLabels(CauseData causeData, String expected) throws Exception {
         FreeStyleProject p = jenkins.createFreeStyleProject();
         GitLabWebHookCause cause = new GitLabWebHookCause(causeData);
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
@@ -84,30 +87,30 @@ public class GitLabEnvironmentContributorTest {
     }
 
     @Test
-    public void freeStyleProjectTestNoLabels() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTestNoLabels() throws Exception {
         // withMergeRequestLabels() not called on CauseDataBuilder
         testFreeStyleProjectLabels(generateCauseData(), null);
     }
 
     @Test
-    public void freeStyleProjectTestNullLabels() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTestNullLabels() throws Exception {
         // null passed as labels
         testFreeStyleProjectLabels(generateCauseDataWithLabels(null), null);
     }
 
     @Test
-    public void freeStyleProjectTestEmptyLabels() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTestEmptyLabels() throws Exception {
         // empty list passed as labels
         testFreeStyleProjectLabels(generateCauseDataWithLabels(Collections.emptyList()), null);
     }
 
     @Test
-    public void freeStyleProjectTestOneLabel() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTestOneLabel() throws Exception {
         testFreeStyleProjectLabels(generateCauseDataWithLabels(Arrays.asList("test1")), "test1");
     }
 
     @Test
-    public void freeStyleProjectTestTwoLabels() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTestTwoLabels() throws Exception {
         testFreeStyleProjectLabels(
                 generateCauseDataWithLabels(Arrays.asList("test1", "test2", "test with spaces")),
                 "test1,test2,test with spaces");

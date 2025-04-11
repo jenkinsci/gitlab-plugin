@@ -30,7 +30,6 @@ import hudson.model.Result;
 import hudson.plugins.git.util.BuildData;
 import hudson.tasks.Notifier;
 import hudson.util.Secret;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,7 +37,7 @@ import java.util.List;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockserver.junit.MockServerRule;
+import org.mockserver.client.MockServerClient;
 
 final class TestUtility {
     static final String GITLAB_CONNECTION_V3 = "GitLabV3";
@@ -52,10 +51,10 @@ final class TestUtility {
 
     private static final String API_TOKEN = "secret";
 
-    static void setupGitLabConnections(JenkinsRule jenkins, MockServerRule mockServer) throws IOException {
+    static void setupGitLabConnections(JenkinsRule jenkins, MockServerClient client) throws Exception {
         GitLabConnectionConfig connectionConfig = jenkins.get(GitLabConnectionConfig.class);
         String apiTokenId = "apiTokenId";
-        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstanceOrNull())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
                 credentialsStore.addCredentials(
@@ -69,7 +68,7 @@ final class TestUtility {
         }
         connectionConfig.addConnection(new GitLabConnection(
                 TestUtility.GITLAB_CONNECTION_V3,
-                "http://localhost:" + mockServer.getPort() + "/gitlab",
+                "http://localhost:" + client.getPort() + "/gitlab",
                 apiTokenId,
                 new V3GitLabClientBuilder(),
                 false,
@@ -77,7 +76,7 @@ final class TestUtility {
                 10));
         connectionConfig.addConnection(new GitLabConnection(
                 TestUtility.GITLAB_CONNECTION_V4,
-                "http://localhost:" + mockServer.getPort() + "/gitlab",
+                "http://localhost:" + client.getPort() + "/gitlab",
                 apiTokenId,
                 new V4GitLabClientBuilder(),
                 false,
@@ -86,7 +85,7 @@ final class TestUtility {
     }
 
     static <T extends Notifier & MatrixAggregatable> void verifyMatrixAggregatable(
-            Class<T> publisherClass, BuildListener listener) throws InterruptedException, IOException {
+            Class<T> publisherClass, BuildListener listener) throws Exception {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(MatrixConfiguration.class);
         Notifier publisher = mock(publisherClass);
@@ -124,7 +123,7 @@ final class TestUtility {
 
     @SuppressWarnings("ConstantConditions")
     static String formatNote(AbstractBuild build, String note) {
-        String buildUrl = Jenkins.getInstance().getRootUrl() + build.getUrl();
+        String buildUrl = Jenkins.getInstanceOrNull().getRootUrl() + build.getUrl();
         return MessageFormat.format(
                 note, build.getResult(), build.getParent().getDisplayName(), BUILD_NUMBER, buildUrl);
     }
