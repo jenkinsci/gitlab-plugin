@@ -17,75 +17,75 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
-import java.io.IOException;
 import java.nio.charset.Charset;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.model.HttpRequest;
 
 /**
  * @author Nikolay Ustinov
  */
-public class GitLabVotePublisherTest {
-    @ClassRule
-    public static MockServerRule mockServer = new MockServerRule(new Object());
+@WithJenkins
+@ExtendWith(MockServerExtension.class)
+class GitLabVotePublisherTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    private MockServerClient mockServerClient;
+    private static MockServerClient mockServerClient;
     private BuildListener listener;
 
-    @BeforeClass
-    public static void setupClass() throws IOException {
-        setupGitLabConnections(jenkins, mockServer);
+    @BeforeAll
+    static void setUp(JenkinsRule rule, MockServerClient client) throws Exception {
+        jenkins = rule;
+        mockServerClient = client;
+        setupGitLabConnections(jenkins, client);
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setUp() {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
-        mockServerClient = new MockServerClient("localhost", mockServer.getPort());
         mockUser(1, "jenkins");
     }
 
-    @After
-    public void cleanup() {
+    @AfterEach
+    void tearDown() {
         mockServerClient.reset();
     }
 
     @Test
-    public void matrixAggregatable() throws InterruptedException, IOException {
+    void matrixAggregatable() throws Exception {
         verifyMatrixAggregatable(GitLabVotePublisher.class, listener);
     }
 
     @Test
-    public void success_v3() throws IOException, InterruptedException {
+    void success_v3() throws Exception {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.SUCCESS), "v3", MERGE_REQUEST_ID, "thumbsup");
     }
 
     @Test
-    public void success_v4() throws IOException, InterruptedException {
+    void success_v4() throws Exception {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.SUCCESS), "v4", MERGE_REQUEST_IID, "thumbsup");
     }
 
     @Test
-    public void failed_v3() throws IOException, InterruptedException {
+    void failed_v3() throws Exception {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V3, Result.FAILURE), "v3", MERGE_REQUEST_ID, "thumbsdown");
     }
 
     @Test
-    public void failed_v4() throws IOException, InterruptedException {
+    void failed_v4() throws Exception {
         performAndVerify(mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE), "v4", MERGE_REQUEST_IID, "thumbsdown");
     }
 
     @Test
-    public void removePreviousVote() throws IOException, InterruptedException {
+    void removePreviousVote() throws Exception {
         // GIVEN
         AbstractBuild build = mockSimpleBuild(GITLAB_CONNECTION_V4, Result.FAILURE);
         mockAward("v4", MERGE_REQUEST_IID, 1, "thumbsdown");
@@ -100,7 +100,7 @@ public class GitLabVotePublisherTest {
     }
 
     private void performAndVerify(AbstractBuild build, String apiLevel, int mergeRequestId, String defaultNote)
-            throws InterruptedException, IOException {
+            throws Exception {
         GitLabVotePublisher publisher = preparePublisher(new GitLabVotePublisher(), build);
         publisher.perform(build, null, listener);
 
@@ -143,8 +143,8 @@ public class GitLabVotePublisherTest {
 
     private void mockAward(final String apiLevel, int mergeRequestId, int awardId, String name) {
         StringBuilder sb = new StringBuilder();
-        sb.append("{\"id\": " + awardId);
-        sb.append(",\"name\": " + name);
+        sb.append("{\"id\": ").append(awardId);
+        sb.append(",\"name\": ").append(name);
         sb.append(",\"User\": ");
         sb.append("  { \"id\": 1 }");
         sb.append("}");

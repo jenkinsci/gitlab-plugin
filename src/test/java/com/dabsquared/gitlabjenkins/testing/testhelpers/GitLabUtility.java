@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.testing.gitlab.rule;
+package com.dabsquared.gitlabjenkins.testing.testhelpers;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -16,7 +16,6 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.User;
 import hudson.util.Secret;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -26,14 +25,11 @@ import java.util.List;
 import java.util.UUID;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 /**
  * @author Robin Müller
  */
-public class GitLabRule implements TestRule {
+public class GitLabUtility {
     private static final String API_TOKEN_ID = "apiTokenId";
     private static final String PASSWORD = "integration-test";
 
@@ -42,16 +38,11 @@ public class GitLabRule implements TestRule {
 
     private GitLabClient clientCache;
 
-    private List<String> projectIds = new ArrayList<>();
+    private final List<String> projectIds = new ArrayList<>();
 
-    public GitLabRule(String url, int postgresPort) {
+    public GitLabUtility(String url, int postgresPort) {
         this.url = url;
         this.postgresPort = postgresPort;
-    }
-
-    @Override
-    public Statement apply(Statement base, Description description) {
-        return new GitlabStatement(base);
     }
 
     public Project getProject(final String projectName) {
@@ -81,8 +72,8 @@ public class GitLabRule implements TestRule {
         return project.getHttpUrlToRepo();
     }
 
-    public GitLabConnectionProperty createGitLabConnectionProperty() throws IOException {
-        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+    public GitLabConnectionProperty createGitLabConnectionProperty() throws Exception {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstanceOrNull())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
                 credentialsStore.addCredentials(
@@ -95,7 +86,7 @@ public class GitLabRule implements TestRule {
             }
         }
 
-        GitLabConnectionConfig config = Jenkins.getInstance().getDescriptorByType(GitLabConnectionConfig.class);
+        GitLabConnectionConfig config = Jenkins.getInstanceOrNull().getDescriptorByType(GitLabConnectionConfig.class);
         GitLabConnection connection =
                 new GitLabConnection("test", url, API_TOKEN_ID, new V3GitLabClientBuilder(), true, 10, 10);
         config.addConnection(connection);
@@ -120,7 +111,7 @@ public class GitLabRule implements TestRule {
         return PASSWORD;
     }
 
-    private void cleanup() {
+    public void cleanup() {
         for (String projectId : projectIds) {
             String randomProjectName = UUID.randomUUID().toString();
             // rename the project before deleting as the deletion will take a while
@@ -152,22 +143,5 @@ public class GitLabRule implements TestRule {
             client().updateUser(user.getId().toString(), user.getEmail(), user.getUsername(), user.getName(), PASSWORD);
         }
         return clientCache;
-    }
-
-    private class GitlabStatement extends Statement {
-        private final Statement next;
-
-        private GitlabStatement(Statement next) {
-            this.next = next;
-        }
-
-        @Override
-        public void evaluate() throws Throwable {
-            try {
-                next.evaluate();
-            } finally {
-                GitLabRule.this.cleanup();
-            }
-        }
     }
 }

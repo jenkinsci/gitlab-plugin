@@ -13,29 +13,29 @@ import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
 import hudson.model.Item;
 import hudson.security.Permission;
 import hudson.util.Secret;
-import java.io.IOException;
 import java.util.List;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class GitLabConnectionTest {
+@WithJenkins
+class GitLabConnectionTest {
     private static final String API_TOKEN = "secret";
     private static final String API_TOKEN_ID = "apiTokenId";
     private static final String API_TOKEN_ID_2 = "apiTokenId2";
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
     private static GitLabConnection connection;
 
-    @BeforeClass
-    public static void setup() throws IOException {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) throws Exception {
+        jenkins = rule;
         for (final CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.get())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 final List<Domain> domains = credentialsStore.getDomains();
@@ -61,20 +61,20 @@ public class GitLabConnectionTest {
     }
 
     @Test
-    public void doFillApiTokenIdItemsTestAdmin() throws Exception {
+    void doFillApiTokenIdItemsTestAdmin() throws Exception {
         String response = retrieveResponseForUserFromFillApiTokenIdItems("admin", Jenkins.ADMINISTER);
         assertThat(response, containsString("gitlab-1"));
     }
 
     @Test
     @Issue("SECURITY-3260")
-    public void doFillApiTokenIdItemsTestConfigure() throws Exception {
+    void doFillApiTokenIdItemsTestConfigure() throws Exception {
         String response = retrieveResponseForUserFromFillApiTokenIdItems("config", Jenkins.READ, Item.CONFIGURE);
         assertThat(response, containsString("\"values\":[]"));
     }
 
     @Test
-    public void doFillApiTokenIdItemsTestRead() throws Exception {
+    void doFillApiTokenIdItemsTestRead() throws Exception {
         String response = retrieveResponseForUserFromFillApiTokenIdItems("dev", Jenkins.READ);
         assertThat(response, not(containsString("gitlab-1")));
     }
@@ -103,21 +103,21 @@ public class GitLabConnectionTest {
     }
 
     @Test
-    public void getClient_nullCredentialId_sameClient() {
+    void getClient_nullCredentialId_sameClient() {
         final GitLabClient client = connection.getClient(null, null);
         assertThat(client, notNullValue());
         assertThat(connection.getClient(null, null), sameInstance(client));
     }
 
     @Test
-    public void getClient_nullAndDefaultCredentialId_sameClient() {
+    void getClient_nullAndDefaultCredentialId_sameClient() {
         final GitLabClient client = connection.getClient(null, null);
         assertThat(client, notNullValue());
         assertThat(connection.getClient(null, API_TOKEN_ID), sameInstance(client));
     }
 
     @Test
-    public void getClient_differentCredentialId_differentClient() {
+    void getClient_differentCredentialId_differentClient() {
         final GitLabClient client1 = connection.getClient(null, API_TOKEN_ID);
         assertThat(client1, notNullValue());
         final GitLabClient client2 = connection.getClient(null, API_TOKEN_ID_2);

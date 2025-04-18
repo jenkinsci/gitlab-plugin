@@ -14,7 +14,6 @@ import com.dabsquared.gitlabjenkins.connection.GitlabCredentialResolver;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import hudson.util.Secret;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 import javax.ws.rs.HttpMethod;
@@ -31,8 +30,8 @@ class TestUtility {
     private static final int CONNECTION_TIMEOUT = 10;
     private static final int READ_TIMEOUT = 10;
 
-    static void addGitLabApiToken() throws IOException {
-        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+    static void addGitLabApiToken() throws Exception {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstanceOrNull())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
                 credentialsStore.addCredentials(

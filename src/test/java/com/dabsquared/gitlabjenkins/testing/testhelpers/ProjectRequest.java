@@ -1,4 +1,4 @@
-package com.dabsquared.gitlabjenkins.testing.gitlab.rule;
+package com.dabsquared.gitlabjenkins.testing.testhelpers;
 
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 

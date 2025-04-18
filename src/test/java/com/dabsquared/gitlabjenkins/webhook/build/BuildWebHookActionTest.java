@@ -4,9 +4,7 @@
  */
 package com.dabsquared.gitlabjenkins.webhook.build;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
@@ -16,10 +14,10 @@ import hudson.model.Item;
 import hudson.model.Project;
 import hudson.security.ACL;
 import org.acegisecurity.Authentication;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.HttpResponses.HttpResponseException;
 
 /**
@@ -27,23 +25,19 @@ import org.kohsuke.stapler.HttpResponses.HttpResponseException;
  *
  * @author Mark Waite
  */
-public class BuildWebHookActionTest {
+@WithJenkins
+class BuildWebHookActionTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
     private FreeStyleProject project;
     private GitLabPushTrigger trigger;
 
-    public BuildWebHookActionTest() {}
-
-    @Before
-    public void confgureGitLabConnection() throws Exception {
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.get(GitLabConnectionConfig.class).setUseAuthenticatedEndpoint(true);
-    }
 
-    @Before
-    public void createFreeStyleProjectWithGitLabTrigger() throws Exception {
         project = j.createFreeStyleProject();
         trigger = new GitLabPushTrigger();
         project.addTrigger(trigger);
@@ -51,50 +45,46 @@ public class BuildWebHookActionTest {
 
     // trigger token == action token, expected to succeed
     @Test
-    public void testNotifierTokenMatches() throws Exception {
+    void testNotifierTokenMatches() {
         String triggerToken = "testNotifierTokenMatches-token";
         trigger.setSecretToken(triggerToken);
         String actionToken = triggerToken;
         BuildWebHookActionImpl action = new BuildWebHookActionImpl(project, actionToken);
         action.runNotifier();
-        assertTrue("performOnPost not called, token did not match?", action.performOnPostCalled);
+        assertTrue(action.performOnPostCalled, "performOnPost not called, token did not match?");
     }
 
     // trigger token != action token, expected to throw an exception
     @Test
-    public void testNotifierTokenDoesNotMatchString() throws Exception {
+    void testNotifierTokenDoesNotMatchString() {
         String triggerToken = "testNotifierTokenDoesNotMatchString-token";
         trigger.setSecretToken(triggerToken);
         String actionToken = triggerToken + "-no-match"; // Won't match
         BuildWebHookActionImpl action = new BuildWebHookActionImpl(project, actionToken);
-        assertThrows(HttpResponseException.class, () -> {
-            action.runNotifier();
-        });
-        assertFalse("performOnPost was called, unexpected token match?", action.performOnPostCalled);
+        assertThrows(HttpResponseException.class, action::runNotifier);
+        assertFalse(action.performOnPostCalled, "performOnPost was called, unexpected token match?");
     }
 
     // trigger token != null action token, expected to throw an exception
     @Test
-    public void testNotifierTokenDoesNotMatchNull() throws Exception {
+    void testNotifierTokenDoesNotMatchNull() {
         String triggerToken = "testNotifierTokenDoesNotMatchNull-token";
         trigger.setSecretToken(triggerToken);
         String actionToken = null;
         BuildWebHookActionImpl action = new BuildWebHookActionImpl(project, actionToken);
-        assertThrows(HttpResponseException.class, () -> {
-            action.runNotifier();
-        });
-        assertFalse("performOnPost was called, unexpected token match?", action.performOnPostCalled);
+        assertThrows(HttpResponseException.class, action::runNotifier);
+        assertFalse(action.performOnPostCalled, "performOnPost was called, unexpected token match?");
     }
 
     // null trigger token != action token, expected to succeed
     @Test
-    public void testNullNotifierTokenAllowsAccess() throws Exception {
+    void testNullNotifierTokenAllowsAccess() {
         // String triggerToken = null;
         // trigger.setSecretToken(triggerToken);
         String actionToken = "testNullNotifierTokenAllowsAccess-token";
         BuildWebHookActionImpl action = new BuildWebHookActionImpl(project, actionToken);
         action.runNotifier();
-        assertTrue("performOnPost not called, token did not match?", action.performOnPostCalled);
+        assertTrue(action.performOnPostCalled, "performOnPost not called, token did not match?");
     }
 
     public class BuildWebHookActionImpl extends BuildWebHookAction {

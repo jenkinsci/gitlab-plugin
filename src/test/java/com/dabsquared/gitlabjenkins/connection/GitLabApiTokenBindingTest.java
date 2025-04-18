@@ -7,26 +7,27 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import hudson.model.Run;
 import hudson.util.Secret;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class GitLabApiTokenBindingTest {
+@WithJenkins
+class GitLabApiTokenBindingTest {
 
     private static final String API_TOKEN = "secret";
     private static final String API_TOKEN_ID = "apiTokenId";
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
 
-    @Before
-    public void setup() throws IOException {
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        jenkins = rule;
         for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(jenkins.jenkins)) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
@@ -42,10 +43,10 @@ public class GitLabApiTokenBindingTest {
     }
 
     @Test
-    public void withCredentials_success() throws Exception {
+    void withCredentials_success() throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        String pipelineText =
-                IOUtils.toString(getClass().getResourceAsStream("pipeline/withCredentials-pipeline.groovy"));
+        String pipelineText = IOUtils.toString(
+                getClass().getResourceAsStream("pipeline/withCredentials-pipeline.groovy"), StandardCharsets.UTF_8);
         project.setDefinition(new CpsFlowDefinition(pipelineText, false));
         Run<?, ?> build = jenkins.buildAndAssertSuccess(project);
         // assert false to know we run it in tests

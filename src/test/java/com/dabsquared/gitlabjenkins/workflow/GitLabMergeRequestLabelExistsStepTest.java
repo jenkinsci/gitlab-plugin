@@ -6,34 +6,36 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import hudson.model.CauseAction;
-import hudson.model.Descriptor.FormException;
 import hudson.model.queue.QueueTaskFuture;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Yiftah Waisman
  */
-@RunWith(MockitoJUnitRunner.class)
-public class GitLabMergeRequestLabelExistsStepTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+class GitLabMergeRequestLabelExistsStepTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    private void testWebhookBase(CauseData causeData, String expected)
-            throws IOException, ExecutionException, InterruptedException, FormException {
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    private void testWebhookBase(CauseData causeData, String expected) throws Exception {
         // load the pipeline script from resources
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
         String pipelineText = IOUtils.toString(
@@ -53,23 +55,21 @@ public class GitLabMergeRequestLabelExistsStepTest {
     }
 
     @Test
-    public void testLabelExistsInMrWebhook()
-            throws IOException, ExecutionException, InterruptedException, FormException {
+    void testLabelExistsInMrWebhook() throws Exception {
         // create a cause data object with a label
         CauseData causeData = generateCauseDataWithLabels(Arrays.asList("test label"));
         testWebhookBase(causeData, "test label found");
     }
 
     @Test
-    public void testNoLabelsInMrWebhook() throws IOException, ExecutionException, InterruptedException, FormException {
+    void testNoLabelsInMrWebhook() throws Exception {
         // create a cause data object with a label
         CauseData causeData = generateCauseData();
         testWebhookBase(causeData, "test label not found");
     }
 
     @Test
-    public void testLabelDoesntExistInMrWebhook()
-            throws IOException, ExecutionException, InterruptedException, FormException {
+    void testLabelDoesntExistInMrWebhook() throws Exception {
         // create a cause data object with a label
         CauseData causeData = generateCauseDataWithLabels(
                 Arrays.asList("test", "label", "test label suffixed", "prefixed test label"));
