@@ -4,7 +4,7 @@ Plugin source code is hosted on [GitHub](https://github.com/jenkinsci/gitlab-plu
 New feature proposals and bug fix proposals should be submitted as
 [GitHub pull requests](https://help.github.com/articles/creating-a-pull-request).
 Fork the repository on GitHub, prepare your change on your forked
-copy, and submit a pull request (see [here](https://github.com/jenkinsci/gitlab-plugin/pulls) for open pull requests). Your pull request will be evaluated by the [plugin's CI job](https://ci.jenkins.io/blue/organizations/jenkins/Plugins%2Fgitlab-plugin/).
+copy, and submit a pull request (see [here](https://github.com/jenkinsci/gitlab-plugin/pulls) for open pull requests). Your pull request will be evaluated by the [plugin's CI job](https://ci.jenkins.io/job/Plugins/job/gitlab-plugin/).
 
 If you are adding new features please make sure that they support Jenkins Pipeline jobs.
 See [here](https://github.com/jenkinsci/workflow-plugin/blob/master/COMPATIBILITY.md) for some information.
