@@ -218,6 +218,9 @@ class GitLabConnectionConfigTest {
 
         config.setConnections(connectionList1);
         assertThat(config.getConnections(), is(connectionList1));
+
+        connectionList1.add(connection1);
+        assertThrows(IllegalArgumentException.class, () -> config.setConnections(connectionList1));
     }
 
     @Test
