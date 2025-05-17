@@ -25,9 +25,9 @@ services:
     image: jenkins/jenkins:lts
     ports:
       - "8080:8080"
-      - "50000:50000"
+      - "50001:50001"
     volumes:
       - '/srv/docker/jenkins:/var/jenkins_home'
     environment:
-      - "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50000"
+      - "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:50001"
     shm_size: '5gb'
