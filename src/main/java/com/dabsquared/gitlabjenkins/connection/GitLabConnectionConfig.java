@@ -44,7 +44,8 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return connections;
     }
 
-    private void addConnection(List<GitLabConnection> list, Map<String, GitLabConnection> map, GitLabConnection connection) {
+    private void addConnection(
+            List<GitLabConnection> list, Map<String, GitLabConnection> map, GitLabConnection connection) {
         String name = connection.getName();
         if (map.containsKey(name)) {
             throw new IllegalArgumentException(Messages.name_exists(name));
@@ -101,10 +102,8 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     public boolean configure(StaplerRequest2 req, JSONObject json) throws FormException {
         try {
             return super.configure(req, json);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new FormException(e.getMessage(), "connections");
         }
     }
-
 }
