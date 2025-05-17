@@ -25,7 +25,6 @@ services:
     image: jenkins/jenkins:lts
     ports:
       - "8080:8080"
-      - "50000:50000"
       - "50001:50001"
     volumes:
       - '/srv/docker/jenkins:/var/jenkins_home'
