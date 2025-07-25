@@ -45,7 +45,7 @@
     <revision>1.9.9</revision>
     <changelist>-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.baseline>2.492</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
