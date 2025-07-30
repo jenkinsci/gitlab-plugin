@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.StaplerResponse2;
 
 /**
