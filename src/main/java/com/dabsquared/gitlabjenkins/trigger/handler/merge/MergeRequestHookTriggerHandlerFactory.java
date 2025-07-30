@@ -2,8 +2,8 @@ package com.dabsquared.gitlabjenkins.trigger.handler.merge;
 
 import static java.util.EnumSet.of;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.lang.StringUtils.split;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
+import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import com.dabsquared.gitlabjenkins.MergeRequestTriggerConfig;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
