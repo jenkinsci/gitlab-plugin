@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>5.19</version>
+    <version>5.22</version>
     <relativePath />
   </parent>
 
@@ -50,7 +50,9 @@
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
+    <hpi.bundledArtifacts>jakarta.validation-api,jboss-annotations-api_1.3_spec,jboss-jaxb-api_2.3_spec,jboss-jaxrs-api_2.1_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-jaxrs</hpi.bundledArtifacts>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
+    <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
     <mockserver.version>5.15.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
   </properties>
