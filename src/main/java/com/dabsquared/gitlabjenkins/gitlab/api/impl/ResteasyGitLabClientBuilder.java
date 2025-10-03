@@ -22,6 +22,15 @@ import hudson.init.Initializer;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.security.ACL;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.ClientResponseContext;
+import jakarta.ws.rs.client.ClientResponseFilter;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.RuntimeDelegate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -38,17 +47,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Priority;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.RuntimeDelegate;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,10 +65,11 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.jboss.resteasy.core.providerfactory.ResteasyProviderFactoryImpl;
 import org.jboss.resteasy.plugins.providers.JaxrsFormProvider;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -80,7 +81,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
 
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
     public static void setRuntimeDelegate() {
-        RuntimeDelegate.setInstance(new ResteasyProviderFactory());
+        RuntimeDelegate.setInstance(new ResteasyProviderFactoryImpl());
     }
 
     private final Class<? extends GitLabApiProxy> apiProxyClass;
@@ -120,7 +121,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             boolean ignoreCertificateErrors,
             int connectionTimeout,
             int readTimeout) {
-        ResteasyClientBuilder builder = new ResteasyClientBuilder();
+        ResteasyClientBuilder builder = new ResteasyClientBuilderImpl();
 
         if (ignoreCertificateErrors) {
             builder.hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY);
@@ -150,10 +151,10 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
             }
         }
 
-        GitLabApiProxy apiProxy = builder.connectionPoolSize(60)
+        ResteasyWebTarget target = (ResteasyWebTarget) builder.connectionPoolSize(60)
                 .maxPooledPerRoute(30)
-                .establishConnectionTimeout(connectionTimeout, TimeUnit.SECONDS)
-                .socketTimeout(readTimeout, TimeUnit.SECONDS)
+                .connectTimeout(connectionTimeout, TimeUnit.SECONDS)
+                .readTimeout(readTimeout, TimeUnit.SECONDS)
                 .register(new JacksonFeature())
                 .register(new JacksonConfig())
                 .register(new ApiHeaderTokenFilter(credentialResolver, url))
@@ -161,10 +162,14 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 .register(new RemoveAcceptEncodingFilter())
                 .register(new JaxrsFormProvider())
                 .build()
-                .target(url)
-                .proxyBuilder(apiProxyClass)
+                .target(url);
+        // ProxyBuilderImpl must be accessible by context class loader
+        ClassLoader ctx = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+        GitLabApiProxy apiProxy = target.proxyBuilder(apiProxyClass)
                 .classloader(apiProxyClass.getClassLoader())
                 .build();
+        Thread.currentThread().setContextClassLoader(ctx);
 
         return new ResteasyGitLabClient(url, apiProxy, mergeRequestIdProvider);
     }
@@ -316,7 +321,8 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         }
     }
 
-    private static class ClientHttpEngineBuilder43 extends org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder43 {
+    private static class ClientHttpEngineBuilder43
+            extends org.jboss.resteasy.client.jaxrs.engines.ClientHttpEngineBuilder43 {
 
         private final CredentialsProvider proxyCredentials;
         private ResteasyClientBuilder that;
@@ -364,8 +370,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 });
             }
 
-            ApacheHttpClient43Engine engine =
-                    (ApacheHttpClient43Engine) ApacheHttpClient4EngineFactory.create(httpClient, true);
+            ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine(httpClient, true);
             engine.setResponseBufferSize(responseBufferSize);
             engine.setHostnameVerifier(verifier);
             engine.setSslContext(theContext);
