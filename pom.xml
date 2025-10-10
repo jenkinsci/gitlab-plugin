@@ -50,7 +50,7 @@
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
-    <hpi.bundledArtifacts>jakarta.validation-api,jboss-annotations-api_1.3_spec,jboss-jaxb-api_2.3_spec,jboss-jaxrs-api_2.1_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-jaxrs</hpi.bundledArtifacts>
+    <hpi.bundledArtifacts>asyncutil,jakarta.annotation-api,jakarta.validation-api,jboss-jaxrs-api_3.0_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-client-api,resteasy-core,resteasy-core-spi</hpi.bundledArtifacts>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
     <mockserver.version>5.15.0</mockserver.version>
@@ -81,24 +81,31 @@
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
+      <artifactId>jakarta-xml-bind-api</artifactId>
+      <version>4.0.5-3.v3d5b_a_73965b_9</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
       <artifactId>javax-activation-api</artifactId>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
-      <artifactId>jaxb</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.jenkins.plugins</groupId>
-      <artifactId>jersey2-api</artifactId>
+      <artifactId>jersey3-api</artifactId>
+      <version>3.1.11-2.v4a_b_db_cf4557b_</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>joda-time-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
-      <version>3.15.6.Final</version>
+      <version>6.0.3.Final</version>
       <exclusions>
         <!-- Provided by Jenkins core -->
         <exclusion>
@@ -119,7 +126,7 @@
           <groupId>commons-io</groupId>
           <artifactId>commons-io</artifactId>
         </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
+        <!-- Provided by jakarta-activation-api plugin -->
         <exclusion>
           <groupId>jakarta.activation</groupId>
           <artifactId>jakarta.activation-api</artifactId>
@@ -159,6 +166,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
+      <version>2.20.0-417.va_5311a_823a_b_8</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -304,6 +312,10 @@
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
+    <repository>
+      <id>incrementals</id>
+      <url>https://repo.jenkins-ci.org/incrementals/</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -326,7 +338,6 @@
                   <excludes combine.children="append">
                     <exclude>com.sun.activation:jakarta.activation</exclude>
                     <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
-                    <exclude>javax.servlet:javax.servlet-api</exclude>
                   </excludes>
                 </requireUpperBoundDeps>
               </rules>

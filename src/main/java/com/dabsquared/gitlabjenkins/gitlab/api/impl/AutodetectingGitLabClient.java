@@ -5,9 +5,9 @@ import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
-import javax.ws.rs.NotFoundException;
 
 final class AutodetectingGitLabClient implements GitLabClient {
     private final Iterable<GitLabClientBuilder> builders;
