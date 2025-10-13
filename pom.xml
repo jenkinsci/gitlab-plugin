@@ -91,7 +91,7 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey3-api</artifactId>
-      <version>3.1.11-2.v4a_b_db_cf4557b_</version>
+      <version>3.1.11-4.v77818819c2e1</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
