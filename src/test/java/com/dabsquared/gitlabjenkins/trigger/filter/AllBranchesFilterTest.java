@@ -13,7 +13,7 @@ class AllBranchesFilterTest {
 
     @Test
     void isRandomBranchNameAllowed() {
-        String randomBranchName = RandomStringUtils.random(10, true, false);
+        String randomBranchName = RandomStringUtils.secure().next(10, true, false);
 
         assertThat(new AllBranchesFilter().isBranchAllowed(null, randomBranchName), is(true));
     }

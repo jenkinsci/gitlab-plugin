@@ -96,7 +96,7 @@ class GitLabCommitStatusPublisherTest {
     }
 
     @Test
-    void running_v3() throws Exception {
+    void running_v3() {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V3, null, "test/project.git");
         HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v3", build, BuildState.running);
 
@@ -104,7 +104,7 @@ class GitLabCommitStatusPublisherTest {
     }
 
     @Test
-    void running_v4() throws Exception {
+    void running_v4() {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project.git");
         HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.running);
 
@@ -112,7 +112,7 @@ class GitLabCommitStatusPublisherTest {
     }
 
     @Test
-    void runningWithLibrary() throws Exception {
+    void runningWithLibrary() {
         AbstractBuild build = mockBuildWithLibrary(GITLAB_CONNECTION_V4, null, "test/project.git");
         HttpRequest[] requests = prepareCheckCommitAndUpdateStatusRequests("v4", build, BuildState.running);
 
@@ -228,7 +228,7 @@ class GitLabCommitStatusPublisherTest {
     }
 
     @Test
-    void running_multipleRepos() throws Exception {
+    void running_multipleRepos() {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project-1.git", "test/project-2.git");
         HttpRequest[] requests = new HttpRequest[] {
             prepareExistsCommitWithSuccessResponse("v4", "test/project-1"),
@@ -241,7 +241,7 @@ class GitLabCommitStatusPublisherTest {
     }
 
     @Test
-    void running_commitNotExists() throws Exception {
+    void running_commitNotExists() {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project.git");
         HttpRequest updateCommitStatus =
                 prepareUpdateCommitStatusWithSuccessResponse("v4", "test/project", build, BuildState.running);
@@ -251,7 +251,7 @@ class GitLabCommitStatusPublisherTest {
     }
 
     @Test
-    void running_failToUpdate() throws Exception {
+    void running_failToUpdate() {
         AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project.git");
         BuildListener buildListener = mock(BuildListener.class);
 
