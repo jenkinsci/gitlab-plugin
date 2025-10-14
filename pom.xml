@@ -101,7 +101,7 @@
     <dependency>
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
-      <version>3.0.2</version>
+      <version>3.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -167,7 +167,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
-      <version>2.20.0-417.va_5311a_823a_b_8</version>
+      <version>2.20.0-420.v8a_08b_d57ca_05</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
