@@ -2,7 +2,6 @@ package com.dabsquared.gitlabjenkins.webhook.build;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
@@ -51,20 +50,18 @@ class PipelineBuildActionTest {
 
     @Test
     void buildOnSuccess() {
-        assertThrows(HttpResponses.HttpResponseException.class, () -> {
-            new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response);
-
-            verify(trigger).onPost(any(PipelineHook.class));
-        });
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response));
+        verify(trigger).onPost(any(PipelineHook.class));
     }
 
     @Test
     void doNotBuildOnFailure() {
-        assertThrows(HttpResponses.HttpResponseException.class, () -> {
-            new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null).execute(response);
-
-            verify(trigger, never()).onPost(any(PipelineHook.class));
-        });
+        assertThrows(HttpResponses.HttpResponseException.class, () -> new PipelineBuildAction(
+                        testProject, getJson("PipelineFailureEvent.json"), null)
+                .execute(response));
+        verify(trigger).onPost(any(PipelineHook.class));
     }
 
     private String getJson(String name) throws Exception {

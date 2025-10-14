@@ -89,16 +89,16 @@ class PushBuildActionTest {
     }
 
     @Test
-    void invalidToken() {
-        assertThrows(HttpResponses.HttpResponseException.class, () -> {
-            FreeStyleProject testProject = jenkins.createFreeStyleProject();
-            when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
-            when(trigger.getSecretToken()).thenReturn("secret");
-            testProject.addTrigger(trigger);
-            new PushBuildAction(testProject, getJson("PushEvent.json"), "wrong-secret").execute(response);
+    void invalidToken() throws Exception {
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
+        when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
+        when(trigger.getSecretToken()).thenReturn("secret");
+        testProject.addTrigger(trigger);
 
-            verify(trigger, never()).onPost(any(PushHook.class));
-        });
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PushBuildAction(testProject, getJson("PushEvent.json"), "wrong-secret").execute(response));
+        verify(trigger, never()).onPost(any(PushHook.class));
     }
 
     private String getJson(String name) throws Exception {

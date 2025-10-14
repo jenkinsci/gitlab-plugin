@@ -55,6 +55,7 @@
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
     <mockserver.version>5.15.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
 
   <dependencyManagement>
@@ -260,13 +261,6 @@
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-junit-jupiter</artifactId>
-      <version>${mockserver.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- used by UpdateGitLabCommitStatusStepTest -->
-    <dependency>
-      <groupId>org.mock-server</groupId>
-      <artifactId>mockserver-junit-rule</artifactId>
       <version>${mockserver.version}</version>
       <scope>test</scope>
     </dependency>

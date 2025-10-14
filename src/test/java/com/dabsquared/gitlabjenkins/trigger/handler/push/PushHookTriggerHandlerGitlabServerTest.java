@@ -101,10 +101,9 @@ class PushHookTriggerHandlerGitlabServerTest {
     @ParameterizedTest
     @MethodSource("data")
     void doNotCreateRevisionParameterAction_deleteBranchRequest(GitLabPushRequestSamples samples) {
-        assertThrows(NoRevisionToBuildException.class, () -> {
-            PushHook hook = samples.deleteBranchRequest();
-            new PushHookTriggerHandlerImpl(false).createRevisionParameter(hook, null);
-        });
+        PushHook hook = samples.deleteBranchRequest();
+        assertThrows(NoRevisionToBuildException.class, () -> new PushHookTriggerHandlerImpl(false)
+                .createRevisionParameter(hook, null));
     }
 
     @ParameterizedTest
