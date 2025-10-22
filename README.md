@@ -151,7 +151,7 @@ This plugin can be configured to send build status messages to GitLab, which sho
 2. Give this user 'Maintainer' permissions on each repo you want Jenkins to send build status to
 3. Log in or 'Impersonate' that user in GitLab, click the user's icon/avatar and choose Settings
 4. Click on 'Access Tokens'
-5. Create a token named e.g. 'jenkins' with 'api' scope; expiration is optional
+5. Create a token named e.g. 'jenkins', with scope set to 'api' and role set to 'Developer' (for protected branches, a higher role might be needed. [See Roles and permissions](https://gitlab-docs-d6a9bb.gitlab.io/ee/user/permissions.html?utm_source=chatgpt.com#repository) on GitLab). Setting expiration is optional.
 6. Copy the token immediately, it cannot be accessed after you leave this page
 7. On the Global Configuration page in Jenkins, in the GitLab configuration section, supply the GitLab host URL, e.g. `https://your.gitlab.server`
 8. Click the 'Add' button to add a credential, choose 'GitLab API token' as the kind of credential, and paste your GitLab user's API key into the 'API token' field
