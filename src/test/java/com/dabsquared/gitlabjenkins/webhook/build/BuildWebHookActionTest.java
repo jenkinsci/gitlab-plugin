@@ -87,7 +87,7 @@ class BuildWebHookActionTest {
         assertTrue(action.performOnPostCalled, "performOnPost not called, token did not match?");
     }
 
-    public class BuildWebHookActionImpl extends BuildWebHookAction {
+    public static class BuildWebHookActionImpl extends BuildWebHookAction {
 
         // Used for the assertion that tokenMatches() returned true
         public boolean performOnPostCalled = false;

@@ -16,41 +16,34 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.RealJenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.RealJenkinsExtension;
 import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import org.mockserver.junit.jupiter.MockServerExtension;
 
-public class UpdateGitLabCommitStatusStepTest {
+@ExtendWith(MockServerExtension.class)
+class UpdateGitLabCommitStatusStepTest {
 
-    @Rule
-    public RealJenkinsRule rr = new RealJenkinsRule();
-
-    @Rule
-    public MockServerRule mockServer = new MockServerRule(new Object());
+    @RegisterExtension
+    private final RealJenkinsExtension extension = new RealJenkinsExtension();
 
     private MockServerClient mockServerClient;
 
-    @Before
-    public void setUp() {
-        mockServerClient = new MockServerClient("localhost", mockServer.getPort());
-    }
-
-    @After
-    public void tearDown() {
-        mockServerClient.reset();
+    @BeforeEach
+    void setUp(MockServerClient client) {
+        mockServerClient = client;
     }
 
     @Test
-    public void updateGitlabCommitStatus() throws Throwable {
-        int port = mockServer.getPort();
+    void updateGitlabCommitStatus() throws Throwable {
+        int port = mockServerClient.getPort();
         String pipelineText = IOUtils.toString(
                 getClass().getResourceAsStream("pipeline/updateGitlabCommitStatus.groovy"), StandardCharsets.UTF_8);
-        rr.then(j -> {
+        extension.then(j -> {
             _updateGitlabCommitStatus(j, port, pipelineText);
         });
     }
