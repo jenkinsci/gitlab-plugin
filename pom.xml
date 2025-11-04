@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>1.9.10-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
@@ -321,26 +321,35 @@
 
   <build>
     <plugins>
-      <plugin>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>display-info</id>
-            <configuration>
-              <rules>
-                <requireUpperBoundDeps>
-                  <excludes combine.children="append">
-                    <exclude>com.sun.activation:jakarta.activation</exclude>
-                    <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
-                  </excludes>
-                </requireUpperBoundDeps>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+        <!-- Plugin to enable packaging 'hpi' -->
+        <plugin>
+            <groupId>org.jenkins-ci.tools</groupId>
+            <artifactId>maven-hpi-plugin</artifactId>
+            <version>3.46</version>
+        </plugin>
+        <!--
+        <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>3.6.2</version>
+            <executions>
+                <execution>
+                    <id>display-info</id>
+                    <configuration>
+                        <rules>
+                            <requireUpperBoundDeps>
+                                <excludes combine.children="append">
+                                    <exclude>com.sun.activation:jakarta.activation</exclude>
+                                    <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
+                                </excludes>
+                            </requireUpperBoundDeps>
+                        </rules>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        -->
     </plugins>
-  </build>
+</build>
 
   <profiles>
     <profile>
