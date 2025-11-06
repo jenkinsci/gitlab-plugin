@@ -164,6 +164,8 @@ class GitLabConnectionConfigSSLTest {
 
         FormValidation formValidation =
                 descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
-        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("(certificate_unknown) PKIX path building failed")));
+        assertThat(
+                formValidation.getMessage(),
+                containsString(Messages.connection_error("(certificate_unknown) PKIX path building failed")));
     }
 }
