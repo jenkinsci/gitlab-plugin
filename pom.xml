@@ -108,32 +108,12 @@
       <exclusions>
         <!-- Provided by Jenkins core -->
         <exclusion>
-          <groupId>com.github.stephenc.jcip</groupId>
-          <artifactId>jcip-annotations</artifactId>
-        </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
-        <exclusion>
-          <groupId>com.sun.activation</groupId>
-          <artifactId>jakarta.activation</artifactId>
-        </exclusion>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-io</groupId>
           <artifactId>commons-io</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-activation-api plugin -->
-        <exclusion>
-          <groupId>jakarta.activation</groupId>
-          <artifactId>jakarta.activation-api</artifactId>
-        </exclusion>
-        <!-- Provided by jaxb plugin -->
-        <exclusion>
-          <groupId>jakarta.xml.bind</groupId>
-          <artifactId>jakarta.xml.bind-api</artifactId>
         </exclusion>
         <!-- Provided by apache-httpcomponents-client-4-api plugin -->
         <exclusion>
@@ -267,16 +247,6 @@
       <version>${mockserver.version}</version>
       <scope>test</scope>
       <exclusions>
-        <!-- Provided by jaxb plugin -->
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId>
-        </exclusion>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-        </exclusion>
         <!-- Banned via the exclude/include list in parent pom 4.62 -->
         <exclusion>
           <groupId>javax.servlet</groupId>
