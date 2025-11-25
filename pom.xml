@@ -46,7 +46,8 @@
     <changelist>-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
     <jenkins.baseline>2.492</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
+    <!-- TODO https://github.com/jenkinsci/jenkins/pull/20345 -->
+    <jenkins.version>2.537-rc37711.669feb_d92990</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>

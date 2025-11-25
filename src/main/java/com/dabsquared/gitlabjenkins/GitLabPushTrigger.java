@@ -749,12 +749,14 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
             byte[] random = new byte[16]; // 16x8=128bit worth of randomness, since we use md5 digest as the API token
             RANDOM.nextBytes(random);
             String secretToken = Util.toHexString(random);
-            response.setHeader("script", "document.getElementById('secretToken').value='" + secretToken + "'");
+            response.setHeader(
+                    "X-Jenkins-ValidateButton-Callback",
+                    "{\"callback\":\"updateSecretToken\",\"arguments\":[\"" + secretToken + "\"]}");
         }
 
         public void doClearSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse2 response) {
-            ;
-            response.setHeader("script", "document.getElementById('secretToken').value=''");
+            response.setHeader(
+                    "X-Jenkins-ValidateButton-Callback", "{\"callback\":\"updateSecretToken\",\"arguments\":[\"\"]}");
         }
     }
 }

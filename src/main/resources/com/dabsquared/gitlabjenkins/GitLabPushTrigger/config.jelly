@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form"
-         xmlns:d="jelly:define">
+         xmlns:st="jelly:stapler">
   <f:entry title="Enabled GitLab triggers">
     <div>
       <f:entry title="Push Events" field="triggerOnPush">
@@ -102,8 +102,9 @@
       </div>
     </f:entry>
     <f:entry title="${%Secret token}" help="/plugin/gitlab-plugin/help/help-secretToken.html">
+      <st:adjunct includes="com.dabsquared.gitlabjenkins.GitLabPushTrigger.adjunct"/>
       <div>
-        <f:readOnlyTextbox field="secretToken" id="secretToken"/>
+        <f:readOnlyTextbox field="secretToken" id="gitlab_plugin_secretToken"/>
         <f:validateButton title="${%Generate}" method="generateSecretToken"/>
         <f:validateButton title="${%Clear}" method="clearSecretToken"/>
       </div>
