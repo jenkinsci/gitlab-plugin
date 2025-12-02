@@ -45,7 +45,7 @@
     <revision>1.9.11</revision>
     <changelist>-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.492</jenkins.baseline>
+    <jenkins.baseline>2.504</jenkins.baseline>
     <!-- TODO https://github.com/jenkinsci/jenkins/pull/20345 -->
     <jenkins.version>2.537-rc37711.669feb_d92990</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
@@ -65,7 +65,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>5473.vb_9533d9e5d88</version>
+        <version>5723.v6f9c6b_d1218a_</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -84,7 +84,6 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jakarta-xml-bind-api</artifactId>
-      <version>4.0.5-3.v3d5b_a_73965b_9</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -93,7 +92,6 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey3-api</artifactId>
-      <version>3.1.11-2.v4a_b_db_cf4557b_</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -111,32 +109,12 @@
       <exclusions>
         <!-- Provided by Jenkins core -->
         <exclusion>
-          <groupId>com.github.stephenc.jcip</groupId>
-          <artifactId>jcip-annotations</artifactId>
-        </exclusion>
-        <!-- Provided by javax-activation-api plugin -->
-        <exclusion>
-          <groupId>com.sun.activation</groupId>
-          <artifactId>jakarta.activation</artifactId>
-        </exclusion>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-io</groupId>
           <artifactId>commons-io</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-activation-api plugin -->
-        <exclusion>
-          <groupId>jakarta.activation</groupId>
-          <artifactId>jakarta.activation-api</artifactId>
-        </exclusion>
-        <!-- Provided by jaxb plugin -->
-        <exclusion>
-          <groupId>jakarta.xml.bind</groupId>
-          <artifactId>jakarta.xml.bind-api</artifactId>
         </exclusion>
         <!-- Provided by apache-httpcomponents-client-4-api plugin -->
         <exclusion>
@@ -168,7 +146,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
-      <version>2.20.1-423.v13951f6b_6532</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -271,16 +248,6 @@
       <version>${mockserver.version}</version>
       <scope>test</scope>
       <exclusions>
-        <!-- Provided by jaxb plugin -->
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId>
-        </exclusion>
-        <!-- Provided by Jenkins core -->
-        <exclusion>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-        </exclusion>
         <!-- Banned via the exclude/include list in parent pom 4.62 -->
         <exclusion>
           <groupId>javax.servlet</groupId>

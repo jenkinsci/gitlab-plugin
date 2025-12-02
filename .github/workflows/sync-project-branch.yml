@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'jenkinsci'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: gsoc-2023-project
       - run: |
