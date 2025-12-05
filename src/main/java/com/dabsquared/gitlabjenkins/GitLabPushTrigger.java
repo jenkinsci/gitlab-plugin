@@ -66,7 +66,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest2;
-import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * Triggers a build when we receive a GitLab WebHook.
@@ -743,18 +742,6 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         public FormValidation doCheckExcludeMergeRequestLabels(
                 @AncestorInPath final Job<?, ?> project, @QueryParameter final String value) {
             return ProjectLabelsProvider.instance().doCheckLabels(project, value);
-        }
-
-        public void doGenerateSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse2 response) {
-            byte[] random = new byte[16]; // 16x8=128bit worth of randomness, since we use md5 digest as the API token
-            RANDOM.nextBytes(random);
-            String secretToken = Util.toHexString(random);
-            response.setHeader("script", "document.getElementById('secretToken').value='" + secretToken + "'");
-        }
-
-        public void doClearSecretToken(@AncestorInPath final Job<?, ?> project, StaplerResponse2 response) {
-            ;
-            response.setHeader("script", "document.getElementById('secretToken').value=''");
         }
     }
 }
