@@ -1,6 +1,8 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -164,6 +166,8 @@ class GitLabConnectionConfigSSLTest {
 
         FormValidation formValidation =
                 descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
-        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("PKIX path building failed")));
+        assertThat(
+                formValidation.getMessage(),
+                allOf(startsWith(Messages.connection_error("")), containsString("PKIX path building failed")));
     }
 }
