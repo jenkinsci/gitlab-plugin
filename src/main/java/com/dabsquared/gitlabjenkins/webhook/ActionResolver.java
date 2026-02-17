@@ -123,6 +123,9 @@ public class ActionResolver {
                 return new PipelineBuildAction(project, getRequestBody(request), tokenHeader);
             case "System Hook":
                 return onSystemHook(project, getRequestBody(request), tokenHeader);
+            // Added support for GitLab "Subgroup Hook" event (community contribution)
+            case "Subgroup Hook":
+                return new PushBuildAction(project, getRequestBody(request), tokenHeader);
             default:
                 LOGGER.log(Level.FINE, "Unsupported X-Gitlab-Event header: {0}", eventHeader);
                 return new NoopAction();
