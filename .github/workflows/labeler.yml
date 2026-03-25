@@ -4,8 +4,8 @@ on:
 
 jobs:
   triage:
+    if: ${{ github.repository_owner == 'jenkinsci' }}
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'jenkinsci'
     steps:
     - uses: actions/labeler@v6
       with:
