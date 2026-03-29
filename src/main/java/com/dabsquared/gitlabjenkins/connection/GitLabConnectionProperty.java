@@ -185,7 +185,7 @@ public class GitLabConnectionProperty extends JobProperty<Job<?, ?>> {
                                 gitLabConnectionTested.getUrl(),
                                 gitLabConnectionTested.getApiTokenId(),
                                 gitLabConnectionTested.getClientBuilderId(),
-                                true,
+                                gitLabConnectionTested.isIgnoreCertificateErrors(),
                                 gitLabConnectionTested.getConnectionTimeout(),
                                 gitLabConnectionTested.getReadTimeout())
                         .getClient(item, jobCredentialId)
