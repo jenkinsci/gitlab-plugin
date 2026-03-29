@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @author Robin Müller
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Namespace {
 
     private String path;

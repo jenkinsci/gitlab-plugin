@@ -7,7 +7,6 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -15,6 +14,7 @@ import hudson.util.HttpResponses;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
+import tools.jackson.databind.JsonNode;
 
 /**
  * @author Robin Müller
