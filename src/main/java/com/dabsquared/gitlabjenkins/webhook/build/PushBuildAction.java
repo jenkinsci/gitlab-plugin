@@ -8,7 +8,6 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -28,6 +27,7 @@ import jenkins.scm.api.trait.SCMTrait;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import tools.jackson.databind.JsonNode;
 
 /**
  * @author Robin Müller

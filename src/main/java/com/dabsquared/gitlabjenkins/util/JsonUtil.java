@@ -1,37 +1,43 @@
 package com.dabsquared.gitlabjenkins.util;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.cfg.EnumFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * @author Robin Müller
  */
 public final class JsonUtil {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .configure(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
             .configure(SerializationFeature.INDENT_OUTPUT, true)
-            .registerModule(new DateModule());
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .addModule(new DateModule())
+            .build();
 
     private JsonUtil() {}
 
     public static String toPrettyPrint(String json) {
         try {
             return toPrettyPrint(OBJECT_MAPPER.readValue(json, Object.class));
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -39,7 +45,7 @@ public final class JsonUtil {
     public static String toPrettyPrint(Object obj) {
         try {
             return OBJECT_MAPPER.writeValueAsString(obj);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -47,7 +53,7 @@ public final class JsonUtil {
     public static JsonNode readTree(String json) {
         try {
             return OBJECT_MAPPER.readTree(json);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -55,7 +61,7 @@ public final class JsonUtil {
     public static <T> T read(String json, Class<T> type) {
         try {
             return OBJECT_MAPPER.readValue(json, type);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -63,7 +69,7 @@ public final class JsonUtil {
     public static <T> T read(JsonNode json, Class<T> type) {
         try {
             return OBJECT_MAPPER.treeToValue(json, type);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -78,10 +84,9 @@ public final class JsonUtil {
         };
 
         private DateModule() {
-            addDeserializer(Date.class, new com.fasterxml.jackson.databind.JsonDeserializer<Date>() {
+            addDeserializer(Date.class, new ValueDeserializer<Date>() {
                 @Override
-                public Date deserialize(com.fasterxml.jackson.core.JsonParser p, DeserializationContext ctxt)
-                        throws IOException {
+                public Date deserialize(tools.jackson.core.JsonParser p, DeserializationContext ctxt) {
                     for (String format : DATE_FORMATS) {
                         try {
                             return new SimpleDateFormat(format, Locale.US).parse(p.getValueAsString());
@@ -89,9 +94,9 @@ public final class JsonUtil {
                             // nothing to do
                         }
                     }
-                    throw new IOException("Unparseable date: \""
+                    throw new UncheckedIOException(new IOException("Unparseable date: \""
                             + p.getValueAsString() + "\". Supported formats: "
-                            + Arrays.toString(DATE_FORMATS));
+                            + Arrays.toString(DATE_FORMATS)));
                 }
             });
         }
