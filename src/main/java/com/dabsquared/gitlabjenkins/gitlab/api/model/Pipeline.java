@@ -1,8 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Pipeline {
     private Integer id;
     private String sha;

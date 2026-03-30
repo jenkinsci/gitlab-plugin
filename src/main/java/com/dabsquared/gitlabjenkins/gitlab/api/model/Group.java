@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @since Mon, 2022-06-13 - 07:19:01
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Group {
 
     /** Group Hook ID */
