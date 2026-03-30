@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -7,6 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Note {
     private Long id;
     private Integer projectId;

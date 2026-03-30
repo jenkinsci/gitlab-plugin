@@ -1,6 +1,7 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -14,6 +15,7 @@ import org.kohsuke.stapler.export.ExportedBean;
  */
 @ExportedBean
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MergeRequest {
     private Integer id;
     private Integer iid;
