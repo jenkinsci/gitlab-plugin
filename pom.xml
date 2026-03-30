@@ -50,7 +50,7 @@
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
-    <hpi.bundledArtifacts>asyncutil,jakarta.annotation-api,jakarta.validation-api,jboss-jaxrs-api_3.0_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-client-api,resteasy-core,resteasy-core-spi</hpi.bundledArtifacts>
+    <hpi.bundledArtifacts>asyncutil,jackson-jakarta-rs-base,jackson-jakarta-rs-json-provider,jakarta.annotation-api,jakarta.validation-api,jboss-jaxrs-api_3.0_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-client-api,resteasy-core,resteasy-core-spi</hpi.bundledArtifacts>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
     <mockserver.version>5.15.0</mockserver.version>
@@ -91,10 +91,6 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>javax-activation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.jenkins.plugins</groupId>
-      <artifactId>jersey3-api</artifactId>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
@@ -171,6 +167,12 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
+    </dependency>
+    <!-- Keep in sync with the jackson version used in the jackson3-api plugin -->
+    <dependency>
+      <groupId>tools.jackson.jakarta.rs</groupId>
+      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+      <version>3.1.1</version>
     </dependency>
     <dependency>
       <groupId>net.karneim</groupId>

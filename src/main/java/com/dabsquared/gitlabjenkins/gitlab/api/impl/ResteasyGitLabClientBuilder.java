@@ -61,7 +61,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.glassfish.jersey.jackson.JacksonFeature;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngineBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -73,6 +72,7 @@ import org.jboss.resteasy.plugins.providers.JaxrsFormProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import tools.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 @Restricted(NoExternalUse.class)
 public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
@@ -155,7 +155,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
                 .maxPooledPerRoute(30)
                 .connectTimeout(connectionTimeout, TimeUnit.SECONDS)
                 .readTimeout(readTimeout, TimeUnit.SECONDS)
-                .register(new JacksonFeature())
+                .register(new JacksonJsonProvider())
                 .register(new JacksonConfig())
                 .register(new ApiHeaderTokenFilter(credentialResolver, url))
                 .register(new LoggingFilter())
