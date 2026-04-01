@@ -1,6 +1,5 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -14,7 +13,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @since Sun, 2022-06-12 - 12:25:26
  */
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProjectHook {
 
     /** Hook ID */
