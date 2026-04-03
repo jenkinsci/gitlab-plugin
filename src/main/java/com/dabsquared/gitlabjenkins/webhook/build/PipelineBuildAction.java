@@ -5,6 +5,7 @@ import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.*;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
@@ -15,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
-import tools.jackson.databind.JsonNode;
 
 /**
  * @author Milena Zachow

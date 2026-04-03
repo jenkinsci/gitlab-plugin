@@ -14,6 +14,7 @@ import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
@@ -33,7 +34,6 @@ import jenkins.scm.api.SCMSourceOwner;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.StaplerResponse2;
-import tools.jackson.databind.JsonNode;
 
 /**
  * @author Robin Müller
@@ -139,7 +139,7 @@ public class ActionResolver {
         String objectKind = "";
         try {
             jsonTree = JsonUtil.readTree(requestBody);
-            objectKind = jsonTree.path("object_kind").asString("");
+            objectKind = jsonTree.path("object_kind").asText("");
         } catch (RuntimeException exception) {
             LOGGER.log(Level.FINE, "Could not extract object_kind from request body.");
         }
