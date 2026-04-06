@@ -42,7 +42,7 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.9.14</revision>
+    <revision>1.9.15</revision>
     <changelist>-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
     <jenkins.baseline>2.528</jenkins.baseline>
