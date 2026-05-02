@@ -18,6 +18,6 @@ jobs:
         run: sleep 15s
       # Drafts your next Release notes as Pull Requests are merged into the default branch
       - name: Release Drafter
-        uses: release-drafter/release-drafter@139054aeaa9adc52ab36ddf67437541f039b88e2 # v7.1.1
+        uses: release-drafter/release-drafter@563bf132657a13ded0b01fcb723c5a58cdd824e2 # v7.2.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
