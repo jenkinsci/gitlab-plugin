@@ -58,9 +58,10 @@ class PipelineBuildActionTest {
 
     @Test
     void doNotBuildOnFailure() {
-        assertThrows(HttpResponses.HttpResponseException.class, () -> new PipelineBuildAction(
-                        testProject, getJson("PipelineFailureEvent.json"), null)
-                .execute(response));
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null)
+                        .execute(response));
         verify(trigger).onPost(any(PipelineHook.class));
     }
 
