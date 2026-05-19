@@ -108,6 +108,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private volatile Secret secretToken;
     private String pendingBuildName;
     private boolean cancelPendingBuildsOnUpdate;
+    private boolean cancelRunningBuildsOnUpdate;
 
     private transient BranchFilter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
@@ -347,6 +348,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return this.cancelPendingBuildsOnUpdate;
     }
 
+    @Override
+    public boolean getCancelRunningBuildsOnUpdate() {
+        return this.cancelRunningBuildsOnUpdate;
+    }
+
     @DataBoundSetter
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
@@ -514,6 +520,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setCancelPendingBuildsOnUpdate(boolean cancelPendingBuildsOnUpdate) {
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+    }
+
+    @DataBoundSetter
+    public void setCancelRunningBuildsOnUpdate(boolean cancelRunningBuildsOnUpdate) {
+        this.cancelRunningBuildsOnUpdate = cancelRunningBuildsOnUpdate;
     }
 
     // executes when the Trigger receives a push request
