@@ -122,6 +122,7 @@ class CommitStatusUpdaterTest {
         when(revision.getSha1String()).thenReturn(REVISION);
         when(build.getUrl()).thenReturn(BUILD_URL);
         when(build.getEnvironment(any(TaskListener.class))).thenReturn(environment);
+        when(build.getCause(GitLabWebHookCause.class)).thenReturn(gitlabCause);
         when(build.getCauses()).thenReturn(new ArrayList<>(Collections.singletonList(upCauseLevel1)));
         when(upCauseLevel1.getUpstreamCauses()).thenReturn(new ArrayList<>(Collections.singletonList(upCauseLevel2)));
         when(upCauseLevel2.getUpstreamCauses()).thenReturn(new ArrayList<>(Collections.singletonList(gitlabCause)));
@@ -182,7 +183,7 @@ class CommitStatusUpdaterTest {
                         Integer.toString(PROJECT_ID),
                         REVISION,
                         BuildState.success,
-                        null,
+                        "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
                         BuildState.success.name());
@@ -197,7 +198,7 @@ class CommitStatusUpdaterTest {
                         Integer.toString(PROJECT_ID),
                         REVISION,
                         BuildState.success,
-                        null,
+                        "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
                         BuildState.success.name());
@@ -214,7 +215,7 @@ class CommitStatusUpdaterTest {
                         Integer.toString(PROJECT_ID),
                         REVISION,
                         BuildState.success,
-                        null,
+                        "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
                         BuildState.success.name());
@@ -231,7 +232,7 @@ class CommitStatusUpdaterTest {
                         Integer.toString(PROJECT_ID),
                         REVISION,
                         BuildState.success,
-                        null,
+                        "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
                         BuildState.success.name());
