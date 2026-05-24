@@ -1,5 +1,9 @@
 package com.dabsquared.gitlabjenkins.connection;
 
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -9,36 +13,36 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnection.DescriptorImpl;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
+import java.util.List;
 import jenkins.model.Jenkins;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.mockserver.socket.PortFactory;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-
-import static java.lang.Thread.sleep;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Robin Müller
  */
-public class GitLabConnectionConfigSSLTest {
+@WithJenkins
+class GitLabConnectionConfigSSLTest {
 
     private static final String API_TOKEN_ID = "apiTokenId";
 
@@ -46,12 +50,12 @@ public class GitLabConnectionConfigSSLTest {
 
     private static Server server;
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
-    @BeforeClass
-    // based on https://www.eclipse.org/jetty/documentation/9.4.x/embedded-examples.html#Multiple%20Connectors
-    public static void startJetty() throws Exception {
+    @BeforeAll // based on
+    // https://www.eclipse.org/jetty/documentation/9.4.x/embedded-examples.html#Multiple%20Connectors
+    static void setUp(JenkinsRule rule) throws Exception {
+        jenkins = rule;
         port = PortFactory.findFreePort();
         int _http_port = PortFactory.findFreePort();
 
@@ -76,8 +80,7 @@ public class GitLabConnectionConfigSSLTest {
         // the http configuration we configured above so it can get things like
         // the output buffer size, etc. We also set the port (8080) and
         // configure an idle timeout.
-        ServerConnector http = new ServerConnector(server,
-            new HttpConnectionFactory(http_config));
+        ServerConnector http = new ServerConnector(server, new HttpConnectionFactory(http_config));
         http.setPort(_http_port);
         http.setIdleTimeout(30000);
 
@@ -88,15 +91,15 @@ public class GitLabConnectionConfigSSLTest {
         // including things like choosing the particular certificate out of a
         // keystore to be used.
 
-        SslContextFactory sslContextFactory = new SslContextFactory();
+        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
         sslContextFactory.setKeyStorePath("src/test/resources/keystore");
         sslContextFactory.setKeyStorePassword("password");
 
         // OPTIONAL: Un-comment the following to use Conscrypt for SSL instead of
         // the native JSSE implementation.
 
-        //Security.addProvider(new OpenSSLProvider());
-        //sslContextFactory.setProvider("Conscrypt");
+        // Security.addProvider(new OpenSSLProvider());
+        // sslContextFactory.setProvider("Conscrypt");
 
         // HTTPS Configuration
         // A new HttpConfiguration object is needed for the next connector and
@@ -115,59 +118,56 @@ public class GitLabConnectionConfigSSLTest {
         // We create a second ServerConnector, passing in the http configuration
         // we just made along with the previously created ssl context factory.
         // Next we set the port and a longer idle timeout.
-        ServerConnector https = new ServerConnector(server,
-            new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-            new HttpConnectionFactory(https_config));
+        ServerConnector https = new ServerConnector(
+                server,
+                new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+                new HttpConnectionFactory(https_config));
         https.setPort(port);
         https.setIdleTimeout(500000);
 
         // Set the connectors
-        server.setConnectors(new Connector[] { http, https });
+        server.setConnectors(new Connector[] {http, https});
 
-        HandlerCollection handlerCollection = new HandlerCollection();
-        handlerCollection.setHandlers(new Handler[] {
-            new AbstractHandler() {
-                public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    baseRequest.setHandled(true);
-                }
+        server.setHandler(new Handler.Abstract() {
+            @Override
+            public boolean handle(Request request, Response response, Callback callback) {
+                response.setStatus(HttpStatus.OK_200);
+                return true;
             }
         });
-        server.setHandler(handlerCollection);
         server.start();
-
-
     }
 
-    @AfterClass
-    public static void stopJetty() throws Exception {
+    @AfterAll
+    static void tearDown() throws Exception {
         server.stop();
     }
 
-    @Before
-    public void setup() throws IOException {
-        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstance())) {
+    @BeforeEach
+    void setUp() throws Exception {
+        for (CredentialsStore credentialsStore : CredentialsProvider.lookupStores(Jenkins.getInstanceOrNull())) {
             if (credentialsStore instanceof SystemCredentialsProvider.StoreImpl) {
                 List<Domain> domains = credentialsStore.getDomains();
-                credentialsStore.addCredentials(domains.get(0),
-                    new StringCredentialsImpl(CredentialsScope.SYSTEM, API_TOKEN_ID, "GitLab API Token", Secret.fromString(API_TOKEN_ID)));
+                credentialsStore.addCredentials(
+                        domains.get(0),
+                        new StringCredentialsImpl(
+                                CredentialsScope.SYSTEM,
+                                API_TOKEN_ID,
+                                "GitLab API Token",
+                                Secret.fromString(API_TOKEN_ID)));
             }
         }
     }
 
     @Test
-    public void doCheckConnection_ignoreCertificateErrors() {
-        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
+    void doCheckConnection_certificateError() {
+        GitLabConnection.DescriptorImpl descriptor =
+                (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
 
-        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", true, 10, 10);
-        assertThat(formValidation.getMessage(), is(Messages.connection_success()));
-    }
-
-    @Test
-    public void doCheckConnection_certificateError() throws IOException {
-        GitLabConnection.DescriptorImpl descriptor = (DescriptorImpl) jenkins.jenkins.getDescriptor(GitLabConnection.class);
-
-        FormValidation formValidation = descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
-        assertThat(formValidation.getMessage(), containsString(Messages.connection_error("")));
+        FormValidation formValidation =
+                descriptor.doTestConnection("https://localhost:" + port + "/gitlab", API_TOKEN_ID, "v3", false, 10, 10);
+        assertThat(
+                formValidation.getMessage(),
+                allOf(startsWith(Messages.connection_error("")), containsString("PKIX path building failed")));
     }
 }

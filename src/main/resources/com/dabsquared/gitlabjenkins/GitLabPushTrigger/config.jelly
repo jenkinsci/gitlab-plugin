@@ -1,8 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
-         xmlns:f="/lib/form">
+         xmlns:f="/lib/form"
+         xmlns:st="jelly:stapler">
   <f:entry title="Enabled GitLab triggers">
-    <table>
+    <div>
       <f:entry title="Push Events" field="triggerOnPush">
         <f:checkbox default="true"/>
       </f:entry>
@@ -34,7 +35,7 @@
       <f:entry title="Comment (regex) for triggering a build" help="/plugin/gitlab-plugin/help/help-noteRegex.html">
         <f:textbox field="noteRegex" default="Jenkins please retry a build"/>
       </f:entry>
-    </table>
+    </div>
   </f:entry>
   <f:advanced>
     <f:entry title="Enable [ci-skip]" field="ciSkip">
@@ -43,10 +44,10 @@
     <f:entry title="${%Ignore WIP Merge Requests}" field="skipWorkInProgressMergeRequest">
       <f:checkbox default="true"/>
     </f:entry>
-    <f:entry title="Labels that forces builds if they are added (comma-separated)">
+    <f:entry title="Labels that launch a build if they are added (comma-separated)" help="/plugin/gitlab-plugin/help/help-labelsThatForcesBuildIfAdded.html">
       <f:textbox field="labelsThatForcesBuildIfAdded"/>
     </f:entry>
-    <f:entry title="Set build description to build cause (eg. Merge request or Git Push )" field="setBuildDescription">
+    <f:entry title="Set build description to build cause (eg. Merge request or Git Push)" field="setBuildDescription">
       <f:checkbox default="true"/>
     </f:entry>
     <f:entry title="Build on successful pipeline events" field="triggerOnPipelineEvent">
@@ -60,7 +61,7 @@
     </f:entry>
 
     <f:entry title="Allowed branches">
-      <table>
+      <div>
         <!--<f:section title="">-->
         <f:radioBlock name="branchFilterType" value="All" title="Allow all branches to trigger this job"
                       checked="${instance.branchFilterType == null || instance.branchFilterType == 'All'}"
@@ -98,14 +99,13 @@
                        autoCompleteDelimChar=","/>
           </f:entry>
         </f:optionalBlock>
-      </table>
+      </div>
     </f:entry>
     <f:entry title="${%Secret token}" help="/plugin/gitlab-plugin/help/help-secretToken.html">
-      <table>
-        <f:readOnlyTextbox field="secretToken" id="secretToken"/>
-        <f:validateButton title="${%Generate}" method="generateSecretToken"/>
-        <f:validateButton title="${%Clear}" method="clearSecretToken"/>
-      </table>
+      <st:adjunct includes="com.dabsquared.gitlabjenkins.GitLabPushTrigger.adjunct"/>
+      <f:readOnlyTextbox field="secretToken" id="gitlab_plugin_secretToken"/>
+      <button class="jenkins-button gitlab_plugin-generate jenkins-!-margin-right-1 jenkins-!-margin-top-1">${%Generate}</button>
+      <button class="jenkins-button gitlab_plugin-clear jenkins-!-margin-top-1">${%Clear}</button>
     </f:entry>
   </f:advanced>
 </j:jelly>

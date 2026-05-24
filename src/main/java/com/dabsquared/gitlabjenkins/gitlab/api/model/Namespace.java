@@ -1,9 +1,9 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.model;
 
 import net.karneim.pojobuilder.GeneratePojoBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author Robin Müller
@@ -30,22 +30,16 @@ public class Namespace {
             return false;
         }
         Namespace namespace = (Namespace) o;
-        return new EqualsBuilder()
-            .append(path, namespace.path)
-            .isEquals();
+        return new EqualsBuilder().append(path, namespace.path).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-            .append(path)
-            .toHashCode();
+        return new HashCodeBuilder(17, 37).append(path).toHashCode();
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("path", path)
-            .toString();
+        return new ToStringBuilder(this).append("path", path).toString();
     }
 }

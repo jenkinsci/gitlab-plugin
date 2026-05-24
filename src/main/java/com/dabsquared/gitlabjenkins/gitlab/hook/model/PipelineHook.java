@@ -1,12 +1,11 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
-import net.karneim.pojobuilder.GeneratePojoBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
-
+import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author Milena Zachow
@@ -15,7 +14,10 @@ import java.util.List;
 public class PipelineHook extends WebHook {
 
     private User user;
+
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "API compatibility")
     public Integer projectId;
+
     private List<Commit> commits;
     private Project project;
     private PipelineEventObjectAttributes objectAttributes;
@@ -58,7 +60,6 @@ public class PipelineHook extends WebHook {
 
     public void setObjectAttributes(PipelineEventObjectAttributes objectAttributes) {
         this.objectAttributes = objectAttributes;
-
     }
 
     @Override

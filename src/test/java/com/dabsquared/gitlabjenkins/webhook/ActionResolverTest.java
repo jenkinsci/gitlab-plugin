@@ -1,5 +1,9 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
+
 import com.dabsquared.gitlabjenkins.webhook.ActionResolver.NoopAction;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
 import com.dabsquared.gitlabjenkins.webhook.build.NoteBuildAction;
@@ -9,37 +13,41 @@ import com.dabsquared.gitlabjenkins.webhook.status.BranchStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction;
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.kohsuke.stapler.StaplerRequest;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author Robin Müller
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ActionResolverTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class ActionResolverTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+    private static JenkinsRule jenkins;
 
     @Mock
-    private StaplerRequest request;
+    private StaplerRequest2 request;
+
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void getBranchBuildPageRedirect() throws IOException {
+    void getBranchBuildPageRedirect() throws Exception {
         String projectName = "getBranchBuildPageRedirect";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
@@ -52,7 +60,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void getCommitStatus() throws IOException {
+    void getCommitStatus() throws Exception {
         String projectName = "getCommitStatus";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/1234abcd/status.json");
@@ -64,7 +72,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void getCommitBuildPageRedirect_builds() throws IOException {
+    void getCommitBuildPageRedirect_builds() throws Exception {
         String projectName = "getCommitBuildPageRedirect_builds";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/1234abcd");
@@ -76,7 +84,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void getCommitBuildPageRedirect_commits() throws IOException {
+    void getCommitBuildPageRedirect_commits() throws Exception {
         String projectName = "getCommitBuildPageRedirect_commits";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("commits/7890efab");
@@ -88,7 +96,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void getBranchStatusPng() throws IOException {
+    void getBranchStatusPng() throws Exception {
         String projectName = "getBranchStatusPng";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/status.png");
@@ -101,7 +109,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void getCommitStatusPng() throws IOException {
+    void getCommitStatusPng() throws Exception {
         String projectName = "getCommitStatusPng";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("builds/status.png");
@@ -114,13 +122,14 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postMergeRequest() throws IOException {
+    void postMergeRequest() throws Exception {
         String projectName = "postMergeRequest";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Merge Request Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -128,13 +137,14 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postSystemHookMergeRequest() throws IOException {
+    void postSystemHookMergeRequest() throws Exception {
         String projectName = "postSystemHookMergeRequest";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -142,13 +152,14 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postSystemHookPush() throws IOException {
+    void postSystemHookPush() throws Exception {
         String projectName = "postSystemHookPush";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -156,13 +167,14 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postSystemHookPushTag() throws IOException {
+    void postSystemHookPushTag() throws Exception {
         String projectName = "postSystemHookPushTag";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -170,7 +182,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postNote() throws IOException {
+    void postNote() throws Exception {
         String projectName = "postNote";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
@@ -184,7 +196,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postPush() throws IOException {
+    void postPush() throws Exception {
         String projectName = "postPush";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
@@ -198,13 +210,14 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postPushTag() throws IOException {
+    void postPushTag() throws Exception {
         String projectName = "postPushTag";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Tag Push Hook");
-        when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
+        when(request.getInputStream())
+                .thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
 
         WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
 
@@ -212,7 +225,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postPushMissingEventHeader() throws IOException {
+    void postPushMissingEventHeader() throws Exception {
         String projectName = "postPushMissingEventHeader";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
@@ -226,7 +239,7 @@ public class ActionResolverTest {
     }
 
     @Test
-    public void postPushUnsupportedEventHeader() throws IOException {
+    void postPushUnsupportedEventHeader() throws Exception {
         String projectName = "postPushUnsupportedEventHeader";
         jenkins.createFreeStyleProject(projectName);
         when(request.getRestOfPath()).thenReturn("");
@@ -238,7 +251,6 @@ public class ActionResolverTest {
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
-
 
     private static class ResourceServletInputStream extends ServletInputStream {
 
@@ -254,17 +266,16 @@ public class ActionResolverTest {
         }
 
         @Override
-        public boolean isReady(){
+        public boolean isReady() {
             return true;
         }
 
         @Override
-        public boolean isFinished(){
+        public boolean isFinished() {
             return true;
         }
 
         @Override
-        public void setReadListener(ReadListener var1){
-        }
+        public void setReadListener(ReadListener var1) {}
     }
 }

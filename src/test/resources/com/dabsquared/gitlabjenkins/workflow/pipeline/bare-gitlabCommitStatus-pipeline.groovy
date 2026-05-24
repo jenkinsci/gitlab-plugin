@@ -4,7 +4,7 @@ package com.dabsquared.gitlabjenkins.workflow.pipeline
 //    gitLabConnection('test-connection')
 //])
 
-node('master') {
+node {
   gitlabCommitStatus {
     echo 'this is simple jenkins-build'
   }

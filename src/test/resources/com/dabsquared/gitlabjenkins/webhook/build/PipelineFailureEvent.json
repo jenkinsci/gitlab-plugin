@@ -21,13 +21,13 @@
     "avatar_url": "http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon"
   },
   "project": {
-    "name": "Gitlab Test",
+    "name": "GitLab Test",
     "description": "Atque in sunt eos similique dolores voluptatem.",
     "web_url": "http://192.168.64.1:3005/gitlab-org/gitlab-test",
     "avatar_url": null,
     "git_ssh_url": "git@192.168.64.1:gitlab-org/gitlab-test.git",
     "git_http_url": "http://192.168.64.1:3005/gitlab-org/gitlab-test.git",
-    "namespace": "Gitlab Org",
+    "namespace": "GitLab Org",
     "visibility_level": 20,
     "path_with_namespace": "gitlab-org/gitlab-test",
     "default_branch": "master"

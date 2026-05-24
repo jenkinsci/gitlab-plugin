@@ -1,11 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
-import net.karneim.pojobuilder.GeneratePojoBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import java.util.Date;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author Nikolay Ustinov
@@ -13,7 +12,7 @@ import java.util.Date;
 @GeneratePojoBuilder(intoPackage = "*.builder.generated", withFactoryMethod = "*")
 public class NoteObjectAttributes {
 
-    private Integer id;
+    private Long id;
     private String note;
     private Integer authorId;
     private Integer projectId;
@@ -21,11 +20,11 @@ public class NoteObjectAttributes {
     private Date updatedAt;
     private String url;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

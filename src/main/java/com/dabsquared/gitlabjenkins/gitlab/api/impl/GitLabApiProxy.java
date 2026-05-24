@@ -1,13 +1,15 @@
 package com.dabsquared.gitlabjenkins.gitlab.api.impl;
 
-
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
-
 import java.util.List;
 
-
 interface GitLabApiProxy {
+    List<Group> getGroups(Boolean allAvailable, Boolean topLevelOnly, String orderBy, String sort);
+
+    List<Project> getGroupProjects(
+            String groupId, Boolean includeSubgroups, String visibility, String orderBy, String sort);
+
     Project createProject(String projectName);
 
     MergeRequest createMergeRequest(Integer projectId, String sourceBranch, String targetBranch, String title);
@@ -18,15 +20,41 @@ interface GitLabApiProxy {
 
     void deleteProject(String projectId);
 
-    void addProjectHook(String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
+    List<ProjectHook> getProjectHooks(String projectName);
 
-    void changeBuildStatus(String projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
+    void addProjectHook(
+            String projectId, String url, Boolean pushEvents, Boolean mergeRequestEvents, Boolean noteEvents);
 
-    void changeBuildStatus(Integer projectId, String sha, BuildState state, String ref, String context, String targetUrl, String description);
+    void addProjectHook(
+            String projectId,
+            String url,
+            String secretToken,
+            Boolean pushEvents,
+            Boolean mergeRequestEvents,
+            Boolean noteEvents);
+
+    void changeBuildStatus(
+            String projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description);
+
+    void changeBuildStatus(
+            Integer projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description);
 
     void getCommit(String projectId, String sha);
 
-    void acceptMergeRequest(Integer projectId, Integer mergeRequestId, String mergeCommitMessage, boolean shouldRemoveSourceBranch);
+    void acceptMergeRequest(
+            Integer projectId, Integer mergeRequestId, String mergeCommitMessage, Boolean shouldRemoveSourceBranch);
 
     void createMergeRequestNote(Integer projectId, Integer mergeRequestId, String body);
 

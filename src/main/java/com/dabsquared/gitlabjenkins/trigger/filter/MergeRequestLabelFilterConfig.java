@@ -21,7 +21,7 @@ public class MergeRequestLabelFilterConfig {
     }
 
     @DataBoundConstructor
-    public MergeRequestLabelFilterConfig() { }
+    public MergeRequestLabelFilterConfig() {}
 
     public String getInclude() {
         return include;

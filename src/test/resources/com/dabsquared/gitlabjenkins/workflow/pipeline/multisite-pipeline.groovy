@@ -39,7 +39,7 @@ for(item in builds) {
 
 def stage_builds = []
 
-node('master') {
+node {
   gitlabBuilds(builds: site_build_names) {
 
     // in the test enviroment I cannot make it works with List.collect(Closure c) nor with List.findAll(Closure c)

@@ -1,5 +1,8 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
+import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.dabsquared.gitlabjenkins.util.ACLUtil;
 import com.dabsquared.gitlabjenkins.util.JsonUtil;
 import com.dabsquared.gitlabjenkins.webhook.build.MergeRequestBuildAction;
@@ -12,29 +15,25 @@ import com.dabsquared.gitlabjenkins.webhook.status.CommitBuildPageRedirectAction
 import com.dabsquared.gitlabjenkins.webhook.status.CommitStatusPngAction;
 import com.dabsquared.gitlabjenkins.webhook.status.StatusJsonAction;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import jenkins.model.Jenkins;
-import jenkins.scm.api.SCMSourceOwner;
-import org.apache.commons.io.IOUtils;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.dabsquared.gitlabjenkins.util.LoggerUtil.toArray;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import jenkins.model.Jenkins;
+import jenkins.scm.api.SCMSourceOwner;
+import org.apache.commons.io.IOUtils;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Robin Müller
@@ -45,22 +44,28 @@ public class ActionResolver {
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
-    public WebHookAction resolve(final String projectName, StaplerRequest request) {
-        Iterator<String> restOfPathParts = Splitter.on('/').omitEmptyStrings().split(request.getRestOfPath()).iterator();
+    public WebHookAction resolve(final String projectName, StaplerRequest2 request) {
+        Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
+                .filter(s -> !s.isEmpty())
+                .iterator();
         Item project = resolveProject(projectName, restOfPathParts);
         if (project == null) {
             throw HttpResponses.notFound();
         }
-        return resolveAction(project, Joiner.on('/').join(restOfPathParts), request);
+        StringJoiner restOfPath = new StringJoiner("/");
+        while (restOfPathParts.hasNext()) {
+            restOfPath.add(restOfPathParts.next());
+        }
+        return resolveAction(project, restOfPath.toString(), request);
     }
 
-    private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest request) {
+    private WebHookAction resolveAction(Item project, String restOfPath, StaplerRequest2 request) {
         String method = request.getMethod();
         if (method.equals("POST")) {
             return onPost(project, request);
         } else if (method.equals("GET")) {
-            if (project instanceof Job<?, ?>) {
-                return onGet((Job<?, ?>) project, restOfPath, request);
+            if (project instanceof Job<?, ?> job) {
+                return onGet(job, restOfPath, request);
             } else {
                 LOGGER.log(Level.FINE, "GET is not supported for this project {0}", project.getName());
                 return new NoopAction();
@@ -70,7 +75,7 @@ public class ActionResolver {
         return new NoopAction();
     }
 
-    private WebHookAction onGet(Job<?, ?> project, String restOfPath, StaplerRequest request) {
+    private WebHookAction onGet(Job<?, ?> project, String restOfPath, StaplerRequest2 request) {
         Matcher commitMatcher = COMMIT_STATUS_PATTERN.matcher(restOfPath);
         if (restOfPath.isEmpty() && request.hasParameter("ref")) {
             return new BranchBuildPageRedirectAction(project, request.getParameter("ref"));
@@ -91,7 +96,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onGetStatusPng(Job<?, ?> project, StaplerRequest request) {
+    private WebHookAction onGetStatusPng(Job<?, ?> project, StaplerRequest2 request) {
         if (request.hasParameter("ref")) {
             return new BranchStatusPngAction(project, request.getParameter("ref"));
         } else {
@@ -99,7 +104,7 @@ public class ActionResolver {
         }
     }
 
-    private WebHookAction onPost(Item project, StaplerRequest request) {
+    private WebHookAction onPost(Item project, StaplerRequest2 request) {
         String eventHeader = request.getHeader("X-Gitlab-Event");
         if (eventHeader == null) {
             LOGGER.log(Level.FINE, "Missing X-Gitlab-Event header");
@@ -151,11 +156,11 @@ public class ActionResolver {
         }
     }
 
-
-    private String getRequestBody(StaplerRequest request) {
+    private String getRequestBody(StaplerRequest2 request) {
         String requestBody;
         try {
-            Charset charset = request.getCharacterEncoding() == null ?  UTF_8 : Charset.forName(request.getCharacterEncoding());
+            Charset charset =
+                    request.getCharacterEncoding() == null ? UTF_8 : Charset.forName(request.getCharacterEncoding());
             requestBody = IOUtils.toString(request.getInputStream(), charset);
         } catch (IOException e) {
             throw HttpResponses.error(500, "Failed to read request body");
@@ -169,21 +174,22 @@ public class ActionResolver {
                 final Jenkins jenkins = Jenkins.getInstance();
                 if (jenkins != null) {
                     Item item = jenkins.getItemByFullName(projectName);
-                    while (item instanceof ItemGroup<?> && !(item instanceof Job<?, ?> || item instanceof SCMSourceOwner) && restOfPathParts.hasNext()) {
+                    while (item instanceof ItemGroup<?>
+                            && !(item instanceof Job<?, ?> || item instanceof SCMSourceOwner)
+                            && restOfPathParts.hasNext()) {
                         item = jenkins.getItem(restOfPathParts.next(), (ItemGroup<?>) item);
                     }
                     if (item instanceof Job<?, ?> || item instanceof SCMSourceOwner) {
                         return item;
                     }
                 }
-                LOGGER.log(Level.FINE, "No project found: {0}, {1}", toArray(projectName, Joiner.on('/').join(restOfPathParts)));
+                LOGGER.log(Level.FINE, "No project found: {0}", toArray(projectName));
                 return null;
             }
         });
     }
 
     static class NoopAction implements WebHookAction {
-        public void execute(StaplerResponse response) {
-        }
+        public void execute(StaplerResponse2 response) {}
     }
 }

@@ -1,19 +1,19 @@
 package com.dabsquared.gitlabjenkins.trigger.filter;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Robin Müller
  */
-public class AllBranchesFilterTest {
+class AllBranchesFilterTest {
 
     @Test
-    public void isRandomBranchNameAllowed() {
-        String randomBranchName = RandomStringUtils.random(10, true, false);
+    void isRandomBranchNameAllowed() {
+        String randomBranchName = RandomStringUtils.secure().next(10, true, false);
 
         assertThat(new AllBranchesFilter().isBranchAllowed(null, randomBranchName), is(true));
     }

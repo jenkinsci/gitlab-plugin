@@ -5,7 +5,7 @@ package com.dabsquared.gitlabjenkins.trigger.filter;
  */
 public class MergeRequestLabelFilterFactory {
 
-    private MergeRequestLabelFilterFactory() { }
+    private MergeRequestLabelFilterFactory() {}
 
     public static MergeRequestLabelFilter newMergeRequestLabelFilter(MergeRequestLabelFilterConfig config) {
         if (config == null) {

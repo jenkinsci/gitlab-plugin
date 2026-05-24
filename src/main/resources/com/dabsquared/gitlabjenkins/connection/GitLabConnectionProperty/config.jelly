@@ -1,7 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form"
 	xmlns:c="/lib/credentials" xmlns:st="jelly:stapler">
-	<st:include page="configure-advanced.jelly" optional="true" />
 	<f:entry title="${%GitLab Connection}" field="gitLabConnection">
 		<f:select />
 	</f:entry>

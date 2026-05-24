@@ -1,13 +1,12 @@
 package com.dabsquared.gitlabjenkins.testhelpers;
 
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
-
-import java.util.Arrays;
-import java.util.Collections;
-
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
+
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequestSamples {
 
@@ -61,12 +60,14 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
                 .withBefore("2bf4170829aedd706d7485d40091a01637b9abf4")
                 .withAfter("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
                 // no checkout_sha
-                .withCommits(Collections.singletonList(commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb").build()))
+                .withCommits(Collections.singletonList(commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
+                        .build()))
                 .build();
     }
 
     public PushHook mergePushRequest() {
-        return pushHook().withRef("refs/heads/master")
+        return pushHook()
+                .withRef("refs/heads/master")
                 .withUserId(123)
                 .withUserName("admin@example")
                 .withProjectId(345)
@@ -79,10 +80,12 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
                 .withAfter("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
                 // no checkout_sha
                 .withCommits(Arrays.asList(
-                        commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb").build(),
-                        commit().withId("be473fcc670b920cc9795581a5cd8f00fa7afddd").build(),
-                        commit().withId("3ebb6927ad4afbe8a11830938b3584cdaf4d657b").build())
-                )
+                        commit().withId("4bf0fcd937085dc2f69dcbe31f2ef960ec9ca7eb")
+                                .build(),
+                        commit().withId("be473fcc670b920cc9795581a5cd8f00fa7afddd")
+                                .build(),
+                        commit().withId("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
+                                .build()))
                 .build();
         // and afterwards the "delete branch" request comes in
     }
@@ -98,7 +101,8 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
                         .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
                         .build())
                 .withRef("refs/tags/test-tag-2")
-                .withBefore(ZERO_SHA).withAfter("f10d9d7b648e5a3e55fe8fe865aba5aa7404df7c")
+                .withBefore(ZERO_SHA)
+                .withAfter("f10d9d7b648e5a3e55fe8fe865aba5aa7404df7c")
                 // no checkout_sha and no commit on new branches
                 .build();
     }
@@ -114,7 +118,8 @@ public class GitLabPushRequestSamples_7_5_1_36679b5 implements GitLabPushRequest
                         .withHomepage("http://gitlabserver.example.com/test-group/test-repo")
                         .build())
                 .withRef("refs/heads/test-branch-delete-1")
-                .withBefore("3ebb6927ad4afbe8a11830938b3584cdaf4d657b").withAfter(ZERO_SHA)
+                .withBefore("3ebb6927ad4afbe8a11830938b3584cdaf4d657b")
+                .withAfter(ZERO_SHA)
                 // no checkout_sha and no commit on new branches
                 .build();
     }

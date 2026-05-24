@@ -1,5 +1,7 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
+import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
@@ -10,19 +12,16 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.util.HttpResponses;
-import jenkins.model.Jenkins;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.dabsquared.gitlabjenkins.util.JsonUtil.toPrettyPrint;
+import jenkins.model.Jenkins;
 
 /**
  * @author Robin Müller
  */
 public class MergeRequestBuildAction extends BuildWebHookAction {
 
-    private final static Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MergeRequestBuildAction.class.getName());
     private Item project;
     private MergeRequestHook mergeRequestHook;
     private final String secretToken;
@@ -57,7 +56,8 @@ public class MergeRequestBuildAction extends BuildWebHookAction {
                     source.setUrl(source.getHttpUrl());
                 }
                 if (source.getHomepage() == null) {
-                    source.setHomepage(source.getHttpUrl().substring(0, source.getHttpUrl().lastIndexOf(".git")));
+                    source.setHomepage(
+                            source.getHttpUrl().substring(0, source.getHttpUrl().lastIndexOf(".git")));
                 }
             }
 

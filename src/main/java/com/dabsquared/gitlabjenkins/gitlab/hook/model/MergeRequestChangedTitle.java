@@ -1,11 +1,9 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
 import net.karneim.pojobuilder.GeneratePojoBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
-import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author Anton Johansson
@@ -46,24 +44,21 @@ public class MergeRequestChangedTitle {
         }
         MergeRequestChangedTitle that = (MergeRequestChangedTitle) o;
         return new EqualsBuilder()
-            .append(previous, that.previous)
-            .append(current, that.current)
-            .isEquals();
+                .append(previous, that.previous)
+                .append(current, that.current)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-            .append(previous)
-            .append(current)
-            .toHashCode();
+        return new HashCodeBuilder(17, 37).append(previous).append(current).toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-            .append("previous", previous)
-            .append("current", current)
-            .toString();
+                .append("previous", previous)
+                .append("current", current)
+                .toString();
     }
 }

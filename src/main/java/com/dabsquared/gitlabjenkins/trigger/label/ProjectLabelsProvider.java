@@ -4,28 +4,27 @@ import com.dabsquared.gitlabjenkins.Messages;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.service.GitLabProjectBranchesService;
 import com.dabsquared.gitlabjenkins.service.GitLabProjectLabelsService;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
 import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
-import jenkins.triggers.SCMTriggerItem;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
-
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import jenkins.model.Jenkins;
+import jenkins.triggers.SCMTriggerItem;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * @author Robin Müller
@@ -35,8 +34,7 @@ public final class ProjectLabelsProvider {
     private static final Logger LOGGER = Logger.getLogger(ProjectLabelsProvider.class.getName());
     private static final ProjectLabelsProvider INSTANCE = new ProjectLabelsProvider();
 
-    private ProjectLabelsProvider() {
-    }
+    private ProjectLabelsProvider() {}
 
     public static ProjectLabelsProvider instance() {
         return INSTANCE;
@@ -46,9 +44,13 @@ public final class ProjectLabelsProvider {
         final URIish sourceRepository = getSourceRepoURLDefault(project);
         GitLabConnectionProperty connectionProperty = project.getProperty(GitLabConnectionProperty.class);
         if (connectionProperty != null && connectionProperty.getClient() != null) {
-            return GitLabProjectLabelsService.instance().getLabels(connectionProperty.getClient(), sourceRepository.toString());
+            return GitLabProjectLabelsService.instance()
+                    .getLabels(connectionProperty.getClient(), sourceRepository.toString());
         } else {
-            LOGGER.log(Level.WARNING, "getProjectLabels: gitlabHostUrl hasn't been configured globally. Job {0}.", project.getFullName());
+            LOGGER.log(
+                    Level.WARNING,
+                    "getProjectLabels: gitlabHostUrl hasn't been configured globally. Job {0}.",
+                    project.getFullName());
             return Collections.emptyList();
         }
     }
@@ -76,14 +78,20 @@ public final class ProjectLabelsProvider {
         try {
             return checkMatchingLabels(value, getProjectLabels(project));
         } catch (GitLabProjectBranchesService.BranchLoadingException e) {
-            return FormValidation.warning(project.hasPermission(Jenkins.ADMINISTER) ? e : null, Messages.GitLabPushTrigger_CannotCheckBranches());
+            return FormValidation.warning(
+                    project.hasPermission(Jenkins.ADMINISTER) ? e : null,
+                    Messages.GitLabPushTrigger_CannotCheckBranches());
         }
     }
 
     private FormValidation checkMatchingLabels(@QueryParameter String value, List<String> labels) {
         Set<String> matchingLabels = new HashSet<>();
         Set<String> unknownLabels = new HashSet<>();
-        for (String label : Splitter.on(',').omitEmptyStrings().trimResults().split(value)) {
+        List<String> inputLabels = Arrays.stream(value.split(","))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .collect(Collectors.toList());
+        for (String label : inputLabels) {
             if (labels.contains(label)) {
                 matchingLabels.add(label);
             } else {
@@ -93,12 +101,13 @@ public final class ProjectLabelsProvider {
         if (unknownLabels.isEmpty()) {
             return FormValidation.ok(Messages.GitLabPushTrigger_LabelsMatched(matchingLabels.size()));
         } else {
-            return FormValidation.warning(Messages.GitLabPushTrigger_LabelsNotFound(Joiner.on(", ").join(unknownLabels)));
+            return FormValidation.warning(Messages.GitLabPushTrigger_LabelsNotFound(
+                    unknownLabels.stream().collect(Collectors.joining(", "))));
         }
     }
 
     private boolean containsNoLabel(@QueryParameter String value) {
-        return StringUtils.isEmpty(value) || StringUtils.containsOnly(value, new char[]{',', ' '});
+        return StringUtils.isEmpty(value) || StringUtils.containsOnly(value, new char[] {',', ' '});
     }
 
     private String[] getProjectLabelsAsArray(Job<?, ?> job) {
@@ -106,11 +115,13 @@ public final class ProjectLabelsProvider {
             List<String> labels = getProjectLabels(job);
             return labels.toArray(new String[labels.size()]);
         } catch (GitLabProjectLabelsService.LabelLoadingException e) {
-            LOGGER.log(Level.FINEST, "Failed to load labels from GitLab. Please check the logs and your configuration.", e);
+            LOGGER.log(
+                    Level.FINEST,
+                    "Failed to load labels from GitLab. Please check the logs and your configuration.",
+                    e);
         }
         return new String[0];
     }
-
 
     /**
      * Get the URL of the first declared repository in the project configuration.
@@ -123,7 +134,9 @@ public final class ProjectLabelsProvider {
         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
         GitSCM gitSCM = getGitSCM(item);
         if (gitSCM == null) {
-            LOGGER.log(Level.WARNING, "Could not find GitSCM for project. Project = {1}, next build = {2}",
+            LOGGER.log(
+                    Level.WARNING,
+                    "Could not find GitSCM for project. Project = {1}, next build = {2}",
                     array(job.getName(), String.valueOf(job.getNextBuildNumber())));
             throw new IllegalStateException("This project does not use git:" + job.getName());
         }
@@ -143,8 +156,8 @@ public final class ProjectLabelsProvider {
     private GitSCM getGitSCM(SCMTriggerItem item) {
         if (item != null) {
             for (SCM scm : item.getSCMs()) {
-                if (scm instanceof GitSCM) {
-                    return (GitSCM) scm;
+                if (scm instanceof GitSCM gitSCM) {
+                    return gitSCM;
                 }
             }
         }

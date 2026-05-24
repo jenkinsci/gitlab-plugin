@@ -2,7 +2,7 @@ package com.dabsquared.gitlabjenkins.workflow.pipeline
 
 def builds = ['pre-build', 'build']
 
-node('master') {
+node {
   gitlabBuilds(builds: builds) {
     gitlabCommitStatus(name: 'pre-build', builds: [
             [projectId: 'test/test', revisionHash: 'master'],

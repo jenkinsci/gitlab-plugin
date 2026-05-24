@@ -1,18 +1,18 @@
 package com.dabsquared.gitlabjenkins.gitlab.api;
 
+import static java.util.Collections.sort;
 
+import com.dabsquared.gitlabjenkins.connection.GitlabCredentialResolver;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.ExtensionPoint;
-import jenkins.model.Jenkins;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static java.util.Collections.sort;
+import java.util.Objects;
+import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 @Restricted(NoExternalUse.class)
 public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuilder>, ExtensionPoint, Serializable {
@@ -27,7 +27,8 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
     }
 
     public static List<GitLabClientBuilder> getAllGitLabClientBuilders() {
-        List<GitLabClientBuilder> builders = new ArrayList<>(Jenkins.getInstance().getExtensionList(GitLabClientBuilder.class));
+        List<GitLabClientBuilder> builders = new ArrayList<>(
+                Objects.requireNonNull(Jenkins.getInstance()).getExtensionList(GitLabClientBuilder.class));
         sort(builders);
         return builders;
     }
@@ -40,16 +41,21 @@ public abstract class GitLabClientBuilder implements Comparable<GitLabClientBuil
         this.ordinal = ordinal;
     }
 
-    @Nonnull
+    @NonNull
     public final String id() {
         return id;
     }
 
-    @Nonnull
-    public abstract GitLabClient buildClient(String url, String token, boolean ignoreCertificateErrors, int connectionTimeout, int readTimeout);
+    @NonNull
+    public abstract GitLabClient buildClient(
+            String url,
+            GitlabCredentialResolver credentialResolver,
+            boolean ignoreCertificateErrors,
+            int connectionTimeout,
+            int readTimeout);
 
     @Override
-    public final int compareTo(@Nonnull GitLabClientBuilder other) {
+    public final int compareTo(@NonNull GitLabClientBuilder other) {
         int o = ordinal - other.ordinal;
         return o != 0 ? o : id().compareTo(other.id());
     }

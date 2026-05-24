@@ -1,82 +1,71 @@
 package com.dabsquared.gitlabjenkins.webhook.build;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
-import com.dabsquared.gitlabjenkins.cause.CauseData;
-import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
-import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import hudson.model.FreeStyleProject;
-import hudson.model.ParametersAction;
-import hudson.model.StringParameterValue;
-import hudson.model.queue.QueueTaskFuture;
-import hudson.plugins.git.GitSCM;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.HttpResponses;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
-import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Milena Zachow
  */
-@RunWith(MockitoJUnitRunner.class)
-public class PipelineBuildActionTest {
+@WithJenkins
+@ExtendWith(MockitoExtension.class)
+class PipelineBuildActionTest {
 
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+    private static JenkinsRule jenkins;
 
     @Mock
-    private StaplerResponse response;
+    private StaplerResponse2 response;
 
     @Mock
     private GitLabPushTrigger trigger;
 
-    FreeStyleProject testProject;
+    private FreeStyleProject testProject;
 
-    @Before
-    public void setUp() throws IOException{
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
         testProject = jenkins.createFreeStyleProject();
         testProject.addTrigger(trigger);
     }
 
     @Test
-    public void buildOnSuccess () throws IOException {
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response);
-
+    void buildOnSuccess() {
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PipelineBuildAction(testProject, getJson("PipelineEvent.json"), null).execute(response));
         verify(trigger).onPost(any(PipelineHook.class));
     }
 
     @Test
-    public void doNotBuildOnFailure() throws IOException {
-        exception.expect(HttpResponses.HttpResponseException.class);
-        new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null).execute(response);
-
-        verify(trigger, never()).onPost(any(PipelineHook.class));
+    void doNotBuildOnFailure() {
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PipelineBuildAction(testProject, getJson("PipelineFailureEvent.json"), null)
+                        .execute(response));
+        verify(trigger).onPost(any(PipelineHook.class));
     }
 
-    private String getJson(String name) throws IOException {
-        return IOUtils.toString(getClass().getResourceAsStream(name));
+    private String getJson(String name) throws Exception {
+        return IOUtils.toString(getClass().getResourceAsStream(name), StandardCharsets.UTF_8);
     }
 }

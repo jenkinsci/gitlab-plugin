@@ -1,16 +1,15 @@
 package com.dabsquared.gitlabjenkins.trigger.branch;
 
-import org.springframework.util.AntPathMatcher;
-
 import java.util.Collection;
 import java.util.HashSet;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * @author Robin Müller
  */
 class AntPathMatcherSet extends HashSet<String> {
 
-    private transient final AntPathMatcher matcher = new AntPathMatcher();
+    private final transient AntPathMatcher matcher = new AntPathMatcher();
 
     public AntPathMatcherSet(Collection<? extends String> c) {
         super(c);

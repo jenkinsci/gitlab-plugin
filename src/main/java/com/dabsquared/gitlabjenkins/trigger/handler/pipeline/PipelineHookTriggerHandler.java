@@ -6,4 +6,4 @@ import com.dabsquared.gitlabjenkins.trigger.handler.WebHookTriggerHandler;
 /**
  * @author Milena Zachow
  */
-public interface PipelineHookTriggerHandler extends WebHookTriggerHandler<PipelineHook> { }
+public interface PipelineHookTriggerHandler extends WebHookTriggerHandler<PipelineHook> {}

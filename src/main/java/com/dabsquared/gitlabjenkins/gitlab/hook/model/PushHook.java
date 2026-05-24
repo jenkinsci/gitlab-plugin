@@ -1,11 +1,10 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
-import net.karneim.pojobuilder.GeneratePojoBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import java.util.List;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * @author Robin Müller
@@ -70,7 +69,7 @@ public class PushHook extends WebHook {
         return userUsername;
     }
 
-    public void setUserUserName(String userUsername) {
+    public void setUserUsername(String userUsername) {
         this.userUsername = userUsername;
     }
 

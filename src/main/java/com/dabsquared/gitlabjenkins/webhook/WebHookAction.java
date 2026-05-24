@@ -1,10 +1,10 @@
 package com.dabsquared.gitlabjenkins.webhook;
 
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 
 /**
  * @author Robin Müller
  */
 public interface WebHookAction {
-    void execute(StaplerResponse response);
+    void execute(StaplerResponse2 response);
 }

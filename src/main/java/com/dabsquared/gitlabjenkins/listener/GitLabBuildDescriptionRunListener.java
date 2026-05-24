@@ -7,7 +7,6 @@ import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-
 import java.io.IOException;
 
 /**
@@ -33,5 +32,4 @@ public class GitLabBuildDescriptionRunListener extends RunListener<Run<?, ?>> {
             }
         }
     }
-
 }

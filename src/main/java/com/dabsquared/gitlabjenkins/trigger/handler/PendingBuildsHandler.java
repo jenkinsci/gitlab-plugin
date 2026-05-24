@@ -12,20 +12,20 @@ import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Queue;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 public class PendingBuildsHandler {
 
     private static final Logger LOGGER = Logger.getLogger(PendingBuildsHandler.class.getName());
 
     public void cancelPendingBuilds(Job<?, ?> job, Integer projectId, String branch) {
-        Queue queue = Jenkins.getInstance().getQueue();
+        Queue queue = Objects.requireNonNull(Jenkins.getInstance()).getQueue();
         for (Queue.Item item : queue.getItems()) {
             if (!job.getName().equals(item.task.getName())) {
                 continue;
@@ -47,8 +47,8 @@ public class PendingBuildsHandler {
 
     private GitLabWebHookCause getGitLabWebHookCauseData(Queue.Item item) {
         for (Cause cause : item.getCauses()) {
-            if (cause instanceof GitLabWebHookCause) {
-                return (GitLabWebHookCause) cause;
+            if (cause instanceof GitLabWebHookCause hookCause) {
+                return hookCause;
             }
         }
         return null;
@@ -56,7 +56,8 @@ public class PendingBuildsHandler {
 
     private void cancel(Queue.Item item, Queue queue, String branch) {
         try {
-            LOGGER.log(Level.INFO, "Cancelling job {0} for branch {1}", LoggerUtil.toArray(item.task.getName(), branch));
+            LOGGER.log(
+                    Level.INFO, "Cancelling job {0} for branch {1}", LoggerUtil.toArray(item.task.getName(), branch));
             queue.cancel(item);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error cancelling queued build", e);
@@ -72,17 +73,23 @@ public class PendingBuildsHandler {
         GitLabClient client = job.getProperty(GitLabConnectionProperty.class).getClient();
         String ref = StringUtils.removeStart(causeData.getSourceBranch(), "refs/tags/");
         try {
-            client.changeBuildStatus(causeData.getSourceProjectId(), causeData.getLastCommit(), BuildState.canceled,
-                ref, buildName, targetUrl, BuildState.canceled.name());
+            client.changeBuildStatus(
+                    causeData.getSourceProjectId(),
+                    causeData.getLastCommit(),
+                    BuildState.canceled,
+                    ref,
+                    buildName,
+                    targetUrl,
+                    BuildState.canceled.name());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to set build state to pending", e);
         }
     }
 
     public static String resolvePendingBuildName(Job<?, ?> job) {
-        if (job instanceof AbstractProject) {
+        if (job instanceof AbstractProject project) {
             GitLabCommitStatusPublisher publisher =
-                (GitLabCommitStatusPublisher) ((AbstractProject) job).getPublishersList().get(GitLabCommitStatusPublisher.class);
+                    (GitLabCommitStatusPublisher) project.getPublishersList().get(GitLabCommitStatusPublisher.class);
             if (publisher != null) {
                 return publisher.getName();
             }

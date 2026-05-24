@@ -9,16 +9,16 @@
 ## Issue
 
 ### Context
-- **Gitlab plugin version**: X.Y.Z
-- **Gitlab version**: X.Y.Z
+- **GitLab plugin version**: X.Y.Z
+- **GitLab version**: X.Y.Z
 - **Jenkins version**: X.Y.Z
 - **Job type**: Pipeline, Freestyle, Matrix, etc.
 
 ### Logs & Traces
 
 _Please include any relevant log that could serve to better understand the source of your issue_
-For Jenkins Gitlab Plugin logs, follow instruction in [User Support section](https://github.com/jenkinsci/gitlab-plugin#user-support).
-For Gitlab logs, ask an administrator to provide you the relevant Gitlab logs.
+For Jenkins GitLab Plugin logs, follow instruction in [User Support section](https://github.com/jenkinsci/gitlab-plugin#user-support).
+For GitLab logs, ask an administrator to provide you the relevant GitLab logs.
 
 ### Problem description
 
