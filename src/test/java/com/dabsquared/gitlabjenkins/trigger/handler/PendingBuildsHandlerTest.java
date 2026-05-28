@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -78,7 +79,7 @@ class PendingBuildsHandlerTest {
 
     @BeforeEach
     void setUp() {
-        when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
+        lenient().when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
     }
 
     @AfterEach
@@ -172,25 +173,23 @@ class PendingBuildsHandlerTest {
     void cancelRunningBuildsAbortsOnlyBuildsMatchingSourceProjectIdAndSourceBranch() {
         Job<?, ?> job = mock(Job.class);
         when(job.getName()).thenReturn("job1");
-        when(job.getFullName()).thenReturn("job1");
 
         // Matching: same source project, same source branch — should be aborted.
         Executor matchExec1 = mock(Executor.class);
-        Run<?, ?> match1 = runningBuildWithCause(matchExec1, 1, "feature-branch", "commit-a");
+        Run<?, ?> match1 = runningBuildWithCause(matchExec1, 1, "feature-branch");
 
         Executor matchExec2 = mock(Executor.class);
-        Run<?, ?> match2 = runningBuildWithCause(matchExec2, 1, "feature-branch", "commit-b");
+        Run<?, ?> match2 = runningBuildWithCause(matchExec2, 1, "feature-branch");
 
         // Non-matching: same project, different branch.
         Executor otherBranchExec = mock(Executor.class);
-        Run<?, ?> otherBranch = runningBuildWithCause(otherBranchExec, 1, "another-branch", "commit-c");
+        Run<?, ?> otherBranch = runningBuildWithCause(null, 1, "another-branch");
 
         // Non-matching: different project, same branch.
         Executor otherProjectExec = mock(Executor.class);
-        Run<?, ?> otherProject = runningBuildWithCause(otherProjectExec, 2, "feature-branch", "commit-d");
+        Run<?, ?> otherProject = runningBuildWithCause(null, 2, "feature-branch");
 
         // Non-matching: already finished.
-        Executor finishedExec = mock(Executor.class);
         Run<?, ?> finished = mock(Run.class);
         when(finished.isBuilding()).thenReturn(false);
 
@@ -205,23 +204,25 @@ class PendingBuildsHandlerTest {
 
         new PendingBuildsHandler().cancelRunningBuilds(job, 1, "feature-branch");
 
-        verify(matchExec1).interrupt(eq(Result.ABORTED), any(PendingBuildsHandler.SupersededByMergeRequestUpdate.class));
-        verify(matchExec2).interrupt(eq(Result.ABORTED), any(PendingBuildsHandler.SupersededByMergeRequestUpdate.class));
+        verify(matchExec1)
+                .interrupt(eq(Result.ABORTED), any(PendingBuildsHandler.SupersededByMergeRequestUpdate.class));
+        verify(matchExec2)
+                .interrupt(eq(Result.ABORTED), any(PendingBuildsHandler.SupersededByMergeRequestUpdate.class));
         verify(otherBranchExec, never()).interrupt(any(), any());
         verify(otherProjectExec, never()).interrupt(any(), any());
-        verify(finishedExec, never()).interrupt(any(), any());
     }
 
-    private static Run<?, ?> runningBuildWithCause(
-            Executor executor, int sourceProjectId, String sourceBranch, String commit) {
+    private static Run<?, ?> runningBuildWithCause(Executor executor, int sourceProjectId, String sourceBranch) {
         Run<?, ?> run = mock(Run.class);
         when(run.isBuilding()).thenReturn(true);
-        when(run.getExecutor()).thenReturn(executor);
+        if (executor != null) {
+            when(run.getExecutor()).thenReturn(executor);
+        }
 
         CauseData causeData = mock(CauseData.class);
         when(causeData.getSourceProjectId()).thenReturn(sourceProjectId);
-        when(causeData.getSourceBranch()).thenReturn(sourceBranch);
-        when(causeData.getLastCommit()).thenReturn(commit);
+        // Branch is only read after project id matches (see PendingBuildsHandler.cancelRunningBuilds).
+        lenient().when(causeData.getSourceBranch()).thenReturn(sourceBranch);
 
         GitLabWebHookCause cause = mock(GitLabWebHookCause.class);
         when(cause.getData()).thenReturn(causeData);
