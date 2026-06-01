@@ -59,7 +59,7 @@
     <f:entry title="Cancel pending merge request builds on update" field="cancelPendingBuildsOnUpdate">
       <f:checkbox default="false"/>
     </f:entry>
-    <f:entry title="Cancel running merge request builds on update" field="cancelRunningBuildsOnUpdate"
+    <f:entry title="Cancel running merge request builds on update" field="cancelRunningBuildsOnUpdate">
       <f:checkbox default="false"/>
     </f:entry>
 
