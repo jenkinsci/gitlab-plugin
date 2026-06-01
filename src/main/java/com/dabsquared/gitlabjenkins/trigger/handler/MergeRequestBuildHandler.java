@@ -24,9 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
-public class PendingBuildsHandler {
+public class MergeRequestBuildHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(PendingBuildsHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MergeRequestBuildHandler.class.getName());
 
     public void cancelPendingBuilds(Job<?, ?> job, Integer projectId, String branch) {
         Queue queue = Objects.requireNonNull(Jenkins.getInstance()).getQueue();

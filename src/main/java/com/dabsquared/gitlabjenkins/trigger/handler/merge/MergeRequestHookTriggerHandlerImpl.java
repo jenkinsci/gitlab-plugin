@@ -212,10 +212,10 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
         Integer sourceProjectId = hook.getObjectAttributes().getSourceProjectId();
         String sourceBranch = hook.getObjectAttributes().getSourceBranch();
         if (this.cancelPendingBuildsOnUpdate) {
-            this.pendingBuildsHandler.cancelPendingBuilds(job, sourceProjectId, sourceBranch);
+            this.mergeRequestBuildHandler.cancelPendingBuilds(job, sourceProjectId, sourceBranch);
         }
         if (this.cancelRunningBuildsOnUpdate) {
-            this.pendingBuildsHandler.cancelRunningBuilds(job, sourceProjectId, sourceBranch);
+            this.mergeRequestBuildHandler.cancelRunningBuilds(job, sourceProjectId, sourceBranch);
         }
     }
 

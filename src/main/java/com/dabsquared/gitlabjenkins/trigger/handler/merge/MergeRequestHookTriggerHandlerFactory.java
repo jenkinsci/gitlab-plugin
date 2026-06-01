@@ -28,29 +28,6 @@ public final class MergeRequestHookTriggerHandlerFactory {
             boolean skipWorkInProgressMergeRequest,
             String labelsThatForcesBuildIfAdded,
             boolean triggerOnApprovedMergeRequest,
-            boolean cancelPendingBuildsOnUpdate) {
-        return newMergeRequestHookTriggerHandler(
-                triggerOnMergeRequest,
-                triggerOnlyWithNewCommitsPushed,
-                triggerOnAcceptedMergeRequest,
-                triggerOnClosedMergeRequest,
-                triggerOpenMergeRequest,
-                skipWorkInProgressMergeRequest,
-                labelsThatForcesBuildIfAdded,
-                triggerOnApprovedMergeRequest,
-                cancelPendingBuildsOnUpdate,
-                false);
-    }
-
-    public static MergeRequestHookTriggerHandler newMergeRequestHookTriggerHandler(
-            boolean triggerOnMergeRequest,
-            boolean triggerOnlyWithNewCommitsPushed,
-            boolean triggerOnAcceptedMergeRequest,
-            boolean triggerOnClosedMergeRequest,
-            TriggerOpenMergeRequest triggerOpenMergeRequest,
-            boolean skipWorkInProgressMergeRequest,
-            String labelsThatForcesBuildIfAdded,
-            boolean triggerOnApprovedMergeRequest,
             boolean cancelPendingBuildsOnUpdate,
             boolean cancelRunningBuildsOnUpdate) {
 

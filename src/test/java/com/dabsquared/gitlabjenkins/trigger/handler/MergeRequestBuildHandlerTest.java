@@ -60,7 +60,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @WithJenkins
 @ExtendWith(MockitoExtension.class)
-class PendingBuildsHandlerTest {
+class MergeRequestBuildHandlerTest {
 
     private static final String GITLAB_BUILD_NAME = "Jenkins";
 
@@ -202,12 +202,12 @@ class PendingBuildsHandlerTest {
                 RunList.fromRuns(Arrays.asList(match1, match2, otherBranch, otherProject, finished, manualBuild));
         doReturn(runs).when(job).getBuilds();
 
-        new PendingBuildsHandler().cancelRunningBuilds(job, 1, "feature-branch");
+        new MergeRequestBuildHandler().cancelRunningBuilds(job, 1, "feature-branch");
 
         verify(matchExec1)
-                .interrupt(eq(Result.ABORTED), any(PendingBuildsHandler.SupersededByMergeRequestUpdate.class));
+                .interrupt(eq(Result.ABORTED), any(MergeRequestBuildHandler.SupersededByMergeRequestUpdate.class));
         verify(matchExec2)
-                .interrupt(eq(Result.ABORTED), any(PendingBuildsHandler.SupersededByMergeRequestUpdate.class));
+                .interrupt(eq(Result.ABORTED), any(MergeRequestBuildHandler.SupersededByMergeRequestUpdate.class));
         verify(otherBranchExec, never()).interrupt(any(), any());
         verify(otherProjectExec, never()).interrupt(any(), any());
     }
@@ -221,7 +221,7 @@ class PendingBuildsHandlerTest {
 
         CauseData causeData = mock(CauseData.class);
         when(causeData.getSourceProjectId()).thenReturn(sourceProjectId);
-        // Branch is only read after project id matches (see PendingBuildsHandler.cancelRunningBuilds).
+        // Branch is only read after project id matches (see MergeRequestBuildHandler.cancelRunningBuilds).
         lenient().when(causeData.getSourceBranch()).thenReturn(sourceBranch);
 
         GitLabWebHookCause cause = mock(GitLabWebHookCause.class);
