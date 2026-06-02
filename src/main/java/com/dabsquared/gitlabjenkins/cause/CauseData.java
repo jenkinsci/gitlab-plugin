@@ -174,7 +174,9 @@ public final class CauseData {
         variables.put("gitlabSourceRepoHttpUrl", sourceRepoHttpUrl);
         variables.putIfNotNull("gitlabMergeCommitSha", mergeCommitSha);
         variables.put("gitlabMergeRequestTitle", mergeRequestTitle);
-        variables.put("gitlabMergeRequestDescription", mergeRequestDescription);
+        variables.put(
+                "gitlabMergeRequestDescription",
+                mergeRequestDescription.substring(0, Math.min(mergeRequestDescription.length(), 1000)));
         variables.put("gitlabMergeRequestId", mergeRequestId == null ? "" : mergeRequestId.toString());
         variables.put("gitlabMergeRequestIid", mergeRequestIid == null ? "" : mergeRequestIid.toString());
         variables.put(
