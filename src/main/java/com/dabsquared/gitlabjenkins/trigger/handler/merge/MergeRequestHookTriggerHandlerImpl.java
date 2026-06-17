@@ -47,17 +47,27 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     private final EnumSet<Action> skipBuiltYetCheckActions = EnumSet.of(Action.open, Action.approved, Action.merge);
     private final EnumSet<Action> skipAllowedStateForActions = EnumSet.of(Action.approved);
     private final boolean cancelPendingBuildsOnUpdate;
+    private final boolean cancelRunningBuildsOnUpdate;
 
     MergeRequestHookTriggerHandlerImpl(
             Collection<State> allowedStates,
             boolean skipWorkInProgressMergeRequest,
             boolean cancelPendingBuildsOnUpdate) {
+        this(allowedStates, skipWorkInProgressMergeRequest, cancelPendingBuildsOnUpdate, false);
+    }
+
+    MergeRequestHookTriggerHandlerImpl(
+            Collection<State> allowedStates,
+            boolean skipWorkInProgressMergeRequest,
+            boolean cancelPendingBuildsOnUpdate,
+            boolean cancelRunningBuildsOnUpdate) {
         this(
                 allowedStates,
                 EnumSet.noneOf(Action.class),
                 false,
                 skipWorkInProgressMergeRequest,
-                cancelPendingBuildsOnUpdate);
+                cancelPendingBuildsOnUpdate,
+                cancelRunningBuildsOnUpdate);
     }
 
     // this retains internal API, however, the plugin code no longer instantiates the handler this way.
@@ -70,11 +80,29 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             boolean skipWorkInProgressMergeRequest,
             boolean cancelPendingBuildsOnUpdate) {
         this(
+                allowedStates,
+                allowedActions,
+                onlyIfNewCommitsPushed,
+                skipWorkInProgressMergeRequest,
+                cancelPendingBuildsOnUpdate,
+                false);
+    }
+
+    @Deprecated
+    MergeRequestHookTriggerHandlerImpl(
+            Collection<State> allowedStates,
+            Collection<Action> allowedActions,
+            boolean onlyIfNewCommitsPushed,
+            boolean skipWorkInProgressMergeRequest,
+            boolean cancelPendingBuildsOnUpdate,
+            boolean cancelRunningBuildsOnUpdate) {
+        this(
                 new TriggerConfigChain().add(allowedStates, null).add(null, allowedActions),
                 onlyIfNewCommitsPushed,
                 skipWorkInProgressMergeRequest,
                 emptySet(),
-                cancelPendingBuildsOnUpdate);
+                cancelPendingBuildsOnUpdate,
+                cancelRunningBuildsOnUpdate);
     }
 
     MergeRequestHookTriggerHandlerImpl(
@@ -83,11 +111,28 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
             boolean skipWorkInProgressMergeRequest,
             Set<String> labelsThatForcesBuildIfAdded,
             boolean cancelPendingBuildsOnUpdate) {
+        this(
+                triggerConfig,
+                onlyIfNewCommitsPushed,
+                skipWorkInProgressMergeRequest,
+                labelsThatForcesBuildIfAdded,
+                cancelPendingBuildsOnUpdate,
+                false);
+    }
+
+    MergeRequestHookTriggerHandlerImpl(
+            Predicate<MergeRequestObjectAttributes> triggerConfig,
+            boolean onlyIfNewCommitsPushed,
+            boolean skipWorkInProgressMergeRequest,
+            Set<String> labelsThatForcesBuildIfAdded,
+            boolean cancelPendingBuildsOnUpdate,
+            boolean cancelRunningBuildsOnUpdate) {
         this.triggerConfig = triggerConfig;
         this.onlyIfNewCommitsPushed = onlyIfNewCommitsPushed;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
         this.labelsThatForcesBuildIfAdded = labelsThatForcesBuildIfAdded;
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+        this.cancelRunningBuildsOnUpdate = cancelRunningBuildsOnUpdate;
     }
 
     @Override
@@ -158,16 +203,20 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
 
     @Override
     protected void cancelPendingBuildsIfNecessary(Job<?, ?> job, MergeRequestHook hook) {
-        if (!this.cancelPendingBuildsOnUpdate) {
+        if (!this.cancelPendingBuildsOnUpdate && !this.cancelRunningBuildsOnUpdate) {
             return;
         }
         if (!hook.getObjectAttributes().getAction().equals(Action.update)) {
             return;
         }
-        this.pendingBuildsHandler.cancelPendingBuilds(
-                job,
-                hook.getObjectAttributes().getSourceProjectId(),
-                hook.getObjectAttributes().getSourceBranch());
+        Integer sourceProjectId = hook.getObjectAttributes().getSourceProjectId();
+        String sourceBranch = hook.getObjectAttributes().getSourceBranch();
+        if (this.cancelPendingBuildsOnUpdate) {
+            this.mergeRequestBuildHandler.cancelPendingBuilds(job, sourceProjectId, sourceBranch);
+        }
+        if (this.cancelRunningBuildsOnUpdate) {
+            this.mergeRequestBuildHandler.cancelRunningBuilds(job, sourceProjectId, sourceBranch);
+        }
     }
 
     @Override
