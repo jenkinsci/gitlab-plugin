@@ -36,7 +36,7 @@ import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implements WebHookTriggerHandler<H> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractWebHookTriggerHandler.class.getName());
-    protected PendingBuildsHandler pendingBuildsHandler = new PendingBuildsHandler();
+    protected MergeRequestBuildHandler mergeRequestBuildHandler = new MergeRequestBuildHandler();
 
     @Override
     public void handle(
@@ -70,7 +70,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, H hook) {
         try {
-            String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
+            String buildName = MergeRequestBuildHandler.resolvePendingBuildName(job);
             if (StringUtils.isNotBlank(buildName)) {
                 GitLabConnectionProperty connectionProperty = job.getProperty(GitLabConnectionProperty.class);
                 if (connectionProperty != null) {
