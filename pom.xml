@@ -43,7 +43,7 @@
 
   <properties>
     <revision>1.9.16</revision>
-    <changelist>>-SNAPSHOT</changelist>
+    <changelist>-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
     <jenkins.baseline>2.541</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
