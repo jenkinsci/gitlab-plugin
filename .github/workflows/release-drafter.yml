@@ -1,0 +1,23 @@
+# Automates creation of Release Drafts using Release Drafter
+# More Info: https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update_release_draft:
+    # Only draft release notes on the repo in the jenkinsci GitHub organization
+    if: ${{ github.repository_owner == 'jenkinsci' }}
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/release-drafter/release-drafter/issues/871#issuecomment-3686135188
+      - name: Wait for 15 seconds to ensure GraphQL consistency
+        shell: bash
+        run: sleep 15s
+      # Drafts your next Release notes as Pull Requests are merged into the default branch
+      - name: Release Drafter
+        uses: release-drafter/release-drafter@693d20e7c1ce1a81d3a41962f85914253b518449 # v7.3.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
