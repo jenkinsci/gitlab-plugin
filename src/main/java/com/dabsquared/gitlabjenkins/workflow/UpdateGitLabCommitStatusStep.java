@@ -36,7 +36,7 @@ public class UpdateGitLabCommitStatusStep extends Step {
 
     private String name;
     private BuildState state;
-    private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>() ;
+    private List<GitLabBranchBuild> builds = new ArrayList<>();
     private GitLabConnectionProperty connection;
 
     @DataBoundConstructor
