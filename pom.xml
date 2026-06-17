@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>5.28</version>
+    <version>6.2189.v695a_c41f5249</version>
     <relativePath />
   </parent>
 
   <artifactId>gitlab-plugin</artifactId>
-  <version>1.9.13</version>
+  <version>${changelist}</version>
   <packaging>hpi</packaging>
   <name>GitLab Plugin</name>
   <url>https://github.com/jenkinsci/${project.artifactId}</url>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:https://github.com/${gitHubRepo}</connection>
     <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
-    <tag>gitlab-plugin-1.9.13</tag>
+    <tag>gitlab-plugin-1.9.15</tag>
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
@@ -42,10 +42,10 @@
   </distributionManagement>
 
   <properties>
-    <revision>1.9.13</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <revision>1.9.16</revision>
+    <changelist>999999-SNAPSHOT</changelist>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.516</jenkins.baseline>
+    <jenkins.baseline>2.541</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
@@ -53,7 +53,7 @@
     <hpi.bundledArtifacts>asyncutil,jakarta.annotation-api,jakarta.validation-api,jboss-jaxrs-api_3.0_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-client-api,resteasy-core,resteasy-core-spi</hpi.bundledArtifacts>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
-    <mockserver.version>5.15.0</mockserver.version>
+    <mockserver.version>7.1.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
@@ -64,7 +64,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>5804.v80587a_38d937</version>
+        <version>6598.v6fcd1f05c3a_9</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -262,7 +262,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.8</version>
+      <version>42.7.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -328,7 +328,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.5.4</version>
+            <version>3.5.6</version>
             <executions>
               <execution>
                 <goals>
@@ -380,7 +380,7 @@
           <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
-            <version>0.48.0</version>
+            <version>0.48.1</version>
             <configuration>
               <verbose>true</verbose>
               <images>

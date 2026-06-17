@@ -88,9 +88,10 @@ class NoteBuildActionTest {
                 0, new ParametersAction(new StringParameterValue("gitlabTargetBranch", "master")));
         future.get();
 
-        assertThrows(HttpResponses.HttpResponseException.class, () -> new NoteBuildAction(
-                        testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null)
-                .execute(response));
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null)
+                        .execute(response));
         verify(trigger).onPost(any(NoteHook.class));
     }
 
@@ -128,9 +129,10 @@ class NoteBuildActionTest {
                         .build()));
         future.get();
 
-        assertThrows(HttpResponses.HttpResponseException.class, () -> new NoteBuildAction(
-                        testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null)
-                .execute(response));
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new NoteBuildAction(testProject, getJson("NoteEvent_alreadyBuiltMR.json"), null)
+                        .execute(response));
         verify(trigger).onPost(any(NoteHook.class));
     }
 
