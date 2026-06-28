@@ -174,4 +174,9 @@ class GitLabClientStub implements GitLabClient {
     public List<Pipeline> getPipelines(String projectName) {
         return null;
     }
+
+    @Override
+    public List<MergeRequest> getCommitMergeRequests(String projectId, String sha) {
+        return null;
+    }
 }

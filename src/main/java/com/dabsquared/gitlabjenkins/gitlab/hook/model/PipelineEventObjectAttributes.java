@@ -14,15 +14,18 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class PipelineEventObjectAttributes {
 
     private Integer id;
+    private Integer iid;
     private String ref;
     private boolean tag;
     private String sha;
     private String beforeSha;
+    private String source;
     private String status;
     private List<String> stages;
     private Date createdAt;
     private Date finishedAt;
     private int duration;
+    private String url;
 
     public String getRef() {
         return ref;
@@ -104,6 +107,30 @@ public class PipelineEventObjectAttributes {
         this.id = id;
     }
 
+    public Integer getIid() {
+        return iid;
+    }
+
+    public void setIid(Integer iid) {
+        this.iid = iid;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -115,15 +142,18 @@ public class PipelineEventObjectAttributes {
         PipelineEventObjectAttributes that = (PipelineEventObjectAttributes) o;
         return new EqualsBuilder()
                 .append(id, that.id)
+                .append(iid, that.iid)
                 .append(ref, that.ref)
                 .append(tag, that.tag)
                 .append(sha, that.sha)
                 .append(beforeSha, that.beforeSha)
+                .append(source, that.source)
                 .append(status, that.status)
                 .append(stages, that.stages)
                 .append(createdAt, that.createdAt)
                 .append(finishedAt, that.finishedAt)
                 .append(duration, that.duration)
+                .append(url, that.url)
                 .isEquals();
     }
 
@@ -131,15 +161,18 @@ public class PipelineEventObjectAttributes {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(id)
+                .append(iid)
                 .append(ref)
                 .append(tag)
                 .append(sha)
                 .append(beforeSha)
+                .append(source)
                 .append(status)
                 .append(stages)
                 .append(createdAt)
                 .append(finishedAt)
                 .append(duration)
+                .append(url)
                 .toHashCode();
     }
 
@@ -147,15 +180,18 @@ public class PipelineEventObjectAttributes {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
+                .append("iid", iid)
                 .append("ref", ref)
                 .append("tag", tag)
                 .append("sha", sha)
                 .append("beforeSha", beforeSha)
+                .append("source", source)
                 .append("status", status)
                 .append("stages", stages)
                 .append("createdAt", createdAt)
                 .append("finishedAt", finishedAt)
                 .append("duration", duration)
+                .append("url", url)
                 .toString();
     }
 }
