@@ -53,6 +53,9 @@
     <f:entry title="Build on successful pipeline events" field="triggerOnPipelineEvent">
       <f:checkbox default="false"/>
     </f:entry>
+    <f:entry title="Build on failed pipeline events" field="triggerOnFailedPipelineEvent">
+      <f:checkbox default="false"/>
+    </f:entry>
     <f:entry title="Pending build name for pipeline" help="/plugin/gitlab-plugin/help/help-pendingBuildName.html">
       <f:textbox field="pendingBuildName"/>
     </f:entry>

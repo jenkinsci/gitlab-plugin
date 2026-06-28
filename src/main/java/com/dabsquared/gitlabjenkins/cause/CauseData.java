@@ -62,6 +62,17 @@ public final class CauseData {
     private final String finishedAt;
     private final String buildDuration;
     private final String commentAuthor;
+    private final Integer pipelineId;
+    private final Integer pipelineIid;
+    private final String pipelineSource;
+    private final String pipelineUrl;
+    private final String commitMessage;
+    private final String commitTitle;
+    private final String commitAuthorName;
+    private final String commitAuthorEmail;
+    private final String commitUrl;
+    private final String projectWebUrl;
+    private final String projectPathWithNamespace;
 
     @GeneratePojoBuilder(withFactoryMethod = "*")
     CauseData(
@@ -109,7 +120,18 @@ public final class CauseData {
             String createdAt,
             String finishedAt,
             String buildDuration,
-            String commentAuthor) {
+            String commentAuthor,
+            Integer pipelineId,
+            Integer pipelineIid,
+            String pipelineSource,
+            String pipelineUrl,
+            String commitMessage,
+            String commitTitle,
+            String commitAuthorName,
+            String commitAuthorEmail,
+            String commitUrl,
+            String projectWebUrl,
+            String projectPathWithNamespace) {
         this.actionType = Objects.requireNonNull(actionType, "actionType must not be null.");
         this.sourceProjectId = Objects.requireNonNull(sourceProjectId, "sourceProjectId must not be null.");
         this.targetProjectId = Objects.requireNonNull(targetProjectId, "targetProjectId must not be null.");
@@ -155,6 +177,17 @@ public final class CauseData {
         this.finishedAt = finishedAt;
         this.buildDuration = buildDuration;
         this.commentAuthor = commentAuthor;
+        this.pipelineId = pipelineId;
+        this.pipelineIid = pipelineIid;
+        this.pipelineSource = pipelineSource;
+        this.pipelineUrl = pipelineUrl;
+        this.commitMessage = commitMessage;
+        this.commitTitle = commitTitle;
+        this.commitAuthorName = commitAuthorName;
+        this.commitAuthorEmail = commitAuthorEmail;
+        this.commitUrl = commitUrl;
+        this.projectWebUrl = projectWebUrl;
+        this.projectPathWithNamespace = projectPathWithNamespace;
     }
 
     @Exported
@@ -205,6 +238,17 @@ public final class CauseData {
         variables.put("finishedAt", finishedAt);
         variables.put("duration", buildDuration);
         variables.putIfNotNull("gitlabTriggerPhrase", triggerPhrase);
+        variables.putIfNotNull("gitlabPipelineId", pipelineId == null ? null : pipelineId.toString());
+        variables.putIfNotNull("gitlabPipelineIid", pipelineIid == null ? null : pipelineIid.toString());
+        variables.putIfNotNull("gitlabPipelineSource", pipelineSource);
+        variables.putIfNotNull("gitlabPipelineUrl", pipelineUrl);
+        variables.putIfNotNull("gitlabCommitMessage", commitMessage);
+        variables.putIfNotNull("gitlabCommitTitle", commitTitle);
+        variables.putIfNotNull("gitlabCommitAuthorName", commitAuthorName);
+        variables.putIfNotNull("gitlabCommitAuthorEmail", commitAuthorEmail);
+        variables.putIfNotNull("gitlabCommitUrl", commitUrl);
+        variables.putIfNotNull("gitlabProjectWebUrl", projectWebUrl);
+        variables.putIfNotNull("gitlabProjectPathWithNamespace", projectPathWithNamespace);
         return variables;
     }
 
@@ -413,6 +457,61 @@ public final class CauseData {
         return commentAuthor;
     }
 
+    @Exported
+    public Integer getPipelineId() {
+        return pipelineId;
+    }
+
+    @Exported
+    public Integer getPipelineIid() {
+        return pipelineIid;
+    }
+
+    @Exported
+    public String getPipelineSource() {
+        return pipelineSource;
+    }
+
+    @Exported
+    public String getPipelineUrl() {
+        return pipelineUrl;
+    }
+
+    @Exported
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    @Exported
+    public String getCommitTitle() {
+        return commitTitle;
+    }
+
+    @Exported
+    public String getCommitAuthorName() {
+        return commitAuthorName;
+    }
+
+    @Exported
+    public String getCommitAuthorEmail() {
+        return commitAuthorEmail;
+    }
+
+    @Exported
+    public String getCommitUrl() {
+        return commitUrl;
+    }
+
+    @Exported
+    public String getProjectWebUrl() {
+        return projectWebUrl;
+    }
+
+    @Exported
+    public String getProjectPathWithNamespace() {
+        return projectPathWithNamespace;
+    }
+
     String getShortDescription() {
         return actionType.getShortDescription(this);
     }
@@ -505,6 +604,17 @@ public final class CauseData {
                 .append(finishedAt, causeData.getFinishedAt())
                 .append(buildDuration, causeData.getBuildDuration())
                 .append(commentAuthor, causeData.getCommentAuthor())
+                .append(pipelineId, causeData.getPipelineId())
+                .append(pipelineIid, causeData.getPipelineIid())
+                .append(pipelineSource, causeData.getPipelineSource())
+                .append(pipelineUrl, causeData.getPipelineUrl())
+                .append(commitMessage, causeData.getCommitMessage())
+                .append(commitTitle, causeData.getCommitTitle())
+                .append(commitAuthorName, causeData.getCommitAuthorName())
+                .append(commitAuthorEmail, causeData.getCommitAuthorEmail())
+                .append(commitUrl, causeData.getCommitUrl())
+                .append(projectWebUrl, causeData.getProjectWebUrl())
+                .append(projectPathWithNamespace, causeData.getProjectPathWithNamespace())
                 .isEquals();
     }
 
@@ -555,6 +665,17 @@ public final class CauseData {
                 .append(finishedAt)
                 .append(buildDuration)
                 .append(commentAuthor)
+                .append(pipelineId)
+                .append(pipelineIid)
+                .append(pipelineSource)
+                .append(pipelineUrl)
+                .append(commitMessage)
+                .append(commitTitle)
+                .append(commitAuthorName)
+                .append(commitAuthorEmail)
+                .append(commitUrl)
+                .append(projectWebUrl)
+                .append(projectPathWithNamespace)
                 .toHashCode();
     }
 
@@ -605,6 +726,17 @@ public final class CauseData {
                 .append("finishedAt", finishedAt)
                 .append("duration", buildDuration)
                 .append("commentAuthor", commentAuthor)
+                .append("pipelineId", pipelineId)
+                .append("pipelineIid", pipelineIid)
+                .append("pipelineSource", pipelineSource)
+                .append("pipelineUrl", pipelineUrl)
+                .append("commitMessage", commitMessage)
+                .append("commitTitle", commitTitle)
+                .append("commitAuthorName", commitAuthorName)
+                .append("commitAuthorEmail", commitAuthorEmail)
+                .append("commitUrl", commitUrl)
+                .append("projectWebUrl", projectWebUrl)
+                .append("projectPathWithNamespace", projectPathWithNamespace)
                 .toString();
     }
 
