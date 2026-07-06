@@ -53,7 +53,7 @@
     <hpi.bundledArtifacts>asyncutil,jakarta.annotation-api,jakarta.validation-api,jboss-jaxrs-api_3.0_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-client-api,resteasy-core,resteasy-core-spi</hpi.bundledArtifacts>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
-    <mockserver.version>7.2.0</mockserver.version>
+    <mockserver.version>7.4.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
