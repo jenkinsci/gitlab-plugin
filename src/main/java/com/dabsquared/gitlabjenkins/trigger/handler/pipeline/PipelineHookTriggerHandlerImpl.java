@@ -71,34 +71,34 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                     try {
                         String projectPath = hook.getProject() != null
                                 ? hook.getProject().getPathWithNamespace()
-                                : (hook.getProjectId() != null ? hook.getProjectId().toString() : null);
+                                : (hook.getProjectId() != null
+                                        ? hook.getProjectId().toString()
+                                        : null);
                         if (projectPath != null) {
                             List<MergeRequest> mergeRequests =
                                     client.getCommitMergeRequests(projectPath, objectAttributes.getSha());
                             if (mergeRequests != null && !mergeRequests.isEmpty()) {
                                 resolvedMergeRequest = mergeRequests.get(0);
-                                LOGGER.log(
-                                        Level.FINE,
-                                        "Resolved merge request IID {0} for commit {1}",
-                                        new Object[] {resolvedMergeRequest.getIid(), objectAttributes.getSha()});
+                                LOGGER.log(Level.FINE, "Resolved merge request IID {0} for commit {1}", new Object[] {
+                                    resolvedMergeRequest.getIid(), objectAttributes.getSha()
+                                });
                             }
                         }
                     } catch (Exception e) {
                         LOGGER.log(
                                 Level.WARNING,
-                                "Failed to look up merge request for commit "
-                                        + objectAttributes.getSha() + ": " + e.getMessage(),
+                                "Failed to look up merge request for commit " + objectAttributes.getSha() + ": "
+                                        + e.getMessage(),
                                 e);
                     }
                 }
             }
         } catch (WebApplicationException e) {
-            LOGGER.log(
-                    Level.WARNING,
-                    "Failed to communicate with gitlab server: " + e.getMessage(),
-                    e);
+            LOGGER.log(Level.WARNING, "Failed to communicate with gitlab server: " + e.getMessage(), e);
         }
-        if (allowedStates.contains(objectAttributes.getStatus()) && !isLastAlreadyBuild(job, hook)) {
+        if (objectAttributes != null
+                && allowedStates.contains(objectAttributes.getStatus())
+                && !isLastAlreadyBuild(job, hook)) {
             if (ciSkip && isCiSkip(hook)) {
                 LOGGER.log(Level.INFO, "Skipping due to ci-skip.");
                 return;
@@ -177,7 +177,8 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                                 : hook.getProject().getWebUrl())
                 .withSourceRepoName(
                         hook.getProject() == null || hook.getProject().getName() == null
-                                ? (hook.getRepository() == null || hook.getRepository().getName() == null
+                                ? (hook.getRepository() == null
+                                                || hook.getRepository().getName() == null
                                         ? ""
                                         : hook.getRepository().getName())
                                 : hook.getProject().getName())
@@ -188,29 +189,36 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                 .withSourceRepoSshUrl(
                         hook.getProject() != null && hook.getProject().getGitSshUrl() != null
                                 ? hook.getProject().getGitSshUrl()
-                                : (hook.getRepository() == null || hook.getRepository().getGitSshUrl() == null
+                                : (hook.getRepository() == null
+                                                || hook.getRepository().getGitSshUrl() == null
                                         ? ""
                                         : hook.getRepository().getGitSshUrl()))
                 .withSourceRepoHttpUrl(
                         hook.getProject() != null && hook.getProject().getGitHttpUrl() != null
                                 ? hook.getProject().getGitHttpUrl()
-                                : (hook.getRepository() == null || hook.getRepository().getGitHttpUrl() == null
+                                : (hook.getRepository() == null
+                                                || hook.getRepository().getGitHttpUrl() == null
                                         ? ""
                                         : hook.getRepository().getGitHttpUrl()))
                 .withMergeRequestTitle(
                         resolvedMergeRequest != null && resolvedMergeRequest.getTitle() != null
                                 ? resolvedMergeRequest.getTitle()
-                                : (hook.getMergeRequest() != null && hook.getMergeRequest().getTitle() != null
+                                : (hook.getMergeRequest() != null
+                                                && hook.getMergeRequest().getTitle() != null
                                         ? hook.getMergeRequest().getTitle()
                                         : ""))
                 .withMergeRequestIid(
                         resolvedMergeRequest != null
                                 ? resolvedMergeRequest.getIid()
-                                : (hook.getMergeRequest() != null ? hook.getMergeRequest().getIid() : null))
+                                : (hook.getMergeRequest() != null
+                                        ? hook.getMergeRequest().getIid()
+                                        : null))
                 .withMergeRequestId(
                         resolvedMergeRequest != null
                                 ? resolvedMergeRequest.getId()
-                                : (hook.getMergeRequest() != null ? hook.getMergeRequest().getId() : null))
+                                : (hook.getMergeRequest() != null
+                                        ? hook.getMergeRequest().getId()
+                                        : null))
                 .withTargetProjectId(hook.getProject().getId())
                 .withTargetBranch(getTargetBranch(hook) == null ? "" : getTargetBranch(hook))
                 .withTargetRepoName("")
