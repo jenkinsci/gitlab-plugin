@@ -81,6 +81,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOnlyIfNewCommitsPushed = false;
     private boolean triggerOnPipelineEvent = false;
+    private boolean triggerOnFailedPipelineEvent = false;
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
     private boolean triggerOnApprovedMergeRequest = false;
@@ -512,6 +513,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.triggerOnPipelineEvent = triggerOnPipelineEvent;
     }
 
+    public boolean getTriggerOnFailedPipelineEvent() {
+        return triggerOnFailedPipelineEvent;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnFailedPipelineEvent(boolean triggerOnFailedPipelineEvent) {
+        this.triggerOnFailedPipelineEvent = triggerOnFailedPipelineEvent;
+    }
+
     @DataBoundSetter
     public void setPendingBuildName(String pendingBuildName) {
         this.pendingBuildName = pendingBuildName;
@@ -588,7 +598,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                 triggerToBranchDeleteRequest,
                 triggerOpenMergeRequestOnPush,
                 skipWorkInProgressMergeRequest);
-        pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
+        pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent, triggerOnFailedPipelineEvent);
     }
 
     private void initializeBranchFilter() {

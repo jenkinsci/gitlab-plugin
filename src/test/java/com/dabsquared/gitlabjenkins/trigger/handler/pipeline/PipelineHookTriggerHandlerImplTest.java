@@ -151,4 +151,122 @@ class PipelineHookTriggerHandlerImplTest {
         assertThat(buildTriggered.isSignaled(), is(true));
         jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
     }
+
+    @Test
+    void pipeline_build_on_failed_event() throws Exception {
+        List<String> failedStates = new ArrayList<>();
+        failedStates.add("failed");
+        PipelineHookTriggerHandler failedHandler = new PipelineHookTriggerHandlerImpl(failedStates);
+
+        Git git = Git.open(tmp);
+        ObjectId head = git.getRepository().resolve(Constants.HEAD);
+
+        User user = new User();
+        user.setName("test");
+        user.setId(1);
+
+        PipelineHook failedPipelineHook = pipelineHook()
+                .withUser(user)
+                .withRepository(repository()
+                        .withName("test")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withGitSshUrl("git@gitlab.org:test.git")
+                        .withGitHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                .withProject(project()
+                        .withNamespace("test-namespace")
+                        .withWebUrl("https://gitlab.org/test")
+                        .withId(1)
+                        .build())
+                .withObjectAttributes(pipelineEventObjectAttributes()
+                        .withId(2)
+                        .withStatus("failed")
+                        .withSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
+                        .withStages(new ArrayList<String>())
+                        .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
+                        .build())
+                .build();
+        git.close();
+
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+                buildHolder.set((FreeStyleBuild) build);
+                buildTriggered.signal();
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+
+        failedHandler.handle(
+                project,
+                failedPipelineHook,
+                false,
+                newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        assertThat(buildTriggered.isSignaled(), is(true));
+        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+    }
+
+    @Test
+    void pipeline_build_ignores_failed_when_not_configured() throws Exception {
+        // Default handler only allows "success" — a "failed" event should NOT trigger a build
+        Git git = Git.open(tmp);
+        ObjectId head = git.getRepository().resolve(Constants.HEAD);
+
+        User user = new User();
+        user.setName("test");
+        user.setId(1);
+
+        PipelineHook failedPipelineHook = pipelineHook()
+                .withUser(user)
+                .withRepository(repository()
+                        .withName("test")
+                        .withHomepage("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withGitSshUrl("git@gitlab.org:test.git")
+                        .withGitHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                .withProject(project()
+                        .withNamespace("test-namespace")
+                        .withWebUrl("https://gitlab.org/test")
+                        .withId(1)
+                        .build())
+                .withObjectAttributes(pipelineEventObjectAttributes()
+                        .withId(2)
+                        .withStatus("failed")
+                        .withSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
+                        .withStages(new ArrayList<String>())
+                        .withRef("refs/heads/" + git.nameRev().add(head).call().get(head))
+                        .build())
+                .build();
+        git.close();
+
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+                buildTriggered.signal();
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+
+        pipelineHookTriggerHandler.handle(
+                project,
+                failedPipelineHook,
+                false,
+                newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(5000);
+        assertThat(buildTriggered.isSignaled(), is(false));
+    }
 }

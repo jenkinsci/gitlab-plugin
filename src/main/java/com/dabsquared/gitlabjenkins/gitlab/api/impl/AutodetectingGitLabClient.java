@@ -362,6 +362,16 @@ final class AutodetectingGitLabClient implements GitLabClient {
         });
     }
 
+    @Override
+    public List<MergeRequest> getCommitMergeRequests(final String projectId, final String sha) {
+        return execute(new GitLabOperation<List<MergeRequest>>() {
+            @Override
+            List<MergeRequest> execute(GitLabClient client) {
+                return client.getCommitMergeRequests(projectId, sha);
+            }
+        });
+    }
+
     private GitLabClient delegate(boolean reset) {
         if (reset || delegate == null) {
             delegate = autodetectOrDie();
