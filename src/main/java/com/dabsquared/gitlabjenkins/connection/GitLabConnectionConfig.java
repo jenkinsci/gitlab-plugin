@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest2;
 
 /**
@@ -24,7 +22,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
 
-    @DataBoundConstructor
     public GitLabConnectionConfig() {
         load();
         refreshConnectionMap();
@@ -34,7 +31,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         return useAuthenticatedEndpoint;
     }
 
-    @DataBoundSetter
     public void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
         save();
@@ -58,7 +54,6 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
         addConnection(connections, connectionMap, connection);
     }
 
-    @DataBoundSetter
     public void setConnections(List<GitLabConnection> newConnections) {
         List<GitLabConnection> tempConnections = new ArrayList<>();
         Map<String, GitLabConnection> tempConnectionMap = new HashMap<>();
