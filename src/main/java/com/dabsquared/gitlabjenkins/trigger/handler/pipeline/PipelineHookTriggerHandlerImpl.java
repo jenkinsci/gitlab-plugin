@@ -7,6 +7,7 @@ import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineEventObjectAttributes;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PipelineHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
@@ -33,7 +34,6 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
     private static final Logger LOGGER = Logger.getLogger(PipelineHookTriggerHandlerImpl.class.getName());
 
     private final List<String> allowedStates;
-    private MergeRequest resolvedMergeRequest;
 
     PipelineHookTriggerHandlerImpl(List<String> allowedStates) {
         this.allowedStates = allowedStates;
@@ -66,8 +66,8 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                     }
                 }
 
-                // Resolve merge request for the commit SHA
-                if (objectAttributes != null && objectAttributes.getSha() != null) {
+                // The payload only carries a merge request for MR pipelines; otherwise resolve it from the commit
+                if (hook.getMergeRequest() == null && objectAttributes != null && objectAttributes.getSha() != null) {
                     try {
                         String projectPath = hook.getProject() != null
                                 ? hook.getProject().getPathWithNamespace()
@@ -78,9 +78,10 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                             List<MergeRequest> mergeRequests =
                                     client.getCommitMergeRequests(projectPath, objectAttributes.getSha());
                             if (mergeRequests != null && !mergeRequests.isEmpty()) {
-                                resolvedMergeRequest = mergeRequests.get(0);
+                                MergeRequest resolved = mergeRequests.get(0);
+                                hook.setMergeRequest(toObjectAttributes(resolved));
                                 LOGGER.log(Level.FINE, "Resolved merge request IID {0} for commit {1}", new Object[] {
-                                    resolvedMergeRequest.getIid(), objectAttributes.getSha()
+                                    resolved.getIid(), objectAttributes.getSha()
                                 });
                             }
                         }
@@ -201,24 +202,13 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                                         ? ""
                                         : hook.getRepository().getGitHttpUrl()))
                 .withMergeRequestTitle(
-                        resolvedMergeRequest != null && resolvedMergeRequest.getTitle() != null
-                                ? resolvedMergeRequest.getTitle()
-                                : (hook.getMergeRequest() != null
-                                                && hook.getMergeRequest().getTitle() != null
-                                        ? hook.getMergeRequest().getTitle()
-                                        : ""))
+                        hook.getMergeRequest() != null && hook.getMergeRequest().getTitle() != null
+                                ? hook.getMergeRequest().getTitle()
+                                : "")
                 .withMergeRequestIid(
-                        resolvedMergeRequest != null
-                                ? resolvedMergeRequest.getIid()
-                                : (hook.getMergeRequest() != null
-                                        ? hook.getMergeRequest().getIid()
-                                        : null))
+                        hook.getMergeRequest() != null ? hook.getMergeRequest().getIid() : null)
                 .withMergeRequestId(
-                        resolvedMergeRequest != null
-                                ? resolvedMergeRequest.getId()
-                                : (hook.getMergeRequest() != null
-                                        ? hook.getMergeRequest().getId()
-                                        : null))
+                        hook.getMergeRequest() != null ? hook.getMergeRequest().getId() : null)
                 .withTargetProjectId(hook.getProject().getId())
                 .withTargetBranch(getTargetBranch(hook) == null ? "" : getTargetBranch(hook))
                 .withTargetRepoName("")
@@ -319,6 +309,16 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
         } else {
             throw new NoRevisionToBuildException();
         }
+    }
+
+    private static MergeRequestObjectAttributes toObjectAttributes(MergeRequest mergeRequest) {
+        MergeRequestObjectAttributes attributes = new MergeRequestObjectAttributes();
+        attributes.setId(mergeRequest.getId());
+        attributes.setIid(mergeRequest.getIid());
+        attributes.setTitle(mergeRequest.getTitle());
+        attributes.setSourceBranch(mergeRequest.getSourceBranch());
+        attributes.setTargetBranch(mergeRequest.getTargetBranch());
+        return attributes;
     }
 
     private boolean isLastAlreadyBuild(Job<?, ?> project, PipelineHook hook) {
