@@ -65,7 +65,7 @@ public class PipelineBuildAction extends BuildWebHookAction {
         }
     }
 
-    void execute() {
+    public void execute() {
         if (!(project instanceof Job<?, ?>)) {
             throw HttpResponses.errorWithoutStack(409, "Pipeline Hook is not supported for this project");
         }

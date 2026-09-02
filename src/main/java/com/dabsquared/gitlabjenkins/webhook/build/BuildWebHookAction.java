@@ -27,7 +27,7 @@ abstract class BuildWebHookAction implements WebHookAction {
 
     abstract void processForCompatibility();
 
-    abstract void execute();
+    public abstract void execute();
 
     public final void execute(StaplerResponse2 response) {
         processForCompatibility();
