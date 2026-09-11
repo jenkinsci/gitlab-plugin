@@ -57,7 +57,8 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                     try {
                         com.dabsquared.gitlabjenkins.gitlab.api.model.Project projectForName =
                                 client.getProject(hook.getProject().getPathWithNamespace());
-                        hook.setProjectId(projectForName.getId());
+hook.setProjectId(projectForName.getId());
+hook.getProject().setId(projectForName.getId());
                     } catch (Exception e) {
                         LOGGER.log(
                                 Level.WARNING,
