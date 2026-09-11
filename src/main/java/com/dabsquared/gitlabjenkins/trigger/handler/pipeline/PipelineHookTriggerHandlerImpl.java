@@ -67,7 +67,10 @@ class PipelineHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<Pipel
                 }
 
                 // The payload only carries a merge request for MR pipelines; otherwise resolve it from the commit
-                if (hook.getMergeRequest() == null && objectAttributes != null && objectAttributes.getSha() != null) {
+if (hook.getMergeRequest() == null
+        && objectAttributes != null
+        && objectAttributes.getSha() != null
+        && allowedStates.contains(objectAttributes.getStatus())) {
                     try {
                         String projectPath = hook.getProjectId() != null
                                 ? hook.getProjectId().toString()
