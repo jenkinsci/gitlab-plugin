@@ -195,7 +195,7 @@ public class ResteasyGitLabClientBuilder extends GitLabClientBuilder {
         @Restricted(NoExternalUse.class)
         private String getApiToken(GitlabCredentialResolver credentialResolver) {
             Item item = credentialResolver.getItem();
-            ItemGroup<?> context = item != null ? item.getParent() : Jenkins.get();
+            ItemGroup<?> context = GitlabCredentialResolver.getLookupContext(item);
             StandardCredentials credentials = CredentialsMatchers.firstOrNull(
                     lookupCredentials(
                             StandardCredentials.class,

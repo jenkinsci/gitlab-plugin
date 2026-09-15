@@ -139,15 +139,11 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
     }
 
     public GitLabClient getClient(Item item, String jobCredentialId) {
-        final String clientId;
-        final String token;
+        final String clientId = buildClientCacheKey(item, jobCredentialId);
         GitlabCredentialResolver credentialResolver = new GitlabCredentialResolver();
         if ((jobCredentialId == null) || jobCredentialId.equals(apiTokenId)) {
-            clientId = "global";
             credentialResolver.setCredentialsId(apiTokenId);
         } else {
-            // Add prefix to credential ID to avoid collision with "global"
-            clientId = "alternative-" + jobCredentialId;
             credentialResolver.setCredentialsId(jobCredentialId);
             credentialResolver.setItem(item);
         }
@@ -159,6 +155,13 @@ public class GitLabConnection extends AbstractDescribableImpl<GitLabConnection> 
                             url, credentialResolver, ignoreCertificateErrors, connectionTimeout, readTimeout));
         }
         return clientCache.get(clientId);
+    }
+
+    private String buildClientCacheKey(Item item, String jobCredentialId) {
+        if ((jobCredentialId == null) || jobCredentialId.equals(apiTokenId)) {
+            return "global";
+        }
+        return "alternative-" + GitlabCredentialResolver.getLookupContextName(item) + "-" + jobCredentialId;
     }
 
     protected GitLabConnection readResolve() {

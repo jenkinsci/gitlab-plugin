@@ -9,11 +9,15 @@ import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
+import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.api.impl.V3GitLabClientBuilder;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.security.Permission;
 import hudson.util.Secret;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,12 +26,14 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.mockito.Mockito;
 
 @WithJenkins
 class GitLabConnectionTest {
     private static final String API_TOKEN = "secret";
     private static final String API_TOKEN_ID = "apiTokenId";
     private static final String API_TOKEN_ID_2 = "apiTokenId2";
+    private static final String ALT_CREDENTIAL_ID = "altCredentialId";
 
     private static JenkinsRule jenkins;
 
@@ -123,5 +129,78 @@ class GitLabConnectionTest {
         final GitLabClient client2 = connection.getClient(null, API_TOKEN_ID_2);
         assertThat(client2, notNullValue());
         assertThat(client2, not((client1)));
+    }
+
+    @Test
+    public void getClient_sameCredentialId_differentFolderContext_differentClient() {
+        ItemGroup<?> folderA = mockItemGroup("folder-a");
+        ItemGroup<?> folderB = mockItemGroup("folder-b");
+        Item itemA = mockItem(folderA);
+        Item itemB = mockItem(folderB);
+
+        CountingGitLabClientBuilder builder = new CountingGitLabClientBuilder();
+        GitLabConnection scopedConnection =
+                new GitLabConnection("scoped", "http://localhost", API_TOKEN_ID, builder, false, 10, 10);
+
+        GitLabClient clientA = scopedConnection.getClient(itemA, ALT_CREDENTIAL_ID);
+        GitLabClient clientB = scopedConnection.getClient(itemB, ALT_CREDENTIAL_ID);
+
+        assertThat(clientB, not(sameInstance(clientA)));
+        assertThat(builder.getBuildCount(), is(2));
+    }
+
+    @Test
+    public void getClient_sameCredentialId_sameFolderContext_sameClient() {
+        ItemGroup<?> folder = mockItemGroup("folder-a");
+        Item itemA = mockItem(folder);
+        Item itemB = mockItem(folder);
+
+        CountingGitLabClientBuilder builder = new CountingGitLabClientBuilder();
+        GitLabConnection scopedConnection =
+                new GitLabConnection("scoped", "http://localhost", API_TOKEN_ID, builder, false, 10, 10);
+
+        GitLabClient clientA = scopedConnection.getClient(itemA, ALT_CREDENTIAL_ID);
+        GitLabClient clientB = scopedConnection.getClient(itemB, ALT_CREDENTIAL_ID);
+
+        assertThat(clientB, sameInstance(clientA));
+        assertThat(builder.getBuildCount(), is(1));
+    }
+
+    private static ItemGroup<?> mockItemGroup(String fullName) {
+        ItemGroup<?> folder = Mockito.mock(ItemGroup.class);
+        Mockito.when(folder.getFullName()).thenReturn(fullName);
+        return folder;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Item mockItem(ItemGroup<?> parent) {
+        Item item = Mockito.mock(Item.class);
+        Mockito.doReturn(parent).when(item).getParent();
+        return item;
+    }
+
+    private static final class CountingGitLabClientBuilder extends GitLabClientBuilder {
+        private final AtomicInteger buildCount = new AtomicInteger();
+        private int clientCounter;
+
+        CountingGitLabClientBuilder() {
+            super("counting", 0);
+        }
+
+        @NonNull
+        @Override
+        public GitLabClient buildClient(
+                String url,
+                GitlabCredentialResolver credentialResolver,
+                boolean ignoreCertificateErrors,
+                int connectionTimeout,
+                int readTimeout) {
+            buildCount.incrementAndGet();
+            return Mockito.mock(GitLabClient.class, "client-" + clientCounter++);
+        }
+
+        int getBuildCount() {
+            return buildCount.get();
+        }
     }
 }
