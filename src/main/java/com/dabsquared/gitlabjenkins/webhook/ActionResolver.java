@@ -44,10 +44,11 @@ public class ActionResolver {
     private static final Pattern COMMIT_STATUS_PATTERN =
             Pattern.compile("^(refs/[^/]+/)?(commits|builds)/(?<sha1>[0-9a-fA-F]+)(?<statusJson>/status.json)?$");
 
-    public WebHookAction resolve(final String projectName, StaplerRequest2 request) {
+    public WebHookAction resolve(StaplerRequest2 request) {
         Iterator<String> restOfPathParts = Arrays.stream(request.getRestOfPath().split("/"))
                 .filter(s -> !s.isEmpty())
                 .iterator();
+        String projectName = restOfPathParts.hasNext() ? restOfPathParts.next() : "";
         Item project = resolveProject(projectName, restOfPathParts);
         if (project == null) {
             throw HttpResponses.notFound();
