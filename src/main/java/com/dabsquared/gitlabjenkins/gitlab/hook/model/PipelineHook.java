@@ -18,9 +18,11 @@ public class PipelineHook extends WebHook {
     @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "API compatibility")
     public Integer projectId;
 
+    private Commit commit;
     private List<Commit> commits;
     private Project project;
     private PipelineEventObjectAttributes objectAttributes;
+    private MergeRequestObjectAttributes mergeRequest;
 
     public Integer getProjectId() {
         return projectId;
@@ -36,6 +38,14 @@ public class PipelineHook extends WebHook {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Commit getCommit() {
+        return commit;
+    }
+
+    public void setCommit(Commit commit) {
+        this.commit = commit;
     }
 
     public List<Commit> getCommits() {
@@ -62,6 +72,14 @@ public class PipelineHook extends WebHook {
         this.objectAttributes = objectAttributes;
     }
 
+    public MergeRequestObjectAttributes getMergeRequest() {
+        return mergeRequest;
+    }
+
+    public void setMergeRequest(MergeRequestObjectAttributes mergeRequest) {
+        this.mergeRequest = mergeRequest;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -75,8 +93,10 @@ public class PipelineHook extends WebHook {
                 .append(user, that.user)
                 .append(project, that.project)
                 .append(projectId, that.projectId)
+                .append(commit, that.commit)
                 .append(commits, that.commits)
                 .append(objectAttributes, that.objectAttributes)
+                .append(mergeRequest, that.mergeRequest)
                 .isEquals();
     }
 
@@ -86,8 +106,10 @@ public class PipelineHook extends WebHook {
                 .append(user)
                 .append(projectId)
                 .append(project)
+                .append(commit)
                 .append(commits)
                 .append(objectAttributes)
+                .append(mergeRequest)
                 .toHashCode();
     }
 
@@ -97,8 +119,10 @@ public class PipelineHook extends WebHook {
                 .append("user", user)
                 .append("project", project)
                 .append("projectId", projectId)
+                .append("commit", commit)
                 .append("objectAttributes", objectAttributes)
                 .append("commits", commits)
+                .append("mergeRequest", mergeRequest)
                 .toString();
     }
 }

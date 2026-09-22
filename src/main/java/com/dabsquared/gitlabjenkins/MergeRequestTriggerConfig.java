@@ -20,4 +20,13 @@ public interface MergeRequestTriggerConfig {
     String getLabelsThatForcesBuildIfAdded();
 
     boolean getCancelPendingBuildsOnUpdate();
+
+    /**
+     * Whether running builds for the same merge request source branch should be aborted when the
+     * merge request is updated. Independent of {@link #getCancelPendingBuildsOnUpdate()} — either
+     * can be enabled on its own.
+     */
+    default boolean getCancelRunningBuildsOnUpdate() {
+        return false;
+    }
 }

@@ -1,6 +1,8 @@
 package com.dabsquared.gitlabjenkins.connection;
 
 import hudson.model.Item;
+import hudson.model.ItemGroup;
+import jenkins.model.Jenkins;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -34,5 +36,15 @@ public class GitlabCredentialResolver {
     @Restricted(NoExternalUse.class)
     public void setCredentialsId(String credentialsId) {
         this.credentialsId = credentialsId;
+    }
+
+    @Restricted(NoExternalUse.class)
+    public static ItemGroup<?> getLookupContext(Item item) {
+        return item != null ? item.getParent() : Jenkins.get();
+    }
+
+    @Restricted(NoExternalUse.class)
+    public static String getLookupContextName(Item item) {
+        return getLookupContext(item).getFullName();
     }
 }

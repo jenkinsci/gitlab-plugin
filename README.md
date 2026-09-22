@@ -32,6 +32,7 @@
   - [Accept merge request after build](#accept-merge-request)
   - [Notify specific project by a specific GitLab connection](#notify-specific-project-by-a-specific-gitlab-connection)
   - [Cancel pending builds on merge request update](#cancel-pending-builds-on-merge-request-update)
+  - [Cancel running builds on merge request update](#cancel-running-builds-on-merge-request-update)
   - [Check if a label is applied to a merge request](#check-if-a-label-is-applied-to-a-merge-request)
 - [Compatibility](#compatibility)
 - [Contributing to the Plugin](#contributing-to-the-plugin)
@@ -304,7 +305,8 @@ properties([
                 exclude: ""
             ],
             pendingBuildName: "jenkins",
-            cancelPendingBuildsOnUpdate: true
+            cancelPendingBuildsOnUpdate: true,
+            cancelRunningBuildsOnUpdate: true
         ]
     ])
 ])
@@ -469,6 +471,7 @@ triggers {
       excludeBranchesSpec: "",
       pendingBuildName: "Jenkins",
       cancelPendingBuildsOnUpdate: false,
+      cancelRunningBuildsOnUpdate: false,
       secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF",
       triggerToBranchDeleteRequest: false,
       triggerOnlyIfNewCommitsPushed: false,
@@ -610,6 +613,12 @@ gitlabCommitStatus(
 ### Cancel pending builds on merge request update
 To cancel pending builds of the same merge request when new commits are pushed, check 'Cancel pending merge request builds on update' from the Advanced-section in the trigger configuration.
 This saves time in projects where builds can stay long time in a build queue and you care only about the status of the newest commit.
+
+### Cancel running builds on merge request update
+To abort an in-flight build for the same merge request when new commits are pushed, check 'Cancel running merge request builds on update' from the Advanced-section in the trigger configuration.
+Only builds whose `GitLabWebHookCause` matches the same source project ID **and** source branch are aborted &mdash; builds for other merge requests, branches, or jobs are left untouched.
+This is independent of `cancelPendingBuildsOnUpdate`; enable both to abort the running build *and* drain the queue when an update arrives.
+Aborted builds are interrupted with cause `Superseded by merge request update on source branch '...'`, which is visible in the build log.
 
 ### Check if a label is applied to a merge request  
 To handle conditional logic in your pipelines based on merge request labels, use:

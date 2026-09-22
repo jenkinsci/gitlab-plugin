@@ -278,4 +278,11 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Path("/projects/{projectId}/pipelines")
     @Override
     List<Pipeline> getPipelines(@PathParam("projectId") @Encoded String projectId);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/projects/{projectId}/repository/commits/{sha}/merge_requests")
+    @Override
+    List<MergeRequest> getCommitMergeRequests(
+            @PathParam("projectId") @Encoded String projectId, @PathParam("sha") @Encoded String sha);
 }

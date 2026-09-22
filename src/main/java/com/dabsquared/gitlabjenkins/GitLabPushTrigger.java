@@ -81,6 +81,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private boolean triggerOnMergeRequest = true;
     private boolean triggerOnlyIfNewCommitsPushed = false;
     private boolean triggerOnPipelineEvent = false;
+    private boolean triggerOnFailedPipelineEvent = false;
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
     private boolean triggerOnApprovedMergeRequest = false;
@@ -108,6 +109,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private volatile Secret secretToken;
     private String pendingBuildName;
     private boolean cancelPendingBuildsOnUpdate;
+    private boolean cancelRunningBuildsOnUpdate;
 
     private transient BranchFilter branchFilter;
     private transient PushHookTriggerHandler pushHookTriggerHandler;
@@ -347,6 +349,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         return this.cancelPendingBuildsOnUpdate;
     }
 
+    @Override
+    public boolean getCancelRunningBuildsOnUpdate() {
+        return this.cancelRunningBuildsOnUpdate;
+    }
+
     @DataBoundSetter
     public void setTriggerOnPush(boolean triggerOnPush) {
         this.triggerOnPush = triggerOnPush;
@@ -506,6 +513,15 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.triggerOnPipelineEvent = triggerOnPipelineEvent;
     }
 
+    public boolean getTriggerOnFailedPipelineEvent() {
+        return triggerOnFailedPipelineEvent;
+    }
+
+    @DataBoundSetter
+    public void setTriggerOnFailedPipelineEvent(boolean triggerOnFailedPipelineEvent) {
+        this.triggerOnFailedPipelineEvent = triggerOnFailedPipelineEvent;
+    }
+
     @DataBoundSetter
     public void setPendingBuildName(String pendingBuildName) {
         this.pendingBuildName = pendingBuildName;
@@ -514,6 +530,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setCancelPendingBuildsOnUpdate(boolean cancelPendingBuildsOnUpdate) {
         this.cancelPendingBuildsOnUpdate = cancelPendingBuildsOnUpdate;
+    }
+
+    @DataBoundSetter
+    public void setCancelRunningBuildsOnUpdate(boolean cancelRunningBuildsOnUpdate) {
+        this.cancelRunningBuildsOnUpdate = cancelRunningBuildsOnUpdate;
     }
 
     // executes when the Trigger receives a push request
@@ -577,7 +598,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
                 triggerToBranchDeleteRequest,
                 triggerOpenMergeRequestOnPush,
                 skipWorkInProgressMergeRequest);
-        pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent);
+        pipelineTriggerHandler = newPipelineHookTriggerHandler(triggerOnPipelineEvent, triggerOnFailedPipelineEvent);
     }
 
     private void initializeBranchFilter() {

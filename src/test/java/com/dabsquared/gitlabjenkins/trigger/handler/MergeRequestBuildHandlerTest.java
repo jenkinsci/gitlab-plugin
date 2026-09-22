@@ -5,14 +5,20 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
@@ -30,10 +36,15 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.Reposito
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import hudson.model.Executor;
 import hudson.model.FreeStyleProject;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.Project;
 import hudson.model.Queue;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.util.RunList;
 import java.io.File;
 import java.util.Arrays;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -49,7 +60,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @WithJenkins
 @ExtendWith(MockitoExtension.class)
-class PendingBuildsHandlerTest {
+class MergeRequestBuildHandlerTest {
 
     private static final String GITLAB_BUILD_NAME = "Jenkins";
 
@@ -68,7 +79,7 @@ class PendingBuildsHandlerTest {
 
     @BeforeEach
     void setUp() {
-        when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
+        lenient().when(gitLabConnectionProperty.getClient()).thenReturn(gitLabClient);
     }
 
     @AfterEach
@@ -156,6 +167,67 @@ class PendingBuildsHandlerTest {
                         eq(BuildState.canceled.name()));
 
         assertThat(jenkins.getInstance().getQueue().getItems().length, is(3));
+    }
+
+    @Test
+    void cancelRunningBuildsAbortsOnlyBuildsMatchingSourceProjectIdAndSourceBranch() {
+        Job<?, ?> job = mock(Job.class);
+        when(job.getName()).thenReturn("job1");
+
+        // Matching: same source project, same source branch — should be aborted.
+        Executor matchExec1 = mock(Executor.class);
+        Run<?, ?> match1 = runningBuildWithCause(matchExec1, 1, "feature-branch");
+
+        Executor matchExec2 = mock(Executor.class);
+        Run<?, ?> match2 = runningBuildWithCause(matchExec2, 1, "feature-branch");
+
+        // Non-matching: same project, different branch.
+        Executor otherBranchExec = mock(Executor.class);
+        Run<?, ?> otherBranch = runningBuildWithCause(null, 1, "another-branch");
+
+        // Non-matching: different project, same branch.
+        Executor otherProjectExec = mock(Executor.class);
+        Run<?, ?> otherProject = runningBuildWithCause(null, 2, "feature-branch");
+
+        // Non-matching: already finished.
+        Run<?, ?> finished = mock(Run.class);
+        when(finished.isBuilding()).thenReturn(false);
+
+        // Non-matching: building but has no GitLab cause (e.g. triggered manually).
+        Run<?, ?> manualBuild = mock(Run.class);
+        when(manualBuild.isBuilding()).thenReturn(true);
+        when(manualBuild.getCause(GitLabWebHookCause.class)).thenReturn(null);
+
+        RunList<Run<?, ?>> runs =
+                RunList.fromRuns(Arrays.asList(match1, match2, otherBranch, otherProject, finished, manualBuild));
+        doReturn(runs).when(job).getBuilds();
+
+        new MergeRequestBuildHandler().cancelRunningBuilds(job, 1, "feature-branch");
+
+        verify(matchExec1)
+                .interrupt(eq(Result.ABORTED), any(MergeRequestBuildHandler.SupersededByMergeRequestUpdate.class));
+        verify(matchExec2)
+                .interrupt(eq(Result.ABORTED), any(MergeRequestBuildHandler.SupersededByMergeRequestUpdate.class));
+        verify(otherBranchExec, never()).interrupt(any(), any());
+        verify(otherProjectExec, never()).interrupt(any(), any());
+    }
+
+    private static Run<?, ?> runningBuildWithCause(Executor executor, int sourceProjectId, String sourceBranch) {
+        Run<?, ?> run = mock(Run.class);
+        when(run.isBuilding()).thenReturn(true);
+        if (executor != null) {
+            when(run.getExecutor()).thenReturn(executor);
+        }
+
+        CauseData causeData = mock(CauseData.class);
+        when(causeData.getSourceProjectId()).thenReturn(sourceProjectId);
+        // Branch is only read after project id matches (see MergeRequestBuildHandler.cancelRunningBuilds).
+        lenient().when(causeData.getSourceBranch()).thenReturn(sourceBranch);
+
+        GitLabWebHookCause cause = mock(GitLabWebHookCause.class);
+        when(cause.getData()).thenReturn(causeData);
+        when(run.getCause(GitLabWebHookCause.class)).thenReturn(cause);
+        return run;
     }
 
     private GitLabPushTrigger gitLabPushTrigger(Project project) throws Exception {

@@ -197,4 +197,9 @@ final class ResteasyGitLabClient implements GitLabClient {
     public List<Pipeline> getPipelines(String projectName) {
         return api.getPipelines(projectName);
     }
+
+    @Override
+    public List<MergeRequest> getCommitMergeRequests(String projectId, String sha) {
+        return api.getCommitMergeRequests(projectId, sha);
+    }
 }

@@ -24,6 +24,8 @@ public class Project {
     private String url;
     private String sshUrl;
     private String httpUrl;
+    private String gitSshUrl;
+    private String gitHttpUrl;
 
     public String getName() {
         return name;
@@ -121,6 +123,22 @@ public class Project {
         this.httpUrl = httpUrl;
     }
 
+    public String getGitSshUrl() {
+        return gitSshUrl;
+    }
+
+    public void setGitSshUrl(String gitSshUrl) {
+        this.gitSshUrl = gitSshUrl;
+    }
+
+    public String getGitHttpUrl() {
+        return gitHttpUrl;
+    }
+
+    public void setGitHttpUrl(String gitHttpUrl) {
+        this.gitHttpUrl = gitHttpUrl;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -152,6 +170,8 @@ public class Project {
                 .append(url, project.url)
                 .append(sshUrl, project.sshUrl)
                 .append(httpUrl, project.httpUrl)
+                .append(gitSshUrl, project.gitSshUrl)
+                .append(gitHttpUrl, project.gitHttpUrl)
                 .isEquals();
     }
 
@@ -171,6 +191,8 @@ public class Project {
                 .append(url)
                 .append(sshUrl)
                 .append(httpUrl)
+                .append(gitSshUrl)
+                .append(gitHttpUrl)
                 .toHashCode();
     }
 
@@ -190,6 +212,8 @@ public class Project {
                 .append("url", url)
                 .append("sshUrl", sshUrl)
                 .append("httpUrl", httpUrl)
+                .append("gitSshUrl", gitSshUrl)
+                .append("gitHttpUrl", gitHttpUrl)
                 .toString();
     }
 }

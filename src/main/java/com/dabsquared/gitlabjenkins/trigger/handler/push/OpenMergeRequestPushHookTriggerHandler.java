@@ -16,7 +16,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
-import com.dabsquared.gitlabjenkins.trigger.handler.PendingBuildsHandler;
+import com.dabsquared.gitlabjenkins.trigger.handler.MergeRequestBuildHandler;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -181,7 +181,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
     }
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {
-        String buildName = PendingBuildsHandler.resolvePendingBuildName(job);
+        String buildName = MergeRequestBuildHandler.resolvePendingBuildName(job);
         if (StringUtils.isNotBlank(buildName)) {
             GitLabClient client =
                     job.getProperty(GitLabConnectionProperty.class).getClient();

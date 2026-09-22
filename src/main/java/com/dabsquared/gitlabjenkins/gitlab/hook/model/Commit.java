@@ -15,6 +15,7 @@ public class Commit {
 
     private String id;
     private String message;
+    private String title;
     private Date timestamp;
     private String url;
     private User author;
@@ -36,6 +37,14 @@ public class Commit {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public Date getTimestamp() {
@@ -98,6 +107,7 @@ public class Commit {
         return new EqualsBuilder()
                 .append(id, commit.id)
                 .append(message, commit.message)
+                .append(title, commit.title)
                 .append(timestamp, commit.timestamp)
                 .append(url, commit.url)
                 .append(author, commit.author)
@@ -112,6 +122,7 @@ public class Commit {
         return new HashCodeBuilder(17, 37)
                 .append(id)
                 .append(message)
+                .append(title)
                 .append(timestamp)
                 .append(url)
                 .append(author)
@@ -126,6 +137,7 @@ public class Commit {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("message", message)
+                .append("title", title)
                 .append("timestamp", timestamp)
                 .append("url", url)
                 .append("author", author)
