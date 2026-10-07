@@ -1,0 +1,23 @@
+<div>
+  <p>
+  When enabled, every commit status update looks up the commit's merge request pipeline and
+  explicitly targets it via <code>pipeline_id</code>, instead of letting GitLab decide based
+  on the commit SHA, ref and status name alone.
+  </p>
+  <p>
+  Without this, GitLab treats (sha, ref, status name) as an identity: the first status update
+  for a build either attaches to whatever pipeline already exists at that moment, or spins up a
+  throwaway "external" pipeline if none does yet - and every later update for the same build
+  keeps updating that same entry in place, even after GitLab's own merge request pipeline for
+  the commit is created. That can leave a build's final result invisible to anything that only
+  looks at the merge request's head pipeline, such as "pipelines must succeed" merge checks.
+  </p>
+  <p>
+  If no merge request pipeline exists yet for the commit (e.g. a plain branch build with no
+  open merge request), this has no effect and GitLab's default behavior is used.
+  </p>
+  <p>
+  This is off by default to preserve existing behavior. It can be overridden per
+  <code>gitlabCommitStatus</code> / <code>updateGitlabCommitStatus</code> Pipeline step call.
+  </p>
+</div>

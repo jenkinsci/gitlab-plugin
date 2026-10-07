@@ -3,4 +3,12 @@
   <f:entry title="${%Build steps}" field="builds" description="${%Comma separated list of build steps}">
     <f:textbox/>
   </f:entry>
+  <!--
+    Nullable Boolean: null = inherit the plugin's global default
+    (GitLabConnectionConfig#isAttachStatusToMergeRequestPipeline). This checkbox only
+    round-trips true/false; leave it alone to keep inheriting the default.
+  -->
+  <f:entry title="${%Attach commit status to merge request pipeline}" field="attachStatusToMergeRequestPipeline" help="/plugin/gitlab-plugin/help/help-attachStatusToMergeRequestPipeline.html">
+    <f:checkbox/>
+  </f:entry>
 </j:jelly>

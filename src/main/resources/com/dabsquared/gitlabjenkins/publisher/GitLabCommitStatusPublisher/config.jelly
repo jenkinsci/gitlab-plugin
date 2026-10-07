@@ -7,5 +7,13 @@
     <f:entry title="${%Mark unstable builds as success}" field="markUnstableAsSuccess">
       <f:checkbox default="false"/>
     </f:entry>
+    <!--
+      Nullable Boolean: null = inherit the plugin's global default
+      (GitLabConnectionConfig#isAttachStatusToMergeRequestPipeline). This checkbox only
+      round-trips true/false; leave it alone to keep inheriting the default.
+    -->
+    <f:entry title="${%Attach commit status to merge request pipeline}" field="attachStatusToMergeRequestPipeline" help="/plugin/gitlab-plugin/help/help-attachStatusToMergeRequestPipeline.html">
+      <f:checkbox/>
+    </f:entry>
   </f:advanced>
 </j:jelly>

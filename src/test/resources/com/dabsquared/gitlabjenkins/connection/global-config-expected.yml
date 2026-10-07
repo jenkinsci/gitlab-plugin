@@ -1,3 +1,4 @@
+attachStatusToMergeRequestPipeline: false
 connections:
 - apiTokenId: "gitlab_token"
   clientBuilderId: "autodetect"

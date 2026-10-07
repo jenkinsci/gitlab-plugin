@@ -117,6 +117,13 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
             @FormParam("merge_requests_events") Boolean mergeRequestEvents,
             @FormParam("note_events") Boolean noteEvents);
 
+    // Only one REST-mapped method per projectId type here (not one with
+    // pipeline_id and one without): a JAX-RS *client* proxy interface isn't a
+    // server resource, so nothing requires unique paths per method, but binding
+    // two methods to the identical @Path+@POST on the same proxy interface is
+    // still exactly the kind of thing these generated proxies are known to
+    // handle unreliably. GitLabClient.changeBuildStatus's 7-arg convenience
+    // overload just calls this one with pipelineId=null instead.
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -129,7 +136,8 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
             @FormParam("ref") String ref,
             @FormParam("context") String context,
             @FormParam("target_url") String targetUrl,
-            @FormParam("description") String description);
+            @FormParam("description") String description,
+            @FormParam("pipeline_id") Integer pipelineId);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -143,7 +151,8 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
             @FormParam("ref") String ref,
             @FormParam("context") String context,
             @FormParam("target_url") String targetUrl,
-            @FormParam("description") String description);
+            @FormParam("description") String description,
+            @FormParam("pipeline_id") Integer pipelineId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -264,11 +273,15 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     @Override
     List<Label> getLabels(@PathParam("projectId") @Encoded String projectId);
 
+    // Only one REST-mapped method here, same reasoning as changeBuildStatus
+    // above: sha is an optional query param, so GitLabClient's 1-arg
+    // convenience overload just calls this one with sha=null.
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/pipelines")
     @Override
-    List<Pipeline> getPipelines(@PathParam("projectId") @Encoded String projectId);
+    List<Pipeline> getPipelines(
+            @PathParam("projectId") @Encoded String projectId, @QueryParam("sha") @Encoded String sha);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

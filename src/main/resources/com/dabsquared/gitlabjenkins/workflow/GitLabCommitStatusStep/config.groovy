@@ -12,6 +12,13 @@ f.advanced() {
     f.entry(title:"GitLab Projects To Notify") {
         f.repeatableHeteroProperty(field: "builds", hasHeader: "true")
     }
+
+    // Nullable Boolean: null = inherit the plugin's global default
+    // (GitLabConnectionConfig#isAttachStatusToMergeRequestPipeline). This checkbox only
+    // round-trips true/false; leave it alone in the UI to keep inheriting the default.
+    f.entry(title:"Attach commit status to merge request pipeline", field: "attachStatusToMergeRequestPipeline") {
+        f.checkbox()
+    }
 }
 
 
