@@ -50,11 +50,11 @@ class ActionResolverTest {
     void getBranchBuildPageRedirect() throws Exception {
         String projectName = "getBranchBuildPageRedirect";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.hasParameter("ref")).thenReturn(true);
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(BranchBuildPageRedirectAction.class));
     }
@@ -63,10 +63,10 @@ class ActionResolverTest {
     void getCommitStatus() throws Exception {
         String projectName = "getCommitStatus";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("builds/1234abcd/status.json");
+        when(request.getRestOfPath()).thenReturn(projectName + "/builds/1234abcd/status.json");
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(StatusJsonAction.class));
     }
@@ -75,10 +75,10 @@ class ActionResolverTest {
     void getCommitBuildPageRedirect_builds() throws Exception {
         String projectName = "getCommitBuildPageRedirect_builds";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("builds/1234abcd");
+        when(request.getRestOfPath()).thenReturn(projectName + "/builds/1234abcd");
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(CommitBuildPageRedirectAction.class));
     }
@@ -87,10 +87,10 @@ class ActionResolverTest {
     void getCommitBuildPageRedirect_commits() throws Exception {
         String projectName = "getCommitBuildPageRedirect_commits";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("commits/7890efab");
+        when(request.getRestOfPath()).thenReturn(projectName + "/commits/7890efab");
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(CommitBuildPageRedirectAction.class));
     }
@@ -99,11 +99,11 @@ class ActionResolverTest {
     void getBranchStatusPng() throws Exception {
         String projectName = "getBranchStatusPng";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("builds/status.png");
+        when(request.getRestOfPath()).thenReturn(projectName + "/builds/status.png");
         when(request.hasParameter("ref")).thenReturn(true);
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(BranchStatusPngAction.class));
     }
@@ -112,11 +112,11 @@ class ActionResolverTest {
     void getCommitStatusPng() throws Exception {
         String projectName = "getCommitStatusPng";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("builds/status.png");
+        when(request.getRestOfPath()).thenReturn(projectName + "/builds/status.png");
         when(request.hasParameter("ref")).thenReturn(false);
         when(request.getMethod()).thenReturn("GET");
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(CommitStatusPngAction.class));
     }
@@ -125,13 +125,13 @@ class ActionResolverTest {
     void postMergeRequest() throws Exception {
         String projectName = "postMergeRequest";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Merge Request Hook");
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postMergeRequest.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
     }
@@ -140,13 +140,13 @@ class ActionResolverTest {
     void postSystemHookMergeRequest() throws Exception {
         String projectName = "postSystemHookMergeRequest";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_MergeRequest.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(MergeRequestBuildAction.class));
     }
@@ -155,13 +155,13 @@ class ActionResolverTest {
     void postSystemHookPush() throws Exception {
         String projectName = "postSystemHookPush";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_Push.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -170,13 +170,13 @@ class ActionResolverTest {
     void postSystemHookPushTag() throws Exception {
         String projectName = "postSystemHookPushTag";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("System Hook");
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postSystemHook_PushTag.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -185,12 +185,12 @@ class ActionResolverTest {
     void postNote() throws Exception {
         String projectName = "postNote";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Note Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postNote.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(NoteBuildAction.class));
     }
@@ -199,12 +199,12 @@ class ActionResolverTest {
     void postPush() throws Exception {
         String projectName = "postPush";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Push Hook");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -213,13 +213,13 @@ class ActionResolverTest {
     void postPushTag() throws Exception {
         String projectName = "postPushTag";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("Tag Push Hook");
         when(request.getInputStream())
                 .thenReturn(new ResourceServletInputStream("ActionResolverTest_postPushTag.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(PushBuildAction.class));
     }
@@ -228,12 +228,12 @@ class ActionResolverTest {
     void postPushMissingEventHeader() throws Exception {
         String projectName = "postPushMissingEventHeader";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn(null);
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
@@ -242,12 +242,12 @@ class ActionResolverTest {
     void postPushUnsupportedEventHeader() throws Exception {
         String projectName = "postPushUnsupportedEventHeader";
         jenkins.createFreeStyleProject(projectName);
-        when(request.getRestOfPath()).thenReturn("");
+        when(request.getRestOfPath()).thenReturn(projectName);
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("X-Gitlab-Event")).thenReturn("__Not Supported Header__");
         when(request.getInputStream()).thenReturn(new ResourceServletInputStream("ActionResolverTest_postPush.json"));
 
-        WebHookAction resolvedAction = new ActionResolver().resolve(projectName, request);
+        WebHookAction resolvedAction = new ActionResolver().resolve(request);
 
         assertThat(resolvedAction, instanceOf(NoopAction.class));
     }
