@@ -186,7 +186,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -201,7 +202,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -218,7 +220,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -235,7 +238,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -279,6 +283,7 @@ class CommitStatusUpdaterTest {
                         "3.0.0",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 }

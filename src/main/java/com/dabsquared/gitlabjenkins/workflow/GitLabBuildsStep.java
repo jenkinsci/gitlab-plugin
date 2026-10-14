@@ -29,6 +29,7 @@ import org.kohsuke.stapler.export.ExportedBean;
 public class GitLabBuildsStep extends Step {
 
     private List<String> builds;
+    private Boolean attachStatusToMergeRequestPipeline;
 
     @DataBoundConstructor
     public GitLabBuildsStep() {}
@@ -56,6 +57,20 @@ public class GitLabBuildsStep extends Step {
         return builds;
     }
 
+    public Boolean getAttachStatusToMergeRequestPipeline() {
+        return attachStatusToMergeRequestPipeline;
+    }
+
+    /**
+     * Explicitly opt this block in or out of attaching its status updates to the commit's
+     * merge request pipeline, overriding the plugin's global default
+     * (GitLabConnectionConfig). Leave unset to just use that global default.
+     */
+    @DataBoundSetter
+    public void setAttachStatusToMergeRequestPipeline(Boolean attachStatusToMergeRequestPipeline) {
+        this.attachStatusToMergeRequestPipeline = attachStatusToMergeRequestPipeline;
+    }
+
     public static class GitLabBuildStepExecution extends StepExecution {
         private static final long serialVersionUID = 1;
 
@@ -80,7 +95,11 @@ public class GitLabBuildsStep extends Step {
                         public void onStart(StepContext context) {
                             for (String name : step.builds) {
                                 CommitStatusUpdater.updateCommitStatus(
-                                        run, getTaskListener(context), BuildState.pending, name);
+                                        run,
+                                        getTaskListener(context),
+                                        BuildState.pending,
+                                        name,
+                                        step.attachStatusToMergeRequestPipeline);
                             }
                             run.addAction(new PendingBuildsAction(new ArrayList<>(step.builds)));
                         }
@@ -107,7 +126,12 @@ public class GitLabBuildsStep extends Step {
                                 BuildState state =
                                         t instanceof FlowInterruptedException ? BuildState.canceled : BuildState.failed;
                                 for (String name : action.getBuilds()) {
-                                    CommitStatusUpdater.updateCommitStatus(run, getTaskListener(context), state, name);
+                                    CommitStatusUpdater.updateCommitStatus(
+                                            run,
+                                            getTaskListener(context),
+                                            state,
+                                            name,
+                                            step.attachStatusToMergeRequestPipeline);
                                 }
                             }
                             context.onFailure(t);
@@ -124,7 +148,8 @@ public class GitLabBuildsStep extends Step {
                 PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
                 if (action != null) {
                     for (String name : action.getBuilds()) {
-                        CommitStatusUpdater.updateCommitStatus(run, null, BuildState.canceled, name);
+                        CommitStatusUpdater.updateCommitStatus(
+                                run, null, BuildState.canceled, name, step.attachStatusToMergeRequestPipeline);
                     }
                 }
                 body.cancel(cause);

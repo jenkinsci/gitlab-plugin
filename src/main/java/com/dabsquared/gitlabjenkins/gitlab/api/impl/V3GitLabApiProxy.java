@@ -126,6 +126,11 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
             @FormParam("merge_requests_events") Boolean mergeRequestEvents,
             @FormParam("note_events") Boolean noteEvents);
 
+    // GitLab's v3 API was removed years ago and this code path is effectively
+    // legacy/unreachable against any modern GitLab instance; pipeline_id is
+    // accepted here purely so V3GitLabApiProxy still satisfies the shared
+    // GitLabApiProxy interface. Not verified against a real v3 server. Only
+    // one REST-mapped method per projectId type (see V4GitLabApiProxy for why).
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -138,7 +143,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
             @FormParam("ref") String ref,
             @FormParam("context") String context,
             @FormParam("target_url") String targetUrl,
-            @FormParam("description") String description);
+            @FormParam("description") String description,
+            @FormParam("pipeline_id") Integer pipelineId);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -152,7 +158,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
             @FormParam("ref") String ref,
             @FormParam("context") String context,
             @FormParam("target_url") String targetUrl,
-            @FormParam("description") String description);
+            @FormParam("description") String description,
+            @FormParam("pipeline_id") Integer pipelineId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -277,7 +284,8 @@ interface V3GitLabApiProxy extends GitLabApiProxy {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/pipelines")
     @Override
-    List<Pipeline> getPipelines(@PathParam("projectId") @Encoded String projectId);
+    List<Pipeline> getPipelines(
+            @PathParam("projectId") @Encoded String projectId, @QueryParam("sha") @Encoded String sha);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

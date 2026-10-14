@@ -4,9 +4,11 @@ import static com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty.g
 
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.EnvVars;
 import hudson.model.*;
@@ -20,11 +22,13 @@ import jakarta.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jenkins.model.Jenkins;
 import jenkins.plugins.git.AbstractGitSCMSource;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMRevisionAction;
@@ -47,6 +51,24 @@ public class CommitStatusUpdater {
             String name,
             List<GitLabBranchBuild> gitLabBranchBuilds,
             GitLabConnectionProperty connection) {
+        updateCommitStatus(build, listener, state, name, gitLabBranchBuilds, connection, null);
+    }
+
+    /**
+     * Same as the six-arg overload above, but lets the caller explicitly opt in or out of
+     * attaching the status to the commit's merge request pipeline (see
+     * resolveMergeRequestPipelineId), overriding the
+     * {@link com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig} global
+     * default for this one call. Pass null to just use that global default.
+     */
+    public static void updateCommitStatus(
+            Run<?, ?> build,
+            TaskListener listener,
+            BuildState state,
+            String name,
+            List<GitLabBranchBuild> gitLabBranchBuilds,
+            GitLabConnectionProperty connection,
+            Boolean attachStatusToMergeRequestPipeline) {
         GitLabClient client;
         if (connection != null) {
             client = connection.getClient();
@@ -94,21 +116,57 @@ public class CommitStatusUpdater {
                         LOGGER.log(
                                 Level.INFO,
                                 "Updating build '%s' to '%s'".formatted(gitLabBranchBuild.getProjectId(), state));
+                        Integer pipelineId = null;
+                        if (shouldAttachStatusToMergeRequestPipeline(attachStatusToMergeRequestPipeline)) {
+                            pipelineId = resolveMergeRequestPipelineId(
+                                    current_client,
+                                    gitLabBranchBuild.getProjectId(),
+                                    gitLabBranchBuild.getRevisionHash());
+                        }
+                        // GitLab's Commit Status API requires pipeline_id, sha and ref to all
+                        // agree on the SAME pipeline - confirmed empirically: passing a real,
+                        // valid pipeline_id alongside a ref that belongs to a DIFFERENT
+                        // pipeline for that sha (e.g. the branch name instead of a merge
+                        // request pipeline's refs/merge-requests/N/head) gets rejected with
+                        // "404 Pipeline for pipeline_id, sha and ref Not Found" even though
+                        // the pipeline_id itself is entirely valid. Once we've resolved a
+                        // pipeline_id, ref becomes redundant (and actively wrong, since the
+                        // build's branch name never matches a merge request pipeline's own
+                        // ref) - omit it so GitLab derives ref from the pipeline instead.
+                        String ref = pipelineId == null ? getBuildBranchOrTag(build, environment) : null;
                         current_client.changeBuildStatus(
                                 gitLabBranchBuild.getProjectId(),
                                 gitLabBranchBuild.getRevisionHash(),
                                 state,
-                                getBuildBranchOrTag(build, environment),
+                                ref,
                                 current_build_name,
                                 buildUrl,
-                                state.name());
+                                state.name(),
+                                pipelineId);
                     }
                 } catch (WebApplicationException | ProcessingException e) {
+                    // e.getMessage() alone (e.g. "HTTP 404 Not Found") is often too vague to
+                    // debug from the build console - GitLab's actual JSON error body (e.g.
+                    // "404 Pipeline for pipeline_id, sha and ref Not Found") is much more
+                    // specific and is what actually diagnosed this class of bug. Read it
+                    // once, defensively, since the response entity stream can only be
+                    // consumed a single time and may not be a WebApplicationException at all.
+                    String detail = e.getMessage();
+                    if (e instanceof WebApplicationException wae && wae.getResponse() != null) {
+                        try {
+                            String body = wae.getResponse().readEntity(String.class);
+                            if (StringUtils.isNotBlank(body)) {
+                                detail = detail + " - " + body;
+                            }
+                        } catch (RuntimeException ignored) {
+                            // response entity already consumed or unavailable; fall back to detail as-is
+                        }
+                    }
                     printf(
                             listener,
                             "Failed to update GitLab commit status for project '%s': %s%n",
                             gitLabBranchBuild.getProjectId(),
-                            e.getMessage());
+                            detail);
                     LOGGER.log(
                             Level.SEVERE,
                             "Failed to update GitLab commit status for project '%s'"
@@ -120,8 +178,21 @@ public class CommitStatusUpdater {
     }
 
     public static void updateCommitStatus(Run<?, ?> build, TaskListener listener, BuildState state, String name) {
+        updateCommitStatus(build, listener, state, name, (Boolean) null);
+    }
+
+    /**
+     * Same as the four-arg overload above, but with an explicit
+     * attachStatusToMergeRequestPipeline override; see the seven-arg overload.
+     */
+    public static void updateCommitStatus(
+            Run<?, ?> build,
+            TaskListener listener,
+            BuildState state,
+            String name,
+            Boolean attachStatusToMergeRequestPipeline) {
         try {
-            updateCommitStatus(build, listener, state, name, null, null);
+            updateCommitStatus(build, listener, state, name, null, null, attachStatusToMergeRequestPipeline);
         } catch (IllegalStateException e) {
             printf(listener, "Failed to update GitLab commit status: %s%n", e.getMessage());
         }
@@ -140,6 +211,60 @@ public class CommitStatusUpdater {
             LOGGER.log(Level.FINE, "failed to print message {0} due to null TaskListener", message.formatted(args));
         } else {
             listener.getLogger().printf(message, args);
+        }
+    }
+
+    /**
+     * Resolves whether this particular status update should be attached to the commit's
+     * merge request pipeline: an explicit per-call override (from a gitlabCommitStatus /
+     * updateGitlabCommitStatus step) wins if given, otherwise falls back to the plugin's
+     * global default (GitLabConnectionConfig#isAttachStatusToMergeRequestPipeline, off
+     * unless an administrator opts in).
+     */
+    private static boolean shouldAttachStatusToMergeRequestPipeline(Boolean attachStatusToMergeRequestPipelineOverride) {
+        if (attachStatusToMergeRequestPipelineOverride != null) {
+            return attachStatusToMergeRequestPipelineOverride;
+        }
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            return false;
+        }
+        GitLabConnectionConfig config = (GitLabConnectionConfig) jenkins.getDescriptor(GitLabConnectionConfig.class);
+        return config != null && config.isAttachStatusToMergeRequestPipeline();
+    }
+
+    /**
+     * Looks up this commit's merge_request_event pipeline right now, so the status update
+     * can target it explicitly instead of letting GitLab pick (or spin up a throwaway
+     * "external" pipeline) based on sha+ref+context alone. Called fresh before EVERY status
+     * update (not just the first), so a later call - e.g. "success", posted after GitLab's
+     * own MR pipeline has since been created - still finds and targets the correct,
+     * up-to-date pipeline, even though an earlier call (e.g. "pending") may have found
+     * nothing yet and been left for GitLab to handle on its own via the old fallback path
+     * (returning null here preserves that exact old behavior).
+     *
+     * Deliberately scoped to merge_request_event pipelines only, never a plain push
+     * pipeline or GitLab's own throwaway "external" pipelines (the ones created by a status
+     * update that had no real pipeline to attach to): the whole point of this is keeping a
+     * build's result visible to the MR's head_pipeline, which a push pipeline isn't.
+     */
+    private static Integer resolveMergeRequestPipelineId(GitLabClient client, String projectId, String sha) {
+        try {
+            List<Pipeline> pipelines = client.getPipelines(projectId, sha);
+            if (pipelines == null || pipelines.isEmpty()) {
+                return null;
+            }
+            return pipelines.stream()
+                    .filter(p -> "merge_request_event".equals(p.getSource()))
+                    .max(Comparator.comparing(p -> p.getCreatedAt() == null ? "" : p.getCreatedAt()))
+                    .map(Pipeline::getId)
+                    .orElse(null);
+        } catch (WebApplicationException | ProcessingException e) {
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to resolve target pipeline for %s@%s, falling back to default GitLab behavior: %s"
+                            .formatted(projectId, sha, e.getMessage()));
+            return null;
         }
     }
 

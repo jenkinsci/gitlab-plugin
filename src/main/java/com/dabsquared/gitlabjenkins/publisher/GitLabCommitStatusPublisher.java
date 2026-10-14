@@ -19,6 +19,7 @@ import hudson.util.FormValidation;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
@@ -28,6 +29,7 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
 
     private String name;
     private boolean markUnstableAsSuccess;
+    private Boolean attachStatusToMergeRequestPipeline;
 
     @DataBoundConstructor
     public GitLabCommitStatusPublisher(String name, boolean markUnstableAsSuccess) {
@@ -41,7 +43,8 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.running, name);
+        CommitStatusUpdater.updateCommitStatus(
+                build, listener, BuildState.running, name, attachStatusToMergeRequestPipeline);
         return true;
     }
 
@@ -50,11 +53,14 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
             throws InterruptedException, IOException {
         Result buildResult = build.getResult();
         if (buildResult == Result.SUCCESS || (buildResult == Result.UNSTABLE && markUnstableAsSuccess)) {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.success, name);
+            CommitStatusUpdater.updateCommitStatus(
+                    build, listener, BuildState.success, name, attachStatusToMergeRequestPipeline);
         } else if (buildResult == Result.ABORTED) {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.canceled, name);
+            CommitStatusUpdater.updateCommitStatus(
+                    build, listener, BuildState.canceled, name, attachStatusToMergeRequestPipeline);
         } else {
-            CommitStatusUpdater.updateCommitStatus(build, listener, BuildState.failed, name);
+            CommitStatusUpdater.updateCommitStatus(
+                    build, listener, BuildState.failed, name, attachStatusToMergeRequestPipeline);
         }
         return true;
     }
@@ -65,6 +71,20 @@ public class GitLabCommitStatusPublisher extends Notifier implements MatrixAggre
 
     public boolean isMarkUnstableAsSuccess() {
         return markUnstableAsSuccess;
+    }
+
+    public Boolean getAttachStatusToMergeRequestPipeline() {
+        return attachStatusToMergeRequestPipeline;
+    }
+
+    /**
+     * Explicitly opt this publisher in or out of attaching its status updates to the
+     * commit's merge request pipeline, overriding the plugin's global default
+     * (GitLabConnectionConfig). Leave unset to just use that global default.
+     */
+    @DataBoundSetter
+    public void setAttachStatusToMergeRequestPipeline(Boolean attachStatusToMergeRequestPipeline) {
+        this.attachStatusToMergeRequestPipeline = attachStatusToMergeRequestPipeline;
     }
 
     protected GitLabCommitStatusPublisher readResolve() {
