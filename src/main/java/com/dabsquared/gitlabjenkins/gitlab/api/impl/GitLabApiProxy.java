@@ -40,7 +40,8 @@ interface GitLabApiProxy {
             String ref,
             String context,
             String targetUrl,
-            String description);
+            String description,
+            Integer pipelineId);
 
     void changeBuildStatus(
             Integer projectId,
@@ -49,7 +50,8 @@ interface GitLabApiProxy {
             String ref,
             String context,
             String targetUrl,
-            String description);
+            String description,
+            Integer pipelineId);
 
     void getCommit(String projectId, String sha);
 
@@ -80,7 +82,7 @@ interface GitLabApiProxy {
 
     List<Label> getLabels(String projectId);
 
-    List<Pipeline> getPipelines(String projectName);
+    List<Pipeline> getPipelines(String projectName, String sha);
 
     List<MergeRequest> getCommitMergeRequests(String projectId, String sha);
 }

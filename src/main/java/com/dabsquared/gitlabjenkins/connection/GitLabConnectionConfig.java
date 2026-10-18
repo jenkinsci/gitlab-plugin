@@ -19,6 +19,18 @@ import org.kohsuke.stapler.StaplerRequest2;
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
     private Boolean useAuthenticatedEndpoint = true;
+
+    /**
+     * Global default for whether commit status updates should be attached to the commit's
+     * merge request pipeline (via pipeline_id) instead of leaving GitLab to pick/create one
+     * based on sha+ref+context alone. Off by default to preserve prior behavior for anyone
+     * upgrading - this changes what GitLab does with every status update, including for
+     * setups that rely on the old "GitLab decides" behavior (e.g. deliberately relying on
+     * ref for disambiguation when the same sha exists on more than one branch). Can be
+     * overridden per gitlabCommitStatus/updateGitlabCommitStatus step call.
+     */
+    private boolean attachStatusToMergeRequestPipeline = false;
+
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
 
@@ -33,6 +45,15 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     public void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
+        save();
+    }
+
+    public boolean isAttachStatusToMergeRequestPipeline() {
+        return attachStatusToMergeRequestPipeline;
+    }
+
+    public void setAttachStatusToMergeRequestPipeline(boolean attachStatusToMergeRequestPipeline) {
+        this.attachStatusToMergeRequestPipeline = attachStatusToMergeRequestPipeline;
         save();
     }
 
