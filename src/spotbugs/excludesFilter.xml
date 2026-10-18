@@ -20,16 +20,6 @@
     - If it is not a false positive, fix the bug, then remove the exclusion from this section.
    -->
   <Match>
-    <Bug pattern="DM_CONVERT_CASE"/>
-    <Class name="com.dabsquared.gitlabjenkins.trigger.branch.ProjectBranchesProvider"/>
-    <Method name="doAutoCompleteBranchesSpec"/>
-  </Match>
-  <Match>
-    <Bug pattern="DM_CONVERT_CASE"/>
-    <Class name="com.dabsquared.gitlabjenkins.trigger.label.ProjectLabelsProvider"/>
-    <Method name="doAutoCompleteLabels"/>
-  </Match>
-  <Match>
     <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS"/>
     <Class name="com.dabsquared.gitlabjenkins.gitlab.api.GitLabClientBuilder"/>
   </Match>

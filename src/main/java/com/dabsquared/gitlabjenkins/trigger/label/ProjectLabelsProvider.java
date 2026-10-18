@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,7 +63,7 @@ public final class ProjectLabelsProvider {
             result.add(getProjectLabelsAsArray(job));
         } else {
             for (String branch : getProjectLabelsAsArray(job)) {
-                if (branch.toLowerCase().contains(query.toLowerCase())) {
+                if (branch.toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT))) {
                     result.add(branch);
                 }
             }
