@@ -19,6 +19,7 @@ import org.kohsuke.stapler.StaplerRequest2;
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
     private Boolean useAuthenticatedEndpoint = true;
+    private Integer mergeRequestDescriptionMaxLength = 1000;
     private List<GitLabConnection> connections = new ArrayList<>();
     private transient Map<String, GitLabConnection> connectionMap = new HashMap<>();
 
@@ -33,6 +34,18 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     public void setUseAuthenticatedEndpoint(boolean useAuthenticatedEndpoint) {
         this.useAuthenticatedEndpoint = useAuthenticatedEndpoint;
+        save();
+    }
+
+    public int getMergeRequestDescriptionMaxLength() {
+        return mergeRequestDescriptionMaxLength == null ? 1000 : mergeRequestDescriptionMaxLength;
+    }
+
+    public void setMergeRequestDescriptionMaxLength(int mergeRequestDescriptionMaxLength) {
+        if (mergeRequestDescriptionMaxLength < 0) {
+            throw new IllegalArgumentException("Merge request description maximum length must not be negative.");
+        }
+        this.mergeRequestDescriptionMaxLength = mergeRequestDescriptionMaxLength;
         save();
     }
 
