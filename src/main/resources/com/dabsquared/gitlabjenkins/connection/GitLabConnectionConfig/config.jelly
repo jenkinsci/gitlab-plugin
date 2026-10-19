@@ -4,6 +4,9 @@
     <f:entry title="${%Enable authentication for '/project' end-point}" field="useAuthenticatedEndpoint">
       <f:checkbox  default="true"/>
     </f:entry>
+    <f:entry title="${%Maximum merge request description length}" field="mergeRequestDescriptionMaxLength">
+      <f:number/>
+    </f:entry>
     <f:entry title="${%GitLab connections}">
       <f:repeatableProperty field="connections">
         <f:block>
