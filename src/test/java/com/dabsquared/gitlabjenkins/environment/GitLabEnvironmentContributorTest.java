@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import hudson.EnvVars;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixBuild;
@@ -45,6 +46,7 @@ class GitLabEnvironmentContributorTest {
     @BeforeEach
     void setUp() {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
+        GitLabConnectionConfig.get().setMergeRequestDescriptionMaxLength(1000);
     }
 
     @Test
@@ -114,6 +116,37 @@ class GitLabEnvironmentContributorTest {
         testFreeStyleProjectLabels(
                 generateCauseDataWithLabels(Arrays.asList("test1", "test2", "test with spaces")),
                 "test1,test2,test with spaces");
+    }
+
+    @Test
+    void mergeRequestDescription_envVariableUsesConfiguredMaximumLength() {
+        String description = "description".repeat(100);
+        GitLabConnectionConfig.get().setMergeRequestDescriptionMaxLength(100);
+
+        CauseData causeData = generateCauseDataBase().withMergeRequestDescription(description).build();
+
+        assertEquals(
+                description.substring(0, 100), causeData.getBuildVariables().get("gitlabMergeRequestDescription"));
+    }
+
+    @Test
+    void mergeRequestDescription_envVariableUsesDefaultMaximumLength() {
+        String description = "description".repeat(100);
+
+        CauseData causeData = generateCauseDataBase().withMergeRequestDescription(description).build();
+
+        assertEquals(
+                description.substring(0, 1000), causeData.getBuildVariables().get("gitlabMergeRequestDescription"));
+    }
+
+    @Test
+    void mergeRequestDescription_envVariableCanBeUntruncated() {
+        String description = "description".repeat(100);
+        GitLabConnectionConfig.get().setMergeRequestDescriptionMaxLength(0);
+
+        CauseData causeData = generateCauseDataBase().withMergeRequestDescription(description).build();
+
+        assertEquals(description, causeData.getBuildVariables().get("gitlabMergeRequestDescription"));
     }
 
     private CauseDataBuilder generateCauseDataBase() {
