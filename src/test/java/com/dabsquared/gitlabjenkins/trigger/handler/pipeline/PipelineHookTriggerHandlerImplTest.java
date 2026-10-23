@@ -18,6 +18,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.RevisionParameterAction;
 import hudson.util.OneShotEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -268,5 +270,38 @@ class PipelineHookTriggerHandlerImplTest {
 
         buildTriggered.block(5000);
         assertThat(buildTriggered.isSignaled(), is(false));
+    }
+
+    /**
+     * Pipeline hooks never carry a {@code repository} field at all, so the revision pin must come
+     * from the top-level {@code project} field instead (jenkinsci/gitlab-plugin#477).
+     */
+    @Test
+    void createRevisionParameter_resolvesFromProject() throws Exception {
+        List<String> allowedStates = new ArrayList<>();
+        allowedStates.add("success");
+        PipelineHookTriggerHandlerImpl handler = new PipelineHookTriggerHandlerImpl(allowedStates);
+        GitSCM gitSCM = new GitSCM("https://gitlab.org/test.git");
+
+        PipelineHook hook = pipelineHook()
+                .withProject(project()
+                        .withId(1)
+                        .withNamespace("test-namespace")
+                        .withWebUrl("https://gitlab.org/test")
+                        .withUrl("git@gitlab.org:test.git")
+                        .withHttpUrl("https://gitlab.org/test.git")
+                        .build())
+                .withObjectAttributes(pipelineEventObjectAttributes()
+                        .withId(1)
+                        .withStatus("success")
+                        .withSha("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
+                        .withStages(new ArrayList<String>())
+                        .withRef("refs/heads/master")
+                        .build())
+                .build();
+
+        RevisionParameterAction action = handler.createRevisionParameter(hook, gitSCM);
+
+        assertThat(action.canOriginateFrom(gitSCM.getRepositories()), is(true));
     }
 }

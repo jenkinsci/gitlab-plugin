@@ -4,6 +4,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.C
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestHookBuilder.mergeRequestHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder.mergeRequestObjectAttributes;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
@@ -25,6 +26,7 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.RevisionParameterAction;
 import hudson.util.OneShotEvent;
 import java.io.File;
 import java.util.Arrays;
@@ -501,6 +503,33 @@ class MergeRequestHookTriggerHandlerImplTest {
 
         assertThat(buildTriggered.isSignaled(), is(false));
         assertNull(buildHolder.get());
+    }
+
+    /**
+     * Regression test for jenkinsci/gitlab-plugin#477: GitLab's real merge request webhook payload
+     * leaves the legacy {@code repository} field null or without git URLs, so the revision pin must
+     * come from {@code object_attributes.target} instead.
+     */
+    @Test
+    void createRevisionParameter_resolvesFromTargetProject_whenLegacyRepositoryUrlDoesNotMatch() throws Exception {
+        MergeRequestHookTriggerHandlerImpl handler =
+                new MergeRequestHookTriggerHandlerImpl(Arrays.asList(State.opened), false, false);
+        GitSCM gitSCM = new GitSCM("https://gitlab.org/test.git");
+
+        RevisionParameterAction action = handler.createRevisionParameter(
+                mergeRequestHook()
+                        .withRepository(
+                                repository().withUrl("git@gitlab.org:test.git").build())
+                        .withObjectAttributes(defaultMergeRequestObjectAttributes()
+                                .withLastCommit(commit().withAuthor(
+                                                user().withName("test").build())
+                                        .withId("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
+                                        .build())
+                                .build())
+                        .build(),
+                gitSCM);
+
+        assertThat(action.canOriginateFrom(gitSCM.getRepositories()), is(true));
     }
 
     private void do_not_build_for_state_when_nothing_enabled(State state) throws Exception {
