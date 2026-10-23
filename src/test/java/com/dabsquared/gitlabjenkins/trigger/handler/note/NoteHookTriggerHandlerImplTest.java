@@ -6,6 +6,7 @@ import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.M
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.NoteHookBuilder.noteHook;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.NoteObjectAttributesBuilder.noteObjectAttributes;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
+import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder.repository;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder.user;
 import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterConfig.BranchFilterConfigBuilder.branchFilterConfig;
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
@@ -23,6 +24,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
+import hudson.plugins.git.RevisionParameterAction;
 import hudson.util.OneShotEvent;
 import java.io.File;
 import java.io.IOException;
@@ -204,5 +206,36 @@ class NoteHookTriggerHandlerImplTest {
 
         buildTriggered.block(10000);
         assertThat(buildTriggered.isSignaled(), is(true));
+    }
+
+    /**
+     * Regression test for jenkinsci/gitlab-plugin#477: a note webhook's {@code repository} field is
+     * only minimally populated (no git URLs), so the revision pin must come from the top-level
+     * {@code project} field instead.
+     */
+    @Test
+    void createRevisionParameter_resolvesFromProject_whenLegacyRepositoryUrlDoesNotMatch() throws Exception {
+        NoteHookTriggerHandlerImpl handler = new NoteHookTriggerHandlerImpl("ci-run");
+        GitSCM gitSCM = new GitSCM("https://gitlab.org/test.git");
+
+        RevisionParameterAction action = handler.createRevisionParameter(
+                noteHook()
+                        .withRepository(repository()
+                                .withUrl("http://localhost/gitlab-org/gitlab-test.git")
+                                .build())
+                        .withProject(project()
+                                .withUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
+                                .build())
+                        .withMergeRequest(mergeRequestObjectAttributes()
+                                .withLastCommit(commit().withAuthor(
+                                                user().withName("test").build())
+                                        .withId("bcbb5ec396a2c0f828686f14fac9b80b780504f2")
+                                        .build())
+                                .build())
+                        .build(),
+                gitSCM);
+
+        assertThat(action.canOriginateFrom(gitSCM.getRepositories()), is(true));
     }
 }
