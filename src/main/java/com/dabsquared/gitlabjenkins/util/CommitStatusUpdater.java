@@ -221,7 +221,8 @@ public class CommitStatusUpdater {
      * global default (GitLabConnectionConfig#isAttachStatusToMergeRequestPipeline, off
      * unless an administrator opts in).
      */
-    private static boolean shouldAttachStatusToMergeRequestPipeline(Boolean attachStatusToMergeRequestPipelineOverride) {
+    private static boolean shouldAttachStatusToMergeRequestPipeline(
+            Boolean attachStatusToMergeRequestPipelineOverride) {
         if (attachStatusToMergeRequestPipelineOverride != null) {
             return attachStatusToMergeRequestPipelineOverride;
         }
