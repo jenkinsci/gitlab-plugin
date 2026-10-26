@@ -215,6 +215,44 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
+    public void changeBuildStatus(
+            final String projectId,
+            final String sha,
+            final BuildState state,
+            final String ref,
+            final String context,
+            final String targetUrl,
+            final String description,
+            final Integer pipelineId) {
+        execute(new GitLabOperation<Void>() {
+            @Override
+            Void execute(GitLabClient client) {
+                client.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description, pipelineId);
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public void changeBuildStatus(
+            final Integer projectId,
+            final String sha,
+            final BuildState state,
+            final String ref,
+            final String context,
+            final String targetUrl,
+            final String description,
+            final Integer pipelineId) {
+        execute(new GitLabOperation<Void>() {
+            @Override
+            Void execute(GitLabClient client) {
+                client.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description, pipelineId);
+                return null;
+            }
+        });
+    }
+
+    @Override
     public void getCommit(final String projectId, final String sha) {
         execute(new GitLabOperation<Void>() {
             @Override
@@ -358,6 +396,16 @@ final class AutodetectingGitLabClient implements GitLabClient {
             @Override
             List<Pipeline> execute(GitLabClient client) {
                 return client.getPipelines(projectName);
+            }
+        });
+    }
+
+    @Override
+    public List<Pipeline> getPipelines(final String projectName, final String sha) {
+        return execute(new GitLabOperation<List<Pipeline>>() {
+            @Override
+            List<Pipeline> execute(GitLabClient client) {
+                return client.getPipelines(projectName, sha);
             }
         });
     }

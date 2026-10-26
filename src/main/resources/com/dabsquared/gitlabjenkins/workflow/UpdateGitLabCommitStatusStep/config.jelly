@@ -6,4 +6,15 @@
   <f:entry title="${%Build state}" field="state">
     <f:select/>
   </f:entry>
+  <!--
+    attachStatusToMergeRequestPipeline is a nullable Boolean (null = inherit the plugin's
+    global default, set via GitLabConnectionConfig): a plain f:checkbox only round-trips
+    true/false, so the "inherit" state is reachable from Pipeline script
+    (attachStatusToMergeRequestPipeline: null / simply omitting the setter call) but not
+    from this classic form. That's an acceptable gap here since this step is normally
+    driven from a Jenkinsfile, not this form.
+  -->
+  <f:entry title="${%Attach commit status to merge request pipeline}" field="attachStatusToMergeRequestPipeline" help="/plugin/gitlab-plugin/help/help-attachStatusToMergeRequestPipeline.html">
+    <f:checkbox/>
+  </f:entry>
 </j:jelly>

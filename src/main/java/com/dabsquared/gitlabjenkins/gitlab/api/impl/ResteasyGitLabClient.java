@@ -112,7 +112,7 @@ final class ResteasyGitLabClient implements GitLabClient {
             String context,
             String targetUrl,
             String description) {
-        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
+        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description, null);
     }
 
     @Override
@@ -124,7 +124,33 @@ final class ResteasyGitLabClient implements GitLabClient {
             String context,
             String targetUrl,
             String description) {
-        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description);
+        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description, null);
+    }
+
+    @Override
+    public void changeBuildStatus(
+            String projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description,
+            Integer pipelineId) {
+        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description, pipelineId);
+    }
+
+    @Override
+    public void changeBuildStatus(
+            Integer projectId,
+            String sha,
+            BuildState state,
+            String ref,
+            String context,
+            String targetUrl,
+            String description,
+            Integer pipelineId) {
+        api.changeBuildStatus(projectId, sha, state, ref, context, targetUrl, description, pipelineId);
     }
 
     @Override
@@ -195,7 +221,12 @@ final class ResteasyGitLabClient implements GitLabClient {
 
     @Override
     public List<Pipeline> getPipelines(String projectName) {
-        return api.getPipelines(projectName);
+        return api.getPipelines(projectName, null);
+    }
+
+    @Override
+    public List<Pipeline> getPipelines(String projectName, String sha) {
+        return api.getPipelines(projectName, sha);
     }
 
     @Override
