@@ -366,6 +366,8 @@ Also make sure you have chosen the appropriate GitLab instance from the 'GitLab 
     }
     ```
 * Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented [here](https://docs.gitlab.com/ee/api/commits.html#set-the-pipeline-status-of-a-commit).
+
+    The states GitLab's Commits API accepts today are: `pending`, `running`, `success`, `failed`, and `canceled` (one "l"). The plugin's `BuildState` enum also lists `skipped` for historical reasons, but sending `state: 'skipped'` is rejected by GitLab with **HTTP 400 Bad Request** and the commit status never appears (#1411). Prefer `canceled` when a stage did not run, or skip the `updateGitlabCommitStatus` call for that stage.
     ```groovy
     node() {
         stage('Checkout') { checkout <your-scm-config> }
