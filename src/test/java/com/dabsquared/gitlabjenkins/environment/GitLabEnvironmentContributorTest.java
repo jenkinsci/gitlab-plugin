@@ -123,7 +123,8 @@ class GitLabEnvironmentContributorTest {
         String description = "description".repeat(100);
         GitLabConnectionConfig.get().setMergeRequestDescriptionMaxLength(100);
 
-        CauseData causeData = generateCauseDataBase().withMergeRequestDescription(description).build();
+        CauseData causeData =
+                generateCauseDataBase().withMergeRequestDescription(description).build();
 
         assertEquals(
                 description.substring(0, 100), causeData.getBuildVariables().get("gitlabMergeRequestDescription"));
@@ -133,7 +134,8 @@ class GitLabEnvironmentContributorTest {
     void mergeRequestDescription_envVariableUsesDefaultMaximumLength() {
         String description = "description".repeat(100);
 
-        CauseData causeData = generateCauseDataBase().withMergeRequestDescription(description).build();
+        CauseData causeData =
+                generateCauseDataBase().withMergeRequestDescription(description).build();
 
         assertEquals(
                 description.substring(0, 1000), causeData.getBuildVariables().get("gitlabMergeRequestDescription"));
@@ -144,7 +146,8 @@ class GitLabEnvironmentContributorTest {
         String description = "description".repeat(100);
         GitLabConnectionConfig.get().setMergeRequestDescriptionMaxLength(0);
 
-        CauseData causeData = generateCauseDataBase().withMergeRequestDescription(description).build();
+        CauseData causeData =
+                generateCauseDataBase().withMergeRequestDescription(description).build();
 
         assertEquals(description, causeData.getBuildVariables().get("gitlabMergeRequestDescription"));
     }
