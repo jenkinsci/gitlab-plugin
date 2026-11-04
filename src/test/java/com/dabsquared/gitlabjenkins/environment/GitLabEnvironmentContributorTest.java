@@ -42,7 +42,6 @@ class GitLabEnvironmentContributorTest {
     static void setUp(JenkinsRule rule) {
         jenkins = rule;
         assertEquals(1000, GitLabConnectionConfig.get().getMergeRequestDescriptionMaxLength());
-        assertEquals(1000, GitLabConnectionConfig.get().getMergeRequestDescriptionMaxLength());
     }
 
     @BeforeEach
