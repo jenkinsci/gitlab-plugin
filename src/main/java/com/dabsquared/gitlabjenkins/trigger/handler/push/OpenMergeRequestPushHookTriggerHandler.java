@@ -19,14 +19,15 @@ import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.trigger.handler.MergeRequestBuildHandler;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
+import com.dabsquared.gitlabjenkins.util.RepositoryUrlUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
+import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.Trigger;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -142,9 +143,10 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                     client.getProject(mergeRequest.getSourceProjectId().toString());
             String commit = branch.getCommit().getId();
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
+            GitSCM gitSCM = RepositoryUrlUtil.findGitSCM(job);
             List<Action> actions = Arrays.<Action>asList(
                     new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
-                    new RevisionParameterAction(commit, retrieveUrIish(hook)));
+                    new RevisionParameterAction(commit, retrieveUrIish(hook, gitSCM)));
             scheduleBuild(job, actions.toArray(new Action[actions.size()]));
         }
     }
@@ -235,14 +237,10 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
         };
     }
 
-    private URIish retrieveUrIish(PushHook hook) {
-        try {
-            if (hook.getRepository() != null) {
-                return new URIish(hook.getRepository().getUrl());
-            }
-        } catch (URISyntaxException e) {
-            LOGGER.log(Level.WARNING, "could not parse URL");
+    private URIish retrieveUrIish(PushHook hook, GitSCM gitSCM) {
+        if (hook.getRepository() == null) {
+            return null;
         }
-        return null;
+        return RepositoryUrlUtil.resolveUrIish(hook.getRepository(), gitSCM);
     }
 }

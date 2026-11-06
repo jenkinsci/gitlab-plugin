@@ -6,11 +6,13 @@ import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Project;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.WebHook;
 import com.dabsquared.gitlabjenkins.trigger.exception.NoRevisionToBuildException;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
 import com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilter;
 import com.dabsquared.gitlabjenkins.util.LoggerUtil;
+import com.dabsquared.gitlabjenkins.util.RepositoryUrlUtil;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -19,7 +21,6 @@ import hudson.plugins.git.RevisionParameterAction;
 import hudson.scm.SCM;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -133,15 +134,23 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected abstract BuildStatusUpdate retrieveBuildStatusUpdate(H hook);
 
-    protected URIish retrieveUrIish(WebHook hook) {
-        try {
-            if (hook.getRepository() != null) {
-                return new URIish(hook.getRepository().getUrl());
-            }
-        } catch (URISyntaxException e) {
-            LOGGER.log(Level.WARNING, "could not parse URL");
+    protected URIish retrieveUrIish(WebHook hook, GitSCM gitSCM) {
+        if (hook.getRepository() == null) {
+            return null;
         }
-        return null;
+        return RepositoryUrlUtil.resolveUrIish(hook.getRepository(), gitSCM);
+    }
+
+    /**
+     * The legacy {@code repository} field ({@link #retrieveUrIish(WebHook, GitSCM)}) is null or
+     * missing the git clone URLs on merge request, note and pipeline hooks; those should resolve
+     * the revision URL from the richer {@code project} field instead.
+     */
+    protected URIish retrieveUrIish(Project project, GitSCM gitSCM) {
+        if (project == null) {
+            return null;
+        }
+        return RepositoryUrlUtil.resolveUrIish(project, gitSCM);
     }
 
     protected void scheduleBuild(Job<?, ?> job, Action[] actions) {
