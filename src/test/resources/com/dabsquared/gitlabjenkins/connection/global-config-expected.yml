@@ -6,4 +6,5 @@ connections:
   name: "my_gitlab_server"
   readTimeout: 10
   url: "https://gitlab.com/"
+mergeRequestDescriptionMaxLength: 500
 useAuthenticatedEndpoint: true

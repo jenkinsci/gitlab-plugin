@@ -111,6 +111,8 @@ gitlabTriggerPhrase
 
  **NOTE:** These variables are not available in Pipeline Multibranch jobs.
 
+The `gitlabMergeRequestDescription` variable is limited to 1000 characters by default. To change the limit, go to **Manage Jenkins » System » GitLab** and set **Maximum merge request description length**. Set it to `0` to expose the full description without truncation.
+
 ## Global plugin configuration
 ### GitLab-to-Jenkins authentication
 The plugin requires authentication to connect from GitLab to Jenkins. This prevents unauthorized persons from triggering jobs.
