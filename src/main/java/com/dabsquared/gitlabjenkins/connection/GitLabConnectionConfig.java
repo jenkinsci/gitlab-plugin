@@ -19,6 +19,7 @@ import org.kohsuke.stapler.StaplerRequest2;
 public class GitLabConnectionConfig extends GlobalConfiguration {
 
     private Boolean useAuthenticatedEndpoint = true;
+    private Integer mergeRequestDescriptionMaxLength = 1000;
 
     /**
      * Global default for whether commit status updates should be attached to the commit's
@@ -54,6 +55,18 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
 
     public void setAttachStatusToMergeRequestPipeline(boolean attachStatusToMergeRequestPipeline) {
         this.attachStatusToMergeRequestPipeline = attachStatusToMergeRequestPipeline;
+        save();
+    }
+
+    public int getMergeRequestDescriptionMaxLength() {
+        return mergeRequestDescriptionMaxLength == null ? 1000 : mergeRequestDescriptionMaxLength;
+    }
+
+    public void setMergeRequestDescriptionMaxLength(int mergeRequestDescriptionMaxLength) {
+        if (mergeRequestDescriptionMaxLength < 0) {
+            throw new IllegalArgumentException("Merge request description maximum length must not be negative.");
+        }
+        this.mergeRequestDescriptionMaxLength = mergeRequestDescriptionMaxLength;
         save();
     }
 
