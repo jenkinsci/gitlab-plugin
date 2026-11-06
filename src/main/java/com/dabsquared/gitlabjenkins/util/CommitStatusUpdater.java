@@ -43,6 +43,7 @@ import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 public class CommitStatusUpdater {
 
     private static final Logger LOGGER = Logger.getLogger(CommitStatusUpdater.class.getName());
+    private static final String MERGE_REQUEST_EVENT_SOURCE = "merge_request_event";
 
     public static void updateCommitStatus(
             Run<?, ?> build,
@@ -251,13 +252,18 @@ public class CommitStatusUpdater {
      */
     private static Integer resolveMergeRequestPipelineId(GitLabClient client, String projectId, String sha) {
         try {
-            List<Pipeline> pipelines = client.getPipelines(projectId, sha);
+            // Filter server-side so the MR pipeline isn't pushed off the first result page by
+            // other pipelines for the same SHA; re-check client-side because older GitLab
+            // versions silently ignore the source filter.
+            List<Pipeline> pipelines = client.getPipelines(projectId, sha, MERGE_REQUEST_EVENT_SOURCE);
             if (pipelines == null || pipelines.isEmpty()) {
                 return null;
             }
             return pipelines.stream()
-                    .filter(p -> "merge_request_event".equals(p.getSource()))
-                    .max(Comparator.comparing(p -> p.getCreatedAt() == null ? "" : p.getCreatedAt()))
+                    .filter(p -> MERGE_REQUEST_EVENT_SOURCE.equals(p.getSource()))
+                    .filter(p -> sha.equals(p.getSha()))
+                    .filter(p -> p.getId() != null)
+                    .max(Comparator.comparing(Pipeline::getId))
                     .map(Pipeline::getId)
                     .orElse(null);
         } catch (WebApplicationException | ProcessingException e) {

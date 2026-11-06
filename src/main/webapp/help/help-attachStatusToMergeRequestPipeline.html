@@ -4,6 +4,12 @@
   SHA, ref and status name alone.
 </p>
 <p>
-  Leave unchecked/unset to use the global default configured under
-  <em>Manage Jenkins &gt; System &gt; GitLab &gt; Attach commit status updates to the merge request pipeline</em>.
+  When unchecked, this is explicitly disabled here, even if the global option
+  <em>Manage Jenkins &gt; System &gt; GitLab &gt; Attach commit status updates to the merge request pipeline</em>
+  is enabled.
+</p>
+<p>
+  To inherit the global option instead, omit the <code>attachStatusToMergeRequestPipeline</code>
+  argument in Pipeline script. Saving this form (or generating a snippet with the Snippet Generator)
+  always stores an explicit <code>true</code> or <code>false</code>.
 </p>

@@ -273,15 +273,16 @@ interface V4GitLabApiProxy extends GitLabApiProxy {
     @Override
     List<Label> getLabels(@PathParam("projectId") @Encoded String projectId);
 
-    // Only one REST-mapped method here, same reasoning as changeBuildStatus
-    // above: sha is an optional query param, so GitLabClient's 1-arg
-    // convenience overload just calls this one with sha=null.
+    // Null query params are omitted from the request. GitLab versions predating the
+    // "source" filter ignore it, so callers must still filter results client-side.
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/projects/{projectId}/pipelines")
     @Override
     List<Pipeline> getPipelines(
-            @PathParam("projectId") @Encoded String projectId, @QueryParam("sha") @Encoded String sha);
+            @PathParam("projectId") @Encoded String projectId,
+            @QueryParam("sha") @Encoded String sha,
+            @QueryParam("source") String source);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

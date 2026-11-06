@@ -3,6 +3,7 @@ package com.dabsquared.gitlabjenkins.gitlab.api;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.*;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface GitLabClient {
     String getHostUrl();
@@ -124,12 +125,19 @@ public interface GitLabClient {
     List<Pipeline> getPipelines(String projectName);
 
     /**
-     * Same as {@link #getPipelines(String)} but filtered to a single commit SHA.
-     * Default implementation falls back to fetching all pipelines unfiltered, so existing
-     * GitLabClient implementations (e.g. test stubs) keep compiling unchanged.
+     * Same as {@link #getPipelines(String)} but filtered to a commit SHA and pipeline source
+     * (e.g. {@code merge_request_event}); a null filter matches everything. The default
+     * implementation filters {@link #getPipelines(String)} client-side.
      */
-    default List<Pipeline> getPipelines(String projectName, String sha) {
-        return getPipelines(projectName);
+    default List<Pipeline> getPipelines(String projectName, String sha, String source) {
+        List<Pipeline> pipelines = getPipelines(projectName);
+        if (pipelines == null) {
+            return null;
+        }
+        return pipelines.stream()
+                .filter(p -> sha == null || sha.equals(p.getSha()))
+                .filter(p -> source == null || source.equals(p.getSource()))
+                .collect(Collectors.toList());
     }
 
     List<MergeRequest> getCommitMergeRequests(String projectId, String sha);

@@ -82,7 +82,7 @@ interface GitLabApiProxy {
 
     List<Label> getLabels(String projectId);
 
-    List<Pipeline> getPipelines(String projectName, String sha);
+    List<Pipeline> getPipelines(String projectName, String sha, String source);
 
     List<MergeRequest> getCommitMergeRequests(String projectId, String sha);
 }

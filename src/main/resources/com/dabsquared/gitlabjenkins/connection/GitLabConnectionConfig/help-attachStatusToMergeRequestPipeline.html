@@ -17,7 +17,10 @@
   open merge request), this has no effect and GitLab's default behavior is used.
   </p>
   <p>
-  This is off by default to preserve existing behavior. It can be overridden per
-  <code>gitlabCommitStatus</code> / <code>updateGitlabCommitStatus</code> Pipeline step call.
+  This is off by default to preserve existing behavior. It applies wherever the per-step or
+  per-job <code>attachStatusToMergeRequestPipeline</code> setting is unset, e.g. a
+  <code>gitlabCommitStatus</code>, <code>updateGitlabCommitStatus</code> or
+  <code>gitlabBuilds</code> Pipeline step call that omits that argument. Saving a job's
+  configuration form always stores an explicit per-job value, which then takes precedence.
   </p>
 </div>

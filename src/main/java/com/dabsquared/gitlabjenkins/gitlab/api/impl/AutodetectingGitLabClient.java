@@ -401,11 +401,11 @@ final class AutodetectingGitLabClient implements GitLabClient {
     }
 
     @Override
-    public List<Pipeline> getPipelines(final String projectName, final String sha) {
+    public List<Pipeline> getPipelines(final String projectName, final String sha, final String source) {
         return execute(new GitLabOperation<List<Pipeline>>() {
             @Override
             List<Pipeline> execute(GitLabClient client) {
-                return client.getPipelines(projectName, sha);
+                return client.getPipelines(projectName, sha, source);
             }
         });
     }
