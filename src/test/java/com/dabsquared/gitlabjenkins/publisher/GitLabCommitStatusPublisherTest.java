@@ -269,6 +269,84 @@ class GitLabCommitStatusPublisherTest {
                         "Failed to update GitLab commit status for project 'test/project': HTTP 403 Forbidden"));
     }
 
+    @Test
+    void running_attachedToMergeRequestPipeline_v4() throws Exception {
+        AbstractBuild build = mockBuildOnBranch("feature");
+        HttpRequest existsCommit = prepareExistsCommitWithSuccessResponse("v4", "test/project");
+        HttpRequest getPipelines = prepareGetMergeRequestPipelinesResponse(
+                "[{\"id\":42,\"sha\":\"" + SHA1 + "\",\"ref\":\"refs/merge-requests/1/head\","
+                        + "\"status\":\"running\",\"source\":\"merge_request_event\"}]");
+        HttpRequest updateCommitStatus =
+                prepareUpdateCommitStatusV4WithSuccessResponse(statusBody(build, BuildState.running, null, 42));
+
+        prebuildWithAttachmentEnabled(build);
+
+        mockServerClient.verify(existsCommit, getPipelines, updateCommitStatus);
+    }
+
+    @Test
+    void running_attachmentEnabledWithoutMergeRequestPipeline_v4() throws Exception {
+        AbstractBuild build = mockBuildOnBranch("feature");
+        HttpRequest existsCommit = prepareExistsCommitWithSuccessResponse("v4", "test/project");
+        HttpRequest getPipelines = prepareGetMergeRequestPipelinesResponse("[]");
+        HttpRequest updateCommitStatus =
+                prepareUpdateCommitStatusV4WithSuccessResponse(statusBody(build, BuildState.running, "feature", null));
+
+        prebuildWithAttachmentEnabled(build);
+
+        mockServerClient.verify(existsCommit, getPipelines, updateCommitStatus);
+    }
+
+    private AbstractBuild mockBuildOnBranch(String branch) throws Exception {
+        AbstractBuild build = mockBuild(GITLAB_CONNECTION_V4, null, "test/project.git");
+        EnvVars environment = build.getEnvironment(listener);
+        when(environment.get("BRANCH_NAME", null)).thenReturn(branch);
+        return build;
+    }
+
+    private void prebuildWithAttachmentEnabled(AbstractBuild build) {
+        GitLabCommitStatusPublisher publisher = new GitLabCommitStatusPublisher("jenkins", false);
+        publisher.setAttachStatusToMergeRequestPipeline(true);
+        publisher.prebuild(build, listener);
+    }
+
+    private HttpRequest prepareGetMergeRequestPipelinesResponse(String json) {
+        HttpRequest getPipelines = request()
+                .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode("test/project", StandardCharsets.UTF_8)
+                        + "/pipelines")
+                .withMethod("GET")
+                .withHeader("PRIVATE-TOKEN", "secret")
+                .withQueryStringParameter("sha", SHA1)
+                .withQueryStringParameter("source", "merge_request_event");
+        mockServerClient
+                .when(getPipelines)
+                .respond(response()
+                        .withStatusCode(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(json));
+        return getPipelines;
+    }
+
+    private HttpRequest prepareUpdateCommitStatusV4WithSuccessResponse(String body) {
+        HttpRequest updateCommitStatus = request()
+                .withPath("/gitlab/api/v4/projects/" + URLEncoder.encode("test/project", StandardCharsets.UTF_8)
+                        + "/statuses/" + SHA1)
+                .withMethod("POST")
+                .withHeader("PRIVATE-TOKEN", "secret")
+                .withBody(body);
+        mockServerClient.when(updateCommitStatus).respond(response().withStatusCode(200));
+        return updateCommitStatus;
+    }
+
+    private static String statusBody(Run<?, ?> build, BuildState state, String ref, Integer pipelineId) {
+        return "state=" + URLEncoder.encode(state.name(), StandardCharsets.UTF_8)
+                + (ref == null ? "" : "&ref=" + URLEncoder.encode(ref, StandardCharsets.UTF_8))
+                + "&context=jenkins"
+                + "&target_url=" + URLEncoder.encode(DisplayURLProvider.get().getRunURL(build), StandardCharsets.UTF_8)
+                + "&description=" + URLEncoder.encode(state.name(), StandardCharsets.UTF_8)
+                + (pipelineId == null ? "" : "&pipeline_id=" + pipelineId);
+    }
+
     private void prebuildAndVerify(AbstractBuild build, BuildListener listener, HttpRequest... requests) {
         new GitLabCommitStatusPublisher("jenkins", false).prebuild(build, listener);
         mockServerClient.verify(requests);

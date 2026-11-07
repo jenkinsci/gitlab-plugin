@@ -2,6 +2,7 @@ package com.dabsquared.gitlabjenkins.util;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +13,7 @@ import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty;
 import com.dabsquared.gitlabjenkins.gitlab.api.GitLabClient;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
+import com.dabsquared.gitlabjenkins.gitlab.api.model.Pipeline;
 import com.dabsquared.gitlabjenkins.workflow.GitLabBranchBuild;
 import hudson.EnvVars;
 import hudson.Functions;
@@ -23,9 +25,11 @@ import hudson.model.TaskListener;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.util.Build;
 import hudson.plugins.git.util.BuildData;
+import jakarta.ws.rs.WebApplicationException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import jenkins.model.Jenkins;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -37,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.OngoingStubbing;
 import org.mockserver.junit.jupiter.MockServerExtension;
 
 /**
@@ -50,6 +55,7 @@ class CommitStatusUpdaterTest {
     private static final String STAGE = "test";
     private static final String REVISION = "1111111";
     private static final String JENKINS_URL = "https://gitlab.org/jenkins/";
+    private static final String MR_SOURCE = "merge_request_event";
 
     @Mock
     private Run<?, ?> build;
@@ -186,7 +192,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -201,7 +208,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -218,7 +226,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -235,7 +244,8 @@ class CommitStatusUpdaterTest {
                         "feature",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
     }
 
     @Test
@@ -279,6 +289,120 @@ class CommitStatusUpdaterTest {
                         "3.0.0",
                         STAGE,
                         DisplayURLProvider.get().getRunURL(build),
-                        BuildState.success.name());
+                        BuildState.success.name(),
+                        null);
+    }
+
+    @Test
+    void mergeRequestPipelineIsNotLookedUpByDefault() {
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
+
+        verify(client, never()).getPipelines(any(), any(), any());
+        verifyStatus(BuildState.success, "feature", null);
+    }
+
+    @Test
+    void globalOptionAttachesStatusToMergeRequestPipelineAndOmitsRef() {
+        when(gitLabConnectionConfig.isAttachStatusToMergeRequestPipeline()).thenReturn(true);
+        whenPipelinesLookedUp().thenReturn(List.of(pipeline(42, MR_SOURCE, REVISION)));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
+
+        verifyStatus(BuildState.success, null, 42);
+    }
+
+    @Test
+    void laterUpdateTargetsMergeRequestPipelineCreatedAfterEarlierUpdate() {
+        when(gitLabConnectionConfig.isAttachStatusToMergeRequestPipeline()).thenReturn(true);
+        whenPipelinesLookedUp()
+                .thenReturn(Collections.emptyList())
+                .thenReturn(List.of(pipeline(42, MR_SOURCE, REVISION)));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.pending, STAGE);
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE);
+
+        verifyStatus(BuildState.pending, "feature", null);
+        verifyStatus(BuildState.success, null, 42);
+    }
+
+    @Test
+    void explicitTrueOverridesDisabledGlobalOption() {
+        when(gitLabConnectionConfig.isAttachStatusToMergeRequestPipeline()).thenReturn(false);
+        whenPipelinesLookedUp().thenReturn(List.of(pipeline(42, MR_SOURCE, REVISION)));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, true);
+
+        verifyStatus(BuildState.success, null, 42);
+    }
+
+    @Test
+    void explicitFalseOverridesEnabledGlobalOption() {
+        when(gitLabConnectionConfig.isAttachStatusToMergeRequestPipeline()).thenReturn(true);
+        whenPipelinesLookedUp().thenReturn(List.of(pipeline(42, MR_SOURCE, REVISION)));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, false);
+
+        verify(client, never()).getPipelines(any(), any(), any());
+        verifyStatus(BuildState.success, "feature", null);
+    }
+
+    @Test
+    void nonMergeRequestPipelinesAndOtherCommitsAreIgnored() {
+        whenPipelinesLookedUp()
+                .thenReturn(List.of(
+                        pipeline(50, "push", REVISION),
+                        pipeline(51, "external", REVISION),
+                        pipeline(52, MR_SOURCE, "2222222")));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, true);
+
+        verifyStatus(BuildState.success, "feature", null);
+    }
+
+    @Test
+    void newestMergeRequestPipelineIsSelected() {
+        whenPipelinesLookedUp()
+                .thenReturn(List.of(
+                        pipeline(40, MR_SOURCE, REVISION),
+                        pipeline(42, MR_SOURCE, REVISION),
+                        pipeline(41, MR_SOURCE, REVISION)));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, true);
+
+        verifyStatus(BuildState.success, null, 42);
+    }
+
+    @Test
+    void pipelineLookupFailureFallsBackToDefaultBehavior() {
+        whenPipelinesLookedUp().thenThrow(new WebApplicationException(500));
+
+        CommitStatusUpdater.updateCommitStatus(build, taskListener, BuildState.success, STAGE, true);
+
+        verifyStatus(BuildState.success, "feature", null);
+    }
+
+    private OngoingStubbing<List<Pipeline>> whenPipelinesLookedUp() {
+        return when(client.getPipelines(Integer.toString(PROJECT_ID), REVISION, MR_SOURCE));
+    }
+
+    private void verifyStatus(BuildState state, String ref, Integer pipelineId) {
+        verify(client)
+                .changeBuildStatus(
+                        Integer.toString(PROJECT_ID),
+                        REVISION,
+                        state,
+                        ref,
+                        STAGE,
+                        DisplayURLProvider.get().getRunURL(build),
+                        state.name(),
+                        pipelineId);
+    }
+
+    private static Pipeline pipeline(int id, String source, String sha) {
+        Pipeline pipeline = new Pipeline();
+        pipeline.setId(id);
+        pipeline.setSource(source);
+        pipeline.setSha(sha);
+        return pipeline;
     }
 }
