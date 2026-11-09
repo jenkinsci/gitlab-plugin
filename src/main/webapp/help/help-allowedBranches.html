@@ -1,5 +1,13 @@
 <p>
-  Comma-separated list of source branches allowed to trigger a build from a <b>Push event</b> or a <b>Merge Request event</b>.
-  If both fields are left empty, all branches are allowed to trigger this job.
-  For <b>Merge Request events</b> only the target branch name is filtered out by the include and exclude lists.
+  Comma-separated lists of branch patterns used to filter builds. For push events, the pushed branch is checked. For merge request events, the target branch is checked. Branches matching an Exclude pattern are not allowed to trigger a build. If Include patterns are specified, the checked branch must match at least one of them. If Include is empty, all branches that do not match an Exclude pattern are allowed. If both fields are empty, no branch filtering is performed.
 </p>
+<p>
+  Patterns use Ant-style path matching. For example:
+</p>
+<pre>
+# Allow only main and release branches:
+Include: main,release/*
+
+# Exclude the old release branch:
+Exclude: release/old
+</pre>

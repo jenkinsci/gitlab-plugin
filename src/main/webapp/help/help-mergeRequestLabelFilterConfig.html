@@ -1,0 +1,32 @@
+ <div>
+  <p>
+    Filter merge requests by their labels using the Include and Exclude fields.
+  </p>
+
+  <ul>
+    <li>
+      <strong>Include:</strong> Comma-separated labels. If specified, a merge request must have at least one matching label to be allowed. Multiple included labels use OR logic.
+    </li>
+    <li>
+      <strong>Exclude:</strong> Comma-separated labels. A merge request is rejected if it contains any matching excluded label.
+    </li>
+  </ul>
+
+  <p>
+    If Include is empty, no label is required. If Exclude is empty, no labels are excluded. If both fields are empty, no label filtering is applied.
+  </p>
+
+  <p>
+    Label matching is exact and case-sensitive. Surrounding whitespace is trimmed from each configured label.
+  </p>
+
+  <p><strong>Example:</strong></p>
+  <pre>
+Include: bug,feature
+Exclude: WIP,blocked
+  </pre>
+
+  <p>
+    This allows merge requests containing either <code>bug</code> or <code>feature</code>, provided they do not contain <code>WIP</code> or <code>blocked</code>.
+  </p>
+</div>

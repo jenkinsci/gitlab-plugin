@@ -1,9 +1,30 @@
 <div>
-  <div>
-    <p>The branch regex allows to limit the execution of this job to certain branches. Any branch matching the specified pattern triggers
-      the job. No filtering is performed if the field is left empty.</p>
-    <p>Examples:</p>
-    <pre># Allow execution for debug and release branches: (.*debug.*|.*release.*) </pre>
-    <pre># Ignore any branch with `Release` or `release` as subword: ^(?:(?![R|r]elease).)*$ </pre>
-  </div>
+  <p>
+    Use regular expressions to restrict which branches can trigger a Jenkins build.
+    The source branch must match the source branch regex, and, when a target branch
+    is available, the target branch must also match the target branch regex.
+    Both conditions must be satisfied for the branch filter to allow the build.
+    Leave either field empty to disable filtering for that branch.
+  </p>
+
+  <p>
+    The entire branch name must match the regular expression, not just a substring.
+  </p>
+
+  <p>Examples:</p>
+
+  <pre>
+# Match source branches beginning with feature/:
+feature/.*
+
+# Match target branch exactly named main:
+main
+
+# Match a branch containing feature anywhere:
+.*feature.*
+
+# Match source branches beginning with feature/ and target branch main:
+Source regex: feature/.*
+Target regex: main
+  </pre>
 </div>
