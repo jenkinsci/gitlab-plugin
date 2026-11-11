@@ -53,6 +53,7 @@ class GitLabConnectionConfigAsCodeTest {
         assertEquals(20, gitLabConnection.getConnectionTimeout());
         assertEquals(10, gitLabConnection.getReadTimeout());
         assertTrue(gitLabConnection.isIgnoreCertificateErrors());
+        assertEquals(500, gitLabConnections.getMergeRequestDescriptionMaxLength());
     }
 
     @Test

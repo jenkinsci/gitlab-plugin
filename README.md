@@ -111,6 +111,8 @@ gitlabTriggerPhrase
 
  **NOTE:** These variables are not available in Pipeline Multibranch jobs.
 
+The `gitlabMergeRequestDescription` variable is limited to 1000 characters by default. To change the limit, go to **Manage Jenkins » System » GitLab** and set **Maximum merge request description length**. Set it to `0` to expose the full description without truncation.
+
 ## Global plugin configuration
 ### GitLab-to-Jenkins authentication
 The plugin requires authentication to connect from GitLab to Jenkins. This prevents unauthorized persons from triggering jobs.
@@ -365,9 +367,10 @@ Also make sure you have chosen the appropriate GitLab instance from the 'GitLab 
         }
     }
     ```
-* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented [here](https://docs.gitlab.com/ee/api/commits.html#set-the-pipeline-status-of-a-commit).
+* Or use the `updateGitlabCommitStatus` step to use a custom value for updating the commit status. You could use try/catch blocks or other logic to send fine-grained status of the build to GitLab. Valid statuses are defined by GitLab and documented [here](https://docs.gitlab.com/api/commits/#set-the-pipeline-status-of-a-commit).
 
-    The states GitLab's Commits API accepts today are: `pending`, `running`, `success`, `failed`, and `canceled` (one "l"). The plugin's `BuildState` enum also lists `skipped` for historical reasons, but sending `state: 'skipped'` is rejected by GitLab with **HTTP 400 Bad Request** and the commit status never appears (#1411). Prefer `canceled` when a stage did not run, or skip the `updateGitlabCommitStatus` call for that stage.
+    GitLab installations can differ in which states they accept. If `state: 'skipped'` returns HTTP 400, as reported in [#1411](https://github.com/jenkinsci/gitlab-plugin/issues/1411), omit the status update for that stage or use a status supported by your GitLab version that reflects the outcome.
+
     ```groovy
     node() {
         stage('Checkout') { checkout <your-scm-config> }

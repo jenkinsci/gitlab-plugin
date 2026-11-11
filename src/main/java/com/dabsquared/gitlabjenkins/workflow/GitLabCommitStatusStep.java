@@ -29,6 +29,7 @@ public class GitLabCommitStatusStep extends Step {
     private String name;
     private List<GitLabBranchBuild> builds = new ArrayList<GitLabBranchBuild>();
     private GitLabConnectionProperty connection;
+    private Boolean attachStatusToMergeRequestPipeline;
 
     @DataBoundConstructor
     public GitLabCommitStatusStep(String name) {
@@ -62,6 +63,20 @@ public class GitLabCommitStatusStep extends Step {
         this.connection = connection;
     }
 
+    public Boolean getAttachStatusToMergeRequestPipeline() {
+        return attachStatusToMergeRequestPipeline;
+    }
+
+    /**
+     * Explicitly opt this block in or out of attaching its status updates to the commit's
+     * merge request pipeline, overriding the plugin's global default
+     * (GitLabConnectionConfig). Leave unset to just use that global default.
+     */
+    @DataBoundSetter
+    public void setAttachStatusToMergeRequestPipeline(Boolean attachStatusToMergeRequestPipeline) {
+        this.attachStatusToMergeRequestPipeline = attachStatusToMergeRequestPipeline;
+    }
+
     public static class GitLabCommitStatusStepExecution extends StepExecution {
         private static final long serialVersionUID = 1;
 
@@ -91,7 +106,8 @@ public class GitLabCommitStatusStep extends Step {
                                     BuildState.running,
                                     name,
                                     step.builds,
-                                    step.connection);
+                                    step.connection,
+                                    step.attachStatusToMergeRequestPipeline);
                             PendingBuildsAction action = run.getAction(PendingBuildsAction.class);
                             if (action != null) {
                                 action.startBuild(name);
@@ -107,7 +123,8 @@ public class GitLabCommitStatusStep extends Step {
                                         BuildState.success,
                                         name,
                                         step.builds,
-                                        step.connection);
+                                        step.connection,
+                                        step.attachStatusToMergeRequestPipeline);
                                 context.onSuccess(result);
                             } catch (NullPointerException e) {
                                 e.getMessage();
@@ -126,7 +143,13 @@ public class GitLabCommitStatusStep extends Step {
                             }
 
                             CommitStatusUpdater.updateCommitStatus(
-                                    run, getTaskListener(context), state, name, step.builds, step.connection);
+                                    run,
+                                    getTaskListener(context),
+                                    state,
+                                    name,
+                                    step.builds,
+                                    step.connection,
+                                    step.attachStatusToMergeRequestPipeline);
                             context.onFailure(Objects.requireNonNull(t));
                         }
                     })
@@ -140,7 +163,13 @@ public class GitLabCommitStatusStep extends Step {
             if (body != null) {
                 String name = StringUtils.isEmpty(step.name) ? "jenkins" : step.name;
                 CommitStatusUpdater.updateCommitStatus(
-                        run, null, BuildState.canceled, name, step.builds, step.connection);
+                        run,
+                        null,
+                        BuildState.canceled,
+                        name,
+                        step.builds,
+                        step.connection,
+                        step.attachStatusToMergeRequestPipeline);
                 body.cancel(cause);
             }
         }
