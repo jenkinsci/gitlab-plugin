@@ -8,6 +8,7 @@
     <Or>
       <Class name="com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig"/>
       <Class name="com.dabsquared.gitlabjenkins.GitLabPushTrigger$DescriptorImpl"/>
+      <Class name="com.dabsquared.gitlabjenkins.util.JsonUtil$DateModule"/>
     </Or>
   </Match>
 
