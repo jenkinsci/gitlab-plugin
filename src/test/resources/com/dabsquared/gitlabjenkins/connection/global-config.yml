@@ -10,6 +10,7 @@ credentials:
 unclassified:
   gitlabconnectionconfig:
     useAuthenticatedEndpoint: true
+    mergeRequestDescriptionMaxLength: 500
     connections:
       - apiTokenId: gitlab_token
         clientBuilderId: "autodetect"
