@@ -287,7 +287,8 @@ class MergeRequestHookTriggerHandlerImpl extends AbstractWebHookTriggerHandler<M
     @Override
     protected RevisionParameterAction createRevisionParameter(MergeRequestHook hook, GitSCM gitSCM)
             throws NoRevisionToBuildException {
-        return new RevisionParameterAction(retrieveRevisionToBuild(hook), retrieveUrIish(hook));
+        return new RevisionParameterAction(
+                retrieveRevisionToBuild(hook), retrieveUrIish(hook.getObjectAttributes().getTarget(), gitSCM));
     }
 
     @Override
