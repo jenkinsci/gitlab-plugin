@@ -23,8 +23,12 @@ main
 # Match a branch containing feature anywhere:
 .*feature.*
 
-# Match source branches beginning with feature/ and target branch main:
+# For merge request events, match source branches beginning with feature/
+# and target branch main:
 Source regex: feature/.*
 Target regex: main
+
+# For ordinary push events, both regexes must match the same pushed branch.
+# This combination therefore rejects all ordinary push events.
   </pre>
 </div>
