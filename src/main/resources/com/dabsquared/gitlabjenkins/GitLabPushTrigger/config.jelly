@@ -95,7 +95,8 @@
         </f:radioBlock>
         <!--</f:section> -->
         <f:optionalBlock title="${%Filter merge request by label}" field="mergeRequestLabelFilterConfig"
-                         checked="${instance.mergeRequestLabelFilterConfig != null}">
+                 checked="${instance.mergeRequestLabelFilterConfig != null}"
+                 help="/plugin/gitlab-plugin/help/help-mergeRequestLabelFilterConfig.html">
           <f:entry title="${%Include}">
             <f:textbox field="includeMergeRequestLabels" name="include" value="${instance.mergeRequestLabelFilterConfig.include}"
                        autoCompleteDelimChar=","/>
