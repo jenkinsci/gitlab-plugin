@@ -15,10 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.Action;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.MergeRequestObjectAttributesBuilder;
 import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -55,6 +57,32 @@ class MergeRequestHookTriggerHandlerImplTest {
     static void setUp(JenkinsRule rule) {
         jenkins = rule;
         jenkins.timeout = 450;
+    }
+
+    @Test
+    void mergeRequest_exposes_webhook_triggering_user_details() throws Exception {
+        MergeRequestHookTriggerHandler handler = withConfig().build();
+
+        AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        AtomicReference<EnvVars> environmentHolder = new AtomicReference<>();
+
+        OneShotEvent buildTriggered = doHandle(
+                handler,
+                defaultMergeRequestObjectAttributes(),
+                buildHolder,
+                environmentHolder,
+                user().withName("Charlie")
+                        .withUsername("charlie")
+                        .withEmail("charlie@example.com")
+                        .build());
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+
+        EnvVars env = environmentHolder.get();
+        assertThat(env.get("gitlabUserName"), is("Charlie"));
+        assertThat(env.get("gitlabUserUsername"), is("charlie"));
+        assertThat(env.get("gitlabUserEmail"), is("charlie@example.com"));
     }
 
     @Test
@@ -523,6 +551,61 @@ class MergeRequestHookTriggerHandlerImplTest {
 
         assertThat(buildTriggered.isSignaled(), is(false));
         assertNull(buildHolder.get());
+    }
+
+    private OneShotEvent doHandle(
+            MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler,
+            MergeRequestObjectAttributesBuilder objectAttributes,
+            AtomicReference<FreeStyleBuild> buildHolder,
+            AtomicReference<EnvVars> environmentHolder,
+            User webhookUser)
+            throws Exception {
+        Git.init().setDirectory(tmp).call();
+        File.createTempFile("test", null, tmp);
+        Git git = Git.open(tmp);
+        git.add().addFilepattern("test");
+        RevCommit commit = git.commit().setSign(false).setMessage("test").call();
+        ObjectId head = git.getRepository().resolve(Constants.HEAD);
+        String repositoryUrl = tmp.toURI().toString();
+
+        final OneShotEvent buildTriggered = new OneShotEvent();
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.setScm(new GitSCM(repositoryUrl));
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws java.io.IOException, InterruptedException {
+                buildHolder.set((FreeStyleBuild) build);
+                environmentHolder.set(build.getEnvironment(listener));
+                buildTriggered.signal();
+                return true;
+            }
+        });
+        project.setQuietPeriod(0);
+        mergeRequestHookTriggerHandler.handle(
+                project,
+                mergeRequestHook()
+                        .withUser(webhookUser)
+                        .withObjectAttributes(objectAttributes
+                                .withTargetBranch("refs/heads/"
+                                        + git.nameRev().add(head).call().get(head))
+                                .withLastCommit(commit().withAuthor(
+                                                user().withName("Alice")
+                                                        .withEmail("alice@example.com")
+                                                        .build())
+                                        .withId(commit.getName())
+                                        .build())
+                                .build())
+                        .withProject(project()
+                                .withWebUrl("https://gitlab.org/test.git")
+                                .build())
+                        .build(),
+                true,
+                BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
+                newMergeRequestLabelFilter(null));
+
+        buildTriggered.block(10000);
+        return buildTriggered;
     }
 
     private OneShotEvent doHandle(

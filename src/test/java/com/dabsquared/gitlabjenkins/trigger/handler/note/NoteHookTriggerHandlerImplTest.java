@@ -122,6 +122,9 @@ class NoteHookTriggerHandlerImplTest {
                     throws InterruptedException, IOException {
                 EnvVars env = build.getEnvironment(listener);
                 assertEquals("bugfix,help needed", env.get("gitlabMergeRequestLabels"));
+                assertEquals("Charlie", env.get("gitlabUserName"));
+                assertEquals("charlie", env.get("gitlabUserUsername"));
+                assertEquals("charlie@example.com", env.get("gitlabUserEmail"));
                 buildTriggered.signal();
                 return true;
             }
@@ -196,6 +199,11 @@ class NoteHookTriggerHandlerImplTest {
                                         .withHttpUrl("https://gitlab.org/test.git")
                                         .withWebUrl("https://gitlab.org/test.git")
                                         .build())
+                                .build())
+                        .withUser(user()
+                                .withName("Charlie")
+                                .withUsername("charlie")
+                                .withEmail("charlie@example.com")
                                 .build())
                         .build(),
                 true,
