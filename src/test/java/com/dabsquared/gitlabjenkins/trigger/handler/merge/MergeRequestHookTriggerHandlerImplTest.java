@@ -589,10 +589,9 @@ class MergeRequestHookTriggerHandlerImplTest {
                         .withObjectAttributes(objectAttributes
                                 .withTargetBranch("refs/heads/"
                                         + git.nameRev().add(head).call().get(head))
-                                .withLastCommit(commit().withAuthor(
-                                                user().withName("Alice")
-                                                        .withEmail("alice@example.com")
-                                                        .build())
+                                .withLastCommit(commit().withAuthor(user().withName("Alice")
+                                                .withEmail("alice@example.com")
+                                                .build())
                                         .withId(commit.getName())
                                         .build())
                                 .build())
