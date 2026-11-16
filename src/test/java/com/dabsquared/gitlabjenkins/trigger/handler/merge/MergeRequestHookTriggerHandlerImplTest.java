@@ -86,6 +86,48 @@ class MergeRequestHookTriggerHandlerImplTest {
     }
 
     @Test
+    void mergeRequest_uses_last_commit_author_when_webhook_user_is_missing() throws Exception {
+        MergeRequestHookTriggerHandler handler = withConfig().build();
+
+        AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        AtomicReference<EnvVars> environmentHolder = new AtomicReference<>();
+
+        OneShotEvent buildTriggered =
+                doHandle(handler, defaultMergeRequestObjectAttributes(), buildHolder, environmentHolder, null);
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+
+        EnvVars env = environmentHolder.get();
+        assertThat(env.get("gitlabUserName"), is("Alice"));
+        assertNull(env.get("gitlabUserUsername"));
+        assertThat(env.get("gitlabUserEmail"), is("alice@example.com"));
+    }
+
+    @Test
+    void mergeRequest_falls_back_when_webhook_user_name_and_email_are_missing() throws Exception {
+        MergeRequestHookTriggerHandler handler = withConfig().build();
+
+        AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
+        AtomicReference<EnvVars> environmentHolder = new AtomicReference<>();
+
+        OneShotEvent buildTriggered = doHandle(
+                handler,
+                defaultMergeRequestObjectAttributes(),
+                buildHolder,
+                environmentHolder,
+                user().withName(null).withUsername("charlie").withEmail(null).build());
+
+        assertThat(buildTriggered.isSignaled(), is(true));
+        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(buildHolder.get()));
+
+        EnvVars env = environmentHolder.get();
+        assertThat(env.get("gitlabUserName"), is("Alice"));
+        assertThat(env.get("gitlabUserUsername"), is("charlie"));
+        assertThat(env.get("gitlabUserEmail"), is("alice@example.com"));
+    }
+
+    @Test
     void mergeRequest_ciSkip() throws Exception {
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         assertThat(ciSkipTestHelper("enable build", "enable build", buildHolder), is(true));
