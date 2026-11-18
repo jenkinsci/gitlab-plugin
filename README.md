@@ -640,6 +640,8 @@ e.g for a merge request with the labels: [`bugfix`, `review needed`], `env.gitla
 
 ## Compatibility
 
+The plugin requires Jenkins 2.555.3 or later and runs on Java 21 or Java 25.
+
 Version 1.2.1 of the plugin introduces a backwards-incompatible change
 for Pipeline jobs. They will need to be manually reconfigured when you
 upgrade to this version. Freestyle jobs are not impacted.
