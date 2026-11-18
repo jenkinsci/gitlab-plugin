@@ -46,6 +46,15 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
  */
 @WithJenkins
 class NoteHookTriggerHandlerImplTest {
+    private record Pair(Object first, Object second) {}
+
+    private static void assertPair(Pair pair) {
+        switch (pair) {
+            case Pair(var first, var second) when first == null -> assertNull(second);
+            case Pair(var first, var second) when second == null -> assertNull(first);
+            case Pair(var first, var second) -> assertEquals(first, second);
+        }
+    }
 
     private static JenkinsRule jenkins;
 
@@ -152,21 +161,9 @@ class NoteHookTriggerHandlerImplTest {
                     throws InterruptedException, IOException {
                 EnvVars env = build.getEnvironment(listener);
                 assertEquals("bugfix,help needed", env.get("gitlabMergeRequestLabels"));
-                if (expectedName == null) {
-                    assertNull(env.get("gitlabUserName"));
-                } else {
-                    assertEquals(expectedName, env.get("gitlabUserName"));
-                }
-                if (expectedUsername == null) {
-                    assertNull(env.get("gitlabUserUsername"));
-                } else {
-                    assertEquals(expectedUsername, env.get("gitlabUserUsername"));
-                }
-                if (expectedEmail == null) {
-                    assertNull(env.get("gitlabUserEmail"));
-                } else {
-                    assertEquals(expectedEmail, env.get("gitlabUserEmail"));
-                }
+                assertPair(new Pair(expectedName, env.get("gitlabUserName")));
+                assertPair(new Pair(expectedUsername, env.get("gitlabUserUsername")));
+                assertPair(new Pair(expectedEmail, env.get("gitlabUserEmail")));
                 buildTriggered.signal();
                 return true;
             }
