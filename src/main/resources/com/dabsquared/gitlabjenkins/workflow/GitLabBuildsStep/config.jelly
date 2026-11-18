@@ -3,4 +3,8 @@
   <f:entry title="${%Build steps}" field="builds" description="${%Comma separated list of build steps}">
     <f:textbox/>
   </f:entry>
+  <!-- Unchecked submits false (explicit opt-out); only an omitted (null) argument inherits the global default. -->
+  <f:entry title="${%Attach commit status to merge request pipeline}" field="attachStatusToMergeRequestPipeline" help="/plugin/gitlab-plugin/help/help-attachStatusToMergeRequestPipeline.html">
+    <f:checkbox/>
+  </f:entry>
 </j:jelly>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>6.2236.v12dd4c483242</version>
+    <version>6.2250.va_d01d559a_209</version>
     <relativePath />
   </parent>
 
@@ -53,7 +53,7 @@
     <hpi.bundledArtifacts>asyncutil,jakarta.annotation-api,jakarta.validation-api,jboss-jaxrs-api_3.0_spec,jboss-logging,reactive-streams,resteasy-client,resteasy-client-api,resteasy-core,resteasy-core-spi</hpi.bundledArtifacts>
     <hpi.compatibleSinceVersion>1.4.0</hpi.compatibleSinceVersion>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
-    <mockserver.version>8.0.0</mockserver.version>
+    <mockserver.version>9.2.0</mockserver.version>
     <spotless.check.skip>false</spotless.check.skip>
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
@@ -340,7 +340,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.6.0</version>
+            <version>3.6.1</version>
             <executions>
               <execution>
                 <goals>
@@ -476,7 +476,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.6.2</version>
+            <version>3.7.0</version>
             <executions>
               <execution>
                 <id>add-source</id>

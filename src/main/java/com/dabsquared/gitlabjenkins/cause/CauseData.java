@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.cause;
 
+import com.dabsquared.gitlabjenkins.connection.GitLabConnectionConfig;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import hudson.markup.EscapedMarkupFormatter;
 import java.util.*;
@@ -207,9 +208,12 @@ public final class CauseData {
         variables.put("gitlabSourceRepoHttpUrl", sourceRepoHttpUrl);
         variables.putIfNotNull("gitlabMergeCommitSha", mergeCommitSha);
         variables.put("gitlabMergeRequestTitle", mergeRequestTitle);
+        int descriptionMaxLength = GitLabConnectionConfig.get().getMergeRequestDescriptionMaxLength();
         variables.put(
                 "gitlabMergeRequestDescription",
-                mergeRequestDescription.substring(0, Math.min(mergeRequestDescription.length(), 1000)));
+                descriptionMaxLength > 0 && mergeRequestDescription.length() > descriptionMaxLength
+                        ? mergeRequestDescription.substring(0, descriptionMaxLength)
+                        : mergeRequestDescription);
         variables.put("gitlabMergeRequestId", mergeRequestId == null ? "" : mergeRequestId.toString());
         variables.put("gitlabMergeRequestIid", mergeRequestIid == null ? "" : mergeRequestIid.toString());
         variables.put(

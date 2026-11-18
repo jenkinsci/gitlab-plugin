@@ -12,6 +12,7 @@ import com.dabsquared.gitlabjenkins.gitlab.api.model.Branch;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.BuildState;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.MergeRequest;
 import com.dabsquared.gitlabjenkins.gitlab.api.model.Project;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.Commit;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.PushHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilter;
@@ -174,10 +175,22 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                 .withTargetNamespace(hook.getProject().getNamespace())
                 .withTargetRepoSshUrl(hook.getRepository().getGitSshUrl())
                 .withTargetRepoHttpUrl(hook.getRepository().getGitHttpUrl())
-                .withTriggeredByUser(hook.getCommits().get(0).getAuthor().getName())
+                .withTriggeredByUser(retrieveTriggeredByUser(hook))
                 .withLastCommit(branch.getCommit().getId())
                 .withTargetProjectUrl(project.getWebUrl())
                 .build();
+    }
+
+    static String retrieveTriggeredByUser(PushHook hook) {
+        final List<Commit> commits = hook.getCommits();
+        if (commits != null && !commits.isEmpty()) {
+            return StringUtils.defaultString(commits.get(0).getAuthor().getName());
+        }
+        // A push hook can carry an empty commits list, e.g. after a force push to the target branch.
+        // CauseData refuses to build when the triggering user is null, so the hook itself has to
+        // answer, and an unknown user stays the empty string the cause model already uses.
+        final String userName = StringUtils.defaultIfBlank(hook.getUserName(), hook.getUserUsername());
+        return StringUtils.defaultString(userName);
     }
 
     private void setCommitStatusPendingIfNecessary(Job<?, ?> job, Integer projectId, String commit, String ref) {

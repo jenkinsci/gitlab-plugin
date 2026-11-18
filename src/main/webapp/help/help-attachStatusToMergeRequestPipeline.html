@@ -1,0 +1,15 @@
+<p>
+  When checked, this status update looks up the commit's merge request pipeline and explicitly
+  targets it via <code>pipeline_id</code>, instead of letting GitLab decide based on the commit
+  SHA, ref and status name alone.
+</p>
+<p>
+  When unchecked, this is explicitly disabled here, even if the global option
+  <em>Manage Jenkins &gt; System &gt; GitLab &gt; Attach commit status updates to the merge request pipeline</em>
+  is enabled.
+</p>
+<p>
+  To inherit the global option instead, omit the <code>attachStatusToMergeRequestPipeline</code>
+  argument in Pipeline script. Saving this form (or generating a snippet with the Snippet Generator)
+  always stores an explicit <code>true</code> or <code>false</code>.
+</p>
