@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.EnvVars;
@@ -45,6 +46,15 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
  */
 @WithJenkins
 class NoteHookTriggerHandlerImplTest {
+    private record Pair(Object first, Object second) {}
+
+    private static void assertPair(Pair pair) {
+        switch (pair) {
+            case Pair(var first, var second) when first == null -> assertNull(second);
+            case Pair(var first, var second) when second == null -> assertNull(first);
+            case Pair(var first, var second) -> assertEquals(first, second);
+        }
+    }
 
     private static JenkinsRule jenkins;
 
@@ -105,6 +115,35 @@ class NoteHookTriggerHandlerImplTest {
 
     @Test
     void note_build() throws Exception {
+        note_build(
+                user().withName("Charlie")
+                        .withUsername("charlie")
+                        .withEmail("charlie@example.com")
+                        .build(),
+                "Charlie",
+                "charlie",
+                "charlie@example.com");
+    }
+
+    @Test
+    void note_build_without_webhook_user() throws Exception {
+        note_build(null, "test", null, null);
+    }
+
+    @Test
+    void note_build_falls_back_when_webhook_user_name_is_missing() throws Exception {
+        note_build(
+                user().withName(null)
+                        .withUsername("charlie")
+                        .withEmail("charlie@example.com")
+                        .build(),
+                "test",
+                "charlie",
+                "charlie@example.com");
+    }
+
+    private void note_build(User webhookUser, String expectedName, String expectedUsername, String expectedEmail)
+            throws Exception {
         Git.init().setDirectory(tmp).call();
         File.createTempFile("test", null, tmp);
         Git git = Git.open(tmp);
@@ -122,6 +161,9 @@ class NoteHookTriggerHandlerImplTest {
                     throws InterruptedException, IOException {
                 EnvVars env = build.getEnvironment(listener);
                 assertEquals("bugfix,help needed", env.get("gitlabMergeRequestLabels"));
+                assertPair(new Pair(expectedName, env.get("gitlabUserName")));
+                assertPair(new Pair(expectedUsername, env.get("gitlabUserUsername")));
+                assertPair(new Pair(expectedEmail, env.get("gitlabUserEmail")));
                 buildTriggered.signal();
                 return true;
             }
@@ -197,6 +239,7 @@ class NoteHookTriggerHandlerImplTest {
                                         .withWebUrl("https://gitlab.org/test.git")
                                         .build())
                                 .build())
+                        .withUser(webhookUser)
                         .build(),
                 true,
                 BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
