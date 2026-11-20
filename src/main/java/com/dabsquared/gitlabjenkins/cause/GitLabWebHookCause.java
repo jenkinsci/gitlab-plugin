@@ -12,15 +12,25 @@ import org.kohsuke.stapler.export.ExportedBean;
 public class GitLabWebHookCause extends SCMTrigger.SCMTriggerCause {
 
     private final CauseData data;
+    private final String rawPayload;
 
     public GitLabWebHookCause(CauseData data) {
+        this(data, null);
+    }
+
+    public GitLabWebHookCause(CauseData data, String rawPayload) {
         super("");
         this.data = Objects.requireNonNull(data, "data must not be null");
+        this.rawPayload = rawPayload;
     }
 
     @Exported
     public CauseData getData() {
         return data;
+    }
+
+    public String getRawPayload() {
+        return rawPayload;
     }
 
     @Override

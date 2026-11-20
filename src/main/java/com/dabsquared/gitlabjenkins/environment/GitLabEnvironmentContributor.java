@@ -30,6 +30,9 @@ public class GitLabEnvironmentContributor extends EnvironmentContributor {
         }
         if (cause != null) {
             envs.overrideAll(cause.getData().getBuildVariables());
+            if (cause.getRawPayload() != null) {
+                envs.put("gitlabWebhookPayload", cause.getRawPayload());
+            }
         }
     }
 }
