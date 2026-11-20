@@ -30,11 +30,13 @@ public class NoteBuildAction implements WebHookAction {
         LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
         this.project = project;
         this.noteHook = JsonUtil.read(json, NoteHook.class);
+        this.noteHook.setRawPayload(json);
         this.secretToken = secretToken;
     }
 
     /**
      * Alternative Constructor which takes in an already deserialized Json Tree.
+     *
      * @param project Jenkins Project Item
      * @param json Payload Json Tree
      * @param secretToken Secret Token
@@ -43,6 +45,7 @@ public class NoteBuildAction implements WebHookAction {
         LOGGER.log(Level.FINE, "Note: {0}", toPrettyPrint(json));
         this.project = project;
         this.noteHook = JsonUtil.read(json, NoteHook.class);
+        this.noteHook.setRawPayload(json.toString());
         this.secretToken = secretToken;
     }
 
