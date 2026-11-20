@@ -185,7 +185,8 @@ class NoteHookTriggerHandlerImplTest {
                         .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
                         .build())
                 .withMergeRequest(mergeRequestObjectAttributes()
-                        .withTargetBranch("refs/heads/" + git.nameRev().add(head).call().get(head))
+                        .withTargetBranch(
+                                "refs/heads/" + git.nameRev().add(head).call().get(head))
                         .withState(State.opened)
                         .withIid(1)
                         .withTitle("test")
@@ -218,9 +219,10 @@ class NoteHookTriggerHandlerImplTest {
                                         .withType("ProjectLabel")
                                         .withGroupId(null)
                                         .build()))
-                        .withLastCommit(commit().withAuthor(user().withName("test").build())
-                                .withId(commit.getName())
-                                .build())
+                        .withLastCommit(
+                                commit().withAuthor(user().withName("test").build())
+                                        .withId(commit.getName())
+                                        .build())
                         .withSource(project()
                                 .withName("test")
                                 .withNamespace("test-namespace")

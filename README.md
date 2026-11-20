@@ -110,7 +110,7 @@ gitlabTriggerPhrase
 gitlabWebhookPayload
 ```
 
- gitlabWebhookPayload contains the complete GitLab webhook event as JSON text. A Pipeline can parse it to access event data that the plugin does not expose through individual variables.
+`gitlabWebhookPayload` contains the complete GitLab webhook event as JSON text. A Pipeline can parse it to access event data that the plugin does not expose through individual variables.
 
 **NOTE:** These variables are not available in Pipeline Multibranch jobs.
 

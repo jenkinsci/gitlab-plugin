@@ -105,8 +105,7 @@ public abstract class AbstractWebHookTriggerHandler<H extends WebHook> implement
 
     protected Action[] createActions(Job<?, ?> job, H hook) {
         ArrayList<Action> actions = new ArrayList<>();
-        actions.add(new CauseAction(
-                new GitLabWebHookCause(retrieveCauseData(hook), hook.getRawPayload())));
+        actions.add(new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook), hook.getRawPayload())));
         actions.add(new BranchQueueAction(getSourceBranch(hook)));
         try {
             SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
