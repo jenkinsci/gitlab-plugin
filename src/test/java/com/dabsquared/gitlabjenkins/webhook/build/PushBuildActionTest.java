@@ -68,24 +68,25 @@ class PushBuildActionTest {
     }
 
     @Test
-    void build() {
-        assertThrows(HttpResponses.HttpResponseException.class, () -> {
-            try {
-                FreeStyleProject testProject = jenkins.createFreeStyleProject();
-                when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
-                testProject.addTrigger(trigger);
+    void build() throws Exception {
+        FreeStyleProject testProject = jenkins.createFreeStyleProject();
+        when(trigger.getTriggerOpenMergeRequestOnPush()).thenReturn(TriggerOpenMergeRequest.never);
+        testProject.addTrigger(trigger);
 
-                // exception.expect(HttpResponses.HttpResponseException.class);
-                new PushBuildAction(testProject, getJson("PushEvent.json"), null).execute(response);
-            } finally {
-                ArgumentCaptor<PushHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(PushHook.class);
-                verify(trigger).onPost(pushHookArgumentCaptor.capture());
-                assertThat(pushHookArgumentCaptor.getValue().getProject(), is(notNullValue()));
-                assertThat(pushHookArgumentCaptor.getValue().getProject().getWebUrl(), is(notNullValue()));
-                assertThat(pushHookArgumentCaptor.getValue().getUserUsername(), is(notNullValue()));
-                assertThat(pushHookArgumentCaptor.getValue().getUserUsername(), containsString("jsmith"));
-            }
-        });
+        String json = getJson("PushEvent.json");
+        assertThrows(
+                HttpResponses.HttpResponseException.class,
+                () -> new PushBuildAction(testProject, json, null).execute(response));
+
+        ArgumentCaptor<PushHook> pushHookArgumentCaptor = ArgumentCaptor.forClass(PushHook.class);
+        verify(trigger).onPost(pushHookArgumentCaptor.capture());
+
+        PushHook hook = pushHookArgumentCaptor.getValue();
+        assertThat(hook.getProject(), is(notNullValue()));
+        assertThat(hook.getProject().getWebUrl(), is(notNullValue()));
+        assertThat(hook.getUserUsername(), is(notNullValue()));
+        assertThat(hook.getUserUsername(), containsString("jsmith"));
+        assertThat(hook.getRawPayload(), is(json));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.gitlab.hook.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -11,6 +12,7 @@ public abstract class WebHook {
 
     private Repository repository;
     private String objectKind;
+    private String rawPayload;
 
     public String getObjectKind() {
         return objectKind;
@@ -26,6 +28,16 @@ public abstract class WebHook {
 
     public void setRepository(Repository repository) {
         this.repository = repository;
+    }
+
+    @JsonIgnore
+    public String getRawPayload() {
+        return rawPayload;
+    }
+
+    @JsonIgnore
+    public void setRawPayload(String rawPayload) {
+        this.rawPayload = rawPayload;
     }
 
     @Override
