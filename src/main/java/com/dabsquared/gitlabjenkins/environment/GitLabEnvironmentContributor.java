@@ -18,6 +18,8 @@ import java.io.IOException;
  */
 @Extension
 public class GitLabEnvironmentContributor extends EnvironmentContributor {
+    private static final int MAX_RAW_PAYLOAD_LENGTH = 16 * 1024;
+
     @Override
     public void buildEnvironmentFor(@NonNull Run r, @NonNull EnvVars envs, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
@@ -38,8 +40,15 @@ public class GitLabEnvironmentContributor extends EnvironmentContributor {
             envs.overrideAll(cause.getData().getBuildVariables());
 
             GitLabPushTrigger trigger = GitLabPushTrigger.getFromJob(job);
-            if (trigger != null && trigger.getExposeRawWebhookPayload() && cause.getRawPayload() != null) {
-                envs.put("gitlabWebhookPayload", cause.getRawPayload());
+            String rawPayload = cause.getRawPayload();
+            if (trigger != null && trigger.getExposeRawWebhookPayload() && rawPayload != null) {
+                if (rawPayload.length() <= MAX_RAW_PAYLOAD_LENGTH) {
+                    envs.put("gitlabWebhookPayload", rawPayload);
+                } else {
+                    listener.getLogger()
+                            .println(
+                                    "WARNING: GitLab webhook payload is too large to expose as an environment variable.");
+                }
             }
         }
     }

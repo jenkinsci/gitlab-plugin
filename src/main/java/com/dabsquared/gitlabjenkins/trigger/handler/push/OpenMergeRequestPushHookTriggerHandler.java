@@ -70,7 +70,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                             GitLabClient client = property.getClient();
                             for (MergeRequest mergeRequest : getOpenMergeRequests(client, projectId.toString())) {
                                 if (mergeRequestLabelFilter.isMergeRequestAllowed(mergeRequest.getLabels())) {
-                                    handleMergeRequest(job, hook, ciSkip, branchFilter, client, mergeRequest);
+                                    handleMergeRequest(job, hook, ciSkip, branchFilter, client, trigger, mergeRequest);
                                 }
                             }
                         }
@@ -109,6 +109,7 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             boolean ciSkip,
             BranchFilter branchFilter,
             GitLabClient client,
+            GitLabPushTrigger trigger,
             MergeRequest mergeRequest) {
         if (ciSkip
                 && mergeRequest.getDescription() != null
@@ -142,9 +143,11 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
                     client.getProject(mergeRequest.getSourceProjectId().toString());
             String commit = branch.getCommit().getId();
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
+
+            String rawPayload = trigger.getExposeRawWebhookPayload() ? hook.getRawPayload() : null;
             List<Action> actions = Arrays.<Action>asList(
-                    new CauseAction(new GitLabWebHookCause(
-                            retrieveCauseData(hook, project, mergeRequest, branch), hook.getRawPayload())),
+                    new CauseAction(
+                            new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch), rawPayload)),
                     new RevisionParameterAction(commit, retrieveUrIish(hook)));
             scheduleBuild(job, actions.toArray(new Action[actions.size()]));
         }

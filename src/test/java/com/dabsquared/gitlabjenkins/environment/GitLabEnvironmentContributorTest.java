@@ -4,6 +4,7 @@ import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
@@ -20,6 +21,7 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.StreamBuildListener;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,6 +88,26 @@ class GitLabEnvironmentContributorTest {
         FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
 
         assertEquals(rawPayload, build.getEnvironment(listener).get("gitlabWebhookPayload"));
+    }
+
+    @Test
+    void rawPayload_isNotExposedWhenTooLarge() throws Exception {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabPushTrigger trigger = new GitLabPushTrigger();
+        trigger.setExposeRawWebhookPayload(true);
+        p.addTrigger(trigger);
+
+        String rawPayload = "x".repeat(16 * 1024 + 1);
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData(), rawPayload);
+        FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
+
+        ByteArrayOutputStream log = new ByteArrayOutputStream();
+        BuildListener capturingListener = new StreamBuildListener(log, Charset.defaultCharset());
+
+        EnvVars env = build.getEnvironment(capturingListener);
+
+        assertNull(env.get("gitlabWebhookPayload"));
+        assertTrue(log.toString(Charset.defaultCharset()).contains("too large"));
     }
 
     @Test
