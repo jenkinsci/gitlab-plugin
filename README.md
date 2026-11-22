@@ -107,9 +107,12 @@ gitlabTargetRepoHttpUrl
 gitlabBefore
 gitlabAfter
 gitlabTriggerPhrase
+gitlabWebhookPayload
 ```
 
- **NOTE:** These variables are not available in Pipeline Multibranch jobs.
+`gitlabWebhookPayload` contains the complete GitLab webhook event as JSON text when the payload is at most 16,384 UTF-16 code units (Java string length). Larger payloads are not truncated: the variable is omitted and a warning is written to the build log, so Pipelines should handle its absence. A Pipeline can parse it to access event data that the plugin does not expose through individual variables. This variable is available only when **Expose raw webhook payload as an environment variable** is enabled in the job’s GitLab trigger settings. The option is off by default.
+
+**NOTE:** These variables are not available in Pipeline Multibranch jobs.
 
 The `gitlabMergeRequestDescription` variable is limited to 1000 characters by default. To change the limit, go to **Manage Jenkins » System » GitLab** and set **Maximum merge request description length**. Set it to `0` to expose the full description without truncation.
 

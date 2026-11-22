@@ -14,7 +14,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.NoteHook;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.State;
+import com.dabsquared.gitlabjenkins.gitlab.hook.model.User;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.EnvVars;
@@ -45,6 +48,15 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
  */
 @WithJenkins
 class NoteHookTriggerHandlerImplTest {
+    private record Pair(Object first, Object second) {}
+
+    private static void assertPair(Pair pair) {
+        switch (pair) {
+            case Pair(var first, var second) when first == null -> assertNull(second);
+            case Pair(var first, var second) when second == null -> assertNull(first);
+            case Pair(var first, var second) -> assertEquals(first, second);
+        }
+    }
 
     private static JenkinsRule jenkins;
 
@@ -105,6 +117,35 @@ class NoteHookTriggerHandlerImplTest {
 
     @Test
     void note_build() throws Exception {
+        note_build(
+                user().withName("Charlie")
+                        .withUsername("charlie")
+                        .withEmail("charlie@example.com")
+                        .build(),
+                "Charlie",
+                "charlie",
+                "charlie@example.com");
+    }
+
+    @Test
+    void note_build_without_webhook_user() throws Exception {
+        note_build(null, "test", null, null);
+    }
+
+    @Test
+    void note_build_falls_back_when_webhook_user_name_is_missing() throws Exception {
+        note_build(
+                user().withName(null)
+                        .withUsername("charlie")
+                        .withEmail("charlie@example.com")
+                        .build(),
+                "test",
+                "charlie",
+                "charlie@example.com");
+    }
+
+    private void note_build(User webhookUser, String expectedName, String expectedUsername, String expectedEmail)
+            throws Exception {
         Git.init().setDirectory(tmp).call();
         File.createTempFile("test", null, tmp);
         Git git = Git.open(tmp);
@@ -112,9 +153,15 @@ class NoteHookTriggerHandlerImplTest {
         RevCommit commit = git.commit().setSign(false).setMessage("test").call();
         ObjectId head = git.getRepository().resolve(Constants.HEAD);
         String repositoryUrl = tmp.toURI().toString();
+        final String rawPayload = "{\"object_kind\":\"note\",\"extra\":\"test-value\"}";
 
         final OneShotEvent buildTriggered = new OneShotEvent();
         FreeStyleProject project = jenkins.createFreeStyleProject();
+
+        GitLabPushTrigger trigger = new GitLabPushTrigger();
+        trigger.setExposeRawWebhookPayload(true);
+        project.addTrigger(trigger);
+
         project.setScm(new GitSCM(repositoryUrl));
         project.getBuildersList().add(new TestBuilder() {
             @Override
@@ -122,82 +169,91 @@ class NoteHookTriggerHandlerImplTest {
                     throws InterruptedException, IOException {
                 EnvVars env = build.getEnvironment(listener);
                 assertEquals("bugfix,help needed", env.get("gitlabMergeRequestLabels"));
+                assertPair(new Pair(expectedName, env.get("gitlabUserName")));
+                assertPair(new Pair(expectedUsername, env.get("gitlabUserUsername")));
+                assertPair(new Pair(expectedEmail, env.get("gitlabUserEmail")));
+                assertEquals(rawPayload, env.get("gitlabWebhookPayload"));
                 buildTriggered.signal();
                 return true;
             }
         });
         Date currentDate = new Date();
         project.setQuietPeriod(0);
-        noteHookTriggerHandler.handle(
-                project,
-                noteHook()
-                        .withObjectAttributes(noteObjectAttributes()
-                                .withId(1L)
-                                .withNote("ci-run")
-                                .withAuthorId(1)
-                                .withProjectId(1)
-                                .withCreatedAt(currentDate)
-                                .withUpdatedAt(currentDate)
-                                .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
-                                .build())
-                        .withMergeRequest(mergeRequestObjectAttributes()
-                                .withTargetBranch("refs/heads/"
-                                        + git.nameRev().add(head).call().get(head))
-                                .withState(State.opened)
-                                .withIid(1)
-                                .withTitle("test")
-                                .withTargetProjectId(1)
-                                .withSourceProjectId(1)
-                                .withSourceBranch("feature")
-                                .withTargetBranch("master")
-                                .withLabels(Arrays.asList(
-                                        mergeRequestLabel()
-                                                .withId(3)
-                                                .withTitle("bugfix")
-                                                .withColor("#009966")
-                                                .withProjectId(1)
-                                                .withCreatedAt(currentDate)
-                                                .withUpdatedAt(currentDate)
-                                                .withTemplate(false)
-                                                .withDescription(null)
-                                                .withType("ProjectLabel")
-                                                .withGroupId(null)
-                                                .build(),
-                                        mergeRequestLabel()
-                                                .withId(4)
-                                                .withTitle("help needed")
-                                                .withColor("#FF0000")
-                                                .withProjectId(1)
-                                                .withCreatedAt(currentDate)
-                                                .withUpdatedAt(currentDate)
-                                                .withTemplate(false)
-                                                .withDescription(null)
-                                                .withType("ProjectLabel")
-                                                .withGroupId(null)
-                                                .build()))
-                                .withLastCommit(commit().withAuthor(
-                                                user().withName("test").build())
+
+        NoteHook hook = noteHook()
+                .withObjectAttributes(noteObjectAttributes()
+                        .withId(1L)
+                        .withNote("ci-run")
+                        .withAuthorId(1)
+                        .withProjectId(1)
+                        .withCreatedAt(currentDate)
+                        .withUpdatedAt(currentDate)
+                        .withUrl("https://gitlab.org/test/merge_requests/1#note_1")
+                        .build())
+                .withMergeRequest(mergeRequestObjectAttributes()
+                        .withTargetBranch(
+                                "refs/heads/" + git.nameRev().add(head).call().get(head))
+                        .withState(State.opened)
+                        .withIid(1)
+                        .withTitle("test")
+                        .withTargetProjectId(1)
+                        .withSourceProjectId(1)
+                        .withSourceBranch("feature")
+                        .withTargetBranch("master")
+                        .withLabels(Arrays.asList(
+                                mergeRequestLabel()
+                                        .withId(3)
+                                        .withTitle("bugfix")
+                                        .withColor("#009966")
+                                        .withProjectId(1)
+                                        .withCreatedAt(currentDate)
+                                        .withUpdatedAt(currentDate)
+                                        .withTemplate(false)
+                                        .withDescription(null)
+                                        .withType("ProjectLabel")
+                                        .withGroupId(null)
+                                        .build(),
+                                mergeRequestLabel()
+                                        .withId(4)
+                                        .withTitle("help needed")
+                                        .withColor("#FF0000")
+                                        .withProjectId(1)
+                                        .withCreatedAt(currentDate)
+                                        .withUpdatedAt(currentDate)
+                                        .withTemplate(false)
+                                        .withDescription(null)
+                                        .withType("ProjectLabel")
+                                        .withGroupId(null)
+                                        .build()))
+                        .withLastCommit(
+                                commit().withAuthor(user().withName("test").build())
                                         .withId(commit.getName())
                                         .build())
-                                .withSource(project()
-                                        .withName("test")
-                                        .withNamespace("test-namespace")
-                                        .withHomepage("https://gitlab.org/test")
-                                        .withUrl("git@gitlab.org:test.git")
-                                        .withSshUrl("git@gitlab.org:test.git")
-                                        .withHttpUrl("https://gitlab.org/test.git")
-                                        .build())
-                                .withTarget(project()
-                                        .withName("test")
-                                        .withNamespace("test-namespace")
-                                        .withHomepage("https://gitlab.org/test")
-                                        .withUrl("git@gitlab.org:test.git")
-                                        .withSshUrl("git@gitlab.org:test.git")
-                                        .withHttpUrl("https://gitlab.org/test.git")
-                                        .withWebUrl("https://gitlab.org/test.git")
-                                        .build())
+                        .withSource(project()
+                                .withName("test")
+                                .withNamespace("test-namespace")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withSshUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
                                 .build())
-                        .build(),
+                        .withTarget(project()
+                                .withName("test")
+                                .withNamespace("test-namespace")
+                                .withHomepage("https://gitlab.org/test")
+                                .withUrl("git@gitlab.org:test.git")
+                                .withSshUrl("git@gitlab.org:test.git")
+                                .withHttpUrl("https://gitlab.org/test.git")
+                                .withWebUrl("https://gitlab.org/test.git")
+                                .build())
+                        .build())
+                .withUser(webhookUser)
+                .build();
+        hook.setRawPayload(rawPayload);
+
+        noteHookTriggerHandler.handle(
+                project,
+                hook,
                 true,
                 BranchFilterFactory.newBranchFilter(branchFilterConfig().build(BranchFilterType.All)),
                 newMergeRequestLabelFilter(null));

@@ -82,6 +82,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private boolean triggerOnlyIfNewCommitsPushed = false;
     private boolean triggerOnPipelineEvent = false;
     private boolean triggerOnFailedPipelineEvent = false;
+    private boolean exposeRawWebhookPayload;
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
     private boolean triggerOnApprovedMergeRequest = false;
@@ -283,6 +284,10 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     public boolean getTriggerOnPipelineEvent() {
         return triggerOnPipelineEvent;
+    }
+
+    public boolean getExposeRawWebhookPayload() {
+        return exposeRawWebhookPayload;
     }
 
     public String getNoteRegex() {
@@ -520,6 +525,11 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     @DataBoundSetter
     public void setTriggerOnFailedPipelineEvent(boolean triggerOnFailedPipelineEvent) {
         this.triggerOnFailedPipelineEvent = triggerOnFailedPipelineEvent;
+    }
+
+    @DataBoundSetter
+    public void setExposeRawWebhookPayload(boolean exposeRawWebhookPayload) {
+        this.exposeRawWebhookPayload = exposeRawWebhookPayload;
     }
 
     @DataBoundSetter

@@ -56,6 +56,10 @@
     <f:entry title="Build on failed pipeline events" field="triggerOnFailedPipelineEvent">
       <f:checkbox default="false"/>
     </f:entry>
+    <f:entry title="Expose raw webhook payload as an environment variable"
+             field="exposeRawWebhookPayload">
+      <f:checkbox default="false"/>
+    </f:entry>
     <f:entry title="Pending build name for pipeline" help="/plugin/gitlab-plugin/help/help-pendingBuildName.html">
       <f:textbox field="pendingBuildName"/>
     </f:entry>
