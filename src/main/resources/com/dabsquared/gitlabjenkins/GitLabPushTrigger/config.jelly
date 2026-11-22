@@ -56,6 +56,10 @@
     <f:entry title="Build on failed pipeline events" field="triggerOnFailedPipelineEvent">
       <f:checkbox default="false"/>
     </f:entry>
+    <f:entry title="Expose raw webhook payload as an environment variable"
+             field="exposeRawWebhookPayload">
+      <f:checkbox default="false"/>
+    </f:entry>
     <f:entry title="Pending build name for pipeline" help="/plugin/gitlab-plugin/help/help-pendingBuildName.html">
       <f:textbox field="pendingBuildName"/>
     </f:entry>
@@ -95,7 +99,8 @@
         </f:radioBlock>
         <!--</f:section> -->
         <f:optionalBlock title="${%Filter merge request by label}" field="mergeRequestLabelFilterConfig"
-                         checked="${instance.mergeRequestLabelFilterConfig != null}">
+                 checked="${instance.mergeRequestLabelFilterConfig != null}"
+                 help="/plugin/gitlab-plugin/help/help-mergeRequestLabelFilterConfig.html">
           <f:entry title="${%Include}">
             <f:textbox field="includeMergeRequestLabels" name="include" value="${instance.mergeRequestLabelFilterConfig.include}"
                        autoCompleteDelimChar=","/>

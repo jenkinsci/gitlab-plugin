@@ -1,3 +1,4 @@
 <div>
-  If enabled, then the build will be skipped when a GitLab comment includes the text <code>ci-skip</code>.
+  If enabled, Jenkins skips ordinary push-event builds when the last commit message in the webhook payload contains <code>[ci-skip]</code>. For merge request events, either the merge request description or the last commit message can contain the marker. For comment-triggered builds and push-triggered rebuilds of open merge requests, only the merge request description is checked. This option does not skip pipeline-event builds.
 </div>
+
