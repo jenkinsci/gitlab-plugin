@@ -143,7 +143,8 @@ class OpenMergeRequestPushHookTriggerHandler implements PushHookTriggerHandler {
             String commit = branch.getCommit().getId();
             setCommitStatusPendingIfNecessary(job, mergeRequest.getSourceProjectId(), commit, branch.getName());
             List<Action> actions = Arrays.<Action>asList(
-                    new CauseAction(new GitLabWebHookCause(retrieveCauseData(hook, project, mergeRequest, branch))),
+                    new CauseAction(new GitLabWebHookCause(
+                            retrieveCauseData(hook, project, mergeRequest, branch), hook.getRawPayload())),
                     new RevisionParameterAction(commit, retrieveUrIish(hook)));
             scheduleBuild(job, actions.toArray(new Action[actions.size()]));
         }

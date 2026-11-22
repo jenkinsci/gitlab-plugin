@@ -3,7 +3,9 @@ package com.dabsquared.gitlabjenkins.environment;
 import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.CauseDataBuilder;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
@@ -58,6 +60,32 @@ class GitLabEnvironmentContributorTest {
         EnvVars env = b.getEnvironment(listener);
 
         assertEnv(env);
+    }
+
+    @Test
+    void rawPayload_isNotExposedWhenOptInIsOff() throws Exception {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        p.addTrigger(new GitLabPushTrigger());
+
+        String rawPayload = "{\"event\":\"push\"}";
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData(), rawPayload);
+        FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
+
+        assertNull(build.getEnvironment(listener).get("gitlabWebhookPayload"));
+    }
+
+    @Test
+    void rawPayload_isExposedWhenOptInIsOn() throws Exception {
+        FreeStyleProject p = jenkins.createFreeStyleProject();
+        GitLabPushTrigger trigger = new GitLabPushTrigger();
+        trigger.setExposeRawWebhookPayload(true);
+        p.addTrigger(trigger);
+
+        String rawPayload = "{\"event\":\"push\"}";
+        GitLabWebHookCause cause = new GitLabWebHookCause(generateCauseData(), rawPayload);
+        FreeStyleBuild build = p.scheduleBuild2(0, cause).get();
+
+        assertEquals(rawPayload, build.getEnvironment(listener).get("gitlabWebhookPayload"));
     }
 
     @Test
