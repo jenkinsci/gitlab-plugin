@@ -1,5 +1,6 @@
 package com.dabsquared.gitlabjenkins.trigger.handler.push;
 
+import static com.dabsquared.gitlabjenkins.cause.CauseDataBuilder.causeData;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.CommitBuilder.commit;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.ProjectBuilder.project;
 import static com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder.pushHook;
@@ -9,13 +10,17 @@ import static com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterFactory.ne
 import static com.dabsquared.gitlabjenkins.trigger.filter.MergeRequestLabelFilterFactory.newMergeRequestLabelFilter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.dabsquared.gitlabjenkins.cause.CauseData;
+import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHookBuilder;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.CauseAction;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.git.GitSCM;
@@ -57,6 +62,45 @@ class PushHookTriggerHandlerImplTest {
     @BeforeEach
     void setUp() {
         pushHookTriggerHandler = new PushHookTriggerHandlerImpl(false);
+    }
+
+    @Test
+    void causeAction_keepsDifferentGitLabWebhookCauses() {
+        CauseAction action = new CauseAction(
+                new GitLabWebHookCause(createCauseData("commit-1")),
+                new GitLabWebHookCause(createCauseData("commit-2")));
+
+        assertEquals(2, action.getCauses().size());
+        assertEquals(
+                "commit-1",
+                ((GitLabWebHookCause) action.getCauses().get(0)).getData().getAfter());
+        assertEquals(
+                "commit-2",
+                ((GitLabWebHookCause) action.getCauses().get(1)).getData().getAfter());
+    }
+
+    private CauseData createCauseData(String after) {
+        return causeData()
+                .withActionType(CauseData.ActionType.PUSH)
+                .withSourceProjectId(1)
+                .withTargetProjectId(1)
+                .withBranch("main")
+                .withSourceBranch("main")
+                .withUserName("user")
+                .withSourceRepoName("repo")
+                .withSourceNamespace("group")
+                .withSourceRepoSshUrl("git@gitlab.org:group/repo.git")
+                .withSourceRepoHttpUrl("https://gitlab.org/group/repo.git")
+                .withMergeRequestTitle("")
+                .withTargetBranch("main")
+                .withTargetRepoName("")
+                .withTargetNamespace("")
+                .withTargetRepoSshUrl("")
+                .withTargetRepoHttpUrl("")
+                .withTriggeredByUser("user")
+                .withAfter(after)
+                .withLastCommit(after)
+                .build();
     }
 
     @Test
