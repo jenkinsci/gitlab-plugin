@@ -101,12 +101,16 @@ class PushHookTriggerHandlerImplTest {
     }
 
     private CauseData createCauseData(String after) {
-        return createCauseData(after, null);
+        return createCauseData(after, null, CauseData.ActionType.PUSH);
     }
 
     private CauseData createCauseData(String after, String triggerPhrase) {
+        return createCauseData(after, triggerPhrase, CauseData.ActionType.NOTE);
+    }
+
+    private CauseData createCauseData(String after, String triggerPhrase, CauseData.ActionType actionType) {
         return causeData()
-                .withActionType(CauseData.ActionType.PUSH)
+                .withActionType(actionType)
                 .withSourceProjectId(1)
                 .withTargetProjectId(1)
                 .withBranch("main")
