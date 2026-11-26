@@ -79,7 +79,32 @@ class PushHookTriggerHandlerImplTest {
                 ((GitLabWebHookCause) action.getCauses().get(1)).getData().getAfter());
     }
 
+    @Test
+    void causeAction_keepsDifferentCausesWhenTriggerPhraseDiffers() {
+        CauseAction action = new CauseAction(
+                new GitLabWebHookCause(createCauseData("same-commit", "first comment")),
+                new GitLabWebHookCause(createCauseData("same-commit", "second comment")));
+
+        assertEquals(2, action.getCauses().size());
+        assertEquals(
+                "first comment",
+                ((GitLabWebHookCause) action.getCauses().get(0))
+                        .getData()
+                        .getBuildVariables()
+                        .get("gitlabTriggerPhrase"));
+        assertEquals(
+                "second comment",
+                ((GitLabWebHookCause) action.getCauses().get(1))
+                        .getData()
+                        .getBuildVariables()
+                        .get("gitlabTriggerPhrase"));
+    }
+
     private CauseData createCauseData(String after) {
+        return createCauseData(after, null);
+    }
+
+    private CauseData createCauseData(String after, String triggerPhrase) {
         return causeData()
                 .withActionType(CauseData.ActionType.PUSH)
                 .withSourceProjectId(1)
@@ -100,6 +125,7 @@ class PushHookTriggerHandlerImplTest {
                 .withTriggeredByUser("user")
                 .withAfter(after)
                 .withLastCommit(after)
+                .withTriggerPhrase(triggerPhrase)
                 .build();
     }
 
