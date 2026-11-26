@@ -37,4 +37,21 @@ public class GitLabWebHookCause extends SCMTrigger.SCMTriggerCause {
     public String getShortDescription() {
         return data.getShortDescription();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        GitLabWebHookCause that = (GitLabWebHookCause) other;
+        return Objects.equals(data, that.data) && Objects.equals(rawPayload, that.rawPayload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data, rawPayload);
+    }
 }
