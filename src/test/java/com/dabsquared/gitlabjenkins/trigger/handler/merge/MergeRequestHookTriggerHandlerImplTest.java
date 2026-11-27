@@ -31,6 +31,7 @@ import hudson.util.OneShotEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+import jenkins.model.Jenkins;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -554,23 +555,31 @@ class MergeRequestHookTriggerHandlerImplTest {
     }
 
     @Test
-    void
-            mergeRequest_skips_build_when_not_push_and_not_merge_request_and_accepted_and_trigger_open_merge_request_unspecified()
-                    throws Exception {
-        GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger();
-        gitLabPushTrigger.setTriggerOnPush(false);
-        gitLabPushTrigger.setTriggerOnMergeRequest(false);
-        gitLabPushTrigger.setTriggerOnAcceptedMergeRequest(true);
-        gitLabPushTrigger.setBranchFilterType(BranchFilterType.All);
+    void mergeRequest_does_not_build_for_update_when_old_config_has_no_open_merge_request_setting() throws Exception {
+        GitLabPushTrigger gitLabPushTrigger = triggerFromOldConfigWithoutOpenMergeRequestSetting();
+        assertThat(gitLabPushTrigger.getTriggerOpenMergeRequestOnPush(), is(TriggerOpenMergeRequest.never));
 
         MergeRequestHookTriggerHandler mergeRequestHookTriggerHandler =
                 MergeRequestHookTriggerHandlerFactory.newMergeRequestHookTriggerHandler(gitLabPushTrigger);
         final AtomicReference<FreeStyleBuild> buildHolder = new AtomicReference<>();
         OneShotEvent buildTriggered =
-                doHandle(mergeRequestHookTriggerHandler, State.opened, Action.update, buildHolder);
+                doHandle(mergeRequestHookTriggerHandler, State.updated, Action.update, buildHolder);
 
         assertThat(buildTriggered.isSignaled(), is(false));
         assertNull(buildHolder.get());
+    }
+
+    private GitLabPushTrigger triggerFromOldConfigWithoutOpenMergeRequestSetting() {
+        String oldConfig = """
+                <com.dabsquared.gitlabjenkins.GitLabPushTrigger>
+                    <spec></spec>
+                    <triggerOnPush>false</triggerOnPush>
+                    <triggerOnMergeRequest>false</triggerOnMergeRequest>
+                    <triggerOnAcceptedMergeRequest>true</triggerOnAcceptedMergeRequest>
+                    <branchFilterType>All</branchFilterType>
+                </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
+                """;
+        return (GitLabPushTrigger) Jenkins.XSTREAM2.fromXML(oldConfig);
     }
 
     private void do_not_build_for_state_when_nothing_enabled(State state) throws Exception {

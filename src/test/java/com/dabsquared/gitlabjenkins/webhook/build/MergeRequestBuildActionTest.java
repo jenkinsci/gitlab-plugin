@@ -14,6 +14,7 @@ import com.dabsquared.gitlabjenkins.GitLabPushTrigger;
 import com.dabsquared.gitlabjenkins.cause.CauseData;
 import com.dabsquared.gitlabjenkins.cause.GitLabWebHookCause;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.MergeRequestHook;
+import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
@@ -93,6 +94,7 @@ class MergeRequestBuildActionTest {
 
         // some defaults of the trigger
         trigger.setBranchFilterType(BranchFilterType.All);
+        trigger.setTriggerOpenMergeRequestOnPush(TriggerOpenMergeRequest.source);
     }
 
     @Test

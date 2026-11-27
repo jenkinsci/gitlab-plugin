@@ -86,7 +86,7 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
     private boolean triggerOnAcceptedMergeRequest = false;
     private boolean triggerOnClosedMergeRequest = false;
     private boolean triggerOnApprovedMergeRequest = false;
-    private TriggerOpenMergeRequest triggerOpenMergeRequestOnPush;
+    private TriggerOpenMergeRequest triggerOpenMergeRequestOnPush = TriggerOpenMergeRequest.never;
     private boolean triggerOnNoteRequest = true;
     private String noteRegex = "";
     private boolean ciSkip = true;
@@ -162,7 +162,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
         this.triggerOnClosedMergeRequest = triggerOnClosedMergeRequest;
         this.triggerOnNoteRequest = triggerOnNoteRequest;
         this.noteRegex = noteRegex;
-        this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+        this.triggerOpenMergeRequestOnPush =
+                triggerOpenMergeRequestOnPush == null ? TriggerOpenMergeRequest.never : triggerOpenMergeRequestOnPush;
         this.triggerOnPipelineEvent = triggerOnPipelineEvent;
         this.ciSkip = ciSkip;
         this.skipWorkInProgressMergeRequest = skipWorkInProgressMergeRequest;
@@ -396,7 +397,8 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     @DataBoundSetter
     public void setTriggerOpenMergeRequestOnPush(TriggerOpenMergeRequest triggerOpenMergeRequestOnPush) {
-        this.triggerOpenMergeRequestOnPush = triggerOpenMergeRequestOnPush;
+        this.triggerOpenMergeRequestOnPush =
+                triggerOpenMergeRequestOnPush == null ? TriggerOpenMergeRequest.never : triggerOpenMergeRequestOnPush;
     }
 
     @DataBoundSetter
@@ -627,6 +629,9 @@ public class GitLabPushTrigger extends Trigger<Job<?, ?>> implements MergeReques
 
     @Override
     protected Object readResolve() throws ObjectStreamException {
+        if (triggerOpenMergeRequestOnPush == null) {
+            triggerOpenMergeRequestOnPush = TriggerOpenMergeRequest.never;
+        }
         if (branchFilterType == null) {
             branchFilterType = StringUtils.isNotBlank(branchFilterName)
                     ? BranchFilterType.valueOf(branchFilterName)
