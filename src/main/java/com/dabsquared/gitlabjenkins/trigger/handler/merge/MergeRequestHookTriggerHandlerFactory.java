@@ -31,17 +31,13 @@ public final class MergeRequestHookTriggerHandlerFactory {
             boolean cancelPendingBuildsOnUpdate,
             boolean cancelRunningBuildsOnUpdate) {
 
+        boolean triggerOpenMergeRequestEnabled =
+                triggerOpenMergeRequest != null && triggerOpenMergeRequest != TriggerOpenMergeRequest.never;
+
         TriggerConfigChain chain = new TriggerConfigChain();
-        chain.rejectUnless(
-                        triggerOpenMergeRequest != TriggerOpenMergeRequest.never,
-                        of(State.opened, State.updated),
-                        of(Action.update))
-                .acceptIf(
-                        triggerOpenMergeRequest != TriggerOpenMergeRequest.never, of(State.updated), of(Action.update))
-                .acceptIf(
-                        triggerOpenMergeRequest != TriggerOpenMergeRequest.never && triggerOpenMergeRequest != null,
-                        of(State.opened),
-                        of(Action.update))
+        chain.rejectUnless(triggerOpenMergeRequestEnabled, of(State.opened, State.updated), of(Action.update))
+                .acceptIf(triggerOpenMergeRequestEnabled, of(State.updated), of(Action.update))
+                .acceptIf(triggerOpenMergeRequestEnabled, of(State.opened), of(Action.update))
                 .acceptOnlyIf(triggerOnApprovedMergeRequest, null, of(Action.approved))
                 .acceptIf(triggerOnMergeRequest, of(State.opened, State.reopened), null)
                 .acceptIf(triggerOnAcceptedMergeRequest, null, of(Action.merge))
