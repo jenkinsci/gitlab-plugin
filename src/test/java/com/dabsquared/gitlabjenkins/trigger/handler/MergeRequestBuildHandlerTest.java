@@ -35,6 +35,7 @@ import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.PushHook
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.RepositoryBuilder;
 import com.dabsquared.gitlabjenkins.gitlab.hook.model.builder.generated.UserBuilder;
 import com.dabsquared.gitlabjenkins.publisher.GitLabCommitStatusPublisher;
+import com.dabsquared.gitlabjenkins.trigger.TriggerOpenMergeRequest;
 import com.dabsquared.gitlabjenkins.trigger.filter.BranchFilterType;
 import hudson.model.Executor;
 import hudson.model.FreeStyleProject;
@@ -248,6 +249,7 @@ class MergeRequestBuildHandlerTest {
         GitLabPushTrigger gitLabPushTrigger = new GitLabPushTrigger();
         gitLabPushTrigger.setTriggerOnPush(true);
         gitLabPushTrigger.setTriggerOnMergeRequest(true);
+        gitLabPushTrigger.setTriggerOpenMergeRequestOnPush(TriggerOpenMergeRequest.source);
         gitLabPushTrigger.setPendingBuildName(GITLAB_BUILD_NAME);
         gitLabPushTrigger.setBranchFilterType(BranchFilterType.NameBasedFilter);
         gitLabPushTrigger.setBranchFilterName("");
